@@ -33,23 +33,16 @@ impl Interpreter {
                         let key = name.into_internal_property_key(realm)?;
 
                         //TODO: this is a hack
-                        let throw_if_none = if scope.is_strict_mode()? && !obj.contains_own_key(key.clone(), realm)? {
-                            true
-                        } else {
-                            false
-                        };
-
-                        let res = obj
-                            .delete_property(key, realm)?
-                            .is_some();
-
-                        if throw_if_none && !res {
-                            return Err(Error::reference("Cannot delete property").into());
-                        } else {
-                            return Ok(res.into());
+                        if scope.is_strict_mode()? {
+                            if let Some(desc) = obj.get_own_property_no_get_set(key.clone(), realm)? {
+                                if !desc.attributes().is_configurable() {
+                                    return Err(Error::ty("Cannot delete non-configurable property").into());
+                                }
+                            }
                         }
-
-
+                        return Ok(obj
+                            .delete_property(key, realm)?
+                            .is_some().into());
 
                     }
                 }
