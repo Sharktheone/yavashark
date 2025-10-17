@@ -18,7 +18,7 @@ impl PluralRules {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Intl.PluralRules")]
 impl PluralRules {
     #[constructor]
     fn construct(

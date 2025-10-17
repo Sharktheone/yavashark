@@ -286,7 +286,7 @@ impl Promise {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Promise")]
 impl Promise {
     #[constructor]
     pub fn construct(callback: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {

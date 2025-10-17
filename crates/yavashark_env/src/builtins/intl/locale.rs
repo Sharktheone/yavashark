@@ -17,7 +17,7 @@ impl Locale {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Intl.Locale")]
 impl Locale {
     #[constructor]
     fn construct() {}

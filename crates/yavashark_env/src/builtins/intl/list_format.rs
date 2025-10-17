@@ -18,7 +18,7 @@ impl ListFormat {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Intl.ListFormat")]
 impl ListFormat {
     #[constructor]
     fn construct(

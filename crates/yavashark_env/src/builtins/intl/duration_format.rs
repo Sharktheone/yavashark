@@ -18,7 +18,7 @@ impl DurationFormat {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Intl.DurationFormat")]
 impl DurationFormat {
     #[constructor]
     fn construct(

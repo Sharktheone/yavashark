@@ -18,7 +18,7 @@ impl DisplayNames {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Intl.DisplayNames")]
 impl DisplayNames {
     #[constructor]
     fn construct(_locales: String, _options: ObjectHandle, realm: &mut Realm) -> ObjectHandle {
