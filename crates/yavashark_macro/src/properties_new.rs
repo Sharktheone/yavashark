@@ -44,6 +44,7 @@ pub struct PropertiesArgs {
     #[allow(unused)]
     or: Option<Expr>,
     override_object: Option<Path>,
+    to_string_tag: Option<String>,
 }
 
 #[allow(unused)]
@@ -114,7 +115,28 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 
     let config = Config::new(Span::call_site());
 
-    let init = init_props(props, &config, None);
+    let mut init = init_props(props, &config, None);
+
+    if let Some(tag) = args.to_string_tag {
+        let value = &config.value;
+        let variable = &config.variable;
+        let env = &config.env_path;
+        let realm = &config.realm;
+        let symbol = &config.symbol;
+
+        init.extend(quote! {
+            {
+                let to_string_tag = #value::from(#tag);
+                obj.define_property_attributes(
+                    #symbol::TO_STRING_TAG.into(),
+                    #variable::config(to_string_tag),
+                    realm,
+                )?;
+            }
+        });
+    }
+
+
     let (constructor_tokens, init_constructor) = init_constructor(
         &item_impl.self_ty,
         static_props,
@@ -215,6 +237,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
 
         init.extend(tokens);
     }
+
     init
 }
 

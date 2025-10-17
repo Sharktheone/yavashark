@@ -25,6 +25,7 @@ pub struct Config {
     pub from_value_output: Path,
     pub property_key: Path,
     pub internal_property_key: Path,
+    pub symbol: Path,
 
     pub primitive_value: Path,
     pub object_or_null: Path,
@@ -184,6 +185,11 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("DefinePropertyResult", span)));
 
+        let mut symbol = env_path.clone();
+        symbol
+            .segments
+            .push(PathSegment::from(Ident::new("Symbol", span)));
+
         Self {
             env_path,
             value_path,
@@ -207,6 +213,7 @@ impl Config {
             from_value_output,
             property_key,
             internal_property_key,
+            symbol,
             primitive_value,
             object_or_null,
             property,
