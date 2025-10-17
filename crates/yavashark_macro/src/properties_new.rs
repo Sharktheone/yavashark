@@ -136,7 +136,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         });
     }
 
-
     let (constructor_tokens, init_constructor) = init_constructor(
         &item_impl.self_ty,
         static_props,

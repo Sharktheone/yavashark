@@ -930,15 +930,17 @@ impl Object {
 
         match to_prim {
             Some(Value::Object(to_prim)) => {
-                    return to_prim
-                        .call(vec![hint.into_value()], self.clone().into(), realm)?
-                        .assert_no_object();
+                return to_prim
+                    .call(vec![hint.into_value()], self.clone().into(), realm)?
+                    .assert_no_object();
             }
-            Some(Value::Undefined | Value::Null) | None => {},
-            Some(to_prim) => return Err(Error::ty_error(format!(
-                "Symbol.toPrimitive must be a function, got {}",
-                to_prim.type_of()
-            ))),
+            Some(Value::Undefined | Value::Null) | None => {}
+            Some(to_prim) => {
+                return Err(Error::ty_error(format!(
+                    "Symbol.toPrimitive must be a function, got {}",
+                    to_prim.type_of()
+                )))
+            }
         }
 
         if hint == Hint::String {

@@ -72,7 +72,6 @@ impl DataView {
 
         let offset = offset as usize;
 
-
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));
         }
@@ -104,7 +103,6 @@ impl DataView {
         }
 
         let offset = offset as usize;
-
 
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));

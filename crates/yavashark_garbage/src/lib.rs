@@ -2,9 +2,9 @@
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
 use log::warn;
+use parking_lot::RwLock;
 #[cfg(feature = "actual_gc")]
 use parking_lot::{RwLockReadGuard, RwLockWriteGuard};
-use parking_lot::RwLock;
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
 use std::ops::{Deref, DerefMut};
