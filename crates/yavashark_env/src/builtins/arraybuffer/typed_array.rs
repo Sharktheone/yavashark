@@ -176,7 +176,7 @@ impl crate::value::ObjectImpl for TypedArray {
     ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if self.is_detached() {
-                return self.get_wrapped_object().resolve_property(name, realm);
+                return Ok(None);
             }
 
             typed_array_run!({
