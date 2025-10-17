@@ -30,7 +30,7 @@ impl PlainYearMonth {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Temporal.PlainYearMonth")]
 impl PlainYearMonth {
     #[constructor]
     pub fn construct(

@@ -19,7 +19,7 @@ pub use crate::builtins::temporal::plain_time::*;
 pub use crate::builtins::temporal::plain_year_month::*;
 pub use crate::builtins::temporal::zoned_date_time::*;
 
-use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
+use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value, Variable};
 
 pub struct Protos {
     pub duration: ObjectHandle,
@@ -126,6 +126,12 @@ pub fn get_temporal(
     obj.define_property_attributes(
         "ZonedDateTime".into(),
         constr(&zoned_date_time, realm),
+        realm,
+    )?;
+
+    obj.define_property_attributes(
+        Symbol::TO_STRING_TAG.into(),
+        Variable::config("Temporal".into()),
         realm,
     )?;
 

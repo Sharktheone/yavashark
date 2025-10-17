@@ -59,7 +59,7 @@ impl Instant {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Temporal.Instant")]
 impl Instant {
     #[constructor]
     fn construct(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {

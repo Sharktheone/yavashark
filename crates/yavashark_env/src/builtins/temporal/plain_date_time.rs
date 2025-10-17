@@ -45,7 +45,7 @@ impl PlainDateTime {
     }
 }
 
-#[props]
+#[props(to_string_tag = "Temporal.PlainDateTime")]
 impl PlainDateTime {
     #[constructor]
     #[allow(clippy::too_many_arguments)]
