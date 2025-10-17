@@ -11,7 +11,7 @@ macro_rules! error {
         ) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
-            proto.define_property("name".into(), stringify!($name).into(), realm)?;
+            proto.define_property_attributes("name".into(), Variable::new_with_attributes(stringify!($name).into(), true, false, true), realm)?;
 
             let constr = NativeConstructor::with_proto(
                 stringify!($name).into(),
