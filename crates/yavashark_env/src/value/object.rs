@@ -17,6 +17,7 @@ use std::sync::atomic::AtomicIsize;
 use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
 use yavashark_string::{ToYSString, YSString};
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum DefinePropertyResult {
     Handled,
     ReadOnly,

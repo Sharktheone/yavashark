@@ -117,10 +117,14 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
-            match obj.define_property(name.into_internal_property_key(realm)?, value, realm)? {
+            let key = name.into_internal_property_key(realm)?;
+
+            match obj.define_property(key, value, realm)? {
                 DefinePropertyResult::Handled => {},
                 DefinePropertyResult::ReadOnly => {
-                    return Err(Error::ty("Cannot assign to read only property"));
+                    if scope.is_strict_mode()? {
+                        return Err(Error::ty("Cannot assign to read only property"));
+                    }
                 }
                 DefinePropertyResult::Setter(_, _) => {}
             }
@@ -396,7 +400,7 @@ impl Interpreter {
                         Property::Getter(_, _) => (Value::Undefined, false),
             });
 
-            if !writable {
+            if !writable && scope.is_strict_mode()? {
                 return Err(Error::ty("Cannot assign to read only property").into());
             }
 

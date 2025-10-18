@@ -644,13 +644,19 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-                if e.attributes.is_writable() {
+                return Ok(if e.attributes.is_writable() {
                     e.set = Value::Undefined;
                     e.get = Value::Undefined;
 
                     e.value = value;
-                    return Ok(DefinePropertyResult::Handled);
-                }
+                        DefinePropertyResult::Handled
+                } else {
+                    if !e.set.is_undefined() {
+                        return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value));
+                    }
+
+                    DefinePropertyResult::ReadOnly
+                });
             }
             Entry::Vacant(entry) => {
                 let idx = self.values.len();
@@ -685,11 +691,17 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-                if e.attributes.is_writable() {
+                return Ok(if e.attributes.is_writable() {
                     *e = value.into();
 
-                    return Ok(DefinePropertyResult::Handled);
-                }
+                    DefinePropertyResult::Handled
+                } else {
+                    if !e.set.is_undefined() {
+                        return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value.value));
+                    }
+
+                    DefinePropertyResult::ReadOnly
+                });
             }
             Entry::Vacant(entry) => {
                 let idx = self.values.len();
