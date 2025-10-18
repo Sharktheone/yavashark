@@ -718,16 +718,21 @@ impl MutObj for MutObject {
             //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
 
-        Ok(self
+        if let Some(prop) =  self
             .properties
             .get::<PropertyKey>(&name.clone().into())
-            .and_then(|idx| self.values.get(*idx).map(|v| v.property()))
-            .or_else(|| match &self.prototype {
+            .and_then(|idx| self.values.get(*idx).map(ObjectProperty::property)) {
+            return Ok(Some(prop));
+        }
+
+
+            match &self.prototype {
                 ObjectOrNull::Object(o) => {
-                    o.resolve_property_no_get_set(name, realm).ok().flatten()
-                } //TODO: this is wrong, we need a realm here!
-                _ => None,
-            }))
+                    o.resolve_property_no_get_set(name, realm)
+                    //TODO: this is wrong, we need a realm here!
+                }
+                _ => Ok(None),
+            }
     }
 
     fn get_own_property(
