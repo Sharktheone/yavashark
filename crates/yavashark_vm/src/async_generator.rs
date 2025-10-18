@@ -139,7 +139,7 @@ impl Func for AsyncGeneratorFunction {
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
 
-        let args = Arguments::new(args, this.copy(), realm);
+        let args = Arguments::new(args, Some(this.copy()), realm);
 
         let args = ObjectHandle::new(args);
 

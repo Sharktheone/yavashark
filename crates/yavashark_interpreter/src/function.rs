@@ -185,8 +185,14 @@ impl RawJSFunction {
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function();
         scope.state_set_returnable();
+        
+        let caller = if scope.is_strict_mode()? {
+            None
+        } else {
+            Some(this.copy())
+        };
 
-        let args = Arguments::new(args, this.copy(), realm);
+        let args = Arguments::new(args, caller, realm);
 
         let args = ObjectHandle::new(args);
 

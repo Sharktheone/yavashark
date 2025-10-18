@@ -9,14 +9,14 @@ use yavashark_macro::props;
 #[derive(Debug)]
 pub struct Arguments {
     pub inner: RefCell<MutObject>,
-    pub callee: Value,
+    pub callee: Option<Value>,
     pub length: RefCell<Value>,
     pub args: RefCell<Vec<Value>>,
 }
 
 impl Arguments {
     #[must_use]
-    pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
+    pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutObject::with_proto(realm.intrinsics.arguments.clone())),
             callee,
@@ -120,8 +120,16 @@ impl ObjectImpl for Arguments {
                 )));
             }
             if s == "callee" {
+                let Some(callee) = &self.callee else {
+                    return Ok(Some(Property::Getter(
+                        realm.intrinsics.throw_type_error.clone(),
+                        Attributes::from_values(false, false, false),
+                    )))
+                };
+
+
                 return Ok(Some(Property::Value(
-                    self.callee.clone(),
+                    callee.clone(),
                     Attributes::write_config(),
                 )));
             }
@@ -146,7 +154,18 @@ impl ObjectImpl for Arguments {
                 return Ok(Some(self.length.borrow().clone().into()));
             }
             if s == "callee" {
-                return Ok(Some(self.callee.clone().into()));
+                let Some(callee) = &self.callee else {
+                    return Ok(Some(Property::Getter(
+                        realm.intrinsics.throw_type_error.clone(),
+                        Attributes::from_values(false, false, false),
+                    )))
+                };
+
+
+                return Ok(Some(Property::Value(
+                    callee.clone(),
+                    Attributes::write_config(),
+                )));
             }
         }
 
