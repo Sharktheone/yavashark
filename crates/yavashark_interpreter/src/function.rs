@@ -79,7 +79,7 @@ impl JSFunction {
             }
         });
 
-        let is_strict = block.as_ref().map_or(false, |b| {
+        let is_strict = scope.is_strict_mode()? ||  block.as_ref().map_or(false, |b| {
             Interpreter::is_strict(&b.stmts)
         });
 
@@ -97,6 +97,14 @@ impl JSFunction {
 
             },
         };
+
+        if !is_strict {
+            this.define_property_attributes(
+                "caller".into(),
+                Variable::new_read_only(Value::Undefined),
+                realm,
+            )?;
+        }
 
         let handle = ObjectHandle::new(this);
 

@@ -19,7 +19,7 @@ pub struct MutValue {
     pub scope: Rc<RefCell<ScopeInternal>>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[allow(clippy::module_name_repetitions)]
 pub struct ScopeState {
     state: u8,
