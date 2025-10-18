@@ -15,12 +15,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
-    get_temporal, get_type_error, get_uri_error, Arguments, Atomics, BigIntObj, BooleanObj, Date,
-    Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap,
-    WeakRef, WeakSet, JSON,
-};
+use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_throw_type_error, get_type_error, get_uri_error, Arguments, Atomics, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON};
 use crate::error_obj::ErrorObj;
 use crate::{
     Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable,
@@ -106,6 +101,7 @@ pub struct Intrinsics {
     pub intl_plural_rules: ObjectHandle,
     pub intl_relative_time_format: ObjectHandle,
     pub intl_segmenter: ObjectHandle,
+    pub throw_type_error: ObjectHandle,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -491,6 +487,8 @@ impl Intrinsics {
             func_prototype.clone().into(),
             realm,
         )?;
+        
+        let throw_type_error = get_throw_type_error(realm)?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -570,6 +568,8 @@ impl Intrinsics {
             intl_plural_rules: intl_protos.plural_rules,
             intl_relative_time_format: intl_protos.relative_time_format,
             intl_segmenter: intl_protos.segmenter,
+            
+            throw_type_error,
 
             other: FxHashMap::default(),
         })
@@ -666,6 +666,7 @@ impl Default for Intrinsics {
             intl_plural_rules: Object::null(),
             intl_relative_time_format: Object::null(),
             intl_segmenter: Object::null(),
+            throw_type_error: Object::null(),
             other: FxHashMap::default(),
         }
     }
