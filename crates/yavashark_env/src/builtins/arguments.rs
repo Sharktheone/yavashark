@@ -1,7 +1,7 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
 use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
-use crate::{InternalPropertyKey, MutObject, Realm, Res, Value, ValueResult, Variable};
+use crate::{InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::props;
@@ -71,6 +71,10 @@ impl ObjectImpl for Arguments {
                 *self.length.borrow_mut() = value;
                 return Ok(DefinePropertyResult::Handled);
             }
+
+            if self.callee.is_none() && s == "callee" {
+                return Err(Error::ty("Cannot redefine property: callee"));
+            }
         }
 
         self.get_wrapped_object()
@@ -94,6 +98,10 @@ impl ObjectImpl for Arguments {
             if s == "length" {
                 *self.length.borrow_mut() = value.value;
                 return Ok(DefinePropertyResult::Handled);
+            }
+
+            if self.callee.is_none() && s == "callee" {
+                return Err(Error::ty("Cannot redefine property: callee"));
             }
         }
 
@@ -172,17 +180,130 @@ impl ObjectImpl for Arguments {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn name(&self) -> String {
-        "Arguments".to_string()
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if idx < self.args.borrow().len() {
+                return Ok(true);
+            }
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "length" {
+                return Ok(true);
+            }
+            if s == "callee" {
+                return Ok(true);
+            }
+        }
+
+        self.get_wrapped_object().contains_key(name, realm)
     }
-    //
-    // fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
-    //     Ok("[object Arguments]".into())
-    // }
-    //
-    // fn to_string_internal(&self) -> Result<YSString, Error> {
-    //     Ok("[object Arguments]".into())
-    // }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if idx < self.args.borrow().len() {
+                return Ok(true);
+            }
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "length" {
+                return Ok(true);
+            }
+            if s == "callee" {
+                return Ok(true);
+            }
+        }
+
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        let mut props = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            props.push((PropertyKey::from(i), args[i].clone()));
+        }
+        props.push((PropertyKey::from("length"), self.length.borrow().clone()));
+        if let Some(callee) = &self.callee {
+            props.push((PropertyKey::from("callee"), callee.clone()));
+        }
+        let mut parent_props = self.get_wrapped_object().properties(realm)?;
+        props.append(&mut parent_props);
+        Ok(props)
+    }
+
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let mut keys = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            keys.push(PropertyKey::from(i));
+        }
+        keys.push(PropertyKey::from("length"));
+        if self.callee.is_some() {
+            keys.push(PropertyKey::from("callee"));
+        }
+        let mut parent_keys = self.get_wrapped_object().keys(realm)?;
+        keys.append(&mut parent_keys);
+        Ok(keys)
+    }
+
+    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        let mut values = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            values.push(args[i].clone());
+        }
+        values.push(self.length.borrow().clone());
+        if let Some(callee) = &self.callee {
+            values.push(callee.clone());
+        }
+        let mut parent_values = self.get_wrapped_object().values(realm)?;
+        values.append(&mut parent_values);
+        Ok(values)
+    }
+
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        let mut props = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            props.push((PropertyKey::from(i), args[i].clone()));
+        }
+        if let Some(callee) = &self.callee {
+            props.push((PropertyKey::from("callee"), callee.clone()));
+        }
+        let mut parent_props = self.get_wrapped_object().enumerable_properties(realm)?;
+        props.append(&mut parent_props);
+        Ok(props)
+    }
+
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let mut keys = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            keys.push(PropertyKey::from(i));
+        }
+        if let Some(_) = &self.callee {
+            keys.push(PropertyKey::from("callee"));
+        }
+        let mut parent_keys = self.get_wrapped_object().enumerable_keys(realm)?;
+        keys.append(&mut parent_keys);
+        Ok(keys)
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        let mut values = Vec::new();
+        let args = self.args.borrow();
+        for i in 0..args.len() {
+            values.push(args[i].clone());
+        }
+        if let Some(callee) = &self.callee {
+            values.push(callee.clone());
+        }
+        let mut parent_values = self.get_wrapped_object().enumerable_values(realm)?;
+        values.append(&mut parent_values);
+        Ok(values)
+    }
 
     fn get_array_or_done(
         &self,
@@ -195,6 +316,18 @@ impl ObjectImpl for Arguments {
         } else {
             Ok((true, None))
         }
+    }
+    //
+    // fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
+
+    fn name(&self) -> String {
+        "Arguments".to_string()
     }
 }
 
