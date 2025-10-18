@@ -150,7 +150,7 @@ fn main() {
         if interpreter {
             let mut realm = Realm::new().unwrap();
             let mut scope = Scope::global(&realm, path.clone());
-            realm.set_eval(InterpreterEval).unwrap();
+            realm.set_eval(InterpreterEval, false).unwrap();
             yavashark_vm::init(&mut realm).unwrap();
 
             let result = match yavashark_interpreter::Interpreter::run_in(

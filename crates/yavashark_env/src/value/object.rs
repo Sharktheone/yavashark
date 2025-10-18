@@ -17,6 +17,7 @@ use std::sync::atomic::AtomicIsize;
 use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
 use yavashark_string::{ToYSString, YSString};
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum DefinePropertyResult {
     Handled,
     ReadOnly,
@@ -27,6 +28,12 @@ pub enum DefinePropertyResult {
 pub enum Property {
     Value(Value, Attributes),
     Getter(ObjectHandle, Attributes),
+}
+
+impl Default for Property {
+    fn default() -> Self {
+        Self::Value(Value::Undefined, Attributes::default())
+    }
 }
 
 impl From<ObjectProperty> for Property {

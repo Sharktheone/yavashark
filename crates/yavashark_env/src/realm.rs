@@ -42,7 +42,7 @@ impl Realm {
         Ok(realm)
     }
 
-    pub fn set_eval(&mut self, eval: impl Eval + 'static) -> Res {
+    pub fn set_eval(&mut self, eval: impl Eval + 'static, strict: bool) -> Res {
         let eval_func = NativeFunction::with_len(
             "eval",
             move |args, _, realm| {
@@ -53,6 +53,13 @@ impl Realm {
                 let code = code.to_string(realm)?;
 
                 let mut scope = Scope::global(realm, PathBuf::from("eval")); //TODO: the scope should be the caller's scope
+
+                //TODO: this is a hack
+                if strict {
+                    scope = scope.child()?;
+                    scope.set_strict_mode()?;
+                    scope.state_set_function()?;
+                }
 
                 eval.eval(&code, realm, &mut scope)
             },

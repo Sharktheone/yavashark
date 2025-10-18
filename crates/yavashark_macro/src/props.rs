@@ -220,6 +220,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             ImplItem::Const(constant) => {
                 let mut js_name = None;
                 let mut mode = mode;
+                let mut writable = false;
 
                 constant.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("prototype") {
@@ -237,6 +238,11 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
 
+                    if attr.path().is_ident("writable") {
+                        writable = true;
+                        return false;
+                    }
+
                     true
                 });
 
@@ -244,6 +250,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     name: constant.ident.clone(),
                     js_name,
                     mode,
+                    writable,
                 }))
             }
 
@@ -272,13 +279,22 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 method.ty,
                 quote! {#variable::write_config},
             ),
-            Prop::Constant(constant) => (
-                constant.init_tokens(&config),
-                constant.name,
-                constant.js_name,
-                Type::Normal,
-                quote! {#variable::new_read_only},
-            ),
+            Prop::Constant(constant) => {
+
+                let variable_fn = if constant.writable {
+                    quote! {#variable::write}
+                } else {
+                    quote! {#variable::new_read_only}
+                };
+
+                (
+                    constant.init_tokens(&config),
+                    constant.name,
+                    constant.js_name,
+                    Type::Normal,
+                    variable_fn,
+                )
+            },
         };
 
         let name = js_name
@@ -391,6 +407,7 @@ struct Constant {
     name: syn::Ident,
     js_name: Option<Expr>,
     mode: Mode,
+    writable: bool,
 }
 
 impl Method {

@@ -1,6 +1,6 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property};
+use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor};
 use std::cell::RefCell;
 use yavashark_garbage::GcRef;
 
@@ -198,6 +198,11 @@ impl Obj for FunctionPrototype {
                     this.to_string = value.into();
                     return Ok(DefinePropertyResult::Handled);
                 }
+                "caller" => {
+                    return Err(Error::ty(
+                        "Cannot assign to read only property 'caller' of function 'function prototype'",
+                    ));
+                }
 
                 _ => {}
             }
@@ -244,6 +249,11 @@ impl Obj for FunctionPrototype {
                     this.to_string = value.into();
                     return Ok(DefinePropertyResult::Handled);
                 }
+                "caller" => {
+                    return Err(Error::ty(
+                        "Cannot assign to read only property 'caller' of function 'function prototype'",
+                    ));
+                }
                 _ => {}
             }
         }
@@ -267,6 +277,11 @@ impl Obj for FunctionPrototype {
                 "length" => return Ok(Some(this.length.clone().into())),
                 "name" => return Ok(Some(this.name.clone().into())),
                 "toString" => return Ok(Some(this.to_string.clone().into())),
+                "caller" => {
+                    return Err(Error::ty(
+                        "Cannot assign to read only property 'caller' of function 'function prototype'",
+                    ));
+                }
                 _ => {}
             }
         }
@@ -290,6 +305,11 @@ impl Obj for FunctionPrototype {
                 "length" => return Ok(Some(this.length.copy().into())),
                 "name" => return Ok(Some(this.name.copy().into())),
                 "toString" => return Ok(Some(this.to_string.copy().into())),
+                "caller" => {
+                    return Err(Error::ty(
+                        "Cannot assign to read only property 'caller' of function 'function prototype'",
+                    ));
+                }
                 _ => {}
             }
         }
@@ -362,6 +382,11 @@ impl Obj for FunctionPrototype {
                     this.to_string = Value::Undefined.into();
                     return Ok(Some(old.into()));
                 }
+                "caller" => {
+                    return Err(Error::ty(
+                        "Cannot assign to read only property 'caller' of function 'function prototype'",
+                    ));
+                }
                 _ => {}
             }
         }
@@ -372,7 +397,7 @@ impl Obj for FunctionPrototype {
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" | "caller" => {
                     return Ok(true)
                 }
                 _ => {}
@@ -387,7 +412,7 @@ impl Obj for FunctionPrototype {
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" | "caller" => {
                     return Ok(true)
                 }
                 _ => {}
@@ -514,6 +539,44 @@ impl Obj for FunctionPrototype {
 
         this.object.set_prototype(prototype, realm)
     }
+
+
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+
+        if matches!(name, InternalPropertyKey::String(ref n) if n.as_str() == "caller") {
+            return Ok(Some(PropertyDescriptor::Accessor {
+                get: Some(realm.intrinsics.throw_type_error.clone()),
+                set: Some(realm.intrinsics.throw_type_error.clone()),
+                enumerable: false,
+                configurable: true,
+            }));
+        }
+
+
+        let Some(prop) = self.get_own_property(name, realm)? else {
+            return Ok(None);
+        };
+
+        match prop {
+            Property::Value(v, a) => Ok(Some(PropertyDescriptor::Data {
+                value: v,
+                writable: a.is_writable(),
+                enumerable: a.is_enumerable(),
+                configurable: a.is_configurable(),
+            })),
+            Property::Getter(g, props) => Ok(Some(PropertyDescriptor::Accessor {
+                get: Some(g),
+                set: None,
+                enumerable: props.is_enumerable(),
+                configurable: props.is_configurable(),
+            })),
+        }
+    }
+
 
     fn name(&self) -> String {
         "FunctionPrototype".to_string()

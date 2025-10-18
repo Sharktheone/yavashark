@@ -1,4 +1,4 @@
-use crate::value::CustomGcRefUntyped;
+use crate::value::{CustomGcRefUntyped, DefinePropertyResult};
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
@@ -19,7 +19,7 @@ pub struct MutValue {
     pub scope: Rc<RefCell<ScopeInternal>>,
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 #[allow(clippy::module_name_repetitions)]
 pub struct ScopeState {
     state: u8,
@@ -34,6 +34,7 @@ impl ScopeState {
     const RETURNABLE: u8 = 0b10000;
     const CONTINUABLE: u8 = 0b10_0000;
     const OPT_CHAIN: u8 = 0b100_0000;
+    const STRICT_MODE: u8 = 0b1000_0000;
     const STATE_NONE: Self = Self { state: Self::NONE };
     const STATE_FUNCTION: Self = Self {
         state: Self::FUNCTION,
@@ -54,6 +55,10 @@ impl ScopeState {
 
     const STATE_OPT_CHAIN: Self = Self {
         state: Self::OPT_CHAIN,
+    };
+
+    const STATE_STRICT_MODE: Self = Self {
+        state: Self::STRICT_MODE,
     };
 
     #[must_use]
@@ -97,6 +102,10 @@ impl ScopeState {
         self.state |= Self::OPT_CHAIN;
     }
 
+    pub const fn set_strict_mode(&mut self) {
+        self.state |= Self::STRICT_MODE;
+    }
+
     #[must_use]
     pub const fn is_function(&self) -> bool {
         self.state & Self::FUNCTION != 0
@@ -129,6 +138,11 @@ impl ScopeState {
     #[must_use]
     pub const fn is_opt_chain(&self) -> bool {
         self.state & Self::OPT_CHAIN != 0
+    }
+
+    #[must_use]
+    pub const fn is_strict_mode(&self) -> bool {
+        self.state & Self::STRICT_MODE != 0
     }
 }
 
@@ -647,24 +661,27 @@ impl ScopeInternal {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name: InternalPropertyKey = name.clone().into();
-                if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
-                    let prop = prop.assert_value();
-                    if !prop.properties.is_writable() {
-                        return Err(Error::ty("Assignment to constant variable"));
-                    }
 
-                    obj.define_property_attributes(
-                        name,
-                        Variable::with_attributes(value, prop.properties),
-                        realm,
-                    )?;
-                    return Ok(());
+                return match obj.define_property(name, value, realm)? {
+                    DefinePropertyResult::Handled => Ok(()),
+                    DefinePropertyResult::ReadOnly => {
+                        if self.state.is_strict_mode() {
+                            Err(Error::ty("Assignment to constant variable"))
+                        } else {
+                            Ok(())
+                        }
+                    }
+                    DefinePropertyResult::Setter(_, _) => Ok(()),
                 }
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
                     if !var.get(realm).properties.is_writable() {
-                        return Err(Error::ty("Assignment to constant variable"));
+                        if self.state.is_strict_mode() {
+                            return Err(Error::ty("Assignment to constant variable"));
+                        } else {
+                            return Ok(());
+                        }
                     }
 
                     var.update(value, realm)?;
@@ -926,6 +943,15 @@ impl Scope {
         Ok(self.scope.borrow()?.state_is_opt_chain())
     }
 
+    pub fn set_strict_mode(&mut self) -> Res {
+        self.scope.borrow_mut()?.state.set_strict_mode();
+        Ok(())
+    }
+
+    pub fn is_strict_mode(&self) -> Res<bool> {
+        Ok(self.scope.borrow()?.state.is_strict_mode())
+    }
+
     pub fn has_value(&self, name: &str, realm: &mut Realm) -> Res<bool> {
         self.scope.borrow()?.has_value(name, realm)
     }
@@ -949,6 +975,17 @@ impl Scope {
 
     pub fn this(&self) -> Res<Value> {
         Ok(self.scope.borrow()?.this.copy())
+    }
+
+
+    pub fn fn_this(&self) -> Res<Value> {
+        let s = self.scope.borrow()?;
+        
+        if s.state.is_strict_mode() {
+            return Ok(Value::Undefined)
+        }
+        
+        Ok(s.this.copy())
     }
 
     pub fn parent(&self) -> Res<Option<Gc<RefCell<ScopeInternal>>>> {

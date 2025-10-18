@@ -19,10 +19,11 @@ pub fn run_file(file: PathBuf) -> Result<String, String> {
     }
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
+    let strict = metadata.flags.contains(Flags::ONLY_STRICT);
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
     let (mut realm, mut scope, harness_dir) =
-        setup_global(file.clone(), raw, async_).map_err(|e| e.to_string())?;
+        setup_global(file.clone(), raw, async_, strict).map_err(|e| e.to_string())?;
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();

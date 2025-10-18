@@ -7,6 +7,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_interpreter::Interpreter;
+use crate::metadata::Flags;
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
@@ -35,7 +36,11 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope, harness: &Path) 
 
     let async_path = harness.join("harness/doneprintHandle.js");
 
-    let prog = parse_file(async_path.as_path()).0;
+    let (prog, meta) = parse_file(async_path.as_path());
+    
+    if meta.flags.contains(Flags::ONLY_STRICT) {
+        scope.set_strict_mode()?;
+    }
 
     scope.set_path(async_path)?;
 
@@ -46,7 +51,7 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope, harness: &Path) 
     Ok(())
 }
 
-pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope, PathBuf)> {
+pub fn setup_global(file: PathBuf, raw: bool, async_: bool, strict: bool) -> Res<(Realm, Scope, PathBuf)> {
     #[cfg(feature = "timings")]
     let now = std::time::Instant::now();
     let mut r = Realm::new()?;
@@ -55,6 +60,10 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
         crate::REALM_DURATION = now.elapsed();
     }
     let mut s = Scope::global(&r, file);
+    
+    if strict {
+        s.set_strict_mode()?;
+    }
 
     let t262 = ObjectHandle::new(Test262::new(&mut r));
 
@@ -78,7 +87,7 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
         }
     }
 
-    r.set_eval(InterpreterEval)?;
+    r.set_eval(InterpreterEval, strict)?;
     yavashark_vm::init(&mut r)?;
 
     Ok((r, s, harness_dir.to_path_buf()))
@@ -111,7 +120,7 @@ mod tests {
 
     #[test]
     fn new_harness() {
-        let (_global, _scope, _) = match setup_global(PathBuf::new(), false, false) {
+        let (_global, _scope, _) = match setup_global(PathBuf::new(), false, false, false) {
             Ok(v) => v,
             Err(e) => {
                 panic!("Failed to create new harness: {e}")

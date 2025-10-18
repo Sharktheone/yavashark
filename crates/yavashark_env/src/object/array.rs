@@ -454,6 +454,7 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
 #[properties_new(default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
     #[prop("length")]
+    #[writable]
     pub const LENGTH: usize = 0;
 
     fn at(#[this] this: Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {

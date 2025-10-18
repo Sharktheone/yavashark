@@ -9,7 +9,7 @@ use swc_ecma_ast::{
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::value::Obj;
+use yavashark_env::value::{DefinePropertyResult, Obj, Property};
 use yavashark_env::{
     Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult,
     Value,
@@ -37,6 +37,9 @@ impl Interpreter {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
+                    if scope.is_strict_mode()? && !scope.has_value(&name, realm)? {
+                        return Err(Error::reference_error(format!("{name} is not defined")));
+                    }
                     scope.update_or_define(name, value, realm)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
@@ -114,7 +117,17 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
-            obj.define_property(name.into_internal_property_key(realm)?, value, realm);
+            let key = name.into_internal_property_key(realm)?;
+
+            match obj.define_property(key, value, realm)? {
+                DefinePropertyResult::Handled => {},
+                DefinePropertyResult::ReadOnly => {
+                    if scope.is_strict_mode()? {
+                        return Err(Error::ty("Cannot assign to read only property"));
+                    }
+                }
+                DefinePropertyResult::Setter(_, _) => {}
+            }
             Ok(())
         } else {
             Err(Error::ty_error(format!(
@@ -174,7 +187,7 @@ impl Interpreter {
                     return Ok(());
                 }
 
-                let this = this.unwrap_or(scope.this()?);
+                let this = this.unwrap_or(scope.fn_this()?);
 
                 Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?
@@ -381,9 +394,25 @@ impl Interpreter {
 
             let name = name.into_internal_property_key(realm)?;
 
-            let left = obj
-                .resolve_property(name.clone(), realm)?
-                .unwrap_or(Value::Undefined);
+            let (left, writable) = (if let Some(v) = obj
+                .resolve_property_no_get_set(name.clone(), realm)? {
+                match v {
+                    Property::Value(v, a) => (v, a.is_writable()),
+                    Property::Getter(get, _) => (get.call(Vec::new(), scope.fn_this()?, realm)?, false),
+                }
+            } else {
+                if scope.is_strict_mode()? {
+                    return Err(Error::ty_error(format!(
+                        "Property {name:?} does not exist on object",
+                    )).into());
+                }
+
+                (Value::Undefined, true)
+            });
+
+            if !writable && !matches!(op, AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign) && scope.is_strict_mode()? {
+                return Err(Error::ty("Cannot assign to read only property").into());
+            }
 
             let value = Self::run_assign_op(op, left, right, realm)?;
 
@@ -461,7 +490,7 @@ impl Interpreter {
                     return Ok(right);
                 }
 
-                let this = this.unwrap_or(scope.this()?);
+                let this = this.unwrap_or(scope.fn_this()?);
 
                 let left = Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?

@@ -65,6 +65,13 @@ impl Variable {
         }
     }
 
+    pub const fn none(value: Value) -> Self {
+        Self {
+            value,
+            properties: Attributes(0),
+        }
+    }
+
     #[must_use]
     pub const fn new_with_attributes(
         value: Value,

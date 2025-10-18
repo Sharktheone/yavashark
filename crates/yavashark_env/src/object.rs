@@ -454,15 +454,18 @@ impl MutObject {
     pub fn delete_array(&mut self, index: usize) -> Option<Property> {
         let (i, found) = self.array_position(index);
 
-        if found
-            && self.array.get(i).is_some_and(|v| {
+        if found {
+
+            if !self.array.get(i).is_some_and(|v| {
                 let Some(v) = self.values.get(v.1) else {
                     return false;
                 };
 
                 v.attributes.is_configurable()
-            })
-        {
+            }) {
+                return None;
+            }
+
             let idx = self.array.remove(i);
 
             return self
@@ -471,7 +474,7 @@ impl MutObject {
                 .map(|v| mem::replace(v, ObjectProperty::new(Value::Undefined)).property());
         }
 
-        None
+        Some(Property::default())
     }
 
     pub fn set_array(&mut self, elements: impl ExactSizeIterator<Item = Value>) {
@@ -644,13 +647,24 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-                if e.attributes.is_writable() {
+                if !e.set.is_undefined() {
+                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value));
+                }
+
+                if !e.get.is_undefined() {
+                    return Ok(DefinePropertyResult::ReadOnly)
+                }
+
+                return Ok(if e.attributes.is_writable() {
                     e.set = Value::Undefined;
                     e.get = Value::Undefined;
 
                     e.value = value;
-                    return Ok(DefinePropertyResult::Handled);
-                }
+                        DefinePropertyResult::Handled
+                } else {
+
+                    DefinePropertyResult::ReadOnly
+                });
             }
             Entry::Vacant(entry) => {
                 let idx = self.values.len();
@@ -685,11 +699,23 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-                if e.attributes.is_writable() {
+
+                if !e.set.is_undefined() {
+                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value.value));
+                }
+
+                if !e.get.is_undefined() {
+                    return Ok(DefinePropertyResult::ReadOnly)
+                }
+
+
+                return Ok(if e.attributes.is_writable() {
                     *e = value.into();
 
-                    return Ok(DefinePropertyResult::Handled);
-                }
+                    DefinePropertyResult::Handled
+                } else {
+                    DefinePropertyResult::ReadOnly
+                });
             }
             Entry::Vacant(entry) => {
                 let idx = self.values.len();
@@ -718,16 +744,21 @@ impl MutObj for MutObject {
             //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
 
-        Ok(self
+        if let Some(prop) =  self
             .properties
             .get::<PropertyKey>(&name.clone().into())
-            .and_then(|idx| self.values.get(*idx).map(|v| v.property()))
-            .or_else(|| match &self.prototype {
+            .and_then(|idx| self.values.get(*idx).map(ObjectProperty::property)) {
+            return Ok(Some(prop));
+        }
+
+
+            match &self.prototype {
                 ObjectOrNull::Object(o) => {
-                    o.resolve_property_no_get_set(name, realm).ok().flatten()
-                } //TODO: this is wrong, we need a realm here!
-                _ => None,
-            }))
+                    o.resolve_property_no_get_set(name, realm)
+                    //TODO: this is wrong, we need a realm here!
+                }
+                _ => Ok(None),
+            }
     }
 
     fn get_own_property(
@@ -865,7 +896,7 @@ impl MutObj for MutObject {
             };
         }
 
-        Ok(None)
+        Ok(Some(Property::default()))
     }
 
     fn contains_own_key(&mut self, name: InternalPropertyKey, _realm: &mut Realm) -> Res<bool> {

@@ -34,6 +34,7 @@ pub struct RawJSFunction {
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
     pub scope: Scope,
+    pub is_strict: bool,
 }
 
 #[derive(Debug)]
@@ -78,6 +79,10 @@ impl JSFunction {
             }
         });
 
+        let is_strict = scope.is_strict_mode()? ||  block.as_ref().map_or(false, |b| {
+            Interpreter::is_strict(&b.stmts)
+        });
+
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone()),
@@ -88,8 +93,18 @@ impl JSFunction {
                 params,
                 block,
                 scope,
+                is_strict,
+
             },
         };
+
+        if !is_strict {
+            this.define_property_attributes(
+                "caller".into(),
+                Variable::new_read_only(Value::Undefined),
+                realm,
+            )?;
+        }
 
         let handle = ObjectHandle::new(this);
 
@@ -153,6 +168,10 @@ impl Func for JSFunction {
 impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
+        if self.is_strict {
+            scope.set_strict_mode();
+        }
+
         scope.state_set_function();
         scope.state_set_returnable();
 
@@ -174,8 +193,14 @@ impl RawJSFunction {
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function();
         scope.state_set_returnable();
+        
+        let caller = if scope.is_strict_mode()? {
+            None
+        } else {
+            Some(this.copy())
+        };
 
-        let args = Arguments::new(args, this.copy(), realm);
+        let args = Arguments::new(args, caller, realm);
 
         let args = ObjectHandle::new(args);
 
@@ -239,7 +264,8 @@ impl ConstructorFn for RawJSFunction {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use swc_ecma_parser::EsSyntax;
+use super::*;
     use crate::Interpreter;
     use swc_common::DUMMY_SP;
     use swc_ecma_ast::{BlockStmt, Param, Pat};
