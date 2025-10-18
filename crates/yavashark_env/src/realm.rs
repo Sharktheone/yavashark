@@ -25,14 +25,11 @@ pub struct Realm {
 impl Realm {
     pub fn new() -> Res<Self> {
         let mut realm = Self::default();
-        
-        let mut intrinsics = Intrinsics::default();
-        intrinsics.initialize(&mut realm)?;
-        
 
-        let global = Object::with_proto(intrinsics.obj.clone());
-        
-        realm.intrinsics = intrinsics;
+        Intrinsics::initialize(&mut realm)?;
+
+        let global = Object::with_proto(realm.intrinsics.obj.clone());
+
         realm.global = global.clone();
 
         init_global_obj(&global, &mut realm)?;

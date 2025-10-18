@@ -190,309 +190,312 @@ impl Intrinsics {
 
 #[allow(clippy::similar_names)]
 impl Intrinsics {
-    pub(crate) fn initialize(&mut self, realm: &mut Realm) -> Res {
-        self.obj = ObjectHandle::new(Prototype::new());
+    pub(crate) fn initialize(realm: &mut Realm) -> Res {
+        realm.intrinsics.obj = ObjectHandle::new(Prototype::new());
 
-        self.func = ObjectHandle::new(FunctionPrototype::new(self.obj.clone().into()));
+        realm.intrinsics.func = ObjectHandle::new(FunctionPrototype::new(realm.intrinsics.obj.clone()));
 
         {
-            let obj_this = self.obj.clone().into();
-            let obj = self.obj.guard();
+            let obj_this = realm.intrinsics.obj.clone();
+            let obj_this2 = obj_this.clone();
+            let obj = obj_this.guard();
 
             let proto = obj
                 .downcast::<Prototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
-            proto.initialize(self.func.clone().into(), obj_this, realm)?;
+            proto.initialize(realm.intrinsics.func.clone(), obj_this2, realm)?;
         }
 
         {
-            let func = self.func.guard();
+            let func = realm.intrinsics.func.clone();
+            let func = func.guard();
 
             let proto = func
                 .downcast::<FunctionPrototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
-            proto.initialize(self.func.clone().into(), realm)?;
+            proto.initialize(realm.intrinsics.func.clone(), realm)?;
         }
 
-        self.array = Array::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.array = Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.array_iter = ArrayIterator::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.array_iter = ArrayIterator::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.error = ErrorObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.error = ErrorObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.math = Math::new(self.obj.clone(), self.func.clone(), realm)?;
+        realm.intrinsics.math = Math::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        self.string = StringObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.string = StringObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.number = NumberObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.number = NumberObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.boolean = BooleanObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.boolean = BooleanObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.symbol = SymbolObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.symbol = SymbolObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.bigint = BigIntObj::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.bigint = BigIntObj::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.regexp = RegExp::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.regexp = RegExp::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.json = JSON::new(self.obj.clone(), self.func.clone(), realm)?;
+        realm.intrinsics.json = JSON::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        let error_constructor = self
+        let error_constructor = realm.intrinsics
             .error
+            .clone()
             .resolve_property("constructor", realm)
             .unwrap_or(Value::Undefined.into())
             .unwrap_or(Value::Undefined.into())
             .to_object()?;
 
-        self.type_error =
-            get_type_error(self.error.clone().into(), error_constructor.clone(), realm)?;
-        self.range_error =
-            get_range_error(self.error.clone().into(), error_constructor.clone(), realm)?;
-        self.reference_error =
-            get_reference_error(self.error.clone().into(), error_constructor.clone(), realm)?;
-        self.syntax_error =
-            get_syntax_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.type_error =
+            get_type_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.range_error =
+            get_range_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.reference_error =
+            get_reference_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.syntax_error =
+            get_syntax_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
 
-        self.eval_error =
-            get_eval_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.eval_error =
+            get_eval_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
 
-        self.uri_error =
-            get_uri_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        realm.intrinsics.uri_error =
+            get_uri_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
 
-        self.aggregate_error =
-            get_aggregate_error(self.error.clone().into(), error_constructor, realm)?;
+        realm.intrinsics.aggregate_error =
+            get_aggregate_error(realm.intrinsics.error.clone().into(), error_constructor, realm)?;
 
-        self.arraybuffer = ArrayBuffer::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.arraybuffer = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.sharedarraybuffer = SharedArrayBuffer::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.sharedarraybuffer = SharedArrayBuffer::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.data_view = DataView::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.data_view = DataView::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.typed_array = TypedArray::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.typed_array = TypedArray::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.int8array = Int8Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.int8array = Int8Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.uint8array = Uint8Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.uint8array = Uint8Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.uint8clampedarray = Uint8ClampedArray::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.uint8clampedarray = Uint8ClampedArray::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.int16array = Int16Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.int16array = Int16Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.uint16array = Uint16Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.uint16array = Uint16Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.int32array = Int32Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.int32array = Int32Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.uint32array = Uint32Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.uint32array = Uint32Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.float16array = Float16Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.float16array = Float16Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.float32array = Float32Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.float32array = Float32Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.float64array = Float64Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.float64array = Float64Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.bigint64array = BigInt64Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.bigint64array = BigInt64Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.biguint64array = BigUint64Array::initialize_proto(
-            Object::raw_with_proto(self.typed_array.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.biguint64array = BigUint64Array::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.atomics = Atomics::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.atomics = Atomics::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.map = Map::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.map = Map::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.weak_map = WeakMap::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.weak_map = WeakMap::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.set = Set::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.set = Set::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.weak_set = WeakSet::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.weak_set = WeakSet::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.weak_ref = WeakRef::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.weak_ref = WeakRef::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.date = Date::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.date = Date::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.reflect = Reflect::new(self.obj.clone().into(), self.func.clone().into(), realm)?;
+        realm.intrinsics.reflect = Reflect::new(realm.intrinsics.obj.clone().into(), realm.intrinsics.func.clone().into(), realm)?;
 
-        let (temporal, temporal_protos) = get_temporal(self.obj.clone(), self.func.clone(), realm)?;
+        let (temporal, temporal_protos) = get_temporal(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        self.temporal = temporal;
-        self.temporal_duration = temporal_protos.duration;
-        self.temporal_instant = temporal_protos.instant;
-        self.temporal_now = temporal_protos.now;
-        self.temporal_plain_date = temporal_protos.plain_date;
-        self.temporal_plain_time = temporal_protos.plain_time;
-        self.temporal_plain_date_time = temporal_protos.plain_date_time;
-        self.temporal_plain_month_day = temporal_protos.plain_month_day;
-        self.temporal_plain_year_month = temporal_protos.plain_year_month;
-        self.temporal_zoned_date_time = temporal_protos.zoned_date_time;
+        realm.intrinsics.temporal = temporal;
+        realm.intrinsics.temporal_duration = temporal_protos.duration;
+        realm.intrinsics.temporal_instant = temporal_protos.instant;
+        realm.intrinsics.temporal_now = temporal_protos.now;
+        realm.intrinsics.temporal_plain_date = temporal_protos.plain_date;
+        realm.intrinsics.temporal_plain_time = temporal_protos.plain_time;
+        realm.intrinsics.temporal_plain_date_time = temporal_protos.plain_date_time;
+        realm.intrinsics.temporal_plain_month_day = temporal_protos.plain_month_day;
+        realm.intrinsics.temporal_plain_year_month = temporal_protos.plain_year_month;
+        realm.intrinsics.temporal_zoned_date_time = temporal_protos.zoned_date_time;
 
         let (intl, intl_protos) =
-            crate::builtins::intl::get_intl(self.obj.clone(), self.func.clone(), realm)?;
+            crate::builtins::intl::get_intl(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        self.intl = intl;
-        self.intl_collator = intl_protos.collator;
-        self.intl_date_time_format = intl_protos.date_time_format;
-        self.intl_display_names = intl_protos.display_names;
-        self.intl_duration_format = intl_protos.duration_format;
-        self.intl_list_format = intl_protos.list_format;
-        self.intl_locale = intl_protos.locale;
-        self.intl_number_format = intl_protos.number_format;
-        self.intl_plural_rules = intl_protos.plural_rules;
-        self.intl_relative_time_format = intl_protos.relative_time_format;
-        self.intl_segmenter = intl_protos.segmenter;
+        realm.intrinsics.intl = intl;
+        realm.intrinsics.intl_collator = intl_protos.collator;
+        realm.intrinsics.intl_date_time_format = intl_protos.date_time_format;
+        realm.intrinsics.intl_display_names = intl_protos.display_names;
+        realm.intrinsics.intl_duration_format = intl_protos.duration_format;
+        realm.intrinsics.intl_list_format = intl_protos.list_format;
+        realm.intrinsics.intl_locale = intl_protos.locale;
+        realm.intrinsics.intl_number_format = intl_protos.number_format;
+        realm.intrinsics.intl_plural_rules = intl_protos.plural_rules;
+        realm.intrinsics.intl_relative_time_format = intl_protos.relative_time_format;
+        realm.intrinsics.intl_segmenter = intl_protos.segmenter;
 
         let (signal, signal_protos) =
-            crate::builtins::signal::get_signal(self.obj.clone(), self.func.clone(), realm)?;
+            crate::builtins::signal::get_signal(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        self.signal = signal;
-        self.signal_state = signal_protos.state;
-        self.signal_computed = signal_protos.computed;
+        realm.intrinsics.signal = signal;
+        realm.intrinsics.signal_state = signal_protos.state;
+        realm.intrinsics.signal_computed = signal_protos.computed;
 
-        self.promise = Promise::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.promise = Promise::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.arguments = Arguments::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.arguments = Arguments::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.proxy = Proxy::initialize_proto(
-            Object::raw_with_proto(self.obj.clone()),
-            self.func.clone().into(),
+        realm.intrinsics.proxy = Proxy::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone().into(),
             realm,
         )?;
 
-        self.throw_type_error = get_throw_type_error(realm)?;
+        realm.intrinsics.throw_type_error = get_throw_type_error(realm)?;
 
         Ok(())
     }
