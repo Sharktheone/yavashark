@@ -15,7 +15,12 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_throw_type_error, get_type_error, get_uri_error, Arguments, Atomics, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON};
+use crate::builtins::{
+    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
+    get_temporal, get_throw_type_error, get_type_error, get_uri_error, Arguments, Atomics,
+    BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set,
+    StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON,
+};
 use crate::error_obj::ErrorObj;
 use crate::{
     Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable,
@@ -185,394 +190,311 @@ impl Intrinsics {
 
 #[allow(clippy::similar_names)]
 impl Intrinsics {
-    pub(crate) fn new() -> Result<Self, Error> {
-        let realm = &mut Realm::default();
+    pub(crate) fn initialize(&mut self, realm: &mut Realm) -> Res {
+        self.obj = ObjectHandle::new(Prototype::new());
 
-        let obj_prototype = ObjectHandle::new(Prototype::new());
-
-        let func_prototype =
-            ObjectHandle::new(FunctionPrototype::new(obj_prototype.clone().into()));
+        self.func = ObjectHandle::new(FunctionPrototype::new(self.obj.clone().into()));
 
         {
-            let obj_this = obj_prototype.clone().into();
-            let obj = obj_prototype.guard();
+            let obj_this = self.obj.clone().into();
+            let obj = self.obj.guard();
 
             let proto = obj
                 .downcast::<Prototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into(), obj_this, realm)?;
+            proto.initialize(self.func.clone().into(), obj_this, realm)?;
         }
 
         {
-            let func = func_prototype.guard();
+            let func = self.func.guard();
 
             let proto = func
                 .downcast::<FunctionPrototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into(), realm)?;
+            proto.initialize(self.func.clone().into(), realm)?;
         }
 
-        let array_prototype = Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.array = Array::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let array_iter_prototype = ArrayIterator::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.array_iter = ArrayIterator::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let error_prototype = ErrorObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.error = ErrorObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone(), realm)?;
+        self.math = Math::new(self.obj.clone(), self.func.clone(), realm)?;
 
-        let string_prototype = StringObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.string = StringObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let number_prototype = NumberObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.number = NumberObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let boolean_prototype = BooleanObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.boolean = BooleanObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let symbol_prototype = SymbolObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.symbol = SymbolObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let bigint_prototype = BigIntObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.bigint = BigIntObj::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let regex = RegExp::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.regexp = RegExp::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let json = JSON::new(obj_prototype.clone(), func_prototype.clone(), realm)?;
+        self.json = JSON::new(self.obj.clone(), self.func.clone(), realm)?;
 
-        let error_constructor = error_prototype
+        let error_constructor = self
+            .error
             .resolve_property("constructor", realm)
             .unwrap_or(Value::Undefined.into())
             .unwrap_or(Value::Undefined.into())
             .to_object()?;
 
-        let type_error = get_type_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
-            realm,
-        )?;
-        let range_error = get_range_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
-            realm,
-        )?;
-        let reference_error = get_reference_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
-            realm,
-        )?;
-        let syntax_error = get_syntax_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
+        self.type_error =
+            get_type_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        self.range_error =
+            get_range_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        self.reference_error =
+            get_reference_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+        self.syntax_error =
+            get_syntax_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+
+        self.eval_error =
+            get_eval_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+
+        self.uri_error =
+            get_uri_error(self.error.clone().into(), error_constructor.clone(), realm)?;
+
+        self.aggregate_error =
+            get_aggregate_error(self.error.clone().into(), error_constructor, realm)?;
+
+        self.arraybuffer = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let eval_error = get_eval_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
+        self.sharedarraybuffer = SharedArrayBuffer::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let uri_error = get_uri_error(
-            error_prototype.clone().into(),
-            error_constructor.clone(),
+        self.data_view = DataView::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let aggregate_error =
-            get_aggregate_error(error_prototype.clone().into(), error_constructor, realm)?;
-
-        let arraybuffer = ArrayBuffer::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.typed_array = TypedArray::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let sharedarraybuffer = SharedArrayBuffer::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.int8array = Int8Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let data_view = DataView::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.uint8array = Uint8Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let typed_array = TypedArray::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.uint8clampedarray = Uint8ClampedArray::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let int8array = Int8Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.int16array = Int16Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let uint8array = Uint8Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.uint16array = Uint16Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let uint8clampedarray = Uint8ClampedArray::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.int32array = Int32Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let int16array = Int16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.uint32array = Uint32Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let uint16array = Uint16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.float16array = Float16Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let int32array = Int32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.float32array = Float32Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let uint32array = Uint32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.float64array = Float64Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let float16array = Float16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.bigint64array = BigInt64Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let float32array = Float32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.biguint64array = BigUint64Array::initialize_proto(
+            Object::raw_with_proto(self.typed_array.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let float64array = Float64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.atomics = Atomics::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let bigint64array = BigInt64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.map = Map::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let biguint64array = BigUint64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone()),
-            func_prototype.clone().into(),
+        self.weak_map = WeakMap::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let atomics = Atomics::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.set = Set::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let map = Map::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.weak_set = WeakSet::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let weak_map = WeakMap::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.weak_ref = WeakRef::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let set = Set::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.date = Date::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let weak_set = WeakSet::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
-            realm,
-        )?;
+        self.reflect = Reflect::new(self.obj.clone().into(), self.func.clone().into(), realm)?;
 
-        let weak_ref = WeakRef::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
-            realm,
-        )?;
+        let (temporal, temporal_protos) = get_temporal(self.obj.clone(), self.func.clone(), realm)?;
 
-        let date = Date::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
-            realm,
-        )?;
-
-        let reflect = Reflect::new(
-            obj_prototype.clone().into(),
-            func_prototype.clone().into(),
-            realm,
-        )?;
-
-        let (temporal, temporal_protos) =
-            get_temporal(obj_prototype.clone(), func_prototype.clone(), realm)?;
+        self.temporal = temporal;
+        self.temporal_duration = temporal_protos.duration;
+        self.temporal_instant = temporal_protos.instant;
+        self.temporal_now = temporal_protos.now;
+        self.temporal_plain_date = temporal_protos.plain_date;
+        self.temporal_plain_time = temporal_protos.plain_time;
+        self.temporal_plain_date_time = temporal_protos.plain_date_time;
+        self.temporal_plain_month_day = temporal_protos.plain_month_day;
+        self.temporal_plain_year_month = temporal_protos.plain_year_month;
+        self.temporal_zoned_date_time = temporal_protos.zoned_date_time;
 
         let (intl, intl_protos) =
-            crate::builtins::intl::get_intl(obj_prototype.clone(), func_prototype.clone(), realm)?;
+            crate::builtins::intl::get_intl(self.obj.clone(), self.func.clone(), realm)?;
 
-        let (signal, signal_protos) = crate::builtins::signal::get_signal(
-            obj_prototype.clone(),
-            func_prototype.clone(),
+        self.intl = intl;
+        self.intl_collator = intl_protos.collator;
+        self.intl_date_time_format = intl_protos.date_time_format;
+        self.intl_display_names = intl_protos.display_names;
+        self.intl_duration_format = intl_protos.duration_format;
+        self.intl_list_format = intl_protos.list_format;
+        self.intl_locale = intl_protos.locale;
+        self.intl_number_format = intl_protos.number_format;
+        self.intl_plural_rules = intl_protos.plural_rules;
+        self.intl_relative_time_format = intl_protos.relative_time_format;
+        self.intl_segmenter = intl_protos.segmenter;
+
+        let (signal, signal_protos) =
+            crate::builtins::signal::get_signal(self.obj.clone(), self.func.clone(), realm)?;
+
+        self.signal = signal;
+        self.signal_state = signal_protos.state;
+        self.signal_computed = signal_protos.computed;
+
+        self.promise = Promise::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let promise = Promise::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.arguments = Arguments::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let arguments = Arguments::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
+        self.proxy = Proxy::initialize_proto(
+            Object::raw_with_proto(self.obj.clone()),
+            self.func.clone().into(),
             realm,
         )?;
 
-        let proxy = Proxy::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone()),
-            func_prototype.clone().into(),
-            realm,
-        )?;
-        
-        let throw_type_error = get_throw_type_error(realm)?;
+        self.throw_type_error = get_throw_type_error(realm)?;
 
-        Ok(Self {
-            obj: obj_prototype,
-            func: func_prototype,
-            array: array_prototype,
-            array_iter: array_iter_prototype,
-            error: error_prototype,
-            math: math_obj,
-            string: string_prototype,
-            number: number_prototype,
-            boolean: boolean_prototype,
-            symbol: symbol_prototype,
-            bigint: bigint_prototype,
-            regexp: regex,
-            json,
-            type_error,
-            range_error,
-            reference_error,
-            syntax_error,
-            eval_error,
-            uri_error,
-            aggregate_error,
-            eval: None,
-            arraybuffer,
-            sharedarraybuffer,
-            data_view,
-            typed_array,
-            int8array,
-            uint8array,
-            uint8clampedarray,
-            int16array,
-            uint16array,
-            int32array,
-            uint32array,
-            float16array,
-            float32array,
-            float64array,
-            bigint64array,
-            biguint64array,
-            atomics,
-            map,
-            weak_map,
-            set,
-            weak_set,
-            weak_ref,
-            date,
-            reflect,
-            temporal,
-            temporal_duration: temporal_protos.duration,
-            temporal_instant: temporal_protos.instant,
-            temporal_now: temporal_protos.now,
-            temporal_plain_date: temporal_protos.plain_date,
-            temporal_plain_time: temporal_protos.plain_time,
-            temporal_plain_date_time: temporal_protos.plain_date_time,
-            temporal_plain_month_day: temporal_protos.plain_month_day,
-            temporal_plain_year_month: temporal_protos.plain_year_month,
-            temporal_zoned_date_time: temporal_protos.zoned_date_time,
-            promise,
-            generator_function: Object::null(),
-            generator: Object::null(),
-            async_generator_function: Object::null(),
-            async_generator: Object::null(),
-            signal,
-            signal_state: signal_protos.state,
-            signal_computed: signal_protos.computed,
-            arguments,
-            proxy,
-
-            intl,
-            intl_collator: intl_protos.collator,
-            intl_date_time_format: intl_protos.date_time_format,
-            intl_display_names: intl_protos.display_names,
-            intl_duration_format: intl_protos.duration_format,
-            intl_list_format: intl_protos.list_format,
-            intl_locale: intl_protos.locale,
-            intl_number_format: intl_protos.number_format,
-            intl_plural_rules: intl_protos.plural_rules,
-            intl_relative_time_format: intl_protos.relative_time_format,
-            intl_segmenter: intl_protos.segmenter,
-            
-            throw_type_error,
-
-            other: FxHashMap::default(),
-        })
+        Ok(())
     }
 
     pub fn get_of<T: 'static>(&self) -> Res<ObjectHandle> {

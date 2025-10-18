@@ -24,18 +24,16 @@ pub struct Realm {
 
 impl Realm {
     pub fn new() -> Res<Self> {
-        let intrinsics = Intrinsics::new()?;
+        let mut realm = Self::default();
+        
+        let mut intrinsics = Intrinsics::default();
+        intrinsics.initialize(&mut realm)?;
+        
 
         let global = Object::with_proto(intrinsics.obj.clone());
-
-        let mut realm = Self {
-            env: Environment {
-                modules: HashMap::new(),
-            },
-            intrinsics,
-            global: global.clone(),
-            queue: AsyncTaskQueue::new(),
-        };
+        
+        realm.intrinsics = intrinsics;
+        realm.global = global.clone();
 
         init_global_obj(&global, &mut realm)?;
 
