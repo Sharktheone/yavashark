@@ -26,17 +26,17 @@ pub fn repl(conf: Conf) -> Res {
     crate::optimizer::define_optimizer(&mut interpreter_realm)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut interpreter_realm)?;
-    interpreter_realm.set_eval(InterpreterEval)?;
+    interpreter_realm.set_eval(InterpreterEval, false)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
     let mut vm_realm = Realm::new()?;
-    vm_realm.set_eval(InterpreterEval)?;
+    vm_realm.set_eval(InterpreterEval, false)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut vm_realm)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
     let mut old_vm_realm = Realm::new()?;
-    old_vm_realm.set_eval(InterpreterEval)?;
+    old_vm_realm.set_eval(InterpreterEval, false)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut old_vm_realm)?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());

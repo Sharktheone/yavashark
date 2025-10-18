@@ -87,7 +87,7 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool, strict: bool) -> Res
         }
     }
 
-    r.set_eval(InterpreterEval)?;
+    r.set_eval(InterpreterEval, strict)?;
     yavashark_vm::init(&mut r)?;
 
     Ok((r, s, harness_dir.to_path_buf()))
