@@ -30,6 +30,12 @@ pub enum Property {
     Getter(ObjectHandle, Attributes),
 }
 
+impl Default for Property {
+    fn default() -> Self {
+        Self::Value(Value::Undefined, Attributes::default())
+    }
+}
+
 impl From<ObjectProperty> for Property {
     fn from(prop: ObjectProperty) -> Self {
         if !prop.set.is_undefined() || !prop.get.is_undefined() {

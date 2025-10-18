@@ -454,15 +454,18 @@ impl MutObject {
     pub fn delete_array(&mut self, index: usize) -> Option<Property> {
         let (i, found) = self.array_position(index);
 
-        if found
-            && self.array.get(i).is_some_and(|v| {
+        if found {
+
+            if !self.array.get(i).is_some_and(|v| {
                 let Some(v) = self.values.get(v.1) else {
                     return false;
                 };
 
                 v.attributes.is_configurable()
-            })
-        {
+            }) {
+                return None;
+            }
+
             let idx = self.array.remove(i);
 
             return self
@@ -471,7 +474,7 @@ impl MutObject {
                 .map(|v| mem::replace(v, ObjectProperty::new(Value::Undefined)).property());
         }
 
-        None
+        Some(Property::default())
     }
 
     pub fn set_array(&mut self, elements: impl ExactSizeIterator<Item = Value>) {
@@ -644,6 +647,14 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
+                if !e.set.is_undefined() {
+                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value));
+                }
+
+                if !e.get.is_undefined() {
+                    return Ok(DefinePropertyResult::ReadOnly)
+                }
+
                 return Ok(if e.attributes.is_writable() {
                     e.set = Value::Undefined;
                     e.get = Value::Undefined;
@@ -651,9 +662,6 @@ impl MutObj for MutObject {
                     e.value = value;
                         DefinePropertyResult::Handled
                 } else {
-                    if !e.set.is_undefined() {
-                        return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value));
-                    }
 
                     DefinePropertyResult::ReadOnly
                 });
@@ -691,15 +699,21 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
+
+                if !e.set.is_undefined() {
+                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value.value));
+                }
+
+                if !e.get.is_undefined() {
+                    return Ok(DefinePropertyResult::ReadOnly)
+                }
+
+
                 return Ok(if e.attributes.is_writable() {
                     *e = value.into();
 
                     DefinePropertyResult::Handled
                 } else {
-                    if !e.set.is_undefined() {
-                        return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value.value));
-                    }
-
                     DefinePropertyResult::ReadOnly
                 });
             }
@@ -882,7 +896,7 @@ impl MutObj for MutObject {
             };
         }
 
-        Ok(None)
+        Ok(Some(Property::default()))
     }
 
     fn contains_own_key(&mut self, name: InternalPropertyKey, _realm: &mut Realm) -> Res<bool> {

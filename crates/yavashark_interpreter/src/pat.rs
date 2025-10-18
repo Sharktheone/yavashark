@@ -69,13 +69,23 @@ impl Interpreter {
                             elems.push(res);
                         }
 
+                        if elems.is_empty() && scope.is_strict_mode()? {
+                            return Err(Error::reference("Cannot destructure empty array in strict mode"));
+                        }
+
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
                         let assert_last = true;
                     } else {
-                        let next = iter.next(realm)?.unwrap_or_else(|| {
+                        let next = if let Some(value) = iter.next(realm)? {
+                            value
+                        } else {
                             is_finished = true;
+                            if scope.is_strict_mode()? {
+                                return Err(Error::reference("Cannot destructure empty array in strict mode"));
+                            }
+
                             Value::Undefined
-                        });
+                        };
 
                         if let Some(elem) = elem {
                             Self::run_pat(realm, elem, scope, &mut iter::once(next), cb)?;
@@ -109,8 +119,19 @@ impl Interpreter {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
                             let value = object
-                                .get_property_opt(key.clone(), realm)?
-                                .unwrap_or(Value::Undefined);
+                                .get_property_opt(key.clone(), realm)?;
+
+                            let mut value = if let Some(value) = value {
+                                value
+                            } else {
+                                if scope.is_strict_mode()? {
+                                    return Err(Error::reference_error(format!(
+                                        "Property {key:?} does not exist on object",
+                                    )));
+                                }
+
+                                Value::Undefined
+                            };
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value), cb)?;
                             rest_not_props.push(key);
