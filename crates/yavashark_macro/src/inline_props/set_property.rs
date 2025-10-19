@@ -9,17 +9,25 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
     let realm = &config.realm;
     let env = &config.env_path;
     let res = &config.res;
-    let from_value_output = &config.from_value_output;
 
     let mut string_arms = Vec::with_capacity(props.len());
     let mut symbols = Vec::new();
 
+    let mut write_idx = 0usize;
+
     for prop in props
         .iter()
-        .filter(|p| matches!(p.kind, Kind::Property | Kind::Setter))
     {
+        if prop.kind == Kind::Getter {
+            continue
+        }
+
+        let w = write_idx;
+        if !prop.readonly {
+            write_idx += 1;
+        }
+
         let key = &prop.name;
-        let ty = &prop.ty;
         let field = &prop.field;
 
         let partial_get = if prop.partial {
@@ -40,15 +48,10 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
                     return Ok(#env::inline_props::UpdatePropertyResult::ReadOnly);
                 }
             }
-        } else if prop.copy {
-            quote::quote! {
-                self.#field #partial_get .set(<#ty as #from_value_output>::from_value_out(value, realm)?);
-                return Ok(#env::inline_props::UpdatePropertyResult::Handled);
-            }
         } else {
             quote::quote! {
-                *self.#field #partial_get .borrow_mut() = <#ty as #from_value_output>::from_value_out(value, realm)?;
-                return Ok(#env::inline_props::UpdatePropertyResult::Handled);
+                self.__written_properties.set(self.__written_properties.get() | (1 << #w));
+                return Ok(#env::inline_props::UpdatePropertyResult::NotHandled(value));
             }
         };
 

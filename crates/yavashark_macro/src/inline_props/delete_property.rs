@@ -13,26 +13,46 @@ pub fn generate_delete_property(props: &[Property], config: &Config) -> TokenStr
     let mut prop_items = Vec::new();
     let mut has_configurable = false;
     let mut config_idx = 0usize;
+    let mut write_idx = 0usize;
 
     for prop in props {
         if !prop.configurable {
+            if prop.configurable {
+                config_idx += 1;
+            }
             continue;
         }
 
         let c = config_idx;
         config_idx += 1;
 
+        let w = write_idx;
+        if !prop.readonly {
+            write_idx += 1;
+        }
+
         has_configurable = true;
 
         let key = &prop.name;
 
-        let value_expr = quote::quote! {
+        let value_expr = if prop.readonly {
+            quote::quote! {
             self.__deleted_properties.set(self.__deleted_properties.get() | (1 << #c));
             //TODO: probably we should alco clear the value, but that might be a bit more difficult
             return ::core::result::Result::Ok(true);
+            }
+        } else {
+            quote::quote! {
+                if (self.__written_properties.get() & (1 << #w)) != 0 {
+                    return ::core::result::Result::Ok(false);
+                }
+
+                self.__deleted_properties.set(self.__deleted_properties.get() | (1 << #c));
+                return ::core::result::Result::Ok(true);
+            }
         };
 
-        match key {
+    match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
                     #s => {
