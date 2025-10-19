@@ -63,7 +63,7 @@ impl WeakMapConstructor {
 #[properties_new(raw)]
 impl WeakMapConstructor {}
 
-#[properties_new(intrinsic_name(func), constructor(WeakMapConstructor::new))]
+#[properties_new(intrinsic_name(weak_map), constructor(WeakMapConstructor::new))]
 impl WeakMap {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();
