@@ -230,7 +230,7 @@ impl Intrinsics {
 
         realm.intrinsics.array_iter = ArrayIterator::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+            realm.intrinsics.func.clone(),
             realm,
         )?;
 
@@ -238,7 +238,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.math = Math::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
+        realm.intrinsics.math = Math::new(realm)?;
 
         realm.intrinsics.string = StringObj::initialize(
             realm,
@@ -264,7 +264,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.json = JSON::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
+        realm.intrinsics.json = JSON::new(realm)?;
 
         let error_constructor = realm.intrinsics
             .error
@@ -384,7 +384,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.reflect = Reflect::new(realm.intrinsics.obj.clone().into(), realm.intrinsics.func.clone().into(), realm)?;
+        realm.intrinsics.reflect = Reflect::new(realm)?;
 
         let (temporal, temporal_protos) = get_temporal(realm)?;
 

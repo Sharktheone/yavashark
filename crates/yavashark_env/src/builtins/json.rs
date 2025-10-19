@@ -11,10 +11,10 @@ pub struct JSON {}
 
 impl JSON {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableJSON {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
