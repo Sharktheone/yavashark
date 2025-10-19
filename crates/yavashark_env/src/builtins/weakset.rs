@@ -57,7 +57,7 @@ impl WeakSetConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -66,7 +66,7 @@ impl WeakSetConstructor {
 #[properties_new(raw)]
 impl WeakSetConstructor {}
 
-#[properties_new(constructor(WeakSetConstructor::new))]
+#[properties_new(intrinsic_name(weak_set), constructor(WeakSetConstructor::new))]
 impl WeakSet {
     fn add(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();

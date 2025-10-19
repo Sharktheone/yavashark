@@ -29,7 +29,7 @@ impl SymbolConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -141,7 +141,7 @@ impl SymbolObj {
     }
 }
 
-#[properties_new(constructor(SymbolConstructor::new))]
+#[properties_new(intrinsic_name(symbol), constructor(SymbolConstructor::new))]
 impl SymbolObj {
     #[prop("valueOf")]
     fn value_of(&self) -> Symbol {

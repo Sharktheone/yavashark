@@ -58,7 +58,7 @@ impl SetConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -67,7 +67,7 @@ impl SetConstructor {
 #[properties_new(raw)]
 impl SetConstructor {}
 
-#[properties_new(constructor(SetConstructor::new))]
+#[properties_new(intrinsic_name(set), constructor(SetConstructor::new))]
 impl Set {
     fn add(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();

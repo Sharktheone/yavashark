@@ -52,7 +52,7 @@ impl ObjectConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

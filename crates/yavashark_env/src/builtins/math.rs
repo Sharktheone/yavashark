@@ -19,7 +19,7 @@ impl Math {
             }),
         };
 
-        this.initialize(func.into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

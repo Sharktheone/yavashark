@@ -28,7 +28,7 @@ impl BigIntConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -65,7 +65,7 @@ impl BigIntObj {
     }
 }
 
-#[properties_new(constructor(BigIntConstructor::new))]
+#[properties_new(intrinsic_name(bigint), constructor(BigIntConstructor::new))]
 impl BigIntObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> ValueResult {

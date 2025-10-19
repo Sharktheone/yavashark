@@ -100,7 +100,7 @@ impl BooleanObj {
     }
 }
 
-#[properties_new(default_null(boolean), constructor(BooleanConstructor::new))]
+#[properties_new(intrinsic_name(boolean), default_null(boolean), constructor(BooleanConstructor::new))]
 impl BooleanObj {
     #[prop("valueOf")]
     fn value_of(&self) -> bool {

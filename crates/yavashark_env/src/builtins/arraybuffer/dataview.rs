@@ -131,7 +131,7 @@ impl DataView {
     }
 }
 
-#[properties_new(constructor(DataViewConstructor::new))]
+#[properties_new(intrinsic_name(data_view), constructor(DataViewConstructor::new))]
 impl DataView {
     #[get("byteLength")]
     pub const fn byte_length(&self) -> usize {

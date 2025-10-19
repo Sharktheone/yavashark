@@ -451,7 +451,7 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
         idx as usize
     }
 }
-#[properties_new(default_null(array), constructor(ArrayConstructor::new))]
+#[properties_new(intrinsic_name(array), default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
     #[prop("length")]
     #[writable]
@@ -1697,7 +1697,7 @@ impl ArrayConstructor {
             }),
         };
 
-        this.initialize(proto, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

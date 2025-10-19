@@ -224,9 +224,7 @@ impl Intrinsics {
             proto.initialize(realm.intrinsics.func.clone(), realm)?;
         }
 
-        realm.intrinsics.array = Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.array = Array::initialize(
             realm,
         )?;
 
@@ -242,39 +240,27 @@ impl Intrinsics {
 
         realm.intrinsics.math = Math::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
 
-        realm.intrinsics.string = StringObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.string = StringObj::initialize(
             realm,
         )?;
 
-        realm.intrinsics.number = NumberObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.number = NumberObj::initialize(
             realm,
         )?;
 
-        realm.intrinsics.boolean = BooleanObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.boolean = BooleanObj::initialize(
             realm,
         )?;
 
-        realm.intrinsics.symbol = SymbolObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.symbol = SymbolObj::initialize(
             realm,
         )?;
 
-        realm.intrinsics.bigint = BigIntObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.bigint = BigIntObj::initialize(
             realm,
         )?;
 
-        realm.intrinsics.regexp = RegExp::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.regexp = RegExp::initialize(
             realm,
         )?;
 
@@ -314,9 +300,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.data_view = DataView::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.data_view = DataView::initialize(
             realm,
         )?;
 
@@ -376,27 +360,19 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.map = Map::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.map = Map::initialize(
             realm,
         )?;
 
-        realm.intrinsics.weak_map = WeakMap::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.weak_map = WeakMap::initialize(
             realm,
         )?;
 
-        realm.intrinsics.set = Set::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.set = Set::initialize(
             realm,
         )?;
 
-        realm.intrinsics.weak_set = WeakSet::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.weak_set = WeakSet::initialize(
             realm,
         )?;
 
@@ -404,9 +380,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.date = Date::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.date = Date::initialize(
             realm,
         )?;
 

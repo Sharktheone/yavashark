@@ -54,7 +54,7 @@ impl WeakMapConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -63,7 +63,7 @@ impl WeakMapConstructor {
 #[properties_new(raw)]
 impl WeakMapConstructor {}
 
-#[properties_new(constructor(WeakMapConstructor::new))]
+#[properties_new(intrinsic_name(func), constructor(WeakMapConstructor::new))]
 impl WeakMap {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();

@@ -55,7 +55,7 @@ impl MapConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -64,7 +64,7 @@ impl MapConstructor {
 #[properties_new(raw)]
 impl MapConstructor {}
 
-#[properties_new(constructor(MapConstructor::new))]
+#[properties_new(intrinsic_name(map), constructor(MapConstructor::new))]
 impl Map {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();

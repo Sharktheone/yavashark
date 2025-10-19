@@ -154,7 +154,7 @@ impl StringConstructor {
 
         this.define_property("name".into(), "String".into(), realm)?;
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -347,7 +347,7 @@ impl StringObj {
     }
 }
 
-#[properties_new(default_null(string), constructor(StringConstructor::new))]
+#[properties_new(intrinsic_name(string), default_null(string), constructor(StringConstructor::new))]
 impl StringObj {
     #[get("length")]
     fn get_length(&self) -> usize {

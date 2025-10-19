@@ -15,7 +15,7 @@ pub struct Date {
     date: DateTime<Local>,
 }
 
-#[properties_new(constructor(DateConstructor::new))]
+#[properties_new(intrinsic_name(date), constructor(DateConstructor::new))]
 impl Date {
     #[prop("getDate")]
     pub fn get_date(&self) -> u32 {
@@ -551,7 +551,7 @@ impl DateConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

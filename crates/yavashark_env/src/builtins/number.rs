@@ -48,7 +48,7 @@ impl NumberConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -188,7 +188,7 @@ impl NumberObj {
     }
 }
 
-#[properties_new(default_null(number), constructor(NumberConstructor::new))]
+#[properties_new(intrinsic_name(number), default_null(number), constructor(NumberConstructor::new))]
 impl NumberObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> Res<YSString> {

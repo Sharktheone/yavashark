@@ -186,7 +186,7 @@ impl RegExpConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -224,7 +224,7 @@ impl Func for RegExpConstructor {
     }
 }
 
-#[properties_new(constructor(RegExpConstructor::new))]
+#[properties_new(intrinsic_name(regexp), constructor(RegExpConstructor::new))]
 impl RegExp {
     #[prop("exec")]
     pub fn exec(

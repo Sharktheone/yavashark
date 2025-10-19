@@ -25,7 +25,7 @@ impl Reflect {
             }),
         };
 
-        this.initialize(func_proto, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

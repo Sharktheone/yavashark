@@ -49,7 +49,7 @@ impl Test262 {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)
+        this.initialize(realm)
             .unwrap();
 
         this
@@ -65,7 +65,7 @@ impl Test262 {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)
+        this.initialize(realm)
             .unwrap();
 
         this
