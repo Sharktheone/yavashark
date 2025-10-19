@@ -28,11 +28,7 @@ impl Realm {
 
         Intrinsics::initialize(&mut realm)?;
 
-        let global = Object::with_proto(realm.intrinsics.obj.clone());
-
-        realm.global = global.clone();
-
-        init_global_obj(&global, &mut realm)?;
+        init_global_obj(&mut realm)?;
 
         Ok(realm)
     }

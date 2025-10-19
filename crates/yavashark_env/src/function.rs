@@ -202,6 +202,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -236,6 +237,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -270,6 +272,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -302,6 +305,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -337,6 +341,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -372,6 +377,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -408,6 +414,7 @@ impl NativeFunction {
                 name,
                 constructor: RefCell::new(None),
                 __deleted_properties: Cell::new(0),
+                __written_properties: Cell::new(0),
             },
         };
 
@@ -438,6 +445,7 @@ impl NativeFunction {
                     name: "",
                     constructor: RefCell::new(None),
                     __deleted_properties: Cell::new(0),
+                    __written_properties: Cell::new(0),
                 },
             },
             true,

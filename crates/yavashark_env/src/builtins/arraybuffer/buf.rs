@@ -207,8 +207,8 @@ impl ArrayBuffer {
     #[prop("isView")]
     pub fn is_view(view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
         Ok(
-            view.instance_of(&realm.intrinsics.typed_array_constructor().value, realm)?
-                || view.instance_of(&realm.intrinsics.data_view_constructor().value, realm)?,
+            view.instance_of(&realm.intrinsics.typed_array_constructor().into(), realm)?
+                || view.instance_of(&realm.intrinsics.data_view_constructor().into(), realm)?,
         )
     }
 }

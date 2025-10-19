@@ -1,7 +1,7 @@
 use crate::console::print::PrettyPrint;
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::NativeFunction;
+use crate::{NativeFunction, ObjectHandle};
 use crate::Value;
 
 mod error;
@@ -9,7 +9,7 @@ pub mod print;
 pub mod sink;
 
 #[must_use]
-pub fn get_console(realm: &mut Realm) -> Value {
+pub fn get_console(realm: &mut Realm) -> ObjectHandle {
     let console = Object::new(realm);
 
     let _ = console.define_property(
@@ -56,5 +56,5 @@ pub fn get_console(realm: &mut Realm) -> Value {
         realm,
     );
 
-    console.into()
+    console
 }

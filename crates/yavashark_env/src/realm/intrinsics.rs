@@ -23,7 +23,7 @@ use crate::builtins::{
 };
 use crate::error_obj::ErrorObj;
 use crate::{
-    Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable,
+    Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value,
 };
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
@@ -114,12 +114,13 @@ pub struct Intrinsics {
 macro_rules! constructor {
     ($name:ident) => {
         paste::paste! {
-            pub fn [<$name _constructor>] (&self) -> Variable {
+            pub fn [<$name _constructor>] (&self) -> ObjectHandle {
                 self.$name
                     .resolve_property("constructor", &mut Realm::default()) //TODO: this is bad, but we don't have access to a realm here
-                    .unwrap_or(Value::Undefined.into())
-                    .unwrap_or(Value::Undefined.into())
-                    .into()
+                    .ok()
+                    .flatten()
+                    .map(|v| v.to_object().unwrap_or(Object::null()))
+                    .unwrap_or(Object::null())
             }
         }
     };
@@ -128,8 +129,8 @@ macro_rules! constructor {
 macro_rules! obj {
     ($name:ident) => {
         paste::paste! {
-            pub fn [<$name _obj>] (&self) -> Variable {
-                self.$name.clone().into()
+            pub fn [<$name _obj>] (&self) -> ObjectHandle {
+                self.$name.clone()
             }
         }
     };

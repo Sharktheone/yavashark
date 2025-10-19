@@ -106,6 +106,13 @@ impl Property {
             }
         }
     }
+    
+    pub fn into_value(self, realm: &mut Realm) -> Res<Value> {
+        match self {
+            Property::Value(v, _) => Ok(v),
+            Property::Getter(g, _) => g.call(Vec::new(), Value::Undefined, realm),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

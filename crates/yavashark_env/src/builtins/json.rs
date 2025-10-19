@@ -75,7 +75,7 @@ impl JSON {
 
                 visited.push(o.as_ptr().addr());
 
-                if value.instance_of(&realm.intrinsics.array_constructor().value, realm)? {
+                if value.instance_of(&realm.intrinsics.array_constructor().into(), realm)? {
                     let mut index = 0;
 
                     let mut array = Vec::new();
