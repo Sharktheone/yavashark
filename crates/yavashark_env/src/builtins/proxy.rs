@@ -432,7 +432,7 @@ impl Obj for Proxy {
     }
 }
 
-#[props]
+#[props(intrinsic_name = proxy)]
 impl Proxy {
     #[constructor]
     pub fn construct(target: ObjectHandle, handler: ObjectHandle) -> Res<ObjectHandle> {

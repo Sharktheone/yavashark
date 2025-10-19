@@ -3,12 +3,14 @@
 mod computed;
 mod state;
 
-use crate::builtins::signal::computed::{Computed, ComputedProtoObj};
-use crate::builtins::signal::state::State;
-use crate::value::BoxedObj;
+use crate::value::{BoxedObj, Obj};
 use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
+
+pub use computed::*;
+pub use state::*;
+use crate::realm::Intrinsic;
 
 pub struct Protos {
     pub state: ObjectHandle,
@@ -16,24 +18,22 @@ pub struct Protos {
 }
 
 pub fn get_signal(
-    obj_proto: ObjectHandle,
-    func_proto: ObjectHandle,
     realm: &mut Realm,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone());
+    let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
-    let state = State::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let state = State::initialize(
         realm,
     )?;
 
     let proto = ComputedProtoObj {
-        obj: Object::raw_with_proto(obj_proto),
+        obj: Object::raw_with_proto(realm.intrinsics.obj.clone()),
         current_dep: RefCell::default(),
     };
 
-    let computed = Computed::initialize_proto(proto, func_proto.into(), realm)?;
+    let computed = Computed::initialize(realm)?;
+
+    computed.set_prototype(proto.into_object().into(), realm)?;
 
     let state_constructor = state
         .resolve_property("constructor", realm)?

@@ -18,7 +18,7 @@ impl DateTimeFormat {
     }
 }
 
-#[props(to_string_tag = "Intl.DateTimeFormat")]
+#[props(intrinsic_name = intl_date_time_format, to_string_tag = "Intl.DateTimeFormat")]
 impl DateTimeFormat {
     #[call_constructor]
     fn construct(

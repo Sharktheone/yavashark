@@ -59,7 +59,7 @@ impl SharedArrayBuffer {
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
 
-#[props(to_string_tag = "SharedArrayBuffer")]
+#[props(intrinsic_name = sharedarraybuffer, to_string_tag = "SharedArrayBuffer")]
 impl SharedArrayBuffer {
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {

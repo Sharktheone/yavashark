@@ -87,7 +87,7 @@ impl Method {
                 #arg_prepare
                 #prepare_receiver
                 #call.try_into_value(realm)
-            }, func_proto.clone(), #length, realm)
+            }, realm.intrinsics.func.clone(), #length, realm)
         }
     }
 

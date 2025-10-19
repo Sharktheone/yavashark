@@ -18,7 +18,7 @@ impl DisplayNames {
     }
 }
 
-#[props(to_string_tag = "Intl.DisplayNames")]
+#[props(intrinsic_name = intl_display_names, to_string_tag = "Intl.DisplayNames")]
 impl DisplayNames {
     #[constructor]
     fn construct(_locales: String, _options: ObjectHandle, realm: &mut Realm) -> ObjectHandle {

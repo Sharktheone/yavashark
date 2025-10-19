@@ -62,7 +62,7 @@ impl Collator {
     }
 }
 
-#[props(to_string_tag = "Intl.Collator")]
+#[props(intrinsic_name = intl_collator, to_string_tag = "Intl.Collator")]
 impl Collator {
     #[constructor]
     fn construct(

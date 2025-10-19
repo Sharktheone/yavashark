@@ -19,7 +19,7 @@ impl Uint8ClampedArray {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = uint8clampedarray, extends = TypedArray)]
 impl Uint8ClampedArray {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u8>();

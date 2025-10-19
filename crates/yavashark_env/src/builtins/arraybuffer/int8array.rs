@@ -19,7 +19,7 @@ impl Int8Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = int8array, extends = TypedArray)]
 impl Int8Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<i8>();

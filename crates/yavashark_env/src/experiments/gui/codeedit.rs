@@ -128,7 +128,7 @@ impl ObjectImpl for JSCodeEditor {
     }
 }
 
-#[props]
+#[props(no_intrinsic)]
 impl JSCodeEditor {
     #[constructor]
     fn construct(#[realm] realm: &Realm, lang: String, code: String) -> Res<ObjectHandle> {

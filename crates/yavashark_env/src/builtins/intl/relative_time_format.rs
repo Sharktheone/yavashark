@@ -18,7 +18,7 @@ impl RelativeTimeFormat {
     }
 }
 
-#[props(to_string_tag = "Intl.RelativeTimeFormat")]
+#[props(intrinsic_name = intl_relative_time_format, to_string_tag = "Intl.RelativeTimeFormat")]
 impl RelativeTimeFormat {
     #[constructor]
     fn construct(

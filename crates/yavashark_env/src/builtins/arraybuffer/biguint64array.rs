@@ -19,7 +19,7 @@ impl BigUint64Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = biguint64array, extends = TypedArray)]
 impl BigUint64Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u64>();

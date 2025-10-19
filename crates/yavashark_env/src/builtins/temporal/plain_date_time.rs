@@ -45,7 +45,7 @@ impl PlainDateTime {
     }
 }
 
-#[props(to_string_tag = "Temporal.PlainDateTime")]
+#[props(intrinsic_name = temporal_plain_date_time, to_string_tag = "Temporal.PlainDateTime")]
 impl PlainDateTime {
     #[constructor]
     #[allow(clippy::too_many_arguments)]

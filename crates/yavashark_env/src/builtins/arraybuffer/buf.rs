@@ -66,7 +66,7 @@ impl ArrayBuffer {
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
 
-#[props(to_string_tag = "ArrayBuffer")]
+#[props(intrinsic_name = arraybuffer, to_string_tag = "ArrayBuffer")]
 impl ArrayBuffer {
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {

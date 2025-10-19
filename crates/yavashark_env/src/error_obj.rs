@@ -105,7 +105,8 @@ impl CustomName for ErrorObj {
     }
 }
 
-#[props]
+
+#[props(intrinsic_name = error)]
 impl ErrorObj {
     #[prop("name")]
     #[both]
@@ -133,3 +134,5 @@ impl ErrorObj {
         this.downcast::<Self>().is_some()
     }
 }
+
+

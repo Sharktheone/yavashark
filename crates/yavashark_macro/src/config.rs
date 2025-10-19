@@ -31,6 +31,7 @@ pub struct Config {
     pub object_or_null: Path,
     pub property: Path,
     pub define_property_result: Path,
+    pub intrinsic: Path,
 }
 
 impl Config {
@@ -190,6 +191,14 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("Symbol", span)));
 
+        let mut intrinsic = env_path.clone();
+        intrinsic
+            .segments
+            .push(PathSegment::from(Ident::new("realm", span)));
+        intrinsic
+            .segments
+            .push(PathSegment::from(Ident::new("Intrinsic", span)));
+
         Self {
             env_path,
             value_path,
@@ -218,6 +227,7 @@ impl Config {
             object_or_null,
             property,
             define_property_result,
+            intrinsic,
         }
     }
 }

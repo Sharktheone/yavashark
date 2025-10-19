@@ -1,5 +1,5 @@
 mod env;
-pub mod initialize;
+mod initialize;
 mod intrinsics;
 
 pub mod resolve;
@@ -12,14 +12,33 @@ use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::ops::Deref;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, PartialEq)]
+pub use initialize::*;
+
+pub struct PrivateRc<T>(std::rc::Rc<T>);
+
+impl<T> Deref for PrivateRc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct Realm {
     pub intrinsics: Intrinsics, // [[Intrinsics]]
     pub global: ObjectHandle,   // [[GlobalObject]]
     pub env: Environment,       // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
+}
+
+impl Debug for Realm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Realm")
+            .finish()
+    }
 }
 
 impl Realm {
@@ -91,4 +110,4 @@ pub trait Eval {
     fn eval(&self, code: &str, realm: &mut Realm, scope: &mut Scope) -> ValueResult;
 }
 
-impl Eq for Realm {}
+// impl Eq for Realm {}

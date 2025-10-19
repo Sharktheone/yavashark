@@ -27,6 +27,11 @@ use crate::{
 };
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
+use crate::partial_init::Partial;
+use crate::realm::initialize::Intrinsic;
+
+type PartialIntrinsic<T> = Partial<ObjectHandle, IntrinsicInitializer<T>>;
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -231,9 +236,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.error = ErrorObj::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.error = ErrorObj::initialize(
             realm,
         )?;
 
@@ -303,15 +306,11 @@ impl Intrinsics {
         realm.intrinsics.aggregate_error =
             get_aggregate_error(realm.intrinsics.error.clone().into(), error_constructor, realm)?;
 
-        realm.intrinsics.arraybuffer = ArrayBuffer::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.arraybuffer = ArrayBuffer::initialize(
             realm,
         )?;
 
-        realm.intrinsics.sharedarraybuffer = SharedArrayBuffer::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.sharedarraybuffer = SharedArrayBuffer::initialize(
             realm,
         )?;
 
@@ -321,87 +320,59 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.typed_array = TypedArray::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.typed_array = TypedArray::initialize(
             realm,
         )?;
 
-        realm.intrinsics.int8array = Int8Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.int8array = Int8Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.uint8array = Uint8Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.uint8array = Uint8Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.uint8clampedarray = Uint8ClampedArray::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.uint8clampedarray = Uint8ClampedArray::initialize(
             realm,
         )?;
 
-        realm.intrinsics.int16array = Int16Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.int16array = Int16Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.uint16array = Uint16Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.uint16array = Uint16Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.int32array = Int32Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.int32array = Int32Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.uint32array = Uint32Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.uint32array = Uint32Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.float16array = Float16Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.float16array = Float16Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.float32array = Float32Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.float32array = Float32Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.float64array = Float64Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.float64array = Float64Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.bigint64array = BigInt64Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.bigint64array = BigInt64Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.biguint64array = BigUint64Array::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.typed_array.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.biguint64array = BigUint64Array::initialize(
             realm,
         )?;
 
-        realm.intrinsics.atomics = Atomics::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.atomics = Atomics::initialize(
             realm,
         )?;
 
@@ -429,9 +400,7 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.weak_ref = WeakRef::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.weak_ref = WeakRef::initialize(
             realm,
         )?;
 
@@ -443,7 +412,7 @@ impl Intrinsics {
 
         realm.intrinsics.reflect = Reflect::new(realm.intrinsics.obj.clone().into(), realm.intrinsics.func.clone().into(), realm)?;
 
-        let (temporal, temporal_protos) = get_temporal(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
+        let (temporal, temporal_protos) = get_temporal(realm)?;
 
         realm.intrinsics.temporal = temporal;
         realm.intrinsics.temporal_duration = temporal_protos.duration;
@@ -457,7 +426,7 @@ impl Intrinsics {
         realm.intrinsics.temporal_zoned_date_time = temporal_protos.zoned_date_time;
 
         let (intl, intl_protos) =
-            crate::builtins::intl::get_intl(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
+            crate::builtins::intl::get_intl(realm)?;
 
         realm.intrinsics.intl = intl;
         realm.intrinsics.intl_collator = intl_protos.collator;
@@ -472,27 +441,21 @@ impl Intrinsics {
         realm.intrinsics.intl_segmenter = intl_protos.segmenter;
 
         let (signal, signal_protos) =
-            crate::builtins::signal::get_signal(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone(), realm)?;
+            crate::builtins::signal::get_signal(realm)?;
 
         realm.intrinsics.signal = signal;
         realm.intrinsics.signal_state = signal_protos.state;
         realm.intrinsics.signal_computed = signal_protos.computed;
 
-        realm.intrinsics.promise = Promise::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.promise = Promise::initialize(
             realm,
         )?;
 
-        realm.intrinsics.arguments = Arguments::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.arguments = Arguments::initialize(
             realm,
         )?;
 
-        realm.intrinsics.proxy = Proxy::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        realm.intrinsics.proxy = Proxy::initialize(
             realm,
         )?;
 
@@ -595,5 +558,17 @@ impl Default for Intrinsics {
             throw_type_error: Object::null(),
             other: FxHashMap::default(),
         }
+    }
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct IntrinsicInitializer<T> {
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Intrinsic> crate::partial_init::Initializer<ObjectHandle> for IntrinsicInitializer<T> {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        T::initialize(realm)
     }
 }

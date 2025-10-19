@@ -26,6 +26,7 @@ pub use segmenter::*;
 pub use supported_values_of::*;
 
 use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
+use crate::realm::Intrinsic;
 
 pub struct Protos {
     pub collator: ObjectHandle,
@@ -50,22 +51,16 @@ fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
 }
 
 pub fn get_intl(
-    obj_proto: ObjectHandle,
-    func_proto: ObjectHandle,
     realm: &mut Realm,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone());
+    let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
-    let collator = Collator::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let collator = Collator::initialize(
         realm,
     )?;
     obj.define_property_attributes("Collator".into(), constr(&collator, realm), realm)?;
 
-    let date_time_format = DateTimeFormat::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let date_time_format = DateTimeFormat::initialize(
         realm,
     )?;
     obj.define_property_attributes(
@@ -74,16 +69,12 @@ pub fn get_intl(
         realm,
     )?;
 
-    let display_names = DisplayNames::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let display_names = DisplayNames::initialize(
         realm,
     )?;
     obj.define_property_attributes("DisplayNames".into(), constr(&display_names, realm), realm)?;
 
-    let duration_format = DurationFormat::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let duration_format = DurationFormat::initialize(
         realm,
     )?;
     obj.define_property_attributes(
@@ -92,37 +83,27 @@ pub fn get_intl(
         realm,
     )?;
 
-    let list_format = ListFormat::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let list_format = ListFormat::initialize(
         realm,
     )?;
     obj.define_property_attributes("ListFormat".into(), constr(&list_format, realm), realm)?;
 
-    let locale = Locale::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let locale = Locale::initialize(
         realm,
     )?;
     obj.define_property_attributes("Locale".into(), constr(&locale, realm), realm)?;
 
-    let number_format = NumberFormat::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let number_format = NumberFormat::initialize(
         realm,
     )?;
     obj.define_property_attributes("NumberFormat".into(), constr(&number_format, realm), realm)?;
 
-    let plural_rules = PluralRules::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let plural_rules = PluralRules::initialize(
         realm,
     )?;
     obj.define_property_attributes("PluralRules".into(), constr(&plural_rules, realm), realm)?;
 
-    let relative_time_format = RelativeTimeFormat::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let relative_time_format = RelativeTimeFormat::initialize(
         realm,
     )?;
     obj.define_property_attributes(
@@ -131,9 +112,7 @@ pub fn get_intl(
         realm,
     )?;
 
-    let segmenter = Segmenter::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
+    let segmenter = Segmenter::initialize(
         realm,
     )?;
     obj.define_property_attributes("Segmenter".into(), constr(&segmenter, realm), realm)?;

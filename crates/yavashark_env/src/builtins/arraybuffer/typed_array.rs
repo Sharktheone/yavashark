@@ -537,7 +537,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
     Ok(ArrayBuffer::from_buffer(realm, buffer))
 }
 
-#[props]
+#[props(intrinsic_name = typed_array)]
 impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
 

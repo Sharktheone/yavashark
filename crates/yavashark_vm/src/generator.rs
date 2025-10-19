@@ -10,6 +10,7 @@ use yavashark_env::error::Error;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::realm::Intrinsic;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -78,7 +79,7 @@ impl GeneratorFunction {
     }
 }
 
-#[props]
+#[props(intrinsic_name = generator_function)]
 impl GeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -156,15 +157,11 @@ impl Generator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        let gf = GeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone(),
+        let gf = GeneratorFunction::initialize(
             realm,
         )?;
 
-        let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone(),
+        let g = Self::initialize(
             realm,
         )?;
 
@@ -175,7 +172,7 @@ impl Generator {
     }
 }
 
-#[props]
+#[props(intrinsic_name = generator)]
 impl Generator {
     pub fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let Some(state) = self.state.take() else {

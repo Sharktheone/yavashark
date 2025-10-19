@@ -60,7 +60,7 @@ impl NumberFormat {
     }
 }
 
-#[props(to_string_tag = "Intl.NumberFormat")]
+#[props(intrinsic_name = intl_number_format, to_string_tag = "Intl.NumberFormat")]
 impl NumberFormat {
     #[constructor]
     fn construct(

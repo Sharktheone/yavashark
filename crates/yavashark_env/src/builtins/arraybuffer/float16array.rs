@@ -20,7 +20,7 @@ impl Float16Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = float16array, extends = TypedArray)]
 impl Float16Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<f16>();

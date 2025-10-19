@@ -331,7 +331,7 @@ impl ObjectImpl for Arguments {
     }
 }
 
-#[props]
+#[props(intrinsic_name = arguments)]
 impl Arguments {
     #[prop(crate::Symbol::ITERATOR)]
     #[nonstatic]

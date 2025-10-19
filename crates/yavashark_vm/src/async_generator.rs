@@ -15,6 +15,7 @@ use yavashark_env::error::Error;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::realm::Intrinsic;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -83,7 +84,7 @@ impl AsyncGeneratorFunction {
     }
 }
 
-#[props]
+#[props(intrinsic_name = async_generator_function)]
 impl AsyncGeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -172,15 +173,11 @@ impl AsyncGenerator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        let gf = AsyncGeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        let gf = AsyncGeneratorFunction::initialize(
             realm,
         )?;
 
-        let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
+        let g = Self::initialize(
             realm,
         )?;
 
@@ -191,7 +188,7 @@ impl AsyncGenerator {
     }
 }
 
-#[props]
+#[props(intrinsic_name = async_generator)]
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, realm: &mut Realm) -> ValueResult {

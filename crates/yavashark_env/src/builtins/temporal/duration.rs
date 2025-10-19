@@ -155,7 +155,7 @@ impl Duration {
     }
 }
 
-#[props(to_string_tag = "Temporal.Duration")]
+#[props(intrinsic_name = temporal_duration, to_string_tag = "Temporal.Duration")]
 impl Duration {
     #[constructor]
     #[allow(clippy::too_many_arguments)]

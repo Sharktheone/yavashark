@@ -28,7 +28,7 @@ impl State {
     }
 }
 
-#[props]
+#[props(intrinsic_name = signal_state)]
 impl State {
     #[constructor]
     pub fn construct(value: Value, _options: Option<ObjectHandle>, realm: &Realm) -> ObjectHandle {

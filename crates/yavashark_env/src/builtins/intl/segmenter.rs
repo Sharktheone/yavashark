@@ -18,7 +18,7 @@ impl Segmenter {
     }
 }
 
-#[props(to_string_tag = "Intl.Segmenter")]
+#[props(intrinsic_name = intl_segmenter, to_string_tag = "Intl.Segmenter")]
 impl Segmenter {
     #[constructor]
     fn construct(

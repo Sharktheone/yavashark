@@ -20,7 +20,7 @@ impl WeakRef {
     }
 }
 
-#[props]
+#[props(intrinsic_name = weak_ref)]
 impl WeakRef {
     #[constructor]
     pub fn construct(handle: &ObjectHandle, realm: &Realm) -> ObjectHandle {

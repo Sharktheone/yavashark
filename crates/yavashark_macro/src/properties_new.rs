@@ -45,6 +45,9 @@ pub struct PropertiesArgs {
     or: Option<Expr>,
     override_object: Option<Path>,
     to_string_tag: Option<String>,
+    intrinsic_name: Option<Ident>,
+    #[darling(default)]
+    no_intrinsic: bool,
 }
 
 #[allow(unused)]
@@ -62,6 +65,20 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         Ok(args) => args,
         Err(e) => return Err(e.into()),
     };
+
+    if args.no_intrinsic && args.intrinsic_name.is_some() {
+        return Err(syn::Error::new(
+            Span::call_site(),
+            "Cannot specify intrinsic_name when no_intrinsic is set",
+        ));
+    }
+
+    if !args.no_intrinsic && args.intrinsic_name.is_none() {
+        return Err(syn::Error::new(
+            Span::call_site(),
+            "Must specify intrinsic_name unless no_intrinsic is set",
+        ));
+    }
 
     let mut props = Vec::new();
     let mut static_props = Vec::new();
@@ -152,28 +169,67 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let error = &config.error;
     let env = &config.env_path;
     let realm = &config.realm;
+    let intrinsic = &config.intrinsic;
+    let res = &config.res;
+    let obj = &config.object;
 
-    let init_fn = quote! {
-        pub fn initialize_proto(mut obj: #proto_object, func_proto: #object_handle, realm: &mut #realm) -> ::core::result::Result<#object_handle, #error> {
-            use #env::value::{Obj, IntoValue, FromValue};
-            use #try_into_value;
-
-            #init
-
-            let obj = obj.into_object();
-
-            #init_constructor
-
-
-            Ok(obj)
+    let intrinsic_get = if let Some(name) = args.intrinsic_name.as_ref() {
+        quote! {
+            Ok(realm.intrinsics.#name.clone())
+        }
+    } else {
+        quote! {
+            Self::initialize(realm)
         }
     };
 
-    item_impl.items.push(syn::parse2(init_fn)?);
+    let struct_name = &item_impl.self_ty;
+
+
+
+    let get_prototype = if let Some(extends) = args.extends {
+        quote! {
+            #extends::get_intrinsic(realm)?
+        }
+    } else {
+        quote! {
+            realm.intrinsics.obj.clone()
+        }
+    };
+
 
     let tokens = quote! {
         #item_impl
         #constructor_tokens
+
+        impl #intrinsic for #struct_name {
+            fn initialize(realm: &mut #realm) -> #res<#object_handle> {
+                use #env::value::{Obj, IntoValue, FromValue};
+                use #try_into_value;
+                let mut obj = #obj::raw_with_proto(#get_prototype);
+
+
+                #init
+
+                let obj = obj.into_object();
+
+                #init_constructor
+
+
+                Ok(obj)
+            }
+
+            fn get_intrinsic(realm: &mut #realm) -> #res<#object_handle> {
+                #intrinsic_get
+            }
+
+            fn get_global(realm: &mut Realm) -> #res<#object_handle> {
+                let this = Self::get_intrinsic(realm)?;
+
+                this.get("constructor", realm)?
+                    .to_object()
+            }
+        }
     };
 
     Ok(tokens.into())
@@ -317,20 +373,20 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #name {
                 #[allow(clippy::new_ret_no_self)]
-                pub fn new(func: & #object_handle, realm: &mut #realm) -> ::core::result::Result<#object_handle, #error> {
+                pub fn new(proto: #object_handle, realm: &mut #realm) -> ::core::result::Result<#object_handle, #error> {
                     use #env::value::Obj;
                     let mut this = Self {
                         inner: ::core::cell::RefCell::new(#mut_name {
-                            object: #mut_obj::with_proto(func.clone()),
+                            object: #mut_obj::with_proto(proto),
                         }),
                     };
 
-                    this.initialize(func.clone(), realm)?;
+                    this.initialize(realm)?;
 
                     Ok(this.into_object())
                 }
 
-                pub fn initialize(&mut self, func_proto: #object_handle, realm: &mut #realm) -> core::result::Result<(), #error> {
+                pub fn initialize(&mut self, realm: &mut #realm) -> core::result::Result<(), #error> {
                     use #env::value::{Obj, IntoValue, FromValue};
                     use #try_into_value;
                     let obj = self;
@@ -347,10 +403,10 @@ fn init_constructor(
 
     let constr_proto = if extends {
         quote! { {
-            &obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
+            obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
         } }
     } else {
-        quote! { &func_proto }
+        quote! { realm.intrinsics.func.clone() }
     };
 
     let init_tokens = quote! {

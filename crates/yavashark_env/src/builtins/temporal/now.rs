@@ -12,7 +12,7 @@ use yavashark_string::YSString;
 #[derive(Debug)]
 pub struct Now {}
 
-#[props]
+#[props(intrinsic_name = temporal_now, to_string_tag = "Temporal.Now")]
 impl Now {
     fn instant(realm: &Realm) -> Res<ObjectHandle> {
         Instant::now_obj(realm)

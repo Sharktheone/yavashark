@@ -52,7 +52,7 @@ impl ZonedDateTime {
     }
 }
 
-#[props(to_string_tag = "Temporal.ZonedDateTime")]
+#[props(intrinsic_name = temporal_zoned_date_time, to_string_tag = "Temporal.ZonedDateTime")]
 impl ZonedDateTime {
     #[constructor]
     pub fn construct(

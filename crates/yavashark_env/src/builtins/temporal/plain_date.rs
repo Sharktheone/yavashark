@@ -47,7 +47,7 @@ impl PlainDate {
     }
 }
 
-#[props(to_string_tag = "Temporal.PlainDate")]
+#[props(intrinsic_name = temporal_plain_date, to_string_tag = "Temporal.PlainDate")]
 impl PlainDate {
     #[constructor]
     pub fn construct(

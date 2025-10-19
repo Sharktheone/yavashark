@@ -120,7 +120,7 @@ impl crate::value::ObjectImpl for ComputedProtoObj {
     }
 }
 
-#[props(override_object=ComputedProtoObj)]
+#[props(intrinsic_name = signal_computed, override_object=ComputedProtoObj)]
 impl Computed {
     #[constructor]
     pub fn construct(cb: ObjectHandle, realm: &Realm) -> Res<ObjectHandle> {
