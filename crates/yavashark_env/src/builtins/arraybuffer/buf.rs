@@ -3,6 +3,9 @@ use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, props};
+use crate::builtins::dataview::DataView;
+use crate::builtins::typed_array::TypedArray;
+use crate::realm::Intrinsic;
 
 #[object]
 #[derive(Debug)]
@@ -207,8 +210,8 @@ impl ArrayBuffer {
     #[prop("isView")]
     pub fn is_view(view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
         Ok(
-            view.instance_of(&realm.intrinsics.typed_array_constructor().into(), realm)?
-                || view.instance_of(&realm.intrinsics.data_view_constructor().into(), realm)?,
+            view.instance_of(&TypedArray::get_global(realm)?.into(), realm)?
+                || view.instance_of(&DataView::get_global(realm)?.into(), realm)?,
         )
     }
 }

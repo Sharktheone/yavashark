@@ -1,12 +1,26 @@
 use std::cell::{Cell, RefCell};
 use yavashark_macro::inline_props;
-use crate::builtins::{
-    get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
-    get_is_finite, get_is_nan, get_parse_float, get_parse_int,
-};
-use crate::realm::Realm;
+use crate::builtins::{get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape, get_is_finite, get_is_nan, get_parse_float, get_parse_int, Atomics, BigIntObj, BooleanObj, Date, Map, NumberObj, Promise, Proxy, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet};
+use crate::realm::{Intrinsic, Realm};
 use crate::{Object, Value};
 use crate::{get_console, ObjectHandle, Res};
+use crate::array::Array;
+use crate::builtins::bigint64array::BigInt64Array;
+use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::dataview::DataView;
+use crate::builtins::float16array::Float16Array;
+use crate::builtins::float32array::Float32Array;
+use crate::builtins::float64array::Float64Array;
+use crate::builtins::int16array::Int16Array;
+use crate::builtins::int32array::Int32Array;
+use crate::builtins::int8array::Int8Array;
+use crate::builtins::shared_buf::SharedArrayBuffer;
+use crate::builtins::uint16array::Uint16Array;
+use crate::builtins::uint32array::Uint32Array;
+use crate::builtins::uint8clampedarray::Uint8ClampedArray;
+use crate::builtins::unit8array::Uint8Array;
+use crate::error_obj::ErrorObj;
 use crate::inline_props::InlineObject;
 use crate::value::Obj;
 
@@ -230,17 +244,17 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         true_: true,
         false_: false,
         console: RefCell::new(get_console(realm)),
-        error: RefCell::new(realm.intrinsics.error_constructor()),
-        array: RefCell::new(realm.intrinsics.array_constructor()),
+        error: RefCell::new(ErrorObj::get_global(realm)?),
+        array: RefCell::new(Array::get_global(realm)?),
         object: RefCell::new(realm.intrinsics.obj_constructor()),
         function: RefCell::new(realm.intrinsics.func_constructor()),
         math: RefCell::new(realm.intrinsics.math_obj()),
-        string: RefCell::new(realm.intrinsics.string_constructor()),
-        number: RefCell::new(realm.intrinsics.number_constructor()),
-        boolean: RefCell::new(realm.intrinsics.boolean_constructor()),
-        symbol: RefCell::new(realm.intrinsics.symbol_constructor()),
-        bigint: RefCell::new(realm.intrinsics.bigint_constructor()),
-        regexp: RefCell::new(realm.intrinsics.regexp_constructor()),
+        string: RefCell::new(StringObj::get_global(realm)?),
+        number: RefCell::new(NumberObj::get_global(realm)?),
+        boolean: RefCell::new(BooleanObj::get_global(realm)?),
+        symbol: RefCell::new(SymbolObj::get_global(realm)?),
+        bigint: RefCell::new(BigIntObj::get_global(realm)?),
+        regexp: RefCell::new(RegExp::get_global(realm)?),
         json: RefCell::new(realm.intrinsics.json_obj()),
         type_error: RefCell::new(realm.intrinsics.type_error_constructor()),
         range_error: RefCell::new(realm.intrinsics.range_error_constructor()),
@@ -251,39 +265,39 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         aggregate_error: RefCell::new(realm.intrinsics.aggregate_error_constructor()),
         global_this: RefCell::new(Object::null()),
         global: RefCell::new(Object::null()),
-        array_buffer: RefCell::new(realm.intrinsics.arraybuffer_constructor()),
-        shared_array_buffer: RefCell::new(realm.intrinsics.sharedarraybuffer_constructor()),
-        data_view: RefCell::new(realm.intrinsics.data_view_constructor()),
-        int8_array: RefCell::new(realm.intrinsics.int8array_constructor()),
-        uint8_array: RefCell::new(realm.intrinsics.uint8array_constructor()),
-        uint8_clamped_array: RefCell::new(realm.intrinsics.uint8clampedarray_constructor()),
-        int16_array: RefCell::new(realm.intrinsics.int16array_constructor()),
-        uint16_array: RefCell::new(realm.intrinsics.uint16array_constructor()),
-        int32_array: RefCell::new(realm.intrinsics.int32array_constructor()),
-        uint32_array: RefCell::new(realm.intrinsics.uint32array_constructor()),
-        float16_array: RefCell::new(realm.intrinsics.float16array_constructor()),
-        float32_array: RefCell::new(realm.intrinsics.float32array_constructor()),
-        float64_array: RefCell::new(realm.intrinsics.float64array_constructor()),
-        bigint64_array: RefCell::new(realm.intrinsics.bigint64array_constructor()),
-        biguint64_array: RefCell::new(realm.intrinsics.biguint64array_constructor()),
-        atomics: RefCell::new(realm.intrinsics.atomics_constructor()),
+        array_buffer: RefCell::new(ArrayBuffer::get_global(realm)?),
+        shared_array_buffer: RefCell::new(SharedArrayBuffer::get_global(realm)?),
+        data_view: RefCell::new(DataView::get_global(realm)?),
+        int8_array: RefCell::new(Int8Array::get_global(realm)?),
+        uint8_array: RefCell::new(Uint8Array::get_global(realm)?),
+        uint8_clamped_array: RefCell::new(Uint8ClampedArray::get_global(realm)?),
+        int16_array: RefCell::new(Int16Array::get_global(realm)?),
+        uint16_array: RefCell::new(Uint16Array::get_global(realm)?),
+        int32_array: RefCell::new(Int32Array::get_global(realm)?),
+        uint32_array: RefCell::new(Uint32Array::get_global(realm)?),
+        float16_array: RefCell::new(Float16Array::get_global(realm)?),
+        float32_array: RefCell::new(Float32Array::get_global(realm)?),
+        float64_array: RefCell::new(Float64Array::get_global(realm)?),
+        bigint64_array: RefCell::new(BigInt64Array::get_global(realm)?),
+        biguint64_array: RefCell::new(BigUint64Array::get_global(realm)?),
+        atomics: RefCell::new(Atomics::get_global(realm)?),
         escape: RefCell::new(get_escape(realm)),
         unescape: RefCell::new(get_escape(realm)),
         encode_uri: RefCell::new(get_encode_uri(realm)),
         decode_uri: RefCell::new(get_decode_uri(realm)),
         encode_uri_component: RefCell::new(get_encode_uri_component(realm)),
         decode_uri_component: RefCell::new(get_decode_uri_component(realm)),
-        map: RefCell::new(realm.intrinsics.map_constructor()),
-        weak_map: RefCell::new(realm.intrinsics.weak_map_constructor()),
-        weak_ref: RefCell::new(realm.intrinsics.weak_ref_constructor()),
-        set: RefCell::new(realm.intrinsics.set_constructor()),
-        weak_set: RefCell::new(realm.intrinsics.weak_set_constructor()),
-        date: RefCell::new(realm.intrinsics.date_constructor()),
+        map: RefCell::new(Map::get_global(realm)?),
+        weak_map: RefCell::new(WeakMap::get_global(realm)?),
+        weak_ref: RefCell::new(WeakRef::get_global(realm)?),
+        set: RefCell::new(Set::get_global(realm)?),
+        weak_set: RefCell::new(WeakSet::get_global(realm)?),
+        date: RefCell::new(Date::get_global(realm)?),
         reflect: RefCell::new(realm.intrinsics.reflect_obj()),
-        proxy: RefCell::new(realm.intrinsics.proxy_constructor()),
+        proxy: RefCell::new(Proxy::get_global(realm)?),
         temporal: RefCell::new(realm.intrinsics.temporal_obj()),
         signal: RefCell::new(realm.intrinsics.signal_obj()),
-        promise: RefCell::new(realm.intrinsics.promise_constructor()),
+        promise: RefCell::new(Promise::get_global(realm)?),
         parse_int: RefCell::new(get_parse_int(realm)),
         parse_float: RefCell::new(get_parse_float(realm)),
         is_nan: RefCell::new(get_is_nan(realm)),

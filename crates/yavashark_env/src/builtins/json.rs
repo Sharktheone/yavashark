@@ -4,6 +4,7 @@ use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use crate::realm::Intrinsic;
 
 #[object]
 #[derive(Debug)]
@@ -75,7 +76,7 @@ impl JSON {
 
                 visited.push(o.as_ptr().addr());
 
-                if value.instance_of(&realm.intrinsics.array_constructor().into(), realm)? {
+                if value.instance_of(&Array::get_global(realm)?.into(), realm)? {
                     let mut index = 0;
 
                     let mut array = Vec::new();
