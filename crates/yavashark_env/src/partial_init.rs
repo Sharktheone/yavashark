@@ -2,18 +2,19 @@ use crate::conversion::FromValueOutput;
 use crate::{Error, Realm, Res, Value};
 use std::cell::{Cell, RefCell, UnsafeCell};
 
-pub struct Partial<T, I: Initializer<T>> {
+#[derive(Debug)]
+pub struct Partial<T, I> {
     value: UnsafeCell<Option<T>>,
     _init: std::marker::PhantomData<I>,
 }
 
-impl<T, I: Initializer<T>> Default for Partial<T, I> {
+impl<T, I> Default for Partial<T, I> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T, I: Initializer<T>> Partial<T, I> {
+impl <T, I> Partial<T, I> {
     pub const fn new() -> Self {
         Self {
             value: UnsafeCell::new(None),
@@ -21,22 +22,14 @@ impl<T, I: Initializer<T>> Partial<T, I> {
         }
     }
 
-    pub fn get(&self, realm: &mut Realm) -> Res<&T> {
-        unsafe {
-            if (*self.value.get()).is_none() {
-                let v = I::initialize(realm)?;
-                *self.value.get() = Some(v);
-            }
-
-            (*self.value.get())
-                .as_ref()
-                .ok_or_else(|| Error::new("Failed to initialize Partial value"))
-        }
+    pub fn is_initialized(&self) -> bool {
+        unsafe { (*self.value.get()).is_some() }
     }
 
     pub fn get_opt(&self) -> Option<&T> {
         unsafe { (*self.value.get()).as_ref() }
     }
+
 
     pub fn set(&self, value: T) -> Option<T> {
         unsafe {
@@ -49,8 +42,42 @@ impl<T, I: Initializer<T>> Partial<T, I> {
         }
     }
 
-    pub fn is_initialized(&self) -> bool {
-        unsafe { (*self.value.get()).is_some() }
+    pub fn get_with<L: Initializer<T>>(&self, realm: &mut Realm) -> Res<&T> {
+        unsafe {
+            if (*self.value.get()).is_none() {
+                let v = L::initialize(realm)?;
+
+                if (*self.value.get()).is_some() {
+                    return Err(Error::new("Partial value was initialized concurrently"));
+                }
+
+                *self.value.get() = Some(v);
+            }
+
+            (*self.value.get())
+                .as_ref()
+                .ok_or_else(|| Error::new("Failed to initialize Partial value"))
+        }
+    }
+}
+
+impl<T, I: Initializer<T>> Partial<T, I> {
+    pub fn get(&self, realm: &mut Realm) -> Res<&T> {
+        unsafe {
+            if (*self.value.get()).is_none() {
+                let v = I::initialize(realm)?;
+
+                if (*self.value.get()).is_some() {
+                    return Err(Error::new("Partial value was initialized concurrently"));
+                }
+
+                *self.value.get() = Some(v);
+            }
+
+            (*self.value.get())
+                .as_ref()
+                .ok_or_else(|| Error::new("Failed to initialize Partial value"))
+        }
     }
 }
 
