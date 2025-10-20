@@ -22,6 +22,7 @@ use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::error_obj::ErrorObj;
 use crate::inline_props::InlineObject;
+use crate::partial_init::{Initializer, Partial};
 use crate::value::Obj;
 
 
@@ -60,10 +61,10 @@ pub struct GlobalProperties {
     console: ObjectHandle,
 
     #[prop("Error")]
-    error: ObjectHandle,
+    error: Partial<ObjectHandle, GlobalInitializer<ErrorObj>>,
 
     #[prop("Array")]
-    array: ObjectHandle,
+    array: Partial<ObjectHandle, GlobalInitializer<Array>>,
 
     #[prop("Object")]
     object: ObjectHandle,
@@ -75,22 +76,22 @@ pub struct GlobalProperties {
     math: ObjectHandle,
 
     #[prop("String")]
-    string: ObjectHandle,
+    string: Partial<ObjectHandle, GlobalInitializer<StringObj>>,
 
     #[prop("Number")]
-    number: ObjectHandle,
+    number: Partial<ObjectHandle, GlobalInitializer<NumberObj>>,
 
     #[prop("Boolean")]
-    boolean: ObjectHandle,
+    boolean: Partial<ObjectHandle, GlobalInitializer<BooleanObj>>,
 
     #[prop("Symbol")]
-    symbol: ObjectHandle,
+    symbol: Partial<ObjectHandle, GlobalInitializer<SymbolObj>>,
 
     #[prop("BigInt")]
-    bigint: ObjectHandle,
+    bigint: Partial<ObjectHandle, GlobalInitializer<BigIntObj>>,
 
     #[prop("RegExp")]
-    regexp: ObjectHandle,
+    regexp: Partial<ObjectHandle, GlobalInitializer<RegExp>>,
 
     #[prop("JSON")]
     json: ObjectHandle,
@@ -122,52 +123,52 @@ pub struct GlobalProperties {
     global: ObjectHandle,
 
     #[prop("ArrayBuffer")]
-    array_buffer: ObjectHandle,
+    array_buffer: Partial<ObjectHandle, GlobalInitializer<ArrayBuffer>>,
 
     #[prop("SharedArrayBuffer")]
-    shared_array_buffer: ObjectHandle,
+    shared_array_buffer: Partial<ObjectHandle, GlobalInitializer<SharedArrayBuffer>>,
 
     #[prop("DataView")]
-    data_view: ObjectHandle,
+    data_view: Partial<ObjectHandle, GlobalInitializer<DataView>>,
 
     #[prop("Int8Array")]
-    int8_array: ObjectHandle,
+    int8_array: Partial<ObjectHandle, GlobalInitializer<Int8Array>>,
 
     #[prop("Uint8Array")]
-    uint8_array: ObjectHandle,
+    uint8_array: Partial<ObjectHandle, GlobalInitializer<Uint8Array>>,
 
     #[prop("Uint8ClampedArray")]
-    uint8_clamped_array: ObjectHandle,
+    uint8_clamped_array: Partial<ObjectHandle, GlobalInitializer<Uint8ClampedArray>>,
 
     #[prop("Int16Array")]
-    int16_array: ObjectHandle,
+    int16_array: Partial<ObjectHandle, GlobalInitializer<Int16Array>>,
 
     #[prop("Uint16Array")]
-    uint16_array: ObjectHandle,
+    uint16_array: Partial<ObjectHandle, GlobalInitializer<Uint16Array>>,
 
     #[prop("Int32Array")]
-    int32_array: ObjectHandle,
+    int32_array: Partial<ObjectHandle, GlobalInitializer<Int32Array>>,
 
     #[prop("Uint32Array")]
-    uint32_array: ObjectHandle,
+    uint32_array: Partial<ObjectHandle, GlobalInitializer<Uint32Array>>,
 
     #[prop("Float16Array")]
-    float16_array: ObjectHandle,
+    float16_array: Partial<ObjectHandle, GlobalInitializer<Float16Array>>,
 
     #[prop("Float32Array")]
-    float32_array: ObjectHandle,
+    float32_array: Partial<ObjectHandle, GlobalInitializer<Float32Array>>,
 
     #[prop("Float64Array")]
-    float64_array: ObjectHandle,
+    float64_array: Partial<ObjectHandle, GlobalInitializer<Float64Array>>,
 
     #[prop("BigInt64Array")]
-    bigint64_array: ObjectHandle,
+    bigint64_array: Partial<ObjectHandle, GlobalInitializer<BigInt64Array>>,
 
     #[prop("BigUint64Array")]
-    biguint64_array: ObjectHandle,
+    biguint64_array: Partial<ObjectHandle, GlobalInitializer<BigUint64Array>>,
 
     #[prop("Atomics")]
-    atomics: ObjectHandle,
+    atomics: Partial<ObjectHandle, GlobalInitializer<Atomics>>,
 
     escape: ObjectHandle,
 
@@ -186,28 +187,28 @@ pub struct GlobalProperties {
     decode_uri_component: ObjectHandle,
 
     #[prop("Map")]
-    map: ObjectHandle,
+    map: Partial<ObjectHandle, GlobalInitializer<Map>>,
 
     #[prop("WeakMap")]
-    weak_map: ObjectHandle,
+    weak_map: Partial<ObjectHandle, GlobalInitializer<WeakMap>>,
 
     #[prop("WeakRef")]
-    weak_ref: ObjectHandle,
+    weak_ref: Partial<ObjectHandle, GlobalInitializer<WeakRef>>,
 
     #[prop("Set")]
-    set: ObjectHandle,
+    set: Partial<ObjectHandle, GlobalInitializer<Set>>,
 
     #[prop("WeakSet")]
-    weak_set: ObjectHandle,
+    weak_set: Partial<ObjectHandle, GlobalInitializer<WeakSet>>,
 
     #[prop("Date")]
-    date: ObjectHandle,
+    date: Partial<ObjectHandle, GlobalInitializer<Date>>,
 
     #[prop("Reflect")]
     reflect: ObjectHandle,
 
     #[prop("Proxy")]
-    proxy: ObjectHandle,
+    proxy: Partial<ObjectHandle, GlobalInitializer<Proxy>>,
 
     #[prop("Temporal")]
     temporal: ObjectHandle,
@@ -216,7 +217,7 @@ pub struct GlobalProperties {
     signal: ObjectHandle,
 
     #[prop("Promise")]
-    promise: ObjectHandle,
+    promise: Partial<ObjectHandle, GlobalInitializer<Promise>>,
 
     #[prop("parseInt")]
     parse_int: ObjectHandle,
@@ -244,17 +245,17 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         true_: true,
         false_: false,
         console: RefCell::new(get_console(realm)),
-        error: RefCell::new(ErrorObj::get_global(realm)?),
-        array: RefCell::new(Array::get_global(realm)?),
+        error: Default::default(),
+        array: Default::default(),
         object: RefCell::new(realm.intrinsics.obj_constructor()),
         function: RefCell::new(realm.intrinsics.func_constructor()),
         math: RefCell::new(realm.intrinsics.math_obj()),
-        string: RefCell::new(StringObj::get_global(realm)?),
-        number: RefCell::new(NumberObj::get_global(realm)?),
-        boolean: RefCell::new(BooleanObj::get_global(realm)?),
-        symbol: RefCell::new(SymbolObj::get_global(realm)?),
-        bigint: RefCell::new(BigIntObj::get_global(realm)?),
-        regexp: RefCell::new(RegExp::get_global(realm)?),
+        string: Default::default(),
+        number: Default::default(),
+        boolean: Default::default(),
+        symbol: Default::default(),
+        bigint: Default::default(),
+        regexp: Default::default(),
         json: RefCell::new(realm.intrinsics.json_obj()),
         type_error: RefCell::new(realm.intrinsics.type_error_constructor()),
         range_error: RefCell::new(realm.intrinsics.range_error_constructor()),
@@ -265,39 +266,39 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         aggregate_error: RefCell::new(realm.intrinsics.aggregate_error_constructor()),
         global_this: RefCell::new(Object::null()),
         global: RefCell::new(Object::null()),
-        array_buffer: RefCell::new(ArrayBuffer::get_global(realm)?),
-        shared_array_buffer: RefCell::new(SharedArrayBuffer::get_global(realm)?),
-        data_view: RefCell::new(DataView::get_global(realm)?),
-        int8_array: RefCell::new(Int8Array::get_global(realm)?),
-        uint8_array: RefCell::new(Uint8Array::get_global(realm)?),
-        uint8_clamped_array: RefCell::new(Uint8ClampedArray::get_global(realm)?),
-        int16_array: RefCell::new(Int16Array::get_global(realm)?),
-        uint16_array: RefCell::new(Uint16Array::get_global(realm)?),
-        int32_array: RefCell::new(Int32Array::get_global(realm)?),
-        uint32_array: RefCell::new(Uint32Array::get_global(realm)?),
-        float16_array: RefCell::new(Float16Array::get_global(realm)?),
-        float32_array: RefCell::new(Float32Array::get_global(realm)?),
-        float64_array: RefCell::new(Float64Array::get_global(realm)?),
-        bigint64_array: RefCell::new(BigInt64Array::get_global(realm)?),
-        biguint64_array: RefCell::new(BigUint64Array::get_global(realm)?),
-        atomics: RefCell::new(Atomics::get_global(realm)?),
+        array_buffer: Default::default(),
+        shared_array_buffer: Default::default(),
+        data_view: Default::default(),
+        int8_array: Default::default(),
+        uint8_array: Default::default(),
+        uint8_clamped_array: Default::default(),
+        int16_array: Default::default(),
+        uint16_array: Default::default(),
+        int32_array: Default::default(),
+        uint32_array: Default::default(),
+        float16_array: Default::default(),
+        float32_array: Default::default(),
+        float64_array: Default::default(),
+        bigint64_array: Default::default(),
+        biguint64_array: Default::default(),
+        atomics: Default::default(),
         escape: RefCell::new(get_escape(realm)),
         unescape: RefCell::new(get_escape(realm)),
         encode_uri: RefCell::new(get_encode_uri(realm)),
         decode_uri: RefCell::new(get_decode_uri(realm)),
         encode_uri_component: RefCell::new(get_encode_uri_component(realm)),
         decode_uri_component: RefCell::new(get_decode_uri_component(realm)),
-        map: RefCell::new(Map::get_global(realm)?),
-        weak_map: RefCell::new(WeakMap::get_global(realm)?),
-        weak_ref: RefCell::new(WeakRef::get_global(realm)?),
-        set: RefCell::new(Set::get_global(realm)?),
-        weak_set: RefCell::new(WeakSet::get_global(realm)?),
-        date: RefCell::new(Date::get_global(realm)?),
+        map: Default::default(),
+        weak_map: Default::default(),
+        weak_ref: Default::default(),
+        set: Default::default(),
+        weak_set: Default::default(),
+        date: Default::default(),
         reflect: RefCell::new(realm.intrinsics.reflect_obj()),
-        proxy: RefCell::new(Proxy::get_global(realm)?),
+        proxy: Default::default(),
         temporal: RefCell::new(realm.intrinsics.temporal_obj()),
         signal: RefCell::new(realm.intrinsics.signal_obj()),
-        promise: RefCell::new(Promise::get_global(realm)?),
+        promise: Default::default(),
         parse_int: RefCell::new(get_parse_int(realm)),
         parse_float: RefCell::new(get_parse_float(realm)),
         is_nan: RefCell::new(get_is_nan(realm)),
@@ -327,4 +328,15 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
     realm.global = handle;
 
     Ok(())
+}
+
+#[derive(Debug)]
+pub struct GlobalInitializer<T> {
+    marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Intrinsic> Initializer<ObjectHandle> for GlobalInitializer<T> {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        T::get_global(realm)
+    }
 }
