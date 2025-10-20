@@ -1,5 +1,6 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
+use yavashark_string::YSString;
 use crate::array::Array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
@@ -7,7 +8,7 @@ use crate::realm::Realm;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::Property;
-use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
+use crate::{Error, Object, ObjectOrNull, Symbol, Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {
@@ -168,7 +169,9 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     let this = coerce_object(this, realm)?;
 
-    let tag = if this.is_callable() {
+    let mut owned_tag = YSString::new();
+
+    let mut tag = if this.is_callable() {
         "Function"
     } else if this.downcast::<Array>().is_some() {
         "Array"
@@ -186,11 +189,13 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
         "Date"
     } else if this.downcast::<RegExp>().is_some() {
         "RegExp"
+    } else if let Some(to_string_tag) = this.get_opt(Symbol::TO_STRING_TAG, realm)? {
+        owned_tag = to_string_tag.to_string(realm)?;
+
+        owned_tag.as_str()
     } else {
         "Object"
     };
-
-    //TODO: we need to check Symbol.toStringTag
 
     Ok(format!("[object {tag}]").into())
 }

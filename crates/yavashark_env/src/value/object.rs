@@ -1035,6 +1035,11 @@ impl Object {
 
     pub fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
         let Some(to_string) = self.get_opt("toString", realm)? else {
+            if let Some(to_string_tag) = self.get_opt(Symbol::TO_STRING_TAG, realm)? {
+                return Ok(format!("[object {}]", to_string_tag.to_string(realm)?).into());
+            }
+
+
             return Ok(format!("[object {}]", self.name()).into());
         };
 
