@@ -7,7 +7,7 @@ use crate::{
 };
 pub use class::*;
 pub use constructor::*;
-pub use prototype::*;
+pub use function_prototype::FunctionPrototype;
 use std::cell::{Cell, RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
@@ -16,7 +16,7 @@ use yavashark_macro::inline_props;
 mod bound;
 mod class;
 mod constructor;
-mod prototype;
+pub mod function_prototype;
 
 type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 

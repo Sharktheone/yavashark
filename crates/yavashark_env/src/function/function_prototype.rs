@@ -1,13 +1,11 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use std::cell::{Cell, RefCell};
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor};
-use yavashark_garbage::GcRef;
 use yavashark_macro::inline_props;
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{proto, Error, InternalPropertyKey, NativeConstructor, NativeFunction, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value, ValueResult, Variable};
+use crate::{proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
 

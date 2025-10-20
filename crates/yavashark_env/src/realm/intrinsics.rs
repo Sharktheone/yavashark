@@ -16,16 +16,15 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
-    get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, AggregateError,
-    Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, Math, NumberObj, Promise,
-    Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError,
-    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet, JSON,
+    intl, signal, temporal, AggregateError,
+    Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, NumberObj, Promise,
+    Proxy, RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError,
+    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::Partial;
 use crate::realm::initialize::Intrinsic;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value};
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 use crate::value::Obj;

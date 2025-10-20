@@ -1,4 +1,3 @@
-use crate::partial_init::Initializer;
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
@@ -6,7 +5,7 @@ use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
-pub use prototype::*;
+pub use prototype::Prototype;
 use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;

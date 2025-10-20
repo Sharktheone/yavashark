@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
-use crate::object::common;
+use crate::object::prototype::common;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull, Property};
@@ -13,7 +13,6 @@ use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
 use crate::partial_init::Initializer;
-use crate::realm::Intrinsic;
 
 #[object(constructor, function)]
 #[derive(Debug)]

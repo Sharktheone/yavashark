@@ -1,5 +1,4 @@
 use crate::error_obj::ErrorObj;
-use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
 use crate::value::Obj;
 use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Value, Variable};

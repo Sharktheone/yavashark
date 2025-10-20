@@ -1,15 +1,14 @@
-use crate::value::{MutObj, Obj, ObjectOrNull};
+use crate::value::ObjectOrNull;
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
     property_is_enumerable, to_locale_string, to_string, value_of,
 };
-use std::any::Any;
 use yavashark_macro::inline_props;
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
 use crate::realm::Realm;
 use crate::{
-    NativeFunction, ObjectHandle, Res, Value,
+    NativeFunction, ObjectHandle, Res,
 };
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
