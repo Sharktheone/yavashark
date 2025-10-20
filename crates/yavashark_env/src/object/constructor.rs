@@ -12,6 +12,8 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
+use crate::partial_init::Initializer;
+use crate::realm::Intrinsic;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -43,16 +45,32 @@ impl Func for ObjectConstructor {
     }
 }
 
+impl Initializer<ObjectHandle> for ObjectConstructor {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        let ctor = ObjectConstructor::new(realm)?;
+
+        ctor.define_property_attributes(
+            "prototype".into(),
+            Variable::new_read_only(realm.intrinsics.obj.clone().into()),
+            realm,
+        )?;
+
+        Ok(ctor)
+    }
+}
+
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableObjectConstructor {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
         this.initialize(realm)?;
+
+
 
         Ok(this.into_object())
     }

@@ -29,7 +29,7 @@ use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
 use crate::realm::{Intrinsic, Realm};
 use crate::value::Obj;
-use crate::{get_console, ObjectHandle, Res};
+use crate::{GlobalFunctionConstructor, GlobalObjectConstructor, ObjectHandle, Res};
 use crate::{Console, Object, Value};
 use std::cell::{Cell, RefCell};
 use yavashark_macro::inline_props;
@@ -74,10 +74,10 @@ pub struct GlobalProperties {
     array: Partial<ObjectHandle, GlobalInitializer<Array>>,
 
     #[prop("Object")]
-    object: ObjectHandle,
+    object: Partial<ObjectHandle, GlobalObjectConstructor>,
 
     #[prop("Function")]
-    function: ObjectHandle,
+    function: Partial<ObjectHandle, GlobalFunctionConstructor>,
 
     #[prop("Math")]
     math: Partial<ObjectHandle, Math>,
@@ -253,8 +253,8 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         console: Default::default(),
         error: Default::default(),
         array: Default::default(),
-        object: RefCell::new(realm.intrinsics.obj_constructor()),
-        function: RefCell::new(realm.intrinsics.func_constructor()),
+        object: Default::default(),
+        function: Default::default(),
         math: Default::default(),
         string: Default::default(),
         number: Default::default(),

@@ -28,6 +28,7 @@ use crate::realm::initialize::Intrinsic;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
+use crate::value::Obj;
 
 type PartialIntrinsic<T> = Partial<ObjectHandle, IntrinsicInitializer<T>>;
 
@@ -107,66 +108,12 @@ pub struct Intrinsics {
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
 
-macro_rules! constructor {
-    ($name:ident) => {
-        paste::paste! {
-            pub fn [<$name _constructor>] (&self) -> ObjectHandle {
-                self.$name
-                    .resolve_property("constructor", &mut Realm::default()) //TODO: this is bad, but we don't have access to a realm here
-                    .ok()
-                    .flatten()
-                    .map(|v| v.to_object().unwrap_or(Object::null()))
-                    .unwrap_or(Object::null())
-            }
-        }
-    };
-}
-
-macro_rules! obj {
-    ($name:ident) => {
-        paste::paste! {
-            pub fn [<$name _obj>] (&self) -> ObjectHandle {
-                self.$name.clone()
-            }
-        }
-    };
-}
-
-impl Intrinsics {
-    constructor!(obj);
-    constructor!(func);
-}
 
 #[allow(clippy::similar_names)]
 impl Intrinsics {
     pub(crate) fn initialize(realm: &mut Realm) -> Res {
-        realm.intrinsics.obj = ObjectHandle::new(Prototype::new());
-
-        realm.intrinsics.func =
-            ObjectHandle::new(FunctionPrototype::new(realm.intrinsics.obj.clone()));
-
-        {
-            let obj_this = realm.intrinsics.obj.clone();
-            let obj_this2 = obj_this.clone();
-            let obj = obj_this.guard();
-
-            let proto = obj
-                .downcast::<Prototype>()
-                .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
-
-            proto.initialize(realm.intrinsics.func.clone(), obj_this2, realm)?;
-        }
-
-        {
-            let func = realm.intrinsics.func.clone();
-            let func = func.guard();
-
-            let proto = func
-                .downcast::<FunctionPrototype>()
-                .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
-
-            proto.initialize(realm.intrinsics.func.clone(), realm)?;
-        }
+        realm.intrinsics.obj = Prototype::new().into_object();
+        realm.intrinsics.func = FunctionPrototype::new(realm).into_object();
 
         Ok(())
     }
