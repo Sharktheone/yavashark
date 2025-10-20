@@ -125,9 +125,9 @@ pub struct GlobalProperties {
     aggregate_error: Partial<ObjectHandle, GlobalInitializer<AggregateError>>,
 
     #[prop("globalThis")]
-    global_this: ObjectHandle,
+    global_this: Partial<ObjectHandle, GlobalThis>,
 
-    global: ObjectHandle,
+    global: Partial<ObjectHandle, GlobalThis>,
 
     #[prop("ArrayBuffer")]
     array_buffer: Partial<ObjectHandle, GlobalInitializer<ArrayBuffer>>,
@@ -270,8 +270,8 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         eval_error: Default::default(),
         uri_error: Default::default(),
         aggregate_error: Default::default(),
-        global_this: RefCell::new(Object::null()),
-        global: RefCell::new(Object::null()),
+        global_this: Default::default(),
+        global: Default::default(),
         array_buffer: Default::default(),
         shared_array_buffer: Default::default(),
         data_view: Default::default(),
@@ -317,16 +317,6 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
 
     let handle = InlineObject::new(inline, realm).into_object();
 
-    {
-        #[allow(clippy::unwrap_used)]
-        let global = handle
-            .downcast::<InlineObject<GlobalProperties>>()
-            .expect("Global object must be InlineObject (unreachable)");
-
-        global.props.global_this.replace(handle.clone());
-        global.props.global.replace(handle.clone());
-    }
-
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(&handle, realm)?;
 
@@ -343,5 +333,14 @@ pub struct GlobalInitializer<T> {
 impl<T: Intrinsic> Initializer<ObjectHandle> for GlobalInitializer<T> {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         T::get_global(realm)
+    }
+}
+
+
+pub struct GlobalThis;
+
+impl Initializer<ObjectHandle> for GlobalThis {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(realm.global.clone())
     }
 }
