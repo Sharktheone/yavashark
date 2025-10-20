@@ -20,13 +20,13 @@ pub struct PlainYearMonth {
 }
 
 impl PlainYearMonth {
-    pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &Realm) -> Self {
-        Self {
+    pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutablePlainYearMonth {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_year_month.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_year_month.get(realm)?.clone()),
             }),
             year_month,
-        }
+        })
     }
 }
 
@@ -38,14 +38,14 @@ impl PlainYearMonth {
         month: u8,
         calendar: Option<YSString>,
         reference_day: Option<u8>,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let calendar = calendar_opt(calendar.as_deref())?;
 
         let year_month = temporal_rs::PlainYearMonth::new(year, month, reference_day, calendar)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(year_month, realm).into_object())
+        Ok(Self::new(year_month, realm)?.into_object())
     }
 
     pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
@@ -61,7 +61,7 @@ impl PlainYearMonth {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let year_month = value_to_plain_year_month(value, opts, realm)?;
-        Ok(Self::new(year_month, realm).into_object())
+        Ok(Self::new(year_month, realm)?.into_object())
     }
 
     pub fn add(
@@ -84,7 +84,7 @@ impl PlainYearMonth {
             .add(&duration, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(year_month, realm).into_object())
+        Ok(Self::new(year_month, realm)?.into_object())
     }
 
     pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
@@ -111,7 +111,7 @@ impl PlainYearMonth {
             .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, duration).into_object())
+        Ok(Duration::with_duration(realm, duration)?.into_object())
     }
 
     pub fn subtract(
@@ -134,7 +134,7 @@ impl PlainYearMonth {
             .subtract(&duration, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(year_month, realm).into_object())
+        Ok(Self::new(year_month, realm)?.into_object())
     }
 
     #[prop("toJSON")]
@@ -158,7 +158,7 @@ impl PlainYearMonth {
             .to_plain_date(day_info)
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainDate::new(plain_date, realm).into_object())
+        Ok(PlainDate::new(plain_date, realm)?.into_object())
     }
 
     #[prop("toString")]
@@ -195,7 +195,7 @@ impl PlainYearMonth {
             .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, duration).into_object())
+        Ok(Duration::with_duration(realm, duration)?.into_object())
     }
 
     #[prop("valueOf")]
@@ -213,7 +213,7 @@ impl PlainYearMonth {
             .with(year_month, overflow)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(year_month, realm).into_object())
+        Ok(Self::new(year_month, realm)?.into_object())
     }
 
     #[get("calendarId")]

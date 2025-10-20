@@ -26,13 +26,13 @@ pub struct PlainDate {
 }
 
 impl PlainDate {
-    pub fn new(date: temporal_rs::PlainDate, realm: &Realm) -> Self {
-        Self {
+    pub fn new(date: temporal_rs::PlainDate, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_date.get(realm)?.clone()),
             }),
             date,
-        }
+        })
     }
 
     fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
@@ -41,9 +41,9 @@ impl PlainDate {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
         let date = Self::now(tz)?;
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 }
 
@@ -55,7 +55,7 @@ impl PlainDate {
         month: u8,
         day: u8,
         calendar: Option<YSString>,
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let calendar = calendar
             .as_deref()
@@ -69,7 +69,7 @@ impl PlainDate {
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_date.get(realm)?.clone()),
             }),
             date,
         }
@@ -79,7 +79,7 @@ impl PlainDate {
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let date = value_to_plain_date(info, realm)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[allow(clippy::use_self)]
@@ -114,7 +114,7 @@ impl PlainDate {
             .since(&other, settings)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur).into_object())
+        Ok(Duration::with_duration(realm, dur)?.into_object())
     }
 
     pub fn until(
@@ -135,7 +135,7 @@ impl PlainDate {
             .until(&other, settings)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur).into_object())
+        Ok(Duration::with_duration(realm, dur)?.into_object())
     }
 
     pub fn add(
@@ -154,7 +154,7 @@ impl PlainDate {
 
         let date = self.date.add(&dur, opts).map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     pub fn subtract(
@@ -176,7 +176,7 @@ impl PlainDate {
             .subtract(&dur, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[prop("toJSON")]
@@ -289,7 +289,7 @@ impl PlainDate {
             .to_plain_date_time(time)
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainDateTime::new(date_time, realm).into_object())
+        Ok(PlainDateTime::new(date_time, realm)?.into_object())
     }
 
     #[prop("toPlainMonthDay")]
@@ -299,7 +299,7 @@ impl PlainDate {
             .to_plain_month_day()
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainMonthDay::new(month_day, realm).into_object())
+        Ok(PlainMonthDay::new(month_day, realm)?.into_object())
     }
 
     #[prop("toPlainYearMonth")]
@@ -309,7 +309,7 @@ impl PlainDate {
             .to_plain_year_month()
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainYearMonth::new(year_month, realm).into_object())
+        Ok(PlainYearMonth::new(year_month, realm)?.into_object())
     }
 
     #[prop("toZonedDateTime")]
@@ -342,7 +342,7 @@ impl PlainDate {
             .to_zoned_date_time_with_provider(tz, time, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(ZonedDateTime::new(zoned_date_time, realm).into_object())
+        Ok(ZonedDateTime::new(zoned_date_time, realm)?.into_object())
     }
 
     #[prop("toString")]
@@ -371,7 +371,7 @@ impl PlainDate {
             .with(fields, overflow)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 }
 

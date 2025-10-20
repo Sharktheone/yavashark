@@ -28,10 +28,10 @@ impl Constructor for ObjectConstructor {
         Ok(match value {
             Value::Object(obj) => obj,
             Value::Number(num) => NumberObj::with_number(realm, num)?,
-            Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)),
-            Value::Boolean(boolean) => BooleanObj::new(realm, boolean),
-            Value::Symbol(symbol) => SymbolObj::new(realm, symbol),
-            Value::BigInt(bigint) => BigIntObj::new(realm, bigint),
+            Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)?),
+            Value::Boolean(boolean) => BooleanObj::new(realm, boolean)?,
+            Value::Symbol(symbol) => SymbolObj::new(realm, symbol)?,
+            Value::BigInt(bigint) => BigIntObj::new(realm, bigint)?,
             Value::Undefined | Value::Null => Object::new(realm),
         })
     }
@@ -158,11 +158,11 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Cannot assign to undefined or null"))
             }
-            Value::Boolean(b) => BooleanObj::new(realm, b),
+            Value::Boolean(b) => BooleanObj::new(realm, b)?,
             Value::Number(n) => NumberObj::with_number(realm, n)?,
-            Value::String(s) => StringObj::with_string(realm, s).into_object(),
-            Value::Symbol(s) => SymbolObj::new(realm, s),
-            Value::BigInt(b) => BigIntObj::new(realm, b),
+            Value::String(s) => StringObj::with_string(realm, s)?.into_object(),
+            Value::Symbol(s) => SymbolObj::new(realm, s)?,
+            Value::BigInt(b) => BigIntObj::new(realm, b)?,
         };
 
         for source in sources {
@@ -388,7 +388,7 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Object.keys() expects an object"))
             }
-            _ => return Ok(Array::from_realm(realm).into_value()),
+            _ => return Ok(Array::from_realm(realm)?.into_value()),
         };
 
         let keys = obj
@@ -417,7 +417,7 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Object.values() expects an object"))
             }
-            _ => return Ok(Array::from_realm(realm).into_value()),
+            _ => return Ok(Array::from_realm(realm)?.into_value()),
         };
 
         let keys = obj.enumerable_keys(realm)?;

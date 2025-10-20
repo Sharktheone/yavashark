@@ -21,13 +21,13 @@ pub struct PlainMonthDay {
 }
 
 impl PlainMonthDay {
-    pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &crate::Realm) -> Self {
-        Self {
+    pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &mut crate::Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutablePlainMonthDay {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_month_day.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_month_day.get(realm)?.clone()),
             }),
             month_day,
-        }
+        })
     }
 }
 
@@ -39,7 +39,7 @@ impl PlainMonthDay {
         day: u8,
         calendar: Option<YSString>,
         ref_year: Option<i32>,
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let calendar = calendar_opt(calendar.as_deref())?;
 
@@ -52,7 +52,7 @@ impl PlainMonthDay {
         )
         .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(month_day, realm).into_object())
+        Ok(Self::new(month_day, realm)?.into_object())
     }
 
     pub fn from(
@@ -70,7 +70,7 @@ impl PlainMonthDay {
 
         month_day.iso.year = 1972;
 
-        Ok(Self::new(month_day, realm).into_object())
+        Ok(Self::new(month_day, realm)?.into_object())
     }
 
     pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
@@ -97,7 +97,7 @@ impl PlainMonthDay {
             .to_plain_date(Some(date.calendar_fields))
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainDate::new(plain_date, realm).into_object())
+        Ok(PlainDate::new(plain_date, realm)?.into_object())
     }
 
     #[prop("toString")]
@@ -133,7 +133,7 @@ impl PlainMonthDay {
             .with(fields, overflow)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(month_day, realm).into_object())
+        Ok(Self::new(month_day, realm)?.into_object())
     }
 
     #[get("calendarId")]

@@ -48,6 +48,8 @@ pub struct PropertiesArgs {
     intrinsic_name: Option<Ident>,
     #[darling(default)]
     no_intrinsic: bool,
+    #[darling(default)]
+    no_partial: bool,
 }
 
 #[allow(unused)]
@@ -174,8 +176,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let obj = &config.object;
 
     let intrinsic_get = if let Some(name) = args.intrinsic_name.as_ref() {
-        quote! {
-            Ok(realm.intrinsics.#name.clone())
+        if args.no_partial {
+            quote! {
+                Ok(realm.intrinsics.clone_public().#name.clone())
+            }
+        } else {
+            quote! {
+                Ok(realm.intrinsics.clone_public().#name.get(realm)?.clone())
+            }
         }
     } else {
         quote! {

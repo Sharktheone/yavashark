@@ -170,8 +170,8 @@ impl ObjectImpl for Array {
 }
 
 impl ProtoDefault for Array {
-    fn proto_default(realm: &Realm) -> Self {
-        Self::new(realm.intrinsics.array.clone())
+    fn proto_default(realm: &mut Realm) -> Res<Self> {
+        Ok(Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone()))
     }
 
     fn null_proto_default() -> Self {
@@ -180,8 +180,8 @@ impl ProtoDefault for Array {
 }
 
 impl Array {
-    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone());
+    pub fn with_elements(realm: &mut Realm, elements: Vec<Value>) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
@@ -206,8 +206,8 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_iter(realm: &Realm, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone());
+    pub fn from_iter(realm: &mut Realm, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
@@ -220,10 +220,10 @@ impl Array {
     }
 
     pub fn from_iter_res(
-        realm: &Realm,
+        realm: &mut Realm,
         elements: impl ExactSizeIterator<Item = ValueResult>,
     ) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone());
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
@@ -267,8 +267,8 @@ impl Array {
         Ok(array)
     }
 
-    pub fn with_len(realm: &Realm, len: usize) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone());
+    pub fn with_len(realm: &mut Realm, len: usize) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         array.length.set(len);
 
@@ -299,7 +299,7 @@ impl Array {
             }
         };
 
-        let array = Self::new(realm.intrinsics.array.clone());
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
 
@@ -337,9 +337,8 @@ impl Array {
         }
     }
 
-    #[must_use]
-    pub fn from_realm(realm: &Realm) -> Self {
-        Self::new(realm.intrinsics.array.clone())
+    pub fn from_realm(realm: &mut Realm) -> Res<Self> {
+        Ok(Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone()))
     }
 
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
@@ -408,8 +407,8 @@ impl Array {
         Ok(())
     }
 
-    pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone());
+    pub fn shallow_clone(&self, realm: &mut Realm) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let other_array = &self.inner.try_borrow()?;
 
@@ -611,7 +610,7 @@ impl Array {
 
         let len = len.to_number(realm)? as usize;
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         let this_arg = this_arg.unwrap_or(realm.global.clone().into());
 
@@ -785,7 +784,7 @@ impl Array {
         }
         let this = coerce_object_strict(this, realm)?;
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         let depth = depth.unwrap_or(1);
 
@@ -814,7 +813,7 @@ impl Array {
     ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         let len = this
             .resolve_property("length", realm)?
@@ -1039,7 +1038,7 @@ impl Array {
 
         let len = len.to_number(realm)? as usize;
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx, realm)?;
@@ -1237,7 +1236,7 @@ impl Array {
         let start = convert_index(start, len);
         let end = end.map_or(len, |end| convert_index(end, len));
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         for idx in start..end {
             let (_, val) = this.get_array_or_done(idx, realm)?;
@@ -1405,7 +1404,7 @@ impl Array {
     fn js_to_reversed(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
-        let array = Self::from_realm(realm);
+        let array = Self::from_realm(realm)?;
 
         let len = this
             .resolve_property("length", realm)?
@@ -1669,7 +1668,7 @@ impl Constructor for ArrayConstructor {
             return Ok(Obj::into_object(Array::with_len(realm, len as usize)?));
         }
 
-        let this = Array::new(realm.intrinsics.array.clone());
+        let this = Array::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = this.inner.try_borrow_mut()?;
 
@@ -1709,17 +1708,21 @@ impl ArrayConstructor {
     const LENGTH: usize = 1;
 
     #[prop("isArray")]
-    fn is_array(test: Value, #[realm] realm: &Realm) -> bool {
-        let is_proto = test.as_object().is_ok_and(|o| *o == realm.intrinsics.array);
+    fn is_array(test: Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        let is_proto = if let Value::Object(o) = &test {
+            o == realm.intrinsics.clone_public().array.get(realm)?
+        } else {
+            false
+        };
 
         if is_proto {
-            return true;
+            return Ok(true);
         }
 
         let this: Res<OwningGcGuard<BoxedObj, Array>, _> =
             crate::value::FromValue::from_value(test);
 
-        this.is_ok()
+        Ok(this.is_ok())
     }
 
     fn of(#[realm] realm: &mut Realm, args: Vec<Value>, #[this] this: Value) -> Res<ObjectHandle> {

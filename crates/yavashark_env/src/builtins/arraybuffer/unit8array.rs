@@ -13,7 +13,7 @@ pub struct Uint8Array {}
 
 impl Uint8Array {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.uint8array.clone().into(), realm)?;
+        ty.set_prototype(realm.intrinsics.clone_public().uint8array.get(realm)?.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableUint8Array {}),
@@ -62,7 +62,7 @@ impl Uint8Array {
             .decode(base64.as_bytes())
             .map_err(|e| Error::syn_error(e.to_string()))?;
 
-        let array = ArrayBuffer::from_buffer(realm, bytes);
+        let array = ArrayBuffer::from_buffer(realm, bytes)?;
 
         let ty = TypedArray::new(realm, array.into_value(), None, None, Type::U8)?;
 
@@ -73,7 +73,7 @@ impl Uint8Array {
     fn from_hex(hex: &str, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let bytes = hex::decode(hex).map_err(|e| Error::syn_error(e.to_string()))?;
 
-        let array = ArrayBuffer::from_buffer(realm, bytes);
+        let array = ArrayBuffer::from_buffer(realm, bytes)?;
 
         let ty = TypedArray::new(realm, array.into_value(), None, None, Type::U8)?;
 

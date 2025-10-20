@@ -73,7 +73,7 @@ pub fn run_file_in(
                     return Err(Error::ty("Error type not found"));
                 };
 
-                let e = ErrorObj::error_to_value(e, realm);
+                let e = ErrorObj::error_to_value(e, realm)?;
 
                 if !e.instance_of(&err, realm)? {
                     return Err(Error::new_error(format!(

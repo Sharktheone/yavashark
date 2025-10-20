@@ -26,7 +26,7 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         if let Some(catch) = &stmt.handler {
             let scope = &mut Scope::with_parent(scope)?;
             if let Some(param) = &catch.param {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 Interpreter::run_pat(
                     realm,

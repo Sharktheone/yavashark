@@ -26,7 +26,7 @@ impl ArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -34,17 +34,17 @@ impl ArrayBuffer {
         })
     }
 
-    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Self {
+    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Res<Self> {
         let len = buffer.len();
 
-        Self {
+        Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
             resizable: true,
-        }
+        })
     }
 
     pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
@@ -103,7 +103,7 @@ impl ArrayBuffer {
 
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(max_len),
@@ -151,7 +151,7 @@ impl ArrayBuffer {
             return Ok(Self::new(realm, 0)?.into_value());
         };
 
-        Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
+        Ok(Self::from_buffer(realm, buffer.to_vec())?.into_value())
     }
 
     fn transfer(&self, realm: &mut Realm) -> ValueResult {
@@ -161,7 +161,7 @@ impl ArrayBuffer {
             return Err(Error::ty("ArrayBuffer is detached"));
         };
 
-        Ok(Self::from_buffer(realm, buf).into_value())
+        Ok(Self::from_buffer(realm, buf)?.into_value())
     }
 
     #[prop("transferToFixedLength")]
@@ -176,7 +176,7 @@ impl ArrayBuffer {
             buf.resize(new_len, 0);
         }
 
-        Ok(Self::from_buffer(realm, buf).into_value())
+        Ok(Self::from_buffer(realm, buf)?.into_value())
     }
 
     #[get("resizable")]

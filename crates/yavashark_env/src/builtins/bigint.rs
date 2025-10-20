@@ -1,7 +1,7 @@
 use crate::builtins::check_radix;
 use crate::conversion::downcast_obj;
 use crate::value::{Func, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -53,15 +53,14 @@ impl Func for BigIntConstructor {
 
 impl BigIntObj {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use]
-    pub fn new(realm: &Realm, big_int: Rc<BigInt>) -> ObjectHandle {
-        Self {
+    pub fn new(realm: &mut Realm, big_int: Rc<BigInt>) -> Res<ObjectHandle> {
+        Ok(Self {
             inner: RefCell::new(MutableBigIntObj {
-                object: MutObject::with_proto(realm.intrinsics.bigint.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().bigint.get(realm)?.clone()),
                 big_int,
             }),
         }
-        .into_object()
+        .into_object())
     }
 }
 

@@ -20,13 +20,13 @@ impl CustomName for BooleanObj {
 }
 
 impl ProtoDefault for BooleanObj {
-    fn proto_default(realm: &Realm) -> Self {
-        Self {
+    fn proto_default(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.boolean.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().boolean.get(realm)?.clone()),
                 boolean: false,
             }),
-        }
+        })
     }
 
     fn null_proto_default() -> Self {
@@ -74,7 +74,7 @@ impl Constructor for BooleanConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let boolean = args.first().is_some_and(|v| v.is_object() || v.is_truthy());
 
-        let obj = BooleanObj::new(realm, boolean);
+        let obj = BooleanObj::new(realm, boolean)?;
 
         Ok(obj.into())
     }
@@ -89,14 +89,14 @@ impl Func for BooleanConstructor {
 
 impl BooleanObj {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &mut Realm, boolean: bool) -> ObjectHandle {
-        Self {
+    pub fn new(realm: &mut Realm, boolean: bool) -> Res<ObjectHandle> {
+        Ok(Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.boolean.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().boolean.get(realm)?.clone()),
                 boolean,
             }),
         }
-        .into_object()
+        .into_object())
     }
 }
 

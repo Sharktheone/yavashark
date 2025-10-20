@@ -79,7 +79,7 @@ impl GeneratorFunction {
     }
 }
 
-#[props(intrinsic_name = generator_function)]
+#[props(intrinsic_name = generator_function, no_partial)]
 impl GeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -127,7 +127,7 @@ impl Func for GeneratorFunction {
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
 
-        let args = Arguments::new(args, None, realm);
+        let args = Arguments::new(args, None, realm)?;
 
         let args = ObjectHandle::new(args);
 
@@ -172,7 +172,7 @@ impl Generator {
     }
 }
 
-#[props(intrinsic_name = generator)]
+#[props(intrinsic_name = generator, no_partial)]
 impl Generator {
     pub fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let Some(state) = self.state.take() else {

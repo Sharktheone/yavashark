@@ -459,14 +459,13 @@ impl Date {
         self.inner.borrow().date
     }
 
-    #[must_use]
-    pub fn new(date: DateTime<Local>, realm: &Realm) -> Self {
-        Self {
+    pub fn new(date: DateTime<Local>, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableDate {
-                object: MutObject::with_proto(realm.intrinsics.date.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().date.get(realm)?.clone()),
                 date,
             }),
-        }
+        })
     }
 
     pub fn js_construct(args: &[Value], realm: &mut Realm) -> Res<Self> {
@@ -534,7 +533,7 @@ impl Date {
             }
         };
 
-        Ok(Self::new(date, realm))
+        Ok(Self::new(date, realm)?)
     }
 }
 

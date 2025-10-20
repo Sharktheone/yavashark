@@ -15,12 +15,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
-    get_temporal, get_throw_type_error, get_type_error, get_uri_error, Arguments, Atomics,
-    BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set,
-    StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON,
-};
+use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, Arguments, Atomics, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON};
 use crate::error_obj::ErrorObj;
 use crate::{
     Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value,
@@ -33,20 +28,19 @@ use crate::realm::initialize::Intrinsic;
 type PartialIntrinsic<T> = Partial<ObjectHandle, IntrinsicInitializer<T>>;
 
 
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
     pub obj: ObjectHandle,
     pub func: ObjectHandle,
-    pub array: ObjectHandle,
+    pub array: PartialIntrinsic<Array>,
     pub array_iter: ObjectHandle,
-    pub error: ObjectHandle,
+    pub error: PartialIntrinsic<ErrorObj>,
     pub math: ObjectHandle,
-    pub string: ObjectHandle,
-    pub number: ObjectHandle,
-    pub boolean: ObjectHandle,
-    pub symbol: ObjectHandle,
-    pub bigint: ObjectHandle,
-    pub regexp: ObjectHandle,
+    pub string: PartialIntrinsic<StringObj>,
+    pub number: PartialIntrinsic<NumberObj>,
+    pub boolean: PartialIntrinsic<BooleanObj>,
+    pub symbol: PartialIntrinsic<SymbolObj>,
+    pub bigint: PartialIntrinsic<BigIntObj>,
+    pub regexp: PartialIntrinsic<RegExp>,
     pub json: ObjectHandle,
     pub type_error: ObjectHandle,
     pub range_error: ObjectHandle,
@@ -56,61 +50,61 @@ pub struct Intrinsics {
     pub uri_error: ObjectHandle,
     pub aggregate_error: ObjectHandle,
     pub eval: Option<ObjectHandle>,
-    pub arraybuffer: ObjectHandle,
-    pub sharedarraybuffer: ObjectHandle,
-    pub data_view: ObjectHandle,
-    pub typed_array: ObjectHandle,
-    pub int8array: ObjectHandle,
-    pub uint8array: ObjectHandle,
-    pub uint8clampedarray: ObjectHandle,
-    pub int16array: ObjectHandle,
-    pub uint16array: ObjectHandle,
-    pub int32array: ObjectHandle,
-    pub uint32array: ObjectHandle,
-    pub float16array: ObjectHandle,
-    pub float32array: ObjectHandle,
-    pub float64array: ObjectHandle,
-    pub bigint64array: ObjectHandle,
-    pub biguint64array: ObjectHandle,
-    pub atomics: ObjectHandle,
-    pub map: ObjectHandle,
-    pub weak_map: ObjectHandle,
-    pub set: ObjectHandle,
-    pub weak_set: ObjectHandle,
-    pub weak_ref: ObjectHandle,
-    pub date: ObjectHandle,
+    pub arraybuffer: PartialIntrinsic<ArrayBuffer>,
+    pub sharedarraybuffer: PartialIntrinsic<SharedArrayBuffer>,
+    pub data_view: PartialIntrinsic<DataView>,
+    pub typed_array: PartialIntrinsic<TypedArray>,
+    pub int8array: PartialIntrinsic<Int8Array>,
+    pub uint8array: PartialIntrinsic<Uint8Array>,
+    pub uint8clampedarray: PartialIntrinsic<Uint8ClampedArray>,
+    pub int16array: PartialIntrinsic<Int16Array>,
+    pub uint16array: PartialIntrinsic<Uint16Array>,
+    pub int32array: PartialIntrinsic<Int32Array>,
+    pub uint32array: PartialIntrinsic<Uint32Array>,
+    pub float16array: PartialIntrinsic<Float16Array>,
+    pub float32array: PartialIntrinsic<Float32Array>,
+    pub float64array: PartialIntrinsic<Float64Array>,
+    pub bigint64array: PartialIntrinsic<BigInt64Array>,
+    pub biguint64array: PartialIntrinsic<BigUint64Array>,
+    pub atomics: PartialIntrinsic<Atomics>,
+    pub map: PartialIntrinsic<Map>,
+    pub weak_map: PartialIntrinsic<WeakMap>,
+    pub set: PartialIntrinsic<Set>,
+    pub weak_set: PartialIntrinsic<WeakSet>,
+    pub weak_ref: PartialIntrinsic<WeakRef>,
+    pub date: PartialIntrinsic<Date>,
     pub reflect: ObjectHandle,
     pub temporal: ObjectHandle,
-    pub temporal_duration: ObjectHandle,
-    pub temporal_instant: ObjectHandle,
-    pub temporal_now: ObjectHandle,
-    pub temporal_plain_date: ObjectHandle,
-    pub temporal_plain_time: ObjectHandle,
-    pub temporal_plain_date_time: ObjectHandle,
-    pub temporal_plain_month_day: ObjectHandle,
-    pub temporal_plain_year_month: ObjectHandle,
-    pub temporal_zoned_date_time: ObjectHandle,
-    pub promise: ObjectHandle,
+    pub temporal_duration: PartialIntrinsic<temporal::Duration>,
+    pub temporal_instant: PartialIntrinsic<temporal::Instant>,
+    pub temporal_now: PartialIntrinsic<temporal::Now>,
+    pub temporal_plain_date: PartialIntrinsic<temporal::PlainDate>,
+    pub temporal_plain_time: PartialIntrinsic<temporal::PlainTime>,
+    pub temporal_plain_date_time: PartialIntrinsic<temporal::PlainDateTime>,
+    pub temporal_plain_month_day: PartialIntrinsic<temporal::PlainMonthDay>,
+    pub temporal_plain_year_month: PartialIntrinsic<temporal::PlainYearMonth>,
+    pub temporal_zoned_date_time: PartialIntrinsic<temporal::ZonedDateTime>,
+    pub promise: PartialIntrinsic<Promise>,
     pub generator_function: ObjectHandle,
     pub generator: ObjectHandle,
     pub async_generator: ObjectHandle,
     pub async_generator_function: ObjectHandle,
     pub signal: ObjectHandle,
-    pub signal_state: ObjectHandle,
-    pub signal_computed: ObjectHandle,
-    pub arguments: ObjectHandle,
-    pub proxy: ObjectHandle,
+    pub signal_state: PartialIntrinsic<signal::State>,
+    pub signal_computed: PartialIntrinsic<signal::Computed>,
+    pub arguments: PartialIntrinsic<Arguments>,
+    pub proxy: PartialIntrinsic<Proxy>,
     pub intl: ObjectHandle,
-    pub intl_collator: ObjectHandle,
-    pub intl_date_time_format: ObjectHandle,
-    pub intl_display_names: ObjectHandle,
-    pub intl_duration_format: ObjectHandle,
-    pub intl_list_format: ObjectHandle,
-    pub intl_locale: ObjectHandle,
-    pub intl_number_format: ObjectHandle,
-    pub intl_plural_rules: ObjectHandle,
-    pub intl_relative_time_format: ObjectHandle,
-    pub intl_segmenter: ObjectHandle,
+    pub intl_collator: PartialIntrinsic<intl::Collator>,
+    pub intl_date_time_format: PartialIntrinsic<intl::DateTimeFormat>,
+    pub intl_display_names: PartialIntrinsic<intl::DisplayNames>,
+    pub intl_duration_format: PartialIntrinsic<intl::DurationFormat>,
+    pub intl_list_format: PartialIntrinsic<intl::ListFormat>,
+    pub intl_locale: PartialIntrinsic<intl::Locale>,
+    pub intl_number_format: PartialIntrinsic<intl::NumberFormat>,
+    pub intl_plural_rules: PartialIntrinsic<intl::PluralRules>,
+    pub intl_relative_time_format: PartialIntrinsic<intl::RelativeTimeFormat>,
+    pub intl_segmenter: PartialIntrinsic<intl::Segmenter>,
     pub throw_type_error: ObjectHandle,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
@@ -224,214 +218,50 @@ impl Intrinsics {
             proto.initialize(realm.intrinsics.func.clone(), realm)?;
         }
 
-        realm.intrinsics.array = Array::initialize(
-            realm,
-        )?;
-
         realm.intrinsics.array_iter = ArrayIterator::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone(),
             realm,
         )?;
 
-        realm.intrinsics.error = ErrorObj::initialize(
-            realm,
-        )?;
-
         realm.intrinsics.math = Math::new(realm)?;
-
-        realm.intrinsics.string = StringObj::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.number = NumberObj::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.boolean = BooleanObj::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.symbol = SymbolObj::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.bigint = BigIntObj::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.regexp = RegExp::initialize(
-            realm,
-        )?;
 
         realm.intrinsics.json = JSON::new(realm)?;
 
-        let error_constructor = realm.intrinsics
-            .error
-            .clone()
+        let error = realm.intrinsics.clone_public().error.get(realm)?.clone();
+
+        let error_constructor = error
             .resolve_property("constructor", realm)
             .unwrap_or(Value::Undefined.into())
             .unwrap_or(Value::Undefined.into())
             .to_object()?;
 
         realm.intrinsics.type_error =
-            get_type_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_type_error(error.clone(), error_constructor.clone(), realm)?;
         realm.intrinsics.range_error =
-            get_range_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_range_error(error.clone(), error_constructor.clone(), realm)?;
         realm.intrinsics.reference_error =
-            get_reference_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_reference_error(error.clone(), error_constructor.clone(), realm)?;
         realm.intrinsics.syntax_error =
-            get_syntax_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_syntax_error(error.clone(), error_constructor.clone(), realm)?;
 
         realm.intrinsics.eval_error =
-            get_eval_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_eval_error(error.clone(), error_constructor.clone(), realm)?;
 
         realm.intrinsics.uri_error =
-            get_uri_error(realm.intrinsics.error.clone().into(), error_constructor.clone(), realm)?;
+            get_uri_error(error.clone(), error_constructor.clone(), realm)?;
 
         realm.intrinsics.aggregate_error =
-            get_aggregate_error(realm.intrinsics.error.clone().into(), error_constructor, realm)?;
-
-        realm.intrinsics.arraybuffer = ArrayBuffer::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.sharedarraybuffer = SharedArrayBuffer::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.data_view = DataView::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.typed_array = TypedArray::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.int8array = Int8Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.uint8array = Uint8Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.uint8clampedarray = Uint8ClampedArray::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.int16array = Int16Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.uint16array = Uint16Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.int32array = Int32Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.uint32array = Uint32Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.float16array = Float16Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.float32array = Float32Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.float64array = Float64Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.bigint64array = BigInt64Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.biguint64array = BigUint64Array::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.atomics = Atomics::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.map = Map::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.weak_map = WeakMap::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.set = Set::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.weak_set = WeakSet::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.weak_ref = WeakRef::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.date = Date::initialize(
-            realm,
-        )?;
+            get_aggregate_error(error.clone(), error_constructor, realm)?;
 
         realm.intrinsics.reflect = Reflect::new(realm)?;
 
-        let (temporal, temporal_protos) = get_temporal(realm)?;
+        realm.intrinsics.temporal = temporal::get_temporal(realm)?;
 
-        realm.intrinsics.temporal = temporal;
-        realm.intrinsics.temporal_duration = temporal_protos.duration;
-        realm.intrinsics.temporal_instant = temporal_protos.instant;
-        realm.intrinsics.temporal_now = temporal_protos.now;
-        realm.intrinsics.temporal_plain_date = temporal_protos.plain_date;
-        realm.intrinsics.temporal_plain_time = temporal_protos.plain_time;
-        realm.intrinsics.temporal_plain_date_time = temporal_protos.plain_date_time;
-        realm.intrinsics.temporal_plain_month_day = temporal_protos.plain_month_day;
-        realm.intrinsics.temporal_plain_year_month = temporal_protos.plain_year_month;
-        realm.intrinsics.temporal_zoned_date_time = temporal_protos.zoned_date_time;
 
-        let (intl, intl_protos) =
-            crate::builtins::intl::get_intl(realm)?;
+        realm.intrinsics.intl = intl::get_intl(realm)?;
 
-        realm.intrinsics.intl = intl;
-        realm.intrinsics.intl_collator = intl_protos.collator;
-        realm.intrinsics.intl_date_time_format = intl_protos.date_time_format;
-        realm.intrinsics.intl_display_names = intl_protos.display_names;
-        realm.intrinsics.intl_duration_format = intl_protos.duration_format;
-        realm.intrinsics.intl_list_format = intl_protos.list_format;
-        realm.intrinsics.intl_locale = intl_protos.locale;
-        realm.intrinsics.intl_number_format = intl_protos.number_format;
-        realm.intrinsics.intl_plural_rules = intl_protos.plural_rules;
-        realm.intrinsics.intl_relative_time_format = intl_protos.relative_time_format;
-        realm.intrinsics.intl_segmenter = intl_protos.segmenter;
-
-        let (signal, signal_protos) =
-            crate::builtins::signal::get_signal(realm)?;
-
-        realm.intrinsics.signal = signal;
-        realm.intrinsics.signal_state = signal_protos.state;
-        realm.intrinsics.signal_computed = signal_protos.computed;
-
-        realm.intrinsics.promise = Promise::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.arguments = Arguments::initialize(
-            realm,
-        )?;
-
-        realm.intrinsics.proxy = Proxy::initialize(
-            realm,
-        )?;
+        realm.intrinsics.signal = signal::get_signal(realm)?;
 
         realm.intrinsics.throw_type_error = get_throw_type_error(realm)?;
 
@@ -455,16 +285,16 @@ impl Default for Intrinsics {
         Self {
             obj: Object::null(),
             func: Object::null(),
-            array: Object::null(),
+            array: Default::default(),
             array_iter: Object::null(),
-            error: Object::null(),
+            error: Default::default(),
             math: Object::null(),
-            string: Object::null(),
-            number: Object::null(),
-            boolean: Object::null(),
-            symbol: Object::null(),
-            bigint: Object::null(),
-            regexp: Object::null(),
+            string: Default::default(),
+            number: Default::default(),
+            boolean: Default::default(),
+            symbol: Default::default(),
+            bigint: Default::default(),
+            regexp: Default::default(),
             json: Object::null(),
             type_error: Object::null(),
             range_error: Object::null(),
@@ -474,61 +304,61 @@ impl Default for Intrinsics {
             uri_error: Object::null(),
             aggregate_error: Object::null(),
             eval: None,
-            arraybuffer: Object::null(),
-            sharedarraybuffer: Object::null(),
-            data_view: Object::null(),
-            typed_array: Object::null(),
-            int8array: Object::null(),
-            uint8array: Object::null(),
-            uint8clampedarray: Object::null(),
-            int16array: Object::null(),
-            uint16array: Object::null(),
-            int32array: Object::null(),
-            uint32array: Object::null(),
-            float16array: Object::null(),
-            float32array: Object::null(),
-            float64array: Object::null(),
-            bigint64array: Object::null(),
-            biguint64array: Object::null(),
-            atomics: Object::null(),
-            map: Object::null(),
-            weak_map: Object::null(),
-            set: Object::null(),
-            weak_set: Object::null(),
-            weak_ref: Object::null(),
-            date: Object::null(),
+            arraybuffer: Default::default(),
+            sharedarraybuffer: Default::default(),
+            data_view: Default::default(),
+            typed_array: Default::default(),
+            int8array: Default::default(),
+            uint8array: Default::default(),
+            uint8clampedarray: Default::default(),
+            int16array: Default::default(),
+            uint16array: Default::default(),
+            int32array: Default::default(),
+            uint32array: Default::default(),
+            float16array: Default::default(),
+            float32array: Default::default(),
+            float64array: Default::default(),
+            bigint64array: Default::default(),
+            biguint64array: Default::default(),
+            atomics: Default::default(),
+            map: Default::default(),
+            weak_map: Default::default(),
+            set: Default::default(),
+            weak_set: Default::default(),
+            weak_ref: Default::default(),
+            date: Default::default(),
             reflect: Object::null(),
             temporal: Object::null(),
-            temporal_duration: Object::null(),
-            temporal_instant: Object::null(),
-            temporal_now: Object::null(),
-            temporal_plain_date: Object::null(),
-            temporal_plain_time: Object::null(),
-            temporal_plain_date_time: Object::null(),
-            temporal_plain_month_day: Object::null(),
-            temporal_plain_year_month: Object::null(),
-            temporal_zoned_date_time: Object::null(),
-            promise: Object::null(),
+            temporal_duration: Default::default(),
+            temporal_instant: Default::default(),
+            temporal_now: Default::default(),
+            temporal_plain_date: Default::default(),
+            temporal_plain_time: Default::default(),
+            temporal_plain_date_time: Default::default(),
+            temporal_plain_month_day: Default::default(),
+            temporal_plain_year_month: Default::default(),
+            temporal_zoned_date_time: Default::default(),
+            promise: Default::default(),
             generator_function: Object::null(),
             generator: Object::null(),
             async_generator_function: Object::null(),
             async_generator: Object::null(),
             signal: Object::null(),
-            signal_state: Object::null(),
-            signal_computed: Object::null(),
-            arguments: Object::null(),
-            proxy: Object::null(),
+            signal_state: Default::default(),
+            signal_computed: Default::default(),
+            arguments: Default::default(),
+            proxy: Default::default(),
             intl: Object::null(),
-            intl_collator: Object::null(),
-            intl_date_time_format: Object::null(),
-            intl_display_names: Object::null(),
-            intl_duration_format: Object::null(),
-            intl_list_format: Object::null(),
-            intl_locale: Object::null(),
-            intl_number_format: Object::null(),
-            intl_plural_rules: Object::null(),
-            intl_relative_time_format: Object::null(),
-            intl_segmenter: Object::null(),
+            intl_collator: Default::default(),
+            intl_date_time_format: Default::default(),
+            intl_display_names: Default::default(),
+            intl_duration_format: Default::default(),
+            intl_list_format: Default::default(),
+            intl_locale: Default::default(),
+            intl_number_format: Default::default(),
+            intl_plural_rules: Default::default(),
+            intl_relative_time_format: Default::default(),
+            intl_segmenter: Default::default(),
             throw_type_error: Object::null(),
             other: FxHashMap::default(),
         }
@@ -537,7 +367,7 @@ impl Default for Intrinsics {
 
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct IntrinsicInitializer<T> {
+pub struct IntrinsicInitializer<T> {
     _marker: std::marker::PhantomData<T>,
 }
 

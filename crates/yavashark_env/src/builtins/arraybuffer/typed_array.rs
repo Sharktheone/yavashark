@@ -389,7 +389,7 @@ impl TypedArray {
         );
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone())),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.clone_public().typed_array.get(realm)?.clone())),
             buffer: buf,
             byte_offset,
             opt_byte_length: byte_length,
@@ -397,12 +397,12 @@ impl TypedArray {
         })
     }
 
-    pub fn from_buffer(realm: &Realm, buffer: ArrayBuffer, ty: Type) -> Res<Self> {
+    pub fn from_buffer(realm: &mut Realm, buffer: ArrayBuffer, ty: Type) -> Res<Self> {
         let buffer = buffer.into_value();
         let buffer = downcast_obj::<ArrayBuffer>(buffer)?;
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone())),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.clone_public().typed_array.get(realm)?.clone())),
             buffer,
             byte_offset: 0,
             opt_byte_length: usize::MAX,
@@ -534,7 +534,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
         }
     }
 
-    Ok(ArrayBuffer::from_buffer(realm, buffer))
+    ArrayBuffer::from_buffer(realm, buffer)
 }
 
 #[props(intrinsic_name = typed_array)]
@@ -650,7 +650,7 @@ impl TypedArray {
         Ok(this)
     }
 
-    pub fn entries(&self, #[realm] realm: &Realm) -> ValueResult {
+    pub fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let array = Array::with_elements(realm, self.to_value_vec()?)?.into_object();
 
         let iter = ArrayIterator {
@@ -988,7 +988,7 @@ impl TypedArray {
     }
 
     #[prop("keys")]
-    pub fn keys_js(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn keys_js(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let array = Array::with_elements(realm, (0..self.get_length()).map(Into::into).collect())?
             .into_object();
 
@@ -1449,7 +1449,7 @@ impl TypedArray {
     }
 
     #[prop("values")]
-    pub fn values_js(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn values_js(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let array = Array::with_elements(realm, self.to_value_vec()?)?.into_object();
 
         let iter = ArrayIterator {
@@ -1486,7 +1486,7 @@ impl TypedArray {
 
     #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
-    fn iterator(&self, #[realm] realm: &Realm) -> ValueResult {
+    fn iterator(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let array = Array::with_elements(realm, self.to_value_vec()?)?.into_object();
 
         let iter = ArrayIterator {
@@ -1505,7 +1505,7 @@ impl TypedArray {
 }
 
 fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
-    let buffer = ArrayBuffer::from_buffer(realm, bytes);
+    let buffer = ArrayBuffer::from_buffer(realm, bytes)?;
 
     let ta = TypedArray::from_buffer(realm, buffer, ty)?;
 

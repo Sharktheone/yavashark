@@ -75,7 +75,7 @@ impl Interpreter {
                 "Cannot read property '{name}' of null",
             ))),
             Value::String(s) => {
-                let str = Obj::into_object(StringObj::with_string(realm, s));
+                let str = Obj::into_object(StringObj::with_string(realm, s)?);
 
                 Ok((
                     str.resolve_property(&name, realm)?
@@ -95,7 +95,7 @@ impl Interpreter {
             }
 
             Value::Boolean(b) => {
-                let boolean = BooleanObj::new(realm, b);
+                let boolean = BooleanObj::new(realm, b)?;
 
                 Ok((
                     boolean
@@ -106,7 +106,7 @@ impl Interpreter {
             }
 
             Value::Symbol(s) => {
-                let symbol = SymbolObj::new(realm, s);
+                let symbol = SymbolObj::new(realm, s)?;
 
                 Ok((
                     symbol
@@ -117,7 +117,7 @@ impl Interpreter {
             }
 
             Value::BigInt(big_int) => {
-                let big_int = BigIntObj::new(realm, big_int);
+                let big_int = BigIntObj::new(realm, big_int)?;
 
                 Ok((
                     big_int

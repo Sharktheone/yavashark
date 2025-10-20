@@ -165,7 +165,8 @@ impl OldOwnedVM {
         if let Some(tb) = self.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {
                 self.set_pc(catch);
-                self.set_acc(ErrorObj::error_to_value(err, &self.realm));
+                let error = ErrorObj::error_to_value(err, &mut self.realm)?;
+                self.set_acc(error);
             } else if let Some(finally) = tb.finally.take() {
                 self.throw = Some(err);
                 self.set_pc(finally);

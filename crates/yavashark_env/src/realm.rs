@@ -12,12 +12,12 @@ use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
-
+use std::rc::Rc;
 pub use initialize::*;
 
-pub struct PrivateRc<T>(std::rc::Rc<T>);
+pub struct PrivateRc<T>(Rc<T>);
 
 impl<T> Deref for PrivateRc<T> {
     type Target = T;
@@ -27,8 +27,37 @@ impl<T> Deref for PrivateRc<T> {
     }
 }
 
+
+impl<T> DerefMut for PrivateRc<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Rc::get_mut(&mut self.0).expect("Multiple references exist")
+    }
+}
+
+impl<T> PrivateRc<T> {
+    #[must_use]
+    pub fn clone_public<'a>(&self) -> PublicRc<'a, T> {
+        PublicRc(self.0.clone(), std::marker::PhantomData)
+    }
+}
+
+
+pub struct PublicRc<'a, T>(Rc<T>, std::marker::PhantomData<&'a ()>);
+
+impl<'a, T> Deref for PublicRc<'a, T>
+where
+    T: 'a,
+    Self: 'a
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct Realm {
-    pub intrinsics: Intrinsics, // [[Intrinsics]]
+    pub intrinsics: PrivateRc<Intrinsics>, // [[Intrinsics]]
     pub global: ObjectHandle,   // [[GlobalObject]]
     pub env: Environment,       // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
@@ -96,7 +125,7 @@ impl Realm {
 impl Default for Realm {
     fn default() -> Self {
         Self {
-            intrinsics: Intrinsics::default(),
+            intrinsics: PrivateRc(Rc::new(Intrinsics::default())),
             global: Object::null(),
             env: Environment {
                 modules: HashMap::new(),

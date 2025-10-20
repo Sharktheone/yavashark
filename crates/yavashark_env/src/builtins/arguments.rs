@@ -15,14 +15,13 @@ pub struct Arguments {
 }
 
 impl Arguments {
-    #[must_use]
-    pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &Realm) -> Self {
-        Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.arguments.clone())),
+    pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.clone_public().arguments.get(realm)?.clone())),
             callee,
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
-        }
+        })
     }
 
     pub fn resolve_array(&self, idx: usize) -> Option<Value> {

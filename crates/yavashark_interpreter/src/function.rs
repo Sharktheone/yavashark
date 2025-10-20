@@ -200,7 +200,7 @@ impl RawJSFunction {
             Some(this.copy())
         };
 
-        let args = Arguments::new(args, caller, realm);
+        let args = Arguments::new(args, caller, realm)?;
 
         let args = ObjectHandle::new(args);
 

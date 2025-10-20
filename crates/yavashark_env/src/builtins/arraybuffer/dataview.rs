@@ -57,7 +57,7 @@ impl DataView {
 
         Ok(Self {
             inner: RefCell::new(MutableDataView {
-                object: MutObject::with_proto(realm.intrinsics.data_view.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().data_view.get(realm)?.clone()),
             }),
             byte_offset,
             buffer: buf,

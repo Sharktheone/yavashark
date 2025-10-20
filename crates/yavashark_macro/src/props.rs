@@ -390,7 +390,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             let intrinsic_get = if let Some(name) = intrinsic_name.as_ref() {
                 quote! {
-                    Ok(realm.intrinsics.#name.clone())
+                    Ok(realm.intrinsics.clone_public().#name.get(realm)?.clone())
                 }
             } else {
                         quote! {
@@ -568,7 +568,7 @@ impl Method {
                     let mut guard = None;
                     let mut def = None::<Self>;
 
-                    let this = if this.as_object() == Ok(&realm.intrinsics.#def) {
+                    let this = if this.as_object() == Ok(realm.intrinsics.clone_public().#def.get(realm)?) {
                         &*def.insert(#env::utils::ProtoDefault::#f)
                     } else {
                         let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;

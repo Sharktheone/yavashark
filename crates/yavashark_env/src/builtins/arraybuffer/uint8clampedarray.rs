@@ -10,7 +10,7 @@ pub struct Uint8ClampedArray {}
 
 impl Uint8ClampedArray {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.uint8clampedarray.clone().into(), realm)?;
+        ty.set_prototype(realm.intrinsics.clone_public().uint8clampedarray.get(realm)?.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableUint8ClampedArray {}),

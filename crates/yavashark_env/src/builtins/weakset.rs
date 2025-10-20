@@ -14,17 +14,17 @@ pub struct WeakSet {
 
 impl WeakSet {
     #[allow(unused)]
-    fn new(realm: &Realm) -> Self {
+    fn new(realm: &mut Realm) -> Res<Self> {
         Self::with_set(realm, IndexSet::new())
     }
 
-    fn with_set(realm: &Realm, set: IndexSet<WeakValue>) -> Self {
-        Self {
+    fn with_set(realm: &mut Realm, set: IndexSet<WeakValue>) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableWeakSet {
-                object: MutObject::with_proto(realm.intrinsics.weak_set.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().weak_set.get(realm)?.clone()),
                 set,
             }),
-        }
+        })
     }
 }
 
@@ -44,7 +44,7 @@ impl Constructor for WeakSetConstructor {
             }
         }
 
-        Ok(WeakSet::with_set(realm, set).into_object())
+        Ok(WeakSet::with_set(realm, set)?.into_object())
     }
 }
 
@@ -88,7 +88,7 @@ impl WeakSet {
         inner.set.shift_remove(key)
     }
 
-    fn difference(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
+    fn difference(&self, other: &Self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -104,7 +104,7 @@ impl WeakSet {
             set.insert(val.clone());
         }
 
-        Ok(Self::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set)?.into_value())
     }
 
     fn has(&self, key: &Value) -> bool {
@@ -128,7 +128,7 @@ impl WeakSet {
         Ok(Value::Undefined)
     }
 
-    fn intersection(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
+    fn intersection(&self, other: &Self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -144,7 +144,7 @@ impl WeakSet {
             set.insert(val.clone());
         }
 
-        Ok(Self::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set)?.into_value())
     }
 
     #[prop("isDisjointFrom")]
@@ -178,7 +178,7 @@ impl WeakSet {
     }
 
     #[prop("symmetricDifference")]
-    fn symmetric_difference(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
+    fn symmetric_difference(&self, other: &Self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -194,7 +194,7 @@ impl WeakSet {
             set.insert(val.clone());
         }
 
-        Ok(Self::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set)?.into_value())
     }
 
     #[get("size")]

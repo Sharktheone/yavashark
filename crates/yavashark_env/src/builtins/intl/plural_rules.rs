@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -9,12 +9,12 @@ use yavashark_macro::{object, props};
 pub struct PluralRules {}
 
 impl PluralRules {
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutablePluralRules {
-                object: MutObject::with_proto(realm.intrinsics.intl_plural_rules.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_plural_rules.get(realm)?.clone()),
             }),
-        }
+        })
     }
 }
 
@@ -25,17 +25,17 @@ impl PluralRules {
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> ObjectHandle {
-        Self::new(realm).into_object()
+    ) -> Res<ObjectHandle> {
+        Ok(Self::new(realm)?.into_object())
     }
 
     #[prop("supportedLocalesOf")]
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &Realm,
-    ) -> ObjectHandle {
-        Array::from_realm(realm).into_object()
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     #[prop("resolvedOptions")]

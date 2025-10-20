@@ -17,27 +17,27 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(value: Value, realm: &Realm) -> Self {
-        Self {
+    pub fn new(value: Value, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableState {
-                object: MutObject::with_proto(realm.intrinsics.signal_state.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().signal_state.get(realm)?.clone()),
                 value,
                 dependents: Vec::new(),
             }),
-        }
+        })
     }
 }
 
 #[props(intrinsic_name = signal_state)]
 impl State {
     #[constructor]
-    pub fn construct(value: Value, _options: Option<ObjectHandle>, realm: &Realm) -> ObjectHandle {
-        let state = Self::new(value, realm);
+    pub fn construct(value: Value, _options: Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
+        let state = Self::new(value, realm)?;
 
-        state.into_object()
+        Ok(state.into_object())
     }
 
-    pub fn get(&self, realm: &Realm, this: Value) -> Res<Value> {
+    pub fn get(&self, realm: &mut Realm, this: Value) -> Res<Value> {
         let computed_proto = Computed::get_proto(realm)?;
 
         if let Some(current_dep) = &*computed_proto.current_dep.borrow() {

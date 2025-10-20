@@ -26,7 +26,7 @@ macro_rules! error {
                             Ok(x.to_string(realm)?.to_string())
                         })?;
 
-                    let obj = ErrorObj::raw(Error::$create(msg), realm);
+                    let obj = ErrorObj::raw(Error::$create(msg), realm)?;
 
                     Ok(obj.into_object())
                 },

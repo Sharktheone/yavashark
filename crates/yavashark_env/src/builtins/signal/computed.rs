@@ -22,7 +22,7 @@ pub struct Computed {
 }
 
 impl Computed {
-    pub fn new(compute_fn: ObjectHandle, realm: &Realm) -> Res<Self> {
+    pub fn new(compute_fn: ObjectHandle, realm: &mut Realm) -> Res<Self> {
         if !compute_fn.is_callable() {
             return Err(Error::ty(
                 "Computed constructor expects a function as the first argument",
@@ -31,7 +31,7 @@ impl Computed {
 
         Ok(Self {
             inner: RefCell::new(MutableComputed {
-                object: MutObject::with_proto(realm.intrinsics.signal_computed.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().signal_computed.get(realm)?.clone()),
                 value: Value::Undefined,
                 dependents: Vec::new(),
             }),
@@ -41,8 +41,8 @@ impl Computed {
         })
     }
 
-    pub fn get_proto(realm: &Realm) -> Res<GCd<ComputedProtoObj>> {
-        let proto = &realm.intrinsics.signal_computed;
+    pub fn get_proto(realm: &mut Realm) -> Res<GCd<ComputedProtoObj>> {
+        let proto = realm.intrinsics.clone_public().signal_computed.get(realm)?.clone();
 
         proto
             .downcast::<ComputedProtoObj>()
@@ -123,7 +123,7 @@ impl crate::value::ObjectImpl for ComputedProtoObj {
 #[props(intrinsic_name = signal_computed, override_object=ComputedProtoObj)]
 impl Computed {
     #[constructor]
-    pub fn construct(cb: ObjectHandle, realm: &Realm) -> Res<ObjectHandle> {
+    pub fn construct(cb: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let obj = Self::new(cb, realm)?;
 
         Ok(obj.into_object())
