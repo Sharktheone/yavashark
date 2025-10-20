@@ -334,7 +334,7 @@ impl ObjectImpl for Arguments {
 impl Arguments {
     #[prop(crate::Symbol::ITERATOR)]
     #[nonstatic]
-    fn iterator(realm: &Realm, this: Value) -> ValueResult {
+    fn iterator(realm: &mut Realm, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(crate::Error::ty_error(format!(
                 "Expected object, found {this:?}"
@@ -343,7 +343,7 @@ impl Arguments {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: obj,
             next: Cell::new(0),

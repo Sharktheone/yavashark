@@ -32,7 +32,7 @@ pub struct Intrinsics {
     pub obj: ObjectHandle,
     pub func: ObjectHandle,
     pub array: PartialIntrinsic<Array>,
-    pub array_iter: ObjectHandle,
+    pub array_iter: PartialIntrinsic<ArrayIterator>,
     pub error: PartialIntrinsic<ErrorObj>,
     pub string: PartialIntrinsic<StringObj>,
     pub number: PartialIntrinsic<NumberObj>,
@@ -164,12 +164,6 @@ impl Intrinsics {
             proto.initialize(realm.intrinsics.func.clone(), realm)?;
         }
 
-        realm.intrinsics.array_iter = ArrayIterator::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone(),
-            realm,
-        )?;
-
         Ok(())
     }
 
@@ -191,7 +185,7 @@ impl Default for Intrinsics {
             obj: Object::null(),
             func: Object::null(),
             array: Default::default(),
-            array_iter: Object::null(),
+            array_iter: Default::default(),
             error: Default::default(),
             string: Default::default(),
             number: Default::default(),

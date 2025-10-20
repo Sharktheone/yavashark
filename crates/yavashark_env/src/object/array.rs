@@ -1,6 +1,6 @@
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::object::Object;
-use crate::realm::Realm;
+use crate::realm::{Intrinsic, Realm};
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{
@@ -527,7 +527,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -980,7 +980,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -1500,7 +1500,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -1535,14 +1535,14 @@ impl Array {
 
     #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
-    fn iterator(&self, #[realm] realm: &Realm, #[this] this: Value) -> ValueResult {
+    fn iterator(&self, #[realm] realm: &mut Realm, #[this] this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1556,14 +1556,14 @@ impl Array {
 
     #[prop(crate::Symbol::ASYNC_ITERATOR)]
     #[allow(clippy::unused_self)]
-    fn iterator_async(&self, #[realm] realm: &Realm, #[this] this: Value) -> ValueResult {
+    fn iterator_async(&self, #[realm] realm: &mut Realm, #[this] this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1822,5 +1822,19 @@ impl ArrayIterator {
         obj.define_property("done".into(), Value::Boolean(self.done.get()), realm)?;
 
         Ok(obj.into())
+    }
+}
+
+impl Intrinsic for ArrayIterator {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Self::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone(),
+            realm,
+        )
+    }
+
+    fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(realm.intrinsics.clone_public().array_iter.get(realm)?.clone())
     }
 }
