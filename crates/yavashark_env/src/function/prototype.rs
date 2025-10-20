@@ -548,9 +548,11 @@ impl Obj for FunctionPrototype {
     ) -> Res<Option<PropertyDescriptor>> {
 
         if matches!(name, InternalPropertyKey::String(ref n) if n.as_str() == "caller") {
+            let throw_type_error = realm.intrinsics.clone_public().throw_type_error.get(realm)?.clone();
+
             return Ok(Some(PropertyDescriptor::Accessor {
-                get: Some(realm.intrinsics.throw_type_error.clone()),
-                set: Some(realm.intrinsics.throw_type_error.clone()),
+                get: Some(throw_type_error.clone()),
+                set: Some(throw_type_error),
                 enumerable: false,
                 configurable: true,
             }));

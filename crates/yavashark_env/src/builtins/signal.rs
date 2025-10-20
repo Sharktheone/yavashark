@@ -10,8 +10,17 @@ use yavashark_garbage::Gc;
 
 pub use computed::*;
 pub use state::*;
+use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
 
+
+pub struct Signal;
+
+impl Initializer<ObjectHandle> for Signal {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        get_signal(realm)
+    }
+}
 
 
 pub fn get_signal(

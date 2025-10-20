@@ -4,6 +4,7 @@ use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
 
 #[object]
@@ -151,5 +152,12 @@ impl JSON {
             || Ok(Value::Undefined),
             |value| Ok(serde_json::to_string(&value).unwrap_or_default().into()),
         )
+    }
+}
+
+
+impl Initializer<ObjectHandle> for JSON {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        JSON::new(realm)
     }
 }

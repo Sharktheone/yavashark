@@ -5,10 +5,13 @@ use num_traits::One;
 use std::cell::RefCell;
 use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
+use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
 pub struct Math {}
+
+
 
 impl Math {
     #[allow(clippy::new_ret_no_self)]
@@ -288,5 +291,11 @@ fn float_min(left: f64, right: f64) -> f64 {
         }
     } else {
         left + right
+    }
+}
+
+impl Initializer<ObjectHandle> for Math {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Math::new(realm)
     }
 }

@@ -15,7 +15,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, Arguments, Atomics, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON};
+use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, AggregateError, Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet, JSON};
 use crate::error_obj::ErrorObj;
 use crate::{
     Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value,
@@ -34,21 +34,19 @@ pub struct Intrinsics {
     pub array: PartialIntrinsic<Array>,
     pub array_iter: ObjectHandle,
     pub error: PartialIntrinsic<ErrorObj>,
-    pub math: ObjectHandle,
     pub string: PartialIntrinsic<StringObj>,
     pub number: PartialIntrinsic<NumberObj>,
     pub boolean: PartialIntrinsic<BooleanObj>,
     pub symbol: PartialIntrinsic<SymbolObj>,
     pub bigint: PartialIntrinsic<BigIntObj>,
     pub regexp: PartialIntrinsic<RegExp>,
-    pub json: ObjectHandle,
-    pub type_error: ObjectHandle,
-    pub range_error: ObjectHandle,
-    pub reference_error: ObjectHandle,
-    pub syntax_error: ObjectHandle,
-    pub eval_error: ObjectHandle,
-    pub uri_error: ObjectHandle,
-    pub aggregate_error: ObjectHandle,
+    pub ty_error: PartialIntrinsic<TypeError>,
+    pub range_error: PartialIntrinsic<RangeError>,
+    pub reference_error: PartialIntrinsic<ReferenceError>,
+    pub syn_error: PartialIntrinsic<SyntaxError>,
+    pub eval_error: PartialIntrinsic<EvalError>,
+    pub uri_error: PartialIntrinsic<URIError>,
+    pub aggregate_error: PartialIntrinsic<AggregateError>,
     pub eval: Option<ObjectHandle>,
     pub arraybuffer: PartialIntrinsic<ArrayBuffer>,
     pub sharedarraybuffer: PartialIntrinsic<SharedArrayBuffer>,
@@ -73,8 +71,6 @@ pub struct Intrinsics {
     pub weak_set: PartialIntrinsic<WeakSet>,
     pub weak_ref: PartialIntrinsic<WeakRef>,
     pub date: PartialIntrinsic<Date>,
-    pub reflect: ObjectHandle,
-    pub temporal: ObjectHandle,
     pub temporal_duration: PartialIntrinsic<temporal::Duration>,
     pub temporal_instant: PartialIntrinsic<temporal::Instant>,
     pub temporal_now: PartialIntrinsic<temporal::Now>,
@@ -89,12 +85,10 @@ pub struct Intrinsics {
     pub generator: ObjectHandle,
     pub async_generator: ObjectHandle,
     pub async_generator_function: ObjectHandle,
-    pub signal: ObjectHandle,
     pub signal_state: PartialIntrinsic<signal::State>,
     pub signal_computed: PartialIntrinsic<signal::Computed>,
     pub arguments: PartialIntrinsic<Arguments>,
     pub proxy: PartialIntrinsic<Proxy>,
-    pub intl: ObjectHandle,
     pub intl_collator: PartialIntrinsic<intl::Collator>,
     pub intl_date_time_format: PartialIntrinsic<intl::DateTimeFormat>,
     pub intl_display_names: PartialIntrinsic<intl::DisplayNames>,
@@ -105,7 +99,7 @@ pub struct Intrinsics {
     pub intl_plural_rules: PartialIntrinsic<intl::PluralRules>,
     pub intl_relative_time_format: PartialIntrinsic<intl::RelativeTimeFormat>,
     pub intl_segmenter: PartialIntrinsic<intl::Segmenter>,
-    pub throw_type_error: ObjectHandle,
+    pub throw_type_error: Partial<ObjectHandle, ThrowTypeError>,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -138,54 +132,6 @@ macro_rules! obj {
 impl Intrinsics {
     constructor!(obj);
     constructor!(func);
-//     constructor!(array);
-//     constructor!(array_iter);
-//     constructor!(error);
-//     constructor!(string);
-//     constructor!(number);
-//     constructor!(boolean);
-//     constructor!(symbol);
-//     constructor!(bigint);
-//     constructor!(regexp);
-    constructor!(type_error);
-    constructor!(range_error);
-    constructor!(reference_error);
-    constructor!(syntax_error);
-    constructor!(eval_error);
-    constructor!(uri_error);
-    constructor!(aggregate_error);
-//     constructor!(arraybuffer);
-//     constructor!(sharedarraybuffer);
-//     constructor!(data_view);
-//     constructor!(typed_array);
-//     constructor!(int8array);
-//     constructor!(uint8array);
-//     constructor!(uint8clampedarray);
-//     constructor!(int16array);
-//     constructor!(uint16array);
-//     constructor!(int32array);
-//     constructor!(uint32array);
-//     constructor!(float16array);
-//     constructor!(float32array);
-//     constructor!(float64array);
-//     constructor!(bigint64array);
-//     constructor!(biguint64array);
-//     constructor!(map);
-//     constructor!(weak_map);
-//     constructor!(set);
-//     constructor!(weak_set);
-//     constructor!(weak_ref);
-//     constructor!(date);
-//     constructor!(promise);
-//     constructor!(proxy);
-//     constructor!(atomics);
-//
-    obj!(json);
-    obj!(math);
-    obj!(reflect);
-    obj!(temporal);
-    obj!(signal);
-    obj!(intl);
 }
 
 #[allow(clippy::similar_names)]
@@ -224,47 +170,6 @@ impl Intrinsics {
             realm,
         )?;
 
-        realm.intrinsics.math = Math::new(realm)?;
-
-        realm.intrinsics.json = JSON::new(realm)?;
-
-        let error = realm.intrinsics.clone_public().error.get(realm)?.clone();
-
-        let error_constructor = error
-            .resolve_property("constructor", realm)
-            .unwrap_or(Value::Undefined.into())
-            .unwrap_or(Value::Undefined.into())
-            .to_object()?;
-
-        realm.intrinsics.type_error =
-            get_type_error(error.clone(), error_constructor.clone(), realm)?;
-        realm.intrinsics.range_error =
-            get_range_error(error.clone(), error_constructor.clone(), realm)?;
-        realm.intrinsics.reference_error =
-            get_reference_error(error.clone(), error_constructor.clone(), realm)?;
-        realm.intrinsics.syntax_error =
-            get_syntax_error(error.clone(), error_constructor.clone(), realm)?;
-
-        realm.intrinsics.eval_error =
-            get_eval_error(error.clone(), error_constructor.clone(), realm)?;
-
-        realm.intrinsics.uri_error =
-            get_uri_error(error.clone(), error_constructor.clone(), realm)?;
-
-        realm.intrinsics.aggregate_error =
-            get_aggregate_error(error.clone(), error_constructor, realm)?;
-
-        realm.intrinsics.reflect = Reflect::new(realm)?;
-
-        realm.intrinsics.temporal = temporal::get_temporal(realm)?;
-
-
-        realm.intrinsics.intl = intl::get_intl(realm)?;
-
-        realm.intrinsics.signal = signal::get_signal(realm)?;
-
-        realm.intrinsics.throw_type_error = get_throw_type_error(realm)?;
-
         Ok(())
     }
 
@@ -288,21 +193,19 @@ impl Default for Intrinsics {
             array: Default::default(),
             array_iter: Object::null(),
             error: Default::default(),
-            math: Object::null(),
             string: Default::default(),
             number: Default::default(),
             boolean: Default::default(),
             symbol: Default::default(),
             bigint: Default::default(),
             regexp: Default::default(),
-            json: Object::null(),
-            type_error: Object::null(),
-            range_error: Object::null(),
-            reference_error: Object::null(),
-            syntax_error: Object::null(),
-            eval_error: Object::null(),
-            uri_error: Object::null(),
-            aggregate_error: Object::null(),
+            ty_error: Default::default(),
+            range_error: Default::default(),
+            reference_error: Default::default(),
+            syn_error: Default::default(),
+            eval_error: Default::default(),
+            uri_error: Default::default(),
+            aggregate_error: Default::default(),
             eval: None,
             arraybuffer: Default::default(),
             sharedarraybuffer: Default::default(),
@@ -327,8 +230,6 @@ impl Default for Intrinsics {
             weak_set: Default::default(),
             weak_ref: Default::default(),
             date: Default::default(),
-            reflect: Object::null(),
-            temporal: Object::null(),
             temporal_duration: Default::default(),
             temporal_instant: Default::default(),
             temporal_now: Default::default(),
@@ -343,12 +244,10 @@ impl Default for Intrinsics {
             generator: Object::null(),
             async_generator_function: Object::null(),
             async_generator: Object::null(),
-            signal: Object::null(),
             signal_state: Default::default(),
             signal_computed: Default::default(),
             arguments: Default::default(),
             proxy: Default::default(),
-            intl: Object::null(),
             intl_collator: Default::default(),
             intl_date_time_format: Default::default(),
             intl_display_names: Default::default(),
@@ -359,7 +258,7 @@ impl Default for Intrinsics {
             intl_plural_rules: Default::default(),
             intl_relative_time_format: Default::default(),
             intl_segmenter: Default::default(),
-            throw_type_error: Object::null(),
+            throw_type_error: Default::default(),
             other: FxHashMap::default(),
         }
     }

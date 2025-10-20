@@ -16,15 +16,14 @@ pub struct ErrorObj {
 
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use]
     pub fn new(error: Error, realm: &mut Realm) -> Res<ObjectHandle> {
         let proto = match &error.kind {
-            ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
-            ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
-            ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
-            ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
-            ErrorKind::Eval(_) => realm.intrinsics.eval_error.clone(),
-            ErrorKind::URI(_) => realm.intrinsics.uri_error.clone(),
+            ErrorKind::Type(_) => realm.intrinsics.clone_public().ty_error.get(realm)?.clone(),
+            ErrorKind::Reference(_) => realm.intrinsics.clone_public().reference_error.get(realm)?.clone(),
+            ErrorKind::Range(_) => realm.intrinsics.clone_public().range_error.get(realm)?.clone(),
+            ErrorKind::Syntax(_) => realm.intrinsics.clone_public().syn_error.get(realm)?.clone(),
+            ErrorKind::Eval(_) => realm.intrinsics.clone_public().eval_error.get(realm)?.clone(),
+            ErrorKind::URI(_) => realm.intrinsics.clone_public().uri_error.get(realm)?.clone(),
             _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
         };
 
@@ -58,12 +57,12 @@ impl ErrorObj {
 
     pub fn raw(error: Error, realm: &mut Realm) -> Res<Self> {
         let proto = match &error.kind {
-            ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
-            ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
-            ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
-            ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
-            ErrorKind::Eval(_) => realm.intrinsics.eval_error.clone(),
-            ErrorKind::URI(_) => realm.intrinsics.uri_error.clone(),
+            ErrorKind::Type(_) => realm.intrinsics.clone_public().ty_error.get(realm)?.clone(),
+            ErrorKind::Reference(_) => realm.intrinsics.clone_public().reference_error.get(realm)?.clone(),
+            ErrorKind::Range(_) => realm.intrinsics.clone_public().range_error.get(realm)?.clone(),
+            ErrorKind::Syntax(_) => realm.intrinsics.clone_public().syn_error.get(realm)?.clone(),
+            ErrorKind::Eval(_) => realm.intrinsics.clone_public().eval_error.get(realm)?.clone(),
+            ErrorKind::URI(_) => realm.intrinsics.clone_public().uri_error.get(realm)?.clone(),
             _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
         };
 

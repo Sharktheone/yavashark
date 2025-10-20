@@ -1,11 +1,21 @@
 use crate::conversion::FromValueOutput;
 use crate::{Error, Realm, Res, Value};
 use std::cell::{Cell, RefCell, UnsafeCell};
+use std::fmt::Debug;
 
-#[derive(Debug)]
 pub struct Partial<T, I> {
     value: UnsafeCell<Option<T>>,
     _init: std::marker::PhantomData<I>,
+}
+
+impl<T: Debug, I> Debug for Partial<T, I> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        unsafe {
+            f.debug_struct("Partial")
+                .field("value", &*self.value.get())
+                .finish()
+        }
+    }
 }
 
 impl<T, I> Default for Partial<T, I> {

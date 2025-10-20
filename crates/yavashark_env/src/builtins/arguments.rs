@@ -129,7 +129,7 @@ impl ObjectImpl for Arguments {
             if s == "callee" {
                 let Some(callee) = &self.callee else {
                     return Ok(Some(Property::Getter(
-                        realm.intrinsics.throw_type_error.clone(),
+                        realm.intrinsics.clone_public().throw_type_error.get(realm)?.clone(),
                         Attributes::from_values(false, false, false),
                     )))
                 };
@@ -163,7 +163,7 @@ impl ObjectImpl for Arguments {
             if s == "callee" {
                 let Some(callee) = &self.callee else {
                     return Ok(Some(Property::Getter(
-                        realm.intrinsics.throw_type_error.clone(),
+                        realm.intrinsics.clone_public().throw_type_error.get(realm)?.clone(),
                         Attributes::from_values(false, false, false),
                     )))
                 };

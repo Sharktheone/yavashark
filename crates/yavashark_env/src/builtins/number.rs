@@ -6,6 +6,7 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
+use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
@@ -510,6 +511,14 @@ pub fn get_is_nan(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+pub struct IsNan;
+
+impl Initializer<ObjectHandle> for IsNan {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_is_nan(realm))
+    }
+}
+
 #[must_use]
 pub fn get_is_finite(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -524,6 +533,15 @@ pub fn get_is_finite(realm: &mut Realm) -> ObjectHandle {
         realm,
         1,
     )
+}
+
+#[derive(Debug)]
+pub struct IsFinite;
+
+impl Initializer<ObjectHandle> for IsFinite {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_is_finite(realm))
+    }
 }
 
 #[must_use]
@@ -548,6 +566,14 @@ pub fn get_parse_int(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+pub struct ParseInt;
+
+impl Initializer<ObjectHandle> for ParseInt {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_parse_int(realm))
+    }
+}
+
 #[must_use]
 pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -564,3 +590,12 @@ pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
         1,
     )
 }
+
+pub struct ParseFloat;
+
+impl Initializer<ObjectHandle> for ParseFloat {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_parse_float(realm))
+    }
+}
+

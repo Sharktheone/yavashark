@@ -11,6 +11,7 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use std::mem;
 use yavashark_garbage::GcRef;
+use crate::partial_init::Initializer;
 
 pub mod array;
 pub mod constructor;

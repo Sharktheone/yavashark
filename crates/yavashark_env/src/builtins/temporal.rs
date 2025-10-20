@@ -20,6 +20,7 @@ pub use crate::builtins::temporal::plain_year_month::*;
 pub use crate::builtins::temporal::zoned_date_time::*;
 
 use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value, Variable};
+use crate::partial_init::Initializer;
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
     Variable::write_config(
@@ -28,6 +29,14 @@ fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
             .flatten()
             .unwrap_or(Value::Undefined),
     )
+}
+
+pub struct Temporal;
+
+impl Initializer<ObjectHandle> for Temporal {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        get_temporal(realm)
+    }
 }
 
 pub fn get_temporal(

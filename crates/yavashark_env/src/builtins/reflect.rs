@@ -7,6 +7,7 @@ use crate::{
 };
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
@@ -221,5 +222,11 @@ impl Reflect {
         };
 
         Ok(target.set_prototype(proto, realm).is_ok())
+    }
+}
+
+impl Initializer<ObjectHandle> for Reflect {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Reflect::new(realm)
     }
 }

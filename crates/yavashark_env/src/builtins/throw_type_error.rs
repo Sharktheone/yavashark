@@ -1,4 +1,5 @@
 use crate::{Error, NativeFunction, ObjectHandle, Realm, Res};
+use crate::partial_init::Initializer;
 
 pub fn get_throw_type_error(
     realm: &mut Realm,
@@ -9,4 +10,12 @@ pub fn get_throw_type_error(
 
 
     Ok(throw_type_error)
+}
+
+pub struct ThrowTypeError;
+
+impl Initializer<ObjectHandle> for ThrowTypeError {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        get_throw_type_error(realm)
+    }
 }

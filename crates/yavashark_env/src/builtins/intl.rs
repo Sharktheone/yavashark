@@ -26,6 +26,15 @@ pub use segmenter::*;
 pub use supported_values_of::*;
 
 use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
+use crate::partial_init::Initializer;
+
+pub struct Intl;
+
+impl Initializer<ObjectHandle> for Intl {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        get_intl(realm)
+    }
+}
 
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
