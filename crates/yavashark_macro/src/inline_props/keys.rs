@@ -196,7 +196,6 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
             }
         };
 
-
         prop_items.push(value_expr);
     }
 

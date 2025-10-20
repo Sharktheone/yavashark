@@ -11,7 +11,14 @@ impl Locale {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableLocale {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_locale.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_locale
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }

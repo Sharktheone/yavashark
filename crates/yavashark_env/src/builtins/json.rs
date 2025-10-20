@@ -1,11 +1,11 @@
 use crate::array::Array;
+use crate::partial_init::Initializer;
+use crate::realm::Intrinsic;
 use crate::value::{Hint, IntoValue, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use crate::partial_init::Initializer;
-use crate::realm::Intrinsic;
 
 #[object]
 #[derive(Debug)]
@@ -154,7 +154,6 @@ impl JSON {
         )
     }
 }
-
 
 impl Initializer<ObjectHandle> for JSON {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {

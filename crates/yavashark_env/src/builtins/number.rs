@@ -1,3 +1,4 @@
+use crate::partial_init::Initializer;
 use crate::utils::ProtoDefault;
 use crate::value::{fmt_num, Constructor, Func, Obj};
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
@@ -6,7 +7,6 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
@@ -20,7 +20,9 @@ impl ProtoDefault for NumberObj {
     fn proto_default(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().number.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().number.get(realm)?.clone(),
+                ),
                 number: 0.0,
             }),
         })
@@ -180,7 +182,9 @@ impl NumberObj {
     pub fn with_number(realm: &mut Realm, number: impl Into<f64>) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().number.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().number.get(realm)?.clone(),
+                ),
                 number: number.into(),
             }),
         };
@@ -189,7 +193,11 @@ impl NumberObj {
     }
 }
 
-#[properties_new(intrinsic_name(number), default_null(number), constructor(NumberConstructor::new))]
+#[properties_new(
+    intrinsic_name(number),
+    default_null(number),
+    constructor(NumberConstructor::new)
+)]
 impl NumberObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> Res<YSString> {
@@ -598,4 +606,3 @@ impl Initializer<ObjectHandle> for ParseFloat {
         Ok(get_parse_float(realm))
     }
 }
-

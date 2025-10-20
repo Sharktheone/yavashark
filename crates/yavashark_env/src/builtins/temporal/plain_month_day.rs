@@ -24,7 +24,14 @@ impl PlainMonthDay {
     pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &mut crate::Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePlainMonthDay {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_month_day.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_month_day
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             month_day,
         })

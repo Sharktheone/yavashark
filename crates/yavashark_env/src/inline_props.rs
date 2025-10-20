@@ -1,9 +1,9 @@
-use std::cell::RefCell;
-use std::fmt::Debug;
-use std::ops::{Deref, DerefMut};
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property};
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
+use std::cell::RefCell;
+use std::fmt::Debug;
+use std::ops::{Deref, DerefMut};
 use yavashark_garbage::GcRef;
 
 pub enum UpdatePropertyResult {
@@ -45,17 +45,13 @@ pub trait PropertiesHook {
     fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
 }
 
-
-
-
-
 #[derive(Debug)]
 pub struct InlineObject<P> {
     pub props: P,
     pub inner: RefCell<MutObject>,
 }
 
-impl <P: PropertiesHook + Debug + 'static> InlineObject<P> {
+impl<P: PropertiesHook + Debug + 'static> InlineObject<P> {
     pub const fn with_inner(props: P, inner: MutObject) -> Self {
         Self {
             props,
@@ -178,7 +174,6 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let mut result = self.get_wrapped_object().properties(realm)?;
 
-
         let inline = self.props.properties(realm)?.collect::<Vec<_>>();
 
         for (key, prop) in inline {
@@ -254,6 +249,5 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         inner_refs.extend(props_refs);
 
         inner_refs
-
     }
 }

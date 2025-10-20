@@ -23,7 +23,14 @@ impl PlainYearMonth {
     pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePlainYearMonth {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_year_month.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_year_month
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             year_month,
         })

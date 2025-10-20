@@ -10,12 +10,12 @@ use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
 use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
+pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::rc::Rc;
-pub use initialize::*;
 
 pub struct PrivateRc<T>(Rc<T>);
 
@@ -26,7 +26,6 @@ impl<T> Deref for PrivateRc<T> {
         &self.0
     }
 }
-
 
 impl<T> DerefMut for PrivateRc<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
@@ -41,13 +40,12 @@ impl<T> PrivateRc<T> {
     }
 }
 
-
 pub struct PublicRc<'a, T>(Rc<T>, std::marker::PhantomData<&'a ()>);
 
 impl<'a, T> Deref for PublicRc<'a, T>
 where
     T: 'a,
-    Self: 'a
+    Self: 'a,
 {
     type Target = T;
 
@@ -58,15 +56,14 @@ where
 
 pub struct Realm {
     pub intrinsics: PrivateRc<Intrinsics>, // [[Intrinsics]]
-    pub global: ObjectHandle,   // [[GlobalObject]]
-    pub env: Environment,       // [[GlobalEnv]]
+    pub global: ObjectHandle,              // [[GlobalObject]]
+    pub env: Environment,                  // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
 }
 
 impl Debug for Realm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Realm")
-            .finish()
+        f.debug_struct("Realm").finish()
     }
 }
 

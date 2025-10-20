@@ -70,7 +70,9 @@ impl Interpreter {
                         }
 
                         if elems.is_empty() && scope.is_strict_mode()? {
-                            return Err(Error::reference("Cannot destructure empty array in strict mode"));
+                            return Err(Error::reference(
+                                "Cannot destructure empty array in strict mode",
+                            ));
                         }
 
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
@@ -81,7 +83,9 @@ impl Interpreter {
                         } else {
                             is_finished = true;
                             if scope.is_strict_mode()? {
-                                return Err(Error::reference("Cannot destructure empty array in strict mode"));
+                                return Err(Error::reference(
+                                    "Cannot destructure empty array in strict mode",
+                                ));
                             }
 
                             Value::Undefined
@@ -118,8 +122,7 @@ impl Interpreter {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
-                            let value = object
-                                .get_property_opt(key.clone(), realm)?;
+                            let value = object.get_property_opt(key.clone(), realm)?;
 
                             let mut value = if let Some(value) = value {
                                 value

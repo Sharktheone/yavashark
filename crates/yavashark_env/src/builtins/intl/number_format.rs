@@ -38,7 +38,14 @@ impl NumberFormat {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableNumberFormat {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_number_format.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_number_format
+                        .get(realm)?
+                        .clone(),
+                ),
                 initialized: false,
                 locale: DEFAULT_LOCALE.to_string(),
                 style: STYLE_DECIMAL.to_string(),

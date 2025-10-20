@@ -26,7 +26,14 @@ impl PlainDateTime {
     pub fn new(date: temporal_rs::PlainDateTime, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_date_time.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_date_time
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             date,
         })

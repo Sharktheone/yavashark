@@ -13,7 +13,9 @@ impl WeakRef {
     pub fn new(handle: WeakObjectHandle, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableWeakRef {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().weak_ref.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().weak_ref.get(realm)?.clone(),
+                ),
             }),
             handle,
         })

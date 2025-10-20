@@ -23,7 +23,9 @@ impl ProtoDefault for BooleanObj {
     fn proto_default(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().boolean.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().boolean.get(realm)?.clone(),
+                ),
                 boolean: false,
             }),
         })
@@ -92,7 +94,9 @@ impl BooleanObj {
     pub fn new(realm: &mut Realm, boolean: bool) -> Res<ObjectHandle> {
         Ok(Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().boolean.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().boolean.get(realm)?.clone(),
+                ),
                 boolean,
             }),
         }
@@ -100,7 +104,11 @@ impl BooleanObj {
     }
 }
 
-#[properties_new(intrinsic_name(boolean), default_null(boolean), constructor(BooleanConstructor::new))]
+#[properties_new(
+    intrinsic_name(boolean),
+    default_null(boolean),
+    constructor(BooleanConstructor::new)
+)]
 impl BooleanObj {
     #[prop("valueOf")]
     fn value_of(&self) -> bool {

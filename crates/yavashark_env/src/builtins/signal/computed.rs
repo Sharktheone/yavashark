@@ -31,7 +31,14 @@ impl Computed {
 
         Ok(Self {
             inner: RefCell::new(MutableComputed {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().signal_computed.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .signal_computed
+                        .get(realm)?
+                        .clone(),
+                ),
                 value: Value::Undefined,
                 dependents: Vec::new(),
             }),
@@ -42,7 +49,12 @@ impl Computed {
     }
 
     pub fn get_proto(realm: &mut Realm) -> Res<GCd<ComputedProtoObj>> {
-        let proto = realm.intrinsics.clone_public().signal_computed.get(realm)?.clone();
+        let proto = realm
+            .intrinsics
+            .clone_public()
+            .signal_computed
+            .get(realm)?
+            .clone();
 
         proto
             .downcast::<ComputedProtoObj>()

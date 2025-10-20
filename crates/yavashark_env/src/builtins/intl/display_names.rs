@@ -12,7 +12,14 @@ impl DisplayNames {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableDisplayNames {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_display_names.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_display_names
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }

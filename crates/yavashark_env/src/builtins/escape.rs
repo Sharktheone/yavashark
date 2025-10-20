@@ -1,9 +1,9 @@
 use crate::error::Error;
+use crate::partial_init::Initializer;
 use crate::{NativeFunction, ObjectHandle, Realm, Res, ValueResult};
 use std::fmt::Write;
 use std::iter::Peekable;
 use std::str::Chars;
-use crate::partial_init::Initializer;
 
 #[must_use]
 pub fn get_escape(realm: &mut Realm) -> ObjectHandle {

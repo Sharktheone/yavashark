@@ -132,7 +132,9 @@ impl SymbolObj {
     pub fn new(realm: &mut Realm, symbol: Symbol) -> Res<ObjectHandle> {
         Ok(Self {
             inner: RefCell::new(MutableSymbolObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().symbol.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().symbol.get(realm)?.clone(),
+                ),
                 symbol,
             }),
         }

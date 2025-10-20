@@ -56,12 +56,10 @@ impl Interpreter {
         false
     }
 
-
     pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> Res<Value> {
         if Self::is_strict(script) {
             scope.set_strict_mode()?;
         }
-
 
         Self::run_statements(realm, script, scope).or_else(|e| match e {
             ControlFlow::Error(e) => Err(e),

@@ -33,7 +33,14 @@ impl ZonedDateTime {
     pub fn new(date: temporal_rs::ZonedDateTime, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableZonedDateTime {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_zoned_date_time.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_zoned_date_time
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             date,
         })

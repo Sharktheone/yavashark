@@ -24,7 +24,7 @@ impl<T, I> Default for Partial<T, I> {
     }
 }
 
-impl <T, I> Partial<T, I> {
+impl<T, I> Partial<T, I> {
     pub const fn new() -> Self {
         Self {
             value: UnsafeCell::new(None),
@@ -39,7 +39,6 @@ impl <T, I> Partial<T, I> {
     pub fn get_opt(&self) -> Option<&T> {
         unsafe { (*self.value.get()).as_ref() }
     }
-
 
     pub fn set(&self, value: T) -> Option<T> {
         unsafe {

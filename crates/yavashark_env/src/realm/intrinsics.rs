@@ -15,18 +15,21 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, AggregateError, Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet, JSON};
-use crate::error_obj::ErrorObj;
-use crate::{
-    Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value,
+use crate::builtins::{
+    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
+    get_throw_type_error, get_type_error, get_uri_error, intl, signal, temporal, AggregateError,
+    Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, Math, NumberObj, Promise,
+    Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError,
+    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet, JSON,
 };
-use rustc_hash::FxHashMap;
-use std::any::TypeId;
+use crate::error_obj::ErrorObj;
 use crate::partial_init::Partial;
 use crate::realm::initialize::Intrinsic;
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value};
+use rustc_hash::FxHashMap;
+use std::any::TypeId;
 
 type PartialIntrinsic<T> = Partial<ObjectHandle, IntrinsicInitializer<T>>;
-
 
 pub struct Intrinsics {
     pub obj: ObjectHandle,
@@ -139,7 +142,8 @@ impl Intrinsics {
     pub(crate) fn initialize(realm: &mut Realm) -> Res {
         realm.intrinsics.obj = ObjectHandle::new(Prototype::new());
 
-        realm.intrinsics.func = ObjectHandle::new(FunctionPrototype::new(realm.intrinsics.obj.clone()));
+        realm.intrinsics.func =
+            ObjectHandle::new(FunctionPrototype::new(realm.intrinsics.obj.clone()));
 
         {
             let obj_this = realm.intrinsics.obj.clone();
@@ -257,7 +261,6 @@ impl Default for Intrinsics {
         }
     }
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IntrinsicInitializer<T> {

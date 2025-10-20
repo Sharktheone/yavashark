@@ -1,4 +1,5 @@
 use crate::constructor::ObjectConstructor;
+use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
 use crate::value::{Obj, Property};
 use crate::{
@@ -7,7 +8,6 @@ use crate::{
 };
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
@@ -15,9 +15,7 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
                 object: MutObject::with_proto(realm.intrinsics.obj.clone()),

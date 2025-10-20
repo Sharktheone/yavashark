@@ -1,11 +1,11 @@
 use crate::array::convert_index;
+use crate::builtins::dataview::DataView;
+use crate::builtins::typed_array::TypedArray;
+use crate::realm::Intrinsic;
 use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, props};
-use crate::builtins::dataview::DataView;
-use crate::builtins::typed_array::TypedArray;
-use crate::realm::Intrinsic;
 
 #[object]
 #[derive(Debug)]
@@ -26,7 +26,14 @@ impl ArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -39,7 +46,14 @@ impl ArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -103,7 +117,14 @@ impl ArrayBuffer {
 
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().arraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(max_len),

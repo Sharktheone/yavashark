@@ -10,7 +10,16 @@ pub struct Uint32Array {}
 
 impl Uint32Array {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.clone_public().uint32array.get(realm)?.clone().into(), realm)?;
+        ty.set_prototype(
+            realm
+                .intrinsics
+                .clone_public()
+                .uint32array
+                .get(realm)?
+                .clone()
+                .into(),
+            realm,
+        )?;
 
         Ok(Self {
             inner: RefCell::new(MutableUint32Array {}),

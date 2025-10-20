@@ -33,7 +33,7 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let w = write_idx;
         if !prop.readonly {
             write_idx += 1;
@@ -108,10 +108,9 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
             }
         };
 
-
         prop_items.push(value_expr);
     }
-    
+
     if prop_items.is_empty() {
         return quote::quote! {
             #[inline(always)]
@@ -170,7 +169,7 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let w = write_idx;
         if !prop.readonly {
             write_idx += 1;
@@ -245,10 +244,9 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
             }
         };
 
-
         prop_items.push(value_expr);
     }
-    
+
     if prop_items.is_empty() {
         return quote::quote! {
             #[inline(always)]

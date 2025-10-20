@@ -1,3 +1,4 @@
+use crate::partial_init::Initializer;
 use crate::utils::ValueIterator;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -5,13 +6,10 @@ use num_traits::One;
 use std::cell::RefCell;
 use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
-use crate::partial_init::Initializer;
 
 #[object]
 #[derive(Debug)]
 pub struct Math {}
-
-
 
 impl Math {
     #[allow(clippy::new_ret_no_self)]

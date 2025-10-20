@@ -79,9 +79,10 @@ impl JSFunction {
             }
         });
 
-        let is_strict = scope.is_strict_mode()? ||  block.as_ref().map_or(false, |b| {
-            Interpreter::is_strict(&b.stmts)
-        });
+        let is_strict = scope.is_strict_mode()?
+            || block
+                .as_ref()
+                .map_or(false, |b| Interpreter::is_strict(&b.stmts));
 
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
@@ -94,7 +95,6 @@ impl JSFunction {
                 block,
                 scope,
                 is_strict,
-
             },
         };
 
@@ -193,7 +193,7 @@ impl RawJSFunction {
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function();
         scope.state_set_returnable();
-        
+
         let caller = if scope.is_strict_mode()? {
             None
         } else {
@@ -264,11 +264,11 @@ impl ConstructorFn for RawJSFunction {
 
 #[cfg(test)]
 mod tests {
-    use swc_ecma_parser::EsSyntax;
-use super::*;
+    use super::*;
     use crate::Interpreter;
     use swc_common::DUMMY_SP;
     use swc_ecma_ast::{BlockStmt, Param, Pat};
+    use swc_ecma_parser::EsSyntax;
     use yavashark_env::scope::Scope;
     use yavashark_env::test_eval;
 

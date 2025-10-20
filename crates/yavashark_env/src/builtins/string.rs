@@ -282,7 +282,9 @@ impl StringObj {
     pub fn with_string(realm: &mut Realm, string: YSString) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableStringObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().string.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().string.get(realm)?.clone(),
+                ),
                 string,
             }),
         })
@@ -347,7 +349,11 @@ impl StringObj {
     }
 }
 
-#[properties_new(intrinsic_name(string), default_null(string), constructor(StringConstructor::new))]
+#[properties_new(
+    intrinsic_name(string),
+    default_null(string),
+    constructor(StringConstructor::new)
+)]
 impl StringObj {
     #[get("length")]
     fn get_length(&self) -> usize {

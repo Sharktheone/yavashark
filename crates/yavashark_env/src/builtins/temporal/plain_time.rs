@@ -24,7 +24,14 @@ impl PlainTime {
     pub fn new(time: temporal_rs::PlainTime, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePlainTime {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_time.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_time
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             time,
         })

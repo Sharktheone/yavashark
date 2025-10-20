@@ -23,7 +23,14 @@ impl SharedArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().sharedarraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(len),
@@ -36,7 +43,14 @@ impl SharedArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().sharedarraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(len),
@@ -93,7 +107,14 @@ impl SharedArrayBuffer {
 
         let buffer = SharedArrayBuffer {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().sharedarraybuffer.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(max_len),

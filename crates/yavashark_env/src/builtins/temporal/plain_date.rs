@@ -29,7 +29,14 @@ impl PlainDate {
     pub fn new(date: temporal_rs::PlainDate, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_date.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_date
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             date,
         })
@@ -69,7 +76,14 @@ impl PlainDate {
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_plain_date.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_date
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             date,
         }

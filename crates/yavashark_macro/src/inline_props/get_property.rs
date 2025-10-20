@@ -21,7 +21,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
             if prop.configurable {
                 config_idx += 1;
             }
-            
+
             if !prop.readonly {
                 write_idx += 1;
             }
@@ -36,7 +36,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let w = write_idx;
         if !prop.readonly {
             write_idx += 1;
@@ -51,7 +51,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
         };
 
         let attributes = prop.attributes(config);
-        
+
         let clone = if prop.copy {
             quote::quote! {}
         } else {
@@ -74,8 +74,8 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
                 if (self.__written_properties.get() & (1 << #w)) != 0 {
                     return ::core::result::Result::Ok(::core::option::Option::None);
                 }
-                
-                
+
+
                 let val = #into_value::into_value(self.#field #partial_get .get());
                 return ::core::result::Result::Ok(::core::option::Option::Some(#env::value::Property::Value(val, #attributes)));
             }
@@ -84,7 +84,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
                 if (self.__written_properties.get() & (1 << #w)) != 0 {
                     return ::core::result::Result::Ok(::core::option::Option::None);
                 }
-                
+
                 let val = self.#field #partial_get.borrow().clone();
                 let val = #into_value::into_value(val);
 

@@ -19,8 +19,8 @@ pub use crate::builtins::temporal::plain_time::*;
 pub use crate::builtins::temporal::plain_year_month::*;
 pub use crate::builtins::temporal::zoned_date_time::*;
 
-use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value, Variable};
 use crate::partial_init::Initializer;
+use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value, Variable};
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
     Variable::write_config(
@@ -39,23 +39,40 @@ impl Initializer<ObjectHandle> for Temporal {
     }
 }
 
-pub fn get_temporal(
-    realm: &mut crate::Realm,
-) -> Res<ObjectHandle> {
+pub fn get_temporal(realm: &mut crate::Realm) -> Res<ObjectHandle> {
     let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
     let intrinsics = realm.intrinsics.clone_public();
 
-    obj.define_property_attributes("Duration".into(), constr(intrinsics.temporal_duration.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Duration".into(),
+        constr(intrinsics.temporal_duration.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("Instant".into(), constr(intrinsics.temporal_instant.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Instant".into(),
+        constr(intrinsics.temporal_instant.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("Now".into(), constr(intrinsics.temporal_now.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Now".into(),
+        constr(intrinsics.temporal_now.get(realm)?, realm),
+        realm,
+    )?;
 
+    obj.define_property_attributes(
+        "PlainDate".into(),
+        constr(intrinsics.temporal_plain_date.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("PlainDate".into(), constr(intrinsics.temporal_plain_date.get(realm)?, realm), realm)?;
-
-    obj.define_property_attributes("PlainTime".into(), constr(intrinsics.temporal_plain_time.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "PlainTime".into(),
+        constr(intrinsics.temporal_plain_time.get(realm)?, realm),
+        realm,
+    )?;
 
     obj.define_property_attributes(
         "PlainDateTime".into(),

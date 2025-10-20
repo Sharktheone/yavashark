@@ -22,7 +22,9 @@ impl Set {
     fn with_set(realm: &mut Realm, set: IndexSet<Value>) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableSet {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().set.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().set.get(realm)?.clone(),
+                ),
                 set,
             }),
         })

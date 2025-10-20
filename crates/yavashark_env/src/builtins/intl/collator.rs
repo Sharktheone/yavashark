@@ -47,7 +47,14 @@ impl Collator {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableCollator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_collator.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_collator
+                        .get(realm)?
+                        .clone(),
+                ),
                 initialized: false,
                 locale: DEFAULT_LOCALE.to_string(),
                 usage: USAGE_SORT.to_string(),

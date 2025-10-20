@@ -193,8 +193,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 
     let struct_name = &item_impl.self_ty;
 
-
-
     let get_prototype = if let Some(extends) = args.extends {
         quote! {
             #extends::get_intrinsic(realm)?
@@ -204,7 +202,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
             realm.intrinsics.obj.clone()
         }
     };
-
 
     let tokens = quote! {
         #item_impl

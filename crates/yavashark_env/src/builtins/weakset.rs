@@ -21,7 +21,9 @@ impl WeakSet {
     fn with_set(realm: &mut Realm, set: IndexSet<WeakValue>) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableWeakSet {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().weak_set.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().weak_set.get(realm)?.clone(),
+                ),
                 set,
             }),
         })

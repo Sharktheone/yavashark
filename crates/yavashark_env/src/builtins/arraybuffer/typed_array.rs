@@ -389,7 +389,14 @@ impl TypedArray {
         );
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.clone_public().typed_array.get(realm)?.clone())),
+            inner: RefCell::new(MutObject::with_proto(
+                realm
+                    .intrinsics
+                    .clone_public()
+                    .typed_array
+                    .get(realm)?
+                    .clone(),
+            )),
             buffer: buf,
             byte_offset,
             opt_byte_length: byte_length,
@@ -402,7 +409,14 @@ impl TypedArray {
         let buffer = downcast_obj::<ArrayBuffer>(buffer)?;
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.clone_public().typed_array.get(realm)?.clone())),
+            inner: RefCell::new(MutObject::with_proto(
+                realm
+                    .intrinsics
+                    .clone_public()
+                    .typed_array
+                    .get(realm)?
+                    .clone(),
+            )),
             buffer,
             byte_offset: 0,
             opt_byte_length: usize::MAX,
@@ -655,7 +669,14 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array,
             next: Cell::new(0),
@@ -994,7 +1015,14 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array,
             next: Cell::new(0),
@@ -1454,7 +1482,14 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array,
             next: Cell::new(0),
@@ -1491,7 +1526,14 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array,
             next: Cell::new(0),

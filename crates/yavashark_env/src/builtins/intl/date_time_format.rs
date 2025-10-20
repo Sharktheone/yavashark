@@ -12,7 +12,14 @@ impl DateTimeFormat {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableDateTimeFormat {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_date_time_format.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_date_time_format
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }
@@ -48,7 +55,12 @@ impl DateTimeFormat {
     }
 
     #[prop("formatRangeToParts")]
-    fn format_range_to_parts(&self, _start: String, _end: String, realm: &mut Realm) -> Res<ObjectHandle> {
+    fn format_range_to_parts(
+        &self,
+        _start: String,
+        _end: String,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         Ok(Array::from_realm(realm)?.into_object())
     }
 

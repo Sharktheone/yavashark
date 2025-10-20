@@ -25,8 +25,8 @@ pub use relative_time_format::*;
 pub use segmenter::*;
 pub use supported_values_of::*;
 
-use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
 use crate::partial_init::Initializer;
+use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
 
 pub struct Intl;
 
@@ -35,7 +35,6 @@ impl Initializer<ObjectHandle> for Intl {
         get_intl(realm)
     }
 }
-
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
     Variable::write_config(
@@ -46,14 +45,16 @@ fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
     )
 }
 
-pub fn get_intl(
-    realm: &mut Realm,
-) -> Res<ObjectHandle> {
+pub fn get_intl(realm: &mut Realm) -> Res<ObjectHandle> {
     let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
     let intrinsics = realm.intrinsics.clone_public();
 
-    obj.define_property_attributes("Collator".into(), constr(intrinsics.intl_collator.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Collator".into(),
+        constr(intrinsics.intl_collator.get(realm)?, realm),
+        realm,
+    )?;
 
     obj.define_property_attributes(
         "DateTimeFormat".into(),
@@ -61,7 +62,11 @@ pub fn get_intl(
         realm,
     )?;
 
-    obj.define_property_attributes("DisplayNames".into(), constr(intrinsics.intl_display_names.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "DisplayNames".into(),
+        constr(intrinsics.intl_display_names.get(realm)?, realm),
+        realm,
+    )?;
 
     obj.define_property_attributes(
         "DurationFormat".into(),
@@ -69,13 +74,29 @@ pub fn get_intl(
         realm,
     )?;
 
-    obj.define_property_attributes("ListFormat".into(), constr(intrinsics.intl_list_format.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "ListFormat".into(),
+        constr(intrinsics.intl_list_format.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("Locale".into(), constr(intrinsics.intl_locale.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Locale".into(),
+        constr(intrinsics.intl_locale.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("NumberFormat".into(), constr(intrinsics.intl_number_format.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "NumberFormat".into(),
+        constr(intrinsics.intl_number_format.get(realm)?, realm),
+        realm,
+    )?;
 
-    obj.define_property_attributes("PluralRules".into(), constr(intrinsics.intl_plural_rules.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "PluralRules".into(),
+        constr(intrinsics.intl_plural_rules.get(realm)?, realm),
+        realm,
+    )?;
 
     obj.define_property_attributes(
         "RelativeTimeFormat".into(),
@@ -83,7 +104,11 @@ pub fn get_intl(
         realm,
     )?;
 
-    obj.define_property_attributes("Segmenter".into(), constr(intrinsics.intl_segmenter.get(realm)?, realm), realm)?;
+    obj.define_property_attributes(
+        "Segmenter".into(),
+        constr(intrinsics.intl_segmenter.get(realm)?, realm),
+        realm,
+    )?;
 
     let get_canonical_locales = get_get_canonical_locales(realm);
     obj.define_property_attributes(

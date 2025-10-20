@@ -106,7 +106,7 @@ impl Property {
             }
         }
     }
-    
+
     pub fn into_value(self, realm: &mut Realm) -> Res<Value> {
         match self {
             Property::Value(v, _) => Ok(v),

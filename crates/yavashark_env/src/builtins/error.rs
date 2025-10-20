@@ -1,8 +1,8 @@
 use crate::error_obj::ErrorObj;
-use crate::value::Obj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Value, Variable};
 use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
+use crate::value::Obj;
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Value, Variable};
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {

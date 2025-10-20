@@ -113,7 +113,9 @@ impl RegExp {
         Ok(Self {
             regex,
             inner: RefCell::new(MutableRegExp {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().regexp.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().regexp.get(realm)?.clone(),
+                ),
             }),
             flags,
             original_source: source,

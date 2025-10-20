@@ -1,9 +1,3 @@
-use std::cell::{Cell, RefCell};
-use yavashark_macro::inline_props;
-use crate::builtins::{get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape, get_is_finite, get_is_nan, get_parse_float, get_parse_int, AggregateError, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI, EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON};
-use crate::realm::{Intrinsic, Realm};
-use crate::{Console, Object, Value};
-use crate::{get_console, ObjectHandle, Res};
 use crate::array::Array;
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
@@ -22,11 +16,23 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
+use crate::builtins::{
+    get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
+    get_is_finite, get_is_nan, get_parse_float, get_parse_int, AggregateError, Atomics, BigIntObj,
+    BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI, EncodeURIComponent, Escape,
+    EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy,
+    RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal,
+    TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
+};
 use crate::error_obj::ErrorObj;
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
+use crate::realm::{Intrinsic, Realm};
 use crate::value::Obj;
-
+use crate::{get_console, ObjectHandle, Res};
+use crate::{Console, Object, Value};
+use std::cell::{Cell, RefCell};
+use yavashark_macro::inline_props;
 
 #[inline_props(enumerable = false, configurable)]
 #[derive(Debug)]
@@ -48,7 +54,6 @@ pub struct GlobalProperties {
     #[readonly]
     #[no_configurable]
     null: Value,
-
 
     #[prop("true")]
     #[readonly]
@@ -237,7 +242,6 @@ pub struct GlobalProperties {
     intl: Partial<ObjectHandle, Intl>,
 }
 
-
 pub fn init_global_obj(realm: &mut Realm) -> Res {
     let inline = GlobalProperties {
         undefined: (),
@@ -311,18 +315,17 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         __written_properties: Cell::default(),
     };
 
-    let handle = InlineObject::new(inline, realm)
-        .into_object();
+    let handle = InlineObject::new(inline, realm).into_object();
 
     {
         #[allow(clippy::unwrap_used)]
-        let global = handle.downcast::<InlineObject<GlobalProperties>>().expect("Global object must be InlineObject (unreachable)");
+        let global = handle
+            .downcast::<InlineObject<GlobalProperties>>()
+            .expect("Global object must be InlineObject (unreachable)");
 
         global.props.global_this.replace(handle.clone());
         global.props.global.replace(handle.clone());
-
     }
-
 
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(&handle, realm)?;

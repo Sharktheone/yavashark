@@ -12,7 +12,14 @@ impl DurationFormat {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableDurationFormat {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_duration_format.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_duration_format
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }

@@ -1,3 +1,4 @@
+mod args;
 mod contains_property;
 mod delete_property;
 mod get_property;
@@ -6,17 +7,16 @@ mod properties;
 mod property;
 mod set_property;
 mod values;
-mod args;
 
-use darling::ast::NestedMeta;
 use crate::config::Config;
+use crate::inline_props::args::InlinePropsArgs;
 use crate::inline_props::property::{Kind, Property};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
+use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::TokenStream;
 use syn::spanned::Spanned;
 use syn::Fields;
-use crate::inline_props::args::InlinePropsArgs;
-use proc_macro::TokenStream as TokenStream1;
-use darling::FromMeta;
 
 pub fn inline_props(
     attrs: proc_macro::TokenStream,

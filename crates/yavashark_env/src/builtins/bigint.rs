@@ -56,7 +56,9 @@ impl BigIntObj {
     pub fn new(realm: &mut Realm, big_int: Rc<BigInt>) -> Res<ObjectHandle> {
         Ok(Self {
             inner: RefCell::new(MutableBigIntObj {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().bigint.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().bigint.get(realm)?.clone(),
+                ),
                 big_int,
             }),
         }

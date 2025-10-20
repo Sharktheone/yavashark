@@ -1,8 +1,8 @@
 use crate::config::Config;
+use crate::inline_props::args::InlinePropsArgs;
 use proc_macro2::{Ident, TokenStream};
 use syn::spanned::Spanned;
 use syn::{Expr, Field, Path, Type};
-use crate::inline_props::args::InlinePropsArgs;
 
 pub struct Property {
     pub copy: bool,

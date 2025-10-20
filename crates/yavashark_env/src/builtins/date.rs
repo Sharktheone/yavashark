@@ -462,7 +462,9 @@ impl Date {
     pub fn new(date: DateTime<Local>, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableDate {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().date.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().date.get(realm)?.clone(),
+                ),
                 date,
             }),
         })

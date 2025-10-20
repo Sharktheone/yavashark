@@ -397,9 +397,8 @@ impl Obj for FunctionPrototype {
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" | "caller" => {
-                    return Ok(true)
-                }
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString"
+                | "caller" => return Ok(true),
                 _ => {}
             }
         }
@@ -412,9 +411,8 @@ impl Obj for FunctionPrototype {
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" | "caller" => {
-                    return Ok(true)
-                }
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString"
+                | "caller" => return Ok(true),
                 _ => {}
             }
         }
@@ -540,15 +538,18 @@ impl Obj for FunctionPrototype {
         this.object.set_prototype(prototype, realm)
     }
 
-
     fn get_property_descriptor(
         &self,
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<PropertyDescriptor>> {
-
         if matches!(name, InternalPropertyKey::String(ref n) if n.as_str() == "caller") {
-            let throw_type_error = realm.intrinsics.clone_public().throw_type_error.get(realm)?.clone();
+            let throw_type_error = realm
+                .intrinsics
+                .clone_public()
+                .throw_type_error
+                .get(realm)?
+                .clone();
 
             return Ok(Some(PropertyDescriptor::Accessor {
                 get: Some(throw_type_error.clone()),
@@ -557,7 +558,6 @@ impl Obj for FunctionPrototype {
                 configurable: true,
             }));
         }
-
 
         let Some(prop) = self.get_own_property(name, realm)? else {
             return Ok(None);
@@ -578,7 +578,6 @@ impl Obj for FunctionPrototype {
             })),
         }
     }
-
 
     fn name(&self) -> String {
         "FunctionPrototype".to_string()

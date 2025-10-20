@@ -22,7 +22,7 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
             if prop.configurable {
                 config_idx += 1;
             }
-            
+
             if !prop.readonly {
                 write_idx += 1;
             }
@@ -37,7 +37,7 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let w = write_idx;
         if !prop.readonly {
             write_idx += 1;
@@ -124,7 +124,6 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
                 Some(#value_expr)
             }
         };
-
 
         prop_items.push(value_expr);
     }
@@ -181,7 +180,7 @@ pub fn generate_enumerable_properties(
             if prop.configurable {
                 config_idx += 1;
             }
-            
+
             if !prop.readonly {
                 write_idx += 1;
             }
@@ -196,7 +195,7 @@ pub fn generate_enumerable_properties(
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let w = write_idx;
         if !prop.readonly {
             write_idx += 1;
@@ -284,7 +283,6 @@ pub fn generate_enumerable_properties(
             }
         };
 
-
         prop_items.push(value_expr);
     }
 
@@ -296,7 +294,6 @@ pub fn generate_enumerable_properties(
             }
         };
     }
-
 
     let configurable_flatten = if has_configurable {
         quote::quote! {

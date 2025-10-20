@@ -37,7 +37,9 @@ impl Constructor for MapConstructor {
 
         let map = Map {
             inner: RefCell::new(MutableMap {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().map.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().map.get(realm)?.clone(),
+                ),
                 map,
             }),
         };

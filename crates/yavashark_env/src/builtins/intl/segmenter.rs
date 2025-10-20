@@ -12,7 +12,14 @@ impl Segmenter {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableSegmenter {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_segmenter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_segmenter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }

@@ -171,7 +171,9 @@ impl ObjectImpl for Array {
 
 impl ProtoDefault for Array {
     fn proto_default(realm: &mut Realm) -> Res<Self> {
-        Ok(Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone()))
+        Ok(Self::new(
+            realm.intrinsics.clone_public().array.get(realm)?.clone(),
+        ))
     }
 
     fn null_proto_default() -> Self {
@@ -206,7 +208,10 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_iter(realm: &mut Realm, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
+    pub fn from_iter(
+        realm: &mut Realm,
+        elements: impl ExactSizeIterator<Item = Value>,
+    ) -> Res<Self> {
         let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -338,7 +343,9 @@ impl Array {
     }
 
     pub fn from_realm(realm: &mut Realm) -> Res<Self> {
-        Ok(Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone()))
+        Ok(Self::new(
+            realm.intrinsics.clone_public().array.get(realm)?.clone(),
+        ))
     }
 
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
@@ -450,7 +457,11 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
         idx as usize
     }
 }
-#[properties_new(intrinsic_name(array), default_null(array), constructor(ArrayConstructor::new))]
+#[properties_new(
+    intrinsic_name(array),
+    default_null(array),
+    constructor(ArrayConstructor::new)
+)]
 impl Array {
     #[prop("length")]
     #[writable]
@@ -527,7 +538,14 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: this,
             next: Cell::new(0),
@@ -980,7 +998,14 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: this,
             next: Cell::new(0),
@@ -1500,7 +1525,14 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: this,
             next: Cell::new(0),
@@ -1542,7 +1574,14 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1563,7 +1602,14 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().array_iter.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1835,6 +1881,11 @@ impl Intrinsic for ArrayIterator {
     }
 
     fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(realm.intrinsics.clone_public().array_iter.get(realm)?.clone())
+        Ok(realm
+            .intrinsics
+            .clone_public()
+            .array_iter
+            .get(realm)?
+            .clone())
     }
 }

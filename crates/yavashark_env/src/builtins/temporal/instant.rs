@@ -27,7 +27,14 @@ impl Instant {
     pub fn from_stamp(stamp: temporal_rs::Instant, realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableInstant {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_instant.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_instant
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             stamp,
         })
@@ -236,7 +243,12 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
             if let Some(other_instant) = obj.downcast::<Instant>() {
                 Ok(other_instant.stamp)
             } else {
-                if obj.eq(realm.intrinsics.clone_public().temporal_instant.get(realm)?) {
+                if obj.eq(realm
+                    .intrinsics
+                    .clone_public()
+                    .temporal_instant
+                    .get(realm)?)
+                {
                     return Err(Error::ty("Expected a Temporal.Instant object"));
                 }
 

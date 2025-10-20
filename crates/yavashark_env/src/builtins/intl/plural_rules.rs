@@ -12,7 +12,14 @@ impl PluralRules {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutablePluralRules {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().intl_plural_rules.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_plural_rules
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
         })
     }

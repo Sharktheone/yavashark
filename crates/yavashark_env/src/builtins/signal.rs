@@ -8,11 +8,10 @@ use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
 
-pub use computed::*;
-pub use state::*;
 use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
-
+pub use computed::*;
+pub use state::*;
 
 pub struct Signal;
 
@@ -22,10 +21,7 @@ impl Initializer<ObjectHandle> for Signal {
     }
 }
 
-
-pub fn get_signal(
-    realm: &mut Realm,
-) -> Res<ObjectHandle> {
+pub fn get_signal(realm: &mut Realm) -> Res<ObjectHandle> {
     let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
     let intrinsics = realm.intrinsics.clone_public();
@@ -35,7 +31,6 @@ pub fn get_signal(
         obj: Object::raw_with_proto(realm.intrinsics.obj.clone()),
         current_dep: RefCell::default(),
     };
-
 
     computed.set_prototype(proto.into_object().into(), realm)?; //TODO find a better way for this
 
@@ -52,7 +47,6 @@ pub fn get_signal(
         .unwrap_or(Value::Undefined);
 
     obj.define_property("State".into(), state_constructor, realm);
-
 
     Ok(obj)
 }

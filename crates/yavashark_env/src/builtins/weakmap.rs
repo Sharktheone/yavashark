@@ -36,7 +36,9 @@ impl Constructor for WeakMapConstructor {
 
         let map = WeakMap {
             inner: RefCell::new(MutableWeakMap {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().weak_map.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().weak_map.get(realm)?.clone(),
+                ),
                 map,
             }),
         };

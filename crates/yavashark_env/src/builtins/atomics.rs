@@ -10,7 +10,9 @@ impl Atomics {
     pub fn new(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableAtomics {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().atomics.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().atomics.get(realm)?.clone(),
+                ),
             }),
         })
     }

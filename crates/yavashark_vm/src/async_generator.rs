@@ -12,10 +12,10 @@ use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::Error;
+use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
 use yavashark_env::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
-use yavashark_env::realm::Intrinsic;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -121,7 +121,6 @@ impl AsyncGeneratorFunction {
     }
 }
 
-
 impl Func for AsyncGeneratorFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
@@ -174,13 +173,9 @@ impl AsyncGenerator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        let gf = AsyncGeneratorFunction::initialize(
-            realm,
-        )?;
+        let gf = AsyncGeneratorFunction::initialize(realm)?;
 
-        let g = Self::initialize(
-            realm,
-        )?;
+        let g = Self::initialize(realm)?;
 
         realm.intrinsics.async_generator_function = gf;
         realm.intrinsics.async_generator = g;

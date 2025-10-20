@@ -310,7 +310,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 quote! {#variable::write_config},
             ),
             Prop::Constant(constant) => {
-
                 let variable_fn = if constant.writable {
                     quote! {#variable::write}
                 } else {
@@ -324,7 +323,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     Type::Normal,
                     variable_fn,
                 )
-            },
+            }
         };
 
         let name = js_name
@@ -380,24 +379,21 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     match mode {
         Mode::Prototype => {
-
             let intrinsic = &config.intrinsic;
             let struct_name = &item.self_ty;
             let obj = &config.object;
             let res = &config.res;
             let object_handle = &config.object_handle;
 
-
             let intrinsic_get = if let Some(name) = intrinsic_name.as_ref() {
                 quote! {
                     Ok(realm.intrinsics.clone_public().#name.get(realm)?.clone())
                 }
             } else {
-                        quote! {
+                quote! {
                     Self::initialize(realm)
                 }
             };
-
 
             let init = quote! {
                 impl #intrinsic for #struct_name {
@@ -456,7 +452,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 #init
             }
-        },
+        }
         Mode::Raw => {
             let init_fn = quote! {
                 pub fn initialize(&mut self, realm: &mut #realm) -> Result<(), #error> {
@@ -475,7 +471,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             item.to_token_stream()
         }
-    }.into()
+    }
+    .into()
 }
 
 enum Prop {

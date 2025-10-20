@@ -26,7 +26,14 @@ impl Duration {
     pub fn with_duration(realm: &mut Realm, duration: temporal_rs::Duration) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableDuration {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().temporal_duration.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_duration
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             dur: duration,
         })

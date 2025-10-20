@@ -15,11 +15,9 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
 
     let mut write_idx = 0usize;
 
-    for prop in props
-        .iter()
-    {
+    for prop in props.iter() {
         if prop.kind == Kind::Getter {
-            continue
+            continue;
         }
 
         let w = write_idx;

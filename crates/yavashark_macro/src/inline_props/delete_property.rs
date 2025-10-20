@@ -52,7 +52,7 @@ pub fn generate_delete_property(props: &[Property], config: &Config) -> TokenStr
             }
         };
 
-    match key {
+        match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
                     #s => {
