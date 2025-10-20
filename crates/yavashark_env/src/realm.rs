@@ -1,5 +1,5 @@
 mod env;
-pub mod initialize;
+mod initialize;
 mod intrinsics;
 
 pub mod resolve;
@@ -10,34 +10,70 @@ use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
 use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
+pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
+use std::rc::Rc;
 
-#[derive(Debug, Clone, PartialEq)]
+pub struct PrivateRc<T>(Rc<T>);
+
+impl<T> Deref for PrivateRc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for PrivateRc<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        Rc::get_mut(&mut self.0).expect("Multiple references exist")
+    }
+}
+
+impl<T> PrivateRc<T> {
+    #[must_use]
+    pub fn clone_public<'a>(&self) -> PublicRc<'a, T> {
+        PublicRc(self.0.clone(), std::marker::PhantomData)
+    }
+}
+
+pub struct PublicRc<'a, T>(Rc<T>, std::marker::PhantomData<&'a ()>);
+
+impl<'a, T> Deref for PublicRc<'a, T>
+where
+    T: 'a,
+    Self: 'a,
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct Realm {
-    pub intrinsics: Intrinsics, // [[Intrinsics]]
-    pub global: ObjectHandle,   // [[GlobalObject]]
-    pub env: Environment,       // [[GlobalEnv]]
+    pub intrinsics: PrivateRc<Intrinsics>, // [[Intrinsics]]
+    pub global: ObjectHandle,              // [[GlobalObject]]
+    pub env: Environment,                  // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
+}
+
+impl Debug for Realm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Realm").finish()
+    }
 }
 
 impl Realm {
     pub fn new() -> Res<Self> {
-        let intrinsics = Intrinsics::new()?;
+        let mut realm = Self::default();
 
-        let global = Object::with_proto(intrinsics.obj.clone());
+        Intrinsics::initialize(&mut realm)?;
 
-        let mut realm = Self {
-            env: Environment {
-                modules: HashMap::new(),
-            },
-            intrinsics,
-            global: global.clone(),
-            queue: AsyncTaskQueue::new(),
-        };
-
-        init_global_obj(&global, &mut realm)?;
+        init_global_obj(&mut realm)?;
 
         Ok(realm)
     }
@@ -86,7 +122,7 @@ impl Realm {
 impl Default for Realm {
     fn default() -> Self {
         Self {
-            intrinsics: Intrinsics::default(),
+            intrinsics: PrivateRc(Rc::new(Intrinsics::default())),
             global: Object::null(),
             env: Environment {
                 modules: HashMap::new(),
@@ -100,4 +136,4 @@ pub trait Eval {
     fn eval(&self, code: &str, realm: &mut Realm, scope: &mut Scope) -> ValueResult;
 }
 
-impl Eq for Realm {}
+// impl Eq for Realm {}

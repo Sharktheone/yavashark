@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
-use crate::object::common;
+use crate::object::prototype::common;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull, Property};
@@ -12,6 +12,7 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
+use crate::partial_init::Initializer;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -28,10 +29,10 @@ impl Constructor for ObjectConstructor {
         Ok(match value {
             Value::Object(obj) => obj,
             Value::Number(num) => NumberObj::with_number(realm, num)?,
-            Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)),
-            Value::Boolean(boolean) => BooleanObj::new(realm, boolean),
-            Value::Symbol(symbol) => SymbolObj::new(realm, symbol),
-            Value::BigInt(bigint) => BigIntObj::new(realm, bigint),
+            Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)?),
+            Value::Boolean(boolean) => BooleanObj::new(realm, boolean)?,
+            Value::Symbol(symbol) => SymbolObj::new(realm, symbol)?,
+            Value::BigInt(bigint) => BigIntObj::new(realm, bigint)?,
             Value::Undefined | Value::Null => Object::new(realm),
         })
     }
@@ -43,16 +44,32 @@ impl Func for ObjectConstructor {
     }
 }
 
+impl Initializer<ObjectHandle> for ObjectConstructor {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        let ctor = ObjectConstructor::new(realm)?;
+
+        ctor.define_property_attributes(
+            "prototype".into(),
+            Variable::new_read_only(realm.intrinsics.obj.clone().into()),
+            realm,
+        )?;
+
+        Ok(ctor)
+    }
+}
+
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableObjectConstructor {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
+
+
 
         Ok(this.into_object())
     }
@@ -158,11 +175,11 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Cannot assign to undefined or null"))
             }
-            Value::Boolean(b) => BooleanObj::new(realm, b),
+            Value::Boolean(b) => BooleanObj::new(realm, b)?,
             Value::Number(n) => NumberObj::with_number(realm, n)?,
-            Value::String(s) => StringObj::with_string(realm, s).into_object(),
-            Value::Symbol(s) => SymbolObj::new(realm, s),
-            Value::BigInt(b) => BigIntObj::new(realm, b),
+            Value::String(s) => StringObj::with_string(realm, s)?.into_object(),
+            Value::Symbol(s) => SymbolObj::new(realm, s)?,
+            Value::BigInt(b) => BigIntObj::new(realm, b)?,
         };
 
         for source in sources {
@@ -388,7 +405,7 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Object.keys() expects an object"))
             }
-            _ => return Ok(Array::from_realm(realm).into_value()),
+            _ => return Ok(Array::from_realm(realm)?.into_value()),
         };
 
         let keys = obj
@@ -417,7 +434,7 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => {
                 return Err(Error::ty("Object.values() expects an object"))
             }
-            _ => return Ok(Array::from_realm(realm).into_value()),
+            _ => return Ok(Array::from_realm(realm)?.into_value()),
         };
 
         let keys = obj.enumerable_keys(realm)?;

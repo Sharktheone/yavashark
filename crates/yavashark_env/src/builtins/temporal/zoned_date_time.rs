@@ -30,13 +30,20 @@ pub struct ZonedDateTime {
 }
 
 impl ZonedDateTime {
-    pub fn new(date: temporal_rs::ZonedDateTime, realm: &Realm) -> Self {
-        Self {
+    pub fn new(date: temporal_rs::ZonedDateTime, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableZonedDateTime {
-                object: MutObject::with_proto(realm.intrinsics.temporal_zoned_date_time.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_zoned_date_time
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             date,
-        }
+        })
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::ZonedDateTime> {
@@ -45,21 +52,21 @@ impl ZonedDateTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
         let date = Self::now(tz)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 }
 
-#[props(to_string_tag = "Temporal.ZonedDateTime")]
+#[props(intrinsic_name = temporal_zoned_date_time, to_string_tag = "Temporal.ZonedDateTime")]
 impl ZonedDateTime {
     #[constructor]
     pub fn construct(
         ns: &BigIntOrNumber,
         tz: &str,
         calendar: Option<YSString>,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let nanos = ns
             .to_big_int()
@@ -77,7 +84,7 @@ impl ZonedDateTime {
         }
         .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     fn compare(left: &Value, right: &Value, realm: &mut Realm) -> Res<i8> {
@@ -90,7 +97,7 @@ impl ZonedDateTime {
     fn from(value: &Value, options: Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = value_to_zoned_date_time(value, options, realm)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     fn add(
@@ -108,7 +115,7 @@ impl ZonedDateTime {
             .add_with_provider(&duration, options, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
@@ -131,7 +138,7 @@ impl ZonedDateTime {
             return Ok(Value::Null);
         };
 
-        Ok(Self::new(transition, realm).into_value())
+        Ok(Self::new(transition, realm)?.into_value())
     }
 
     pub fn round(&self, unit: Value, realm: &mut Realm) -> Res<ObjectHandle> {
@@ -142,7 +149,7 @@ impl ZonedDateTime {
             .round_with_provider(opts, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     pub fn since(
@@ -163,7 +170,7 @@ impl ZonedDateTime {
             .since_with_provider(&other, settings, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur).into_object())
+        Ok(Duration::with_duration(realm, dur)?.into_object())
     }
 
     #[prop("startOfDay")]
@@ -173,7 +180,7 @@ impl ZonedDateTime {
             .start_of_day_with_provider(&*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     pub fn subtract(
@@ -191,14 +198,14 @@ impl ZonedDateTime {
             .subtract_with_provider(&duration, options, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[prop("toInstant")]
-    pub fn to_instant(&self, realm: &Realm) -> Res<ObjectHandle> {
+    pub fn to_instant(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         let instant = self.date.to_instant();
 
-        Ok(Instant::from_stamp(instant, realm).into_object())
+        Ok(Instant::from_stamp(instant, realm)?.into_object())
     }
 
     #[prop("toJSON")]
@@ -209,24 +216,24 @@ impl ZonedDateTime {
     }
 
     #[prop("toPlainDate")]
-    pub fn to_plain_date(&self, realm: &mut Realm) -> ObjectHandle {
+    pub fn to_plain_date(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self.date.to_plain_date();
 
-        PlainDate::new(date, realm).into_object()
+        Ok(PlainDate::new(date, realm)?.into_object())
     }
 
     #[prop("toPlainDateTime")]
-    pub fn to_plain_date_time(&self, realm: &mut Realm) -> ObjectHandle {
+    pub fn to_plain_date_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self.date.to_plain_date_time();
 
-        PlainDateTime::new(date, realm).into_object()
+        Ok(PlainDateTime::new(date, realm)?.into_object())
     }
 
     #[prop("toPlainTime")]
-    pub fn to_plain_time(&self, realm: &mut Realm) -> ObjectHandle {
+    pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self.date.to_plain_time();
 
-        PlainTime::new(date, realm).into_object()
+        Ok(PlainTime::new(date, realm)?.into_object())
     }
 
     #[prop("toString")]
@@ -273,7 +280,7 @@ impl ZonedDateTime {
             .until_with_provider(&other, settings, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur).into_object())
+        Ok(Duration::with_duration(realm, dur)?.into_object())
     }
 
     #[prop("valueOf")]
@@ -294,16 +301,16 @@ impl ZonedDateTime {
             .with(fields, disambiguation, offset_disambiguation, overflow)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[prop("withCalendar")]
-    pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
+    pub fn with_calendar(&self, calendar: &str, realm: &mut Realm) -> Res<ObjectHandle> {
         let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
 
         let date = self.date.with_calendar(calendar);
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[prop("withPlainTime")]
@@ -315,16 +322,16 @@ impl ZonedDateTime {
             .with_plain_time_and_provider(Some(time), &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[prop("withTimeZone")]
-    pub fn with_time_zone(&self, time_zone: &str, realm: &Realm) -> Res<Value> {
+    pub fn with_time_zone(&self, time_zone: &str, realm: &mut Realm) -> Res<Value> {
         let tz = TimeZone::try_from_str(time_zone).map_err(Error::from_temporal)?;
 
         let date = self.date.with_timezone(tz).map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_value())
+        Ok(Self::new(date, realm)?.into_value())
     }
 
     #[get("calendarId")]

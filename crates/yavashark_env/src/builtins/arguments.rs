@@ -1,7 +1,9 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
 use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
-use crate::{InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable};
+use crate::{
+    InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable,
+};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::props;
@@ -15,14 +17,20 @@ pub struct Arguments {
 }
 
 impl Arguments {
-    #[must_use]
-    pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &Realm) -> Self {
-        Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.arguments.clone())),
+    pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
+            inner: RefCell::new(MutObject::with_proto(
+                realm
+                    .intrinsics
+                    .clone_public()
+                    .arguments
+                    .get(realm)?
+                    .clone(),
+            )),
             callee,
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
-        }
+        })
     }
 
     pub fn resolve_array(&self, idx: usize) -> Option<Value> {
@@ -130,11 +138,15 @@ impl ObjectImpl for Arguments {
             if s == "callee" {
                 let Some(callee) = &self.callee else {
                     return Ok(Some(Property::Getter(
-                        realm.intrinsics.throw_type_error.clone(),
+                        realm
+                            .intrinsics
+                            .clone_public()
+                            .throw_type_error
+                            .get(realm)?
+                            .clone(),
                         Attributes::from_values(false, false, false),
-                    )))
+                    )));
                 };
-
 
                 return Ok(Some(Property::Value(
                     callee.clone(),
@@ -164,11 +176,15 @@ impl ObjectImpl for Arguments {
             if s == "callee" {
                 let Some(callee) = &self.callee else {
                     return Ok(Some(Property::Getter(
-                        realm.intrinsics.throw_type_error.clone(),
+                        realm
+                            .intrinsics
+                            .clone_public()
+                            .throw_type_error
+                            .get(realm)?
+                            .clone(),
                         Attributes::from_values(false, false, false),
-                    )))
+                    )));
                 };
-
 
                 return Ok(Some(Property::Value(
                     callee.clone(),
@@ -263,7 +279,10 @@ impl ObjectImpl for Arguments {
         Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let mut props = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {
@@ -331,11 +350,11 @@ impl ObjectImpl for Arguments {
     }
 }
 
-#[props]
+#[props(intrinsic_name = arguments)]
 impl Arguments {
     #[prop(crate::Symbol::ITERATOR)]
     #[nonstatic]
-    fn iterator(realm: &Realm, this: Value) -> ValueResult {
+    fn iterator(realm: &mut Realm, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(crate::Error::ty_error(format!(
                 "Expected object, found {this:?}"
@@ -344,7 +363,14 @@ impl Arguments {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .array_iter
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             array: obj,
             next: Cell::new(0),

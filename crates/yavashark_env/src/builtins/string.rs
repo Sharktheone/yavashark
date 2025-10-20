@@ -19,7 +19,7 @@ pub struct StringObj {
 }
 
 impl ProtoDefault for StringObj {
-    fn proto_default(realm: &Realm) -> Self {
+    fn proto_default(realm: &mut Realm) -> Res<Self> {
         Self::with_string(realm, YSString::new())
     }
 
@@ -154,7 +154,7 @@ impl StringConstructor {
 
         this.define_property("name".into(), "String".into(), realm)?;
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -256,7 +256,7 @@ impl Constructor for StringConstructor {
             None => YSString::new(),
         };
 
-        let obj = StringObj::with_string(realm, str);
+        let obj = StringObj::with_string(realm, str)?;
 
         Ok(Obj::into_object(obj))
     }
@@ -275,17 +275,19 @@ impl Func for StringConstructor {
 
 impl StringObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &Realm) -> ObjectHandle {
-        Obj::into_object(Self::with_string(realm, YSString::new()))
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(Obj::into_object(Self::with_string(realm, YSString::new())?))
     }
 
-    pub fn with_string(realm: &Realm, string: YSString) -> Self {
-        Self {
+    pub fn with_string(realm: &mut Realm, string: YSString) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableStringObj {
-                object: MutObject::with_proto(realm.intrinsics.string.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().string.get(realm)?.clone(),
+                ),
                 string,
             }),
-        }
+        })
     }
 
     pub fn get(&self, index: isize, to: isize) -> Option<String> {
@@ -347,7 +349,11 @@ impl StringObj {
     }
 }
 
-#[properties_new(default_null(string), constructor(StringConstructor::new))]
+#[properties_new(
+    intrinsic_name(string),
+    default_null(string),
+    constructor(StringConstructor::new)
+)]
 impl StringObj {
     #[get("length")]
     fn get_length(&self) -> usize {

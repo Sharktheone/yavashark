@@ -3,52 +3,52 @@
 mod computed;
 mod state;
 
-use crate::builtins::signal::computed::{Computed, ComputedProtoObj};
-use crate::builtins::signal::state::State;
-use crate::value::BoxedObj;
+use crate::value::{BoxedObj, Obj};
 use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
 
-pub struct Protos {
-    pub state: ObjectHandle,
-    pub computed: ObjectHandle,
+use crate::partial_init::Initializer;
+use crate::realm::Intrinsic;
+pub use computed::*;
+pub use state::*;
+
+pub struct Signal;
+
+impl Initializer<ObjectHandle> for Signal {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        get_signal(realm)
+    }
 }
 
-pub fn get_signal(
-    obj_proto: ObjectHandle,
-    func_proto: ObjectHandle,
-    realm: &mut Realm,
-) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone());
+pub fn get_signal(realm: &mut Realm) -> Res<ObjectHandle> {
+    let obj = Object::with_proto(realm.intrinsics.obj.clone());
 
-    let state = State::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
-        realm,
-    )?;
+    let intrinsics = realm.intrinsics.clone_public();
 
+    let computed = intrinsics.signal_computed.get(realm)?;
     let proto = ComputedProtoObj {
-        obj: Object::raw_with_proto(obj_proto),
+        obj: Object::raw_with_proto(realm.intrinsics.obj.clone()),
         current_dep: RefCell::default(),
     };
 
-    let computed = Computed::initialize_proto(proto, func_proto.into(), realm)?;
+    computed.set_prototype(proto.into_object().into(), realm)?; //TODO find a better way for this
 
-    let state_constructor = state
+    let computed_constructor = computed
         .resolve_property("constructor", realm)?
         .unwrap_or(Value::Undefined);
-    let computed_constructor = computed
+
+    obj.define_property("Computed".into(), computed_constructor, realm);
+
+    let state_constructor = intrinsics
+        .signal_state
+        .get(realm)?
         .resolve_property("constructor", realm)?
         .unwrap_or(Value::Undefined);
 
     obj.define_property("State".into(), state_constructor, realm);
 
-    obj.define_property("Computed".into(), computed_constructor, realm);
-
-    let protos = Protos { state, computed };
-
-    Ok((obj, protos))
+    Ok(obj)
 }
 
 pub fn notify_dependent(dep: &ObjectHandle, realm: &mut Realm) -> Res<()> {

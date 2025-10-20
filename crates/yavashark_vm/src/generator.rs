@@ -7,6 +7,7 @@ use std::rc::Rc;
 use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::error::Error;
+use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
@@ -78,7 +79,7 @@ impl GeneratorFunction {
     }
 }
 
-#[props]
+#[props(intrinsic_name = generator_function, no_partial)]
 impl GeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -126,7 +127,7 @@ impl Func for GeneratorFunction {
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
 
-        let args = Arguments::new(args, None, realm);
+        let args = Arguments::new(args, None, realm)?;
 
         let args = ObjectHandle::new(args);
 
@@ -156,17 +157,9 @@ impl Generator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        let gf = GeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone(),
-            realm,
-        )?;
+        let gf = GeneratorFunction::initialize(realm)?;
 
-        let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone(),
-            realm,
-        )?;
+        let g = Self::initialize(realm)?;
 
         realm.intrinsics.generator_function = gf;
         realm.intrinsics.generator = g;
@@ -175,7 +168,7 @@ impl Generator {
     }
 }
 
-#[props]
+#[props(intrinsic_name = generator, no_partial)]
 impl Generator {
     pub fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let Some(state) = self.state.take() else {

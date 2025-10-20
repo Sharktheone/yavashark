@@ -7,16 +7,18 @@ use yavashark_macro::{object, props};
 pub struct Atomics {}
 
 impl Atomics {
-    pub fn new(realm: &Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableAtomics {
-                object: MutObject::with_proto(realm.intrinsics.atomics.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().atomics.get(realm)?.clone(),
+                ),
             }),
-        }
+        })
     }
 }
 
-#[props]
+#[props(intrinsic_name = atomics)]
 #[allow(unused)]
 impl Atomics {
     pub fn add(ta: &ObjectHandle, index: usize, value: i32) {}

@@ -35,10 +35,17 @@ pub struct NumberFormat {
 }
 
 impl NumberFormat {
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableNumberFormat {
-                object: MutObject::with_proto(realm.intrinsics.intl_number_format.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_number_format
+                        .get(realm)?
+                        .clone(),
+                ),
                 initialized: false,
                 locale: DEFAULT_LOCALE.to_string(),
                 style: STYLE_DECIMAL.to_string(),
@@ -48,7 +55,7 @@ impl NumberFormat {
                 maximum_fraction_digits: 3,
                 bound_format: None,
             }),
-        }
+        })
     }
 
     fn ensure_initialized(&self) -> Res<()> {
@@ -60,7 +67,7 @@ impl NumberFormat {
     }
 }
 
-#[props(to_string_tag = "Intl.NumberFormat")]
+#[props(intrinsic_name = intl_number_format, to_string_tag = "Intl.NumberFormat")]
 impl NumberFormat {
     #[constructor]
     fn construct(
@@ -120,7 +127,7 @@ impl NumberFormat {
             3
         };
 
-        let nf = Self::new(realm);
+        let nf = Self::new(realm)?;
 
         {
             let mut inner = nf.inner.borrow_mut();

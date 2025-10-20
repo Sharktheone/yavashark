@@ -1,4 +1,5 @@
 use crate::constructor::ObjectConstructor;
+use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
 use crate::value::{Obj, Property};
 use crate::{
@@ -14,18 +15,14 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(
-        proto: ObjectHandle,
-        func_proto: ObjectHandle,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
-        this.initialize(func_proto, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -223,5 +220,11 @@ impl Reflect {
         };
 
         Ok(target.set_prototype(proto, realm).is_ok())
+    }
+}
+
+impl Initializer<ObjectHandle> for Reflect {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Reflect::new(realm)
     }
 }

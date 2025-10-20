@@ -21,13 +21,20 @@ pub struct PlainTime {
 }
 
 impl PlainTime {
-    pub fn new(time: temporal_rs::PlainTime, realm: &Realm) -> Self {
-        Self {
+    pub fn new(time: temporal_rs::PlainTime, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutablePlainTime {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_time.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_plain_time
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             time,
-        }
+        })
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
@@ -36,18 +43,18 @@ impl PlainTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
         let time = Self::now(tz)?;
 
-        Ok(Self::new(time, realm).into_object())
+        Ok(Self::new(time, realm)?.into_object())
     }
 }
 
-#[props(to_string_tag = "Temporal.PlainTime")]
+#[props(intrinsic_name = temporal_plain_time, to_string_tag = "Temporal.PlainTime")]
 impl PlainTime {
     #[constructor]
     pub fn construct(
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
         hour: u8,
         minute: u8,
         second: u8,
@@ -59,7 +66,7 @@ impl PlainTime {
             temporal_rs::PlainTime::new(hour, minute, second, millisecond, microsecond, nanosecond)
                 .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(time, realm).into_object())
+        Ok(Self::new(time, realm)?.into_object())
     }
 
     pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
@@ -74,7 +81,7 @@ impl PlainTime {
     pub fn from(value: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let time = value_to_plain_time(value, realm)?;
 
-        Ok(Self::new(time, realm).into_object())
+        Ok(Self::new(time, realm)?.into_object())
     }
 
     pub fn add(&self, dur: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -82,7 +89,7 @@ impl PlainTime {
 
         let new_time = self.time.add(&dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::new(new_time, realm).into_object())
+        Ok(Self::new(new_time, realm)?.into_object())
     }
 
     pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
@@ -93,7 +100,7 @@ impl PlainTime {
 
     pub fn round(&self, _opts: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         //TODO
-        Ok(Self::new(self.time, realm).into_object())
+        Ok(Self::new(self.time, realm)?.into_object())
     }
 
     pub fn since(
@@ -114,7 +121,7 @@ impl PlainTime {
             .since(&other_time, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, duration).into_object())
+        Ok(Duration::with_duration(realm, duration)?.into_object())
     }
 
     pub fn subtract(&self, dur: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -122,7 +129,7 @@ impl PlainTime {
 
         let new_time = self.time.subtract(&dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::new(new_time, realm).into_object())
+        Ok(Self::new(new_time, realm)?.into_object())
     }
 
     #[prop("toJSON")]
@@ -155,7 +162,7 @@ impl PlainTime {
         let plain_date_time = temporal_rs::PlainDateTime::from_date_and_time(date, self.time)
             .map_err(Error::from_temporal)?;
 
-        Ok(PlainDateTime::new(plain_date_time, realm).into_object())
+        Ok(PlainDateTime::new(plain_date_time, realm)?.into_object())
     }
 
     pub fn until(
@@ -176,7 +183,7 @@ impl PlainTime {
             .until(&other_time, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, duration).into_object())
+        Ok(Duration::with_duration(realm, duration)?.into_object())
     }
 
     #[prop("valueOf")]
@@ -194,7 +201,7 @@ impl PlainTime {
             .with(partial_time, overflow)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::new(date, realm).into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     #[get("hour")]

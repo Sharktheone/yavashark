@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -9,33 +9,40 @@ use yavashark_macro::{object, props};
 pub struct DateTimeFormat {}
 
 impl DateTimeFormat {
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableDateTimeFormat {
-                object: MutObject::with_proto(realm.intrinsics.intl_date_time_format.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_date_time_format
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
-        }
+        })
     }
 }
 
-#[props(to_string_tag = "Intl.DateTimeFormat")]
+#[props(intrinsic_name = intl_date_time_format, to_string_tag = "Intl.DateTimeFormat")]
 impl DateTimeFormat {
     #[call_constructor]
     fn construct(
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> ObjectHandle {
-        Self::new(realm).into_object()
+    ) -> Res<ObjectHandle> {
+        Ok(Self::new(realm)?.into_object())
     }
 
     #[prop("supportedLocalesOf")]
     fn supported_locales_of(
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
-        realm: &Realm,
-    ) -> ObjectHandle {
-        Array::from_realm(realm).into_object()
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     fn format(&self) -> String {
@@ -48,13 +55,18 @@ impl DateTimeFormat {
     }
 
     #[prop("formatRangeToParts")]
-    fn format_range_to_parts(&self, _start: String, _end: String, realm: &Realm) -> ObjectHandle {
-        Array::from_realm(realm).into_object()
+    fn format_range_to_parts(
+        &self,
+        _start: String,
+        _end: String,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     #[prop("formatToParts")]
-    fn format_to_parts(&self, _date: String, realm: &Realm) -> ObjectHandle {
-        Array::from_realm(realm).into_object()
+    fn format_to_parts(&self, _date: String, realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     #[prop("resolvedOptions")]

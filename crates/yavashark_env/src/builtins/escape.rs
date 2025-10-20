@@ -1,12 +1,12 @@
 use crate::error::Error;
-use crate::value::IntoValue;
-use crate::{NativeFunction, Realm, Res, Value, ValueResult};
+use crate::partial_init::Initializer;
+use crate::{NativeFunction, ObjectHandle, Realm, Res, ValueResult};
 use std::fmt::Write;
 use std::iter::Peekable;
 use std::str::Chars;
 
 #[must_use]
-pub fn get_escape(realm: &mut Realm) -> Value {
+pub fn get_escape(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "escape",
         |args, _, realm| {
@@ -38,11 +38,18 @@ pub fn get_escape(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct Escape;
+
+impl Initializer<ObjectHandle> for Escape {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_escape(realm))
+    }
 }
 
 #[must_use]
-pub fn get_encode_uri(realm: &mut Realm) -> Value {
+pub fn get_encode_uri(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "encodeURI",
         |args, _, realm| {
@@ -68,11 +75,18 @@ pub fn get_encode_uri(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct EncodeURI;
+
+impl Initializer<ObjectHandle> for EncodeURI {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_encode_uri(realm))
+    }
 }
 
 #[must_use]
-pub fn get_encode_uri_component(realm: &mut Realm) -> Value {
+pub fn get_encode_uri_component(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "encodeURIComponent",
         |args, _, realm| {
@@ -98,11 +112,18 @@ pub fn get_encode_uri_component(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct EncodeURIComponent;
+
+impl Initializer<ObjectHandle> for EncodeURIComponent {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_encode_uri_component(realm))
+    }
 }
 
 #[must_use]
-pub fn get_unescape(realm: &mut Realm) -> Value {
+pub fn get_unescape(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "unescape",
         |args, _, realm| {
@@ -128,11 +149,18 @@ pub fn get_unescape(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct Unescape;
+
+impl Initializer<ObjectHandle> for Unescape {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_unescape(realm))
+    }
 }
 
 #[must_use]
-pub fn get_decode_uri(realm: &mut Realm) -> Value {
+pub fn get_decode_uri(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "decodeURI",
         |args, _, realm| {
@@ -146,11 +174,18 @@ pub fn get_decode_uri(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct DecodeURI;
+
+impl Initializer<ObjectHandle> for DecodeURI {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_decode_uri(realm))
+    }
 }
 
 #[must_use]
-pub fn get_decode_uri_component(realm: &mut Realm) -> Value {
+pub fn get_decode_uri_component(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "decodeURIComponent",
         |args, _, realm| {
@@ -164,7 +199,14 @@ pub fn get_decode_uri_component(realm: &mut Realm) -> Value {
         realm,
         1,
     )
-    .into_value()
+}
+
+pub struct DecodeURIComponent;
+
+impl Initializer<ObjectHandle> for DecodeURIComponent {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_decode_uri_component(realm))
+    }
 }
 
 fn decode_uri_impl(input: &str, decode_all: bool, realm: &Realm) -> ValueResult {

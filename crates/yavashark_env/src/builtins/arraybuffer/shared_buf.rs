@@ -23,7 +23,14 @@ impl SharedArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.sharedarraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(len),
@@ -31,17 +38,24 @@ impl SharedArrayBuffer {
         })
     }
 
-    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Self {
+    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Res<Self> {
         let len = buffer.len();
 
-        Self {
+        Ok(Self {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.sharedarraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(len),
             growable: true,
-        }
+        })
     }
 
     pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
@@ -59,7 +73,7 @@ impl SharedArrayBuffer {
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
 
-#[props(to_string_tag = "SharedArrayBuffer")]
+#[props(intrinsic_name = sharedarraybuffer, to_string_tag = "SharedArrayBuffer")]
 impl SharedArrayBuffer {
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {
@@ -93,7 +107,14 @@ impl SharedArrayBuffer {
 
         let buffer = SharedArrayBuffer {
             inner: RefCell::new(MutableSharedArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.sharedarraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .sharedarraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer,
             }),
             max_byte_length: Some(max_len),
@@ -135,7 +156,7 @@ impl SharedArrayBuffer {
             return Ok(Self::new(realm, 0)?.into_value());
         };
 
-        Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
+        Ok(Self::from_buffer(realm, buffer.to_vec())?.into_value())
     }
 
     #[get("growable")]

@@ -19,17 +19,24 @@ pub struct Duration {
 
 impl Duration {
     #[allow(unused)]
-    fn new(realm: &Realm) -> Self {
+    fn new(realm: &mut Realm) -> Res<Self> {
         Self::with_duration(realm, temporal_rs::Duration::default())
     }
 
-    pub fn with_duration(realm: &Realm, duration: temporal_rs::Duration) -> Self {
-        Self {
+    pub fn with_duration(realm: &mut Realm, duration: temporal_rs::Duration) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableDuration {
-                object: MutObject::with_proto(realm.intrinsics.temporal_duration.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_duration
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             dur: duration,
-        }
+        })
     }
 
     pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
@@ -97,7 +104,7 @@ impl Duration {
             return Ok(RefOrOwned::Owned(
                 temporal_rs::Duration::from_str(s.as_str())
                     .map_err(Error::from_temporal)
-                    .map(|dur| Self::with_duration(realm, dur))?,
+                    .and_then(|dur| Self::with_duration(realm, dur))?,
             ));
         }
 
@@ -107,7 +114,7 @@ impl Duration {
     fn from_value(info: Value, realm: &mut Realm) -> Res<Self> {
         Ok(match Self::from_value_ref(info, realm)? {
             RefOrOwned::Ref(r) => {
-                return Ok(Self::with_duration(realm, r.dur));
+                return Ok(Self::with_duration(realm, r.dur)?);
             }
             RefOrOwned::Owned(o) => o,
         })
@@ -125,7 +132,7 @@ impl Duration {
         milliseconds: Option<i64>,
         microseconds: Option<i128>,
         nanoseconds: Option<i128>,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> Res<Self> {
         let years = years.unwrap_or(0);
         let months = months.unwrap_or(0);
@@ -151,11 +158,11 @@ impl Duration {
             nanoseconds,
         )
         .map_err(Error::from_temporal)
-        .map(|dur| Self::with_duration(realm, dur))
+        .and_then(|dur| Self::with_duration(realm, dur))
     }
 }
 
-#[props(to_string_tag = "Temporal.Duration")]
+#[props(intrinsic_name = temporal_duration, to_string_tag = "Temporal.Duration")]
 impl Duration {
     #[constructor]
     #[allow(clippy::too_many_arguments)]
@@ -170,7 +177,7 @@ impl Duration {
         milliseconds: Option<NonFract<i64>>,
         microseconds: Option<NonFract<i128>>,
         nanoseconds: Option<NonFract<i128>>,
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let years = years.map(|n| n.0);
         let months = months.map(|n| n.0);
@@ -220,10 +227,10 @@ impl Duration {
             .map_err(Error::from_temporal)? as i8)
     }
 
-    fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn abs(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let res = self.dur.abs();
 
-        Ok(Self::with_duration(realm, res).into_object())
+        Ok(Self::with_duration(realm, res)?.into_object())
     }
 
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -231,13 +238,13 @@ impl Duration {
 
         let dur = self.dur.add(&other.dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur).into_object())
+        Ok(Self::with_duration(realm, dur)?.into_object())
     }
 
-    fn negated(&self, #[realm] realm: &Realm) -> ObjectHandle {
+    fn negated(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let neg = self.dur.negated();
 
-        Self::with_duration(realm, neg).into_object()
+        Ok(Self::with_duration(realm, neg)?.into_object())
     }
 
     fn round(&self, unit: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -252,7 +259,7 @@ impl Duration {
             .round_with_provider(opts, rel, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur).into_object())
+        Ok(Self::with_duration(realm, dur)?.into_object())
     }
 
     fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -263,7 +270,7 @@ impl Duration {
             .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur).into_object())
+        Ok(Self::with_duration(realm, dur)?.into_object())
     }
 
     #[prop("toJSON")]

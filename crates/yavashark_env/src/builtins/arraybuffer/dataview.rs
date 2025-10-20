@@ -57,7 +57,14 @@ impl DataView {
 
         Ok(Self {
             inner: RefCell::new(MutableDataView {
-                object: MutObject::with_proto(realm.intrinsics.data_view.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .data_view
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             byte_offset,
             buffer: buf,
@@ -131,7 +138,7 @@ impl DataView {
     }
 }
 
-#[properties_new(constructor(DataViewConstructor::new))]
+#[properties_new(intrinsic_name(data_view), constructor(DataViewConstructor::new))]
 impl DataView {
     #[get("byteLength")]
     pub const fn byte_length(&self) -> usize {

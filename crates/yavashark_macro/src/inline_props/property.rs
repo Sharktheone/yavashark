@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::inline_props::args::InlinePropsArgs;
 use proc_macro2::{Ident, TokenStream};
 use syn::spanned::Spanned;
 use syn::{Expr, Field, Path, Type};
@@ -45,8 +46,20 @@ impl Default for Property {
 }
 
 impl Property {
-    pub fn from_field(field: &mut Field) -> syn::Result<Self> {
-        let mut flags = Property::default();
+    fn with_args(args: InlinePropsArgs) -> Self {
+        Self {
+            enumerable: args.enumerable,
+            configurable: args.configurable,
+            readonly: args.readonly,
+            partial: args.partial,
+            ..Default::default()
+        }
+    }
+}
+
+impl Property {
+    pub fn from_field(field: &mut Field, args: InlinePropsArgs) -> syn::Result<Self> {
+        let mut flags = Property::with_args(args);
 
         let name = field
             .ident
@@ -204,6 +217,9 @@ fn type_is_copy(ty: &syn::Type) -> bool {
                         | "f64"
                         | "bool"
                         | "char"
+                        | "usize"
+                        | "isize"
+                        | "()"
                 )
             } else {
                 false

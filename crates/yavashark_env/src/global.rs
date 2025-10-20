@@ -1,369 +1,347 @@
+use crate::array::Array;
+use crate::builtins::bigint64array::BigInt64Array;
+use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::dataview::DataView;
+use crate::builtins::float16array::Float16Array;
+use crate::builtins::float32array::Float32Array;
+use crate::builtins::float64array::Float64Array;
+use crate::builtins::int16array::Int16Array;
+use crate::builtins::int32array::Int32Array;
+use crate::builtins::int8array::Int8Array;
+use crate::builtins::intl::Intl;
+use crate::builtins::shared_buf::SharedArrayBuffer;
+use crate::builtins::signal::Signal;
+use crate::builtins::uint16array::Uint16Array;
+use crate::builtins::uint32array::Uint32Array;
+use crate::builtins::uint8clampedarray::Uint8ClampedArray;
+use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
-    get_is_finite, get_is_nan, get_parse_float, get_parse_int,
+    AggregateError, Atomics, BigIntObj,
+    BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI, EncodeURIComponent, Escape,
+    EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy,
+    RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal,
+    TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
 };
-use crate::realm::Realm;
-use crate::Value;
-use crate::{get_console, ObjectHandle, Res, Variable};
+use crate::error_obj::ErrorObj;
+use crate::inline_props::InlineObject;
+use crate::partial_init::{Initializer, Partial};
+use crate::realm::{Intrinsic, Realm};
+use crate::value::Obj;
+use crate::{ObjectHandle, Res};
+use crate::{Console, Value};
+use std::cell::Cell;
+use yavashark_macro::inline_props;
+use crate::function::function_prototype::GlobalFunctionConstructor;
+use crate::object::prototype::GlobalObjectConstructor;
 
-pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
-    let obj = handle.guard();
+#[inline_props(enumerable = false, configurable)]
+#[derive(Debug)]
+pub struct GlobalProperties {
+    #[readonly]
+    #[no_configurable]
+    undefined: (),
 
-    obj.define_property_attributes(
-        "undefined".into(),
-        Variable::new_read_only(Value::Undefined),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "NaN".into(),
-        Variable::new_read_only(Value::Number(f64::NAN)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Infinity".into(),
-        Variable::new_read_only(Value::Number(f64::INFINITY)),
-        realm,
-    )?;
-    obj.define_property_attributes("null".into(), Variable::new_read_only(Value::Null), realm)?;
-    obj.define_property_attributes(
-        "true".into(),
-        Variable::new_read_only(Value::Boolean(true)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "false".into(),
-        Variable::new_read_only(Value::Boolean(false)),
-        realm,
-    )?;
+    #[prop("NaN")]
+    #[readonly]
+    #[no_configurable]
+    nan: f64,
 
-    obj.define_property_attributes(
-        "console".into(),
-        Variable::write_config(get_console(realm)),
-        realm,
-    )?;
+    #[prop("Infinity")]
+    #[readonly]
+    #[no_configurable]
+    infinity: f64,
 
-    obj.define_property_attributes(
-        "Error".into(),
-        Variable::write_config(realm.intrinsics.error_constructor().value),
-        realm,
-    )?;
+    #[readonly]
+    #[no_configurable]
+    null: Value,
 
-    #[allow(clippy::expect_used)]
-    obj.define_property_attributes(
-        "Array".into(),
-        Variable::write_config(realm.intrinsics.array_constructor().value),
-        realm,
-    )?;
+    #[prop("true")]
+    #[readonly]
+    #[no_configurable]
+    true_: bool,
 
-    obj.define_property_attributes(
-        "Object".into(),
-        Variable::write_config(realm.intrinsics.obj_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Function".into(),
-        Variable::write_config(realm.intrinsics.func_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Math".into(),
-        Variable::write_config(realm.intrinsics.math_obj().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "String".into(),
-        Variable::write_config(realm.intrinsics.string_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Number".into(),
-        Variable::write_config(realm.intrinsics.number_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Boolean".into(),
-        Variable::write_config(realm.intrinsics.boolean_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Symbol".into(),
-        Variable::write_config(realm.intrinsics.symbol_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "BigInt".into(),
-        Variable::write_config(realm.intrinsics.bigint_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "RegExp".into(),
-        Variable::write_config(realm.intrinsics.regexp_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "JSON".into(),
-        Variable::write_config(realm.intrinsics.json_obj().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "TypeError".into(),
-        Variable::write_config(realm.intrinsics.type_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "RangeError".into(),
-        Variable::write_config(realm.intrinsics.range_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "ReferenceError".into(),
-        Variable::write_config(realm.intrinsics.reference_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "SyntaxError".into(),
-        Variable::write_config(realm.intrinsics.syntax_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "EvalError".into(),
-        Variable::write_config(realm.intrinsics.eval_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "URIError".into(),
-        Variable::write_config(realm.intrinsics.uri_error_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "AggregateError".into(),
-        Variable::write_config(realm.intrinsics.aggregate_error_constructor().value),
-        realm,
-    )?;
+    #[prop("false")]
+    #[readonly]
+    #[no_configurable]
+    false_: bool,
 
-    obj.define_property_attributes(
-        "globalThis".into(),
-        Variable::write_config(realm.global.clone().into()),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "global".into(),
-        Variable::write_config(realm.global.clone().into()),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "ArrayBuffer".into(),
-        Variable::write_config(realm.intrinsics.arraybuffer_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "SharedArrayBuffer".into(),
-        Variable::write_config(realm.intrinsics.sharedarraybuffer_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "DataView".into(),
-        Variable::write_config(realm.intrinsics.data_view_constructor().value),
-        realm,
-    )?;
+    console: Partial<ObjectHandle, Console>,
 
-    obj.define_property_attributes(
-        "Int8Array".into(),
-        Variable::write_config(realm.intrinsics.int8array_constructor().value),
-        realm,
-    )?;
+    #[prop("Error")]
+    error: Partial<ObjectHandle, GlobalInitializer<ErrorObj>>,
 
-    obj.define_property_attributes(
-        "Uint8Array".into(),
-        Variable::write_config(realm.intrinsics.uint8array_constructor().value),
-        realm,
-    )?;
+    #[prop("Array")]
+    array: Partial<ObjectHandle, GlobalInitializer<Array>>,
 
-    obj.define_property_attributes(
-        "Uint8ClampedArray".into(),
-        Variable::write_config(realm.intrinsics.uint8clampedarray_constructor().value),
-        realm,
-    )?;
+    #[prop("Object")]
+    object: Partial<ObjectHandle, GlobalObjectConstructor>,
 
-    obj.define_property_attributes(
-        "Int16Array".into(),
-        Variable::write_config(realm.intrinsics.int16array_constructor().value),
-        realm,
-    )?;
+    #[prop("Function")]
+    function: Partial<ObjectHandle, GlobalFunctionConstructor>,
 
-    obj.define_property_attributes(
-        "Uint16Array".into(),
-        Variable::write_config(realm.intrinsics.uint16array_constructor().value),
-        realm,
-    )?;
+    #[prop("Math")]
+    math: Partial<ObjectHandle, Math>,
 
-    obj.define_property_attributes(
-        "Int32Array".into(),
-        Variable::write_config(realm.intrinsics.int32array_constructor().value),
-        realm,
-    )?;
+    #[prop("String")]
+    string: Partial<ObjectHandle, GlobalInitializer<StringObj>>,
 
-    obj.define_property_attributes(
-        "Uint32Array".into(),
-        Variable::write_config(realm.intrinsics.uint32array_constructor().value),
-        realm,
-    )?;
+    #[prop("Number")]
+    number: Partial<ObjectHandle, GlobalInitializer<NumberObj>>,
 
-    obj.define_property_attributes(
-        "Float16Array".into(),
-        Variable::write_config(realm.intrinsics.float16array_constructor().value),
-        realm,
-    )?;
+    #[prop("Boolean")]
+    boolean: Partial<ObjectHandle, GlobalInitializer<BooleanObj>>,
 
-    obj.define_property_attributes(
-        "Float32Array".into(),
-        Variable::write_config(realm.intrinsics.float32array_constructor().value),
-        realm,
-    )?;
+    #[prop("Symbol")]
+    symbol: Partial<ObjectHandle, GlobalInitializer<SymbolObj>>,
 
-    obj.define_property_attributes(
-        "Float64Array".into(),
-        Variable::write_config(realm.intrinsics.float64array_constructor().value),
-        realm,
-    )?;
+    #[prop("BigInt")]
+    bigint: Partial<ObjectHandle, GlobalInitializer<BigIntObj>>,
 
-    obj.define_property_attributes(
-        "BigInt64Array".into(),
-        Variable::write_config(realm.intrinsics.bigint64array_constructor().value),
-        realm,
-    )?;
+    #[prop("RegExp")]
+    regexp: Partial<ObjectHandle, GlobalInitializer<RegExp>>,
 
-    obj.define_property_attributes(
-        "BigUint64Array".into(),
-        Variable::write_config(realm.intrinsics.biguint64array_constructor().value),
-        realm,
-    )?;
+    #[prop("JSON")]
+    json: Partial<ObjectHandle, JSON>,
 
-    obj.define_property_attributes(
-        "Atomics".into(),
-        Variable::write_config(realm.intrinsics.atomics_constructor().value),
-        realm,
-    )?;
+    #[prop("TypeError")]
+    type_error: Partial<ObjectHandle, GlobalInitializer<TypeError>>,
 
-    obj.define_property_attributes(
-        "escape".into(),
-        Variable::write_config(get_escape(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "unescape".into(),
-        Variable::write_config(get_escape(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "encodeURI".into(),
-        Variable::write_config(get_encode_uri(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "decodeURI".into(),
-        Variable::write_config(get_decode_uri(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "encodeURIComponent".into(),
-        Variable::write_config(get_encode_uri_component(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "decodeURIComponent".into(),
-        Variable::write_config(get_decode_uri_component(realm)),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Map".into(),
-        Variable::write_config(realm.intrinsics.map_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "WeakMap".into(),
-        Variable::write_config(realm.intrinsics.weak_map_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "WeakRef".into(),
-        Variable::write_config(realm.intrinsics.weak_ref_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Set".into(),
-        Variable::write_config(realm.intrinsics.set_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "WeakSet".into(),
-        Variable::write_config(realm.intrinsics.weak_set_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Date".into(),
-        Variable::write_config(realm.intrinsics.date_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Reflect".into(),
-        Variable::write_config(realm.intrinsics.reflect_obj().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Proxy".into(),
-        Variable::write_config(realm.intrinsics.proxy_constructor().value),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "Temporal".into(),
-        Variable::write_config(realm.intrinsics.temporal_obj().value),
-        realm,
-    )?;
+    #[prop("RangeError")]
+    range_error: Partial<ObjectHandle, GlobalInitializer<RangeError>>,
 
-    obj.define_property_attributes(
-        "Signal".into(),
-        Variable::write_config(realm.intrinsics.signal_obj().value),
-        realm,
-    )?;
+    #[prop("ReferenceError")]
+    reference_error: Partial<ObjectHandle, GlobalInitializer<ReferenceError>>,
 
-    obj.define_property_attributes(
-        "Promise".into(),
-        Variable::write_config(realm.intrinsics.promise_constructor().value),
-        realm,
-    )?;
+    #[prop("SyntaxError")]
+    syntax_error: Partial<ObjectHandle, GlobalInitializer<SyntaxError>>,
 
-    obj.define_property_attributes(
-        "parseInt".into(),
-        Variable::write_config(get_parse_int(realm).into()),
-        realm,
-    )?;
+    #[prop("EvalError")]
+    eval_error: Partial<ObjectHandle, GlobalInitializer<EvalError>>,
 
-    obj.define_property_attributes(
-        "parseFloat".into(),
-        Variable::write_config(get_parse_float(realm).into()),
-        realm,
-    )?;
+    #[prop("URIError")]
+    uri_error: Partial<ObjectHandle, GlobalInitializer<URIError>>,
 
-    obj.define_property_attributes(
-        "isNaN".into(),
-        Variable::write_config(get_is_nan(realm).into()),
-        realm,
-    )?;
-    obj.define_property_attributes(
-        "isFinite".into(),
-        Variable::write_config(get_is_finite(realm).into()),
-        realm,
-    )?;
+    #[prop("AggregateError")]
+    aggregate_error: Partial<ObjectHandle, GlobalInitializer<AggregateError>>,
 
-    obj.define_property_attributes(
-        "Intl".into(),
-        Variable::write_config(realm.intrinsics.intl_obj().value),
-        realm,
-    )?;
+    #[prop("globalThis")]
+    global_this: Partial<ObjectHandle, GlobalThis>,
+
+    global: Partial<ObjectHandle, GlobalThis>,
+
+    #[prop("ArrayBuffer")]
+    array_buffer: Partial<ObjectHandle, GlobalInitializer<ArrayBuffer>>,
+
+    #[prop("SharedArrayBuffer")]
+    shared_array_buffer: Partial<ObjectHandle, GlobalInitializer<SharedArrayBuffer>>,
+
+    #[prop("DataView")]
+    data_view: Partial<ObjectHandle, GlobalInitializer<DataView>>,
+
+    #[prop("Int8Array")]
+    int8_array: Partial<ObjectHandle, GlobalInitializer<Int8Array>>,
+
+    #[prop("Uint8Array")]
+    uint8_array: Partial<ObjectHandle, GlobalInitializer<Uint8Array>>,
+
+    #[prop("Uint8ClampedArray")]
+    uint8_clamped_array: Partial<ObjectHandle, GlobalInitializer<Uint8ClampedArray>>,
+
+    #[prop("Int16Array")]
+    int16_array: Partial<ObjectHandle, GlobalInitializer<Int16Array>>,
+
+    #[prop("Uint16Array")]
+    uint16_array: Partial<ObjectHandle, GlobalInitializer<Uint16Array>>,
+
+    #[prop("Int32Array")]
+    int32_array: Partial<ObjectHandle, GlobalInitializer<Int32Array>>,
+
+    #[prop("Uint32Array")]
+    uint32_array: Partial<ObjectHandle, GlobalInitializer<Uint32Array>>,
+
+    #[prop("Float16Array")]
+    float16_array: Partial<ObjectHandle, GlobalInitializer<Float16Array>>,
+
+    #[prop("Float32Array")]
+    float32_array: Partial<ObjectHandle, GlobalInitializer<Float32Array>>,
+
+    #[prop("Float64Array")]
+    float64_array: Partial<ObjectHandle, GlobalInitializer<Float64Array>>,
+
+    #[prop("BigInt64Array")]
+    bigint64_array: Partial<ObjectHandle, GlobalInitializer<BigInt64Array>>,
+
+    #[prop("BigUint64Array")]
+    biguint64_array: Partial<ObjectHandle, GlobalInitializer<BigUint64Array>>,
+
+    #[prop("Atomics")]
+    atomics: Partial<ObjectHandle, GlobalInitializer<Atomics>>,
+
+    escape: Partial<ObjectHandle, Escape>,
+
+    unescape: Partial<ObjectHandle, Unescape>,
+
+    #[prop("encodeURI")]
+    encode_uri: Partial<ObjectHandle, EncodeURI>,
+
+    #[prop("decodeURI")]
+    decode_uri: Partial<ObjectHandle, DecodeURI>,
+
+    #[prop("encodeURIComponent")]
+    encode_uri_component: Partial<ObjectHandle, EncodeURIComponent>,
+
+    #[prop("decodeURIComponent")]
+    decode_uri_component: Partial<ObjectHandle, DecodeURIComponent>,
+
+    #[prop("Map")]
+    map: Partial<ObjectHandle, GlobalInitializer<Map>>,
+
+    #[prop("WeakMap")]
+    weak_map: Partial<ObjectHandle, GlobalInitializer<WeakMap>>,
+
+    #[prop("WeakRef")]
+    weak_ref: Partial<ObjectHandle, GlobalInitializer<WeakRef>>,
+
+    #[prop("Set")]
+    set: Partial<ObjectHandle, GlobalInitializer<Set>>,
+
+    #[prop("WeakSet")]
+    weak_set: Partial<ObjectHandle, GlobalInitializer<WeakSet>>,
+
+    #[prop("Date")]
+    date: Partial<ObjectHandle, GlobalInitializer<Date>>,
+
+    #[prop("Reflect")]
+    reflect: Partial<ObjectHandle, Reflect>,
+
+    #[prop("Proxy")]
+    proxy: Partial<ObjectHandle, GlobalInitializer<Proxy>>,
+
+    #[prop("Temporal")]
+    temporal: Partial<ObjectHandle, Temporal>,
+
+    #[prop("Signal")]
+    signal: Partial<ObjectHandle, Signal>,
+
+    #[prop("Promise")]
+    promise: Partial<ObjectHandle, GlobalInitializer<Promise>>,
+
+    #[prop("parseInt")]
+    parse_int: Partial<ObjectHandle, ParseInt>,
+
+    #[prop("parseFloat")]
+    parse_float: Partial<ObjectHandle, ParseFloat>,
+
+    #[prop("isNaN")]
+    is_nan: Partial<ObjectHandle, IsNan>,
+
+    #[prop("isFinite")]
+    is_finite: Partial<ObjectHandle, IsFinite>,
+
+    #[prop("Intl")]
+    intl: Partial<ObjectHandle, Intl>,
+}
+
+pub fn init_global_obj(realm: &mut Realm) -> Res {
+    let inline = GlobalProperties {
+        undefined: (),
+        nan: f64::NAN,
+        infinity: f64::INFINITY,
+        null: Value::Null,
+        true_: true,
+        false_: false,
+        console: Default::default(),
+        error: Default::default(),
+        array: Default::default(),
+        object: Default::default(),
+        function: Default::default(),
+        math: Default::default(),
+        string: Default::default(),
+        number: Default::default(),
+        boolean: Default::default(),
+        symbol: Default::default(),
+        bigint: Default::default(),
+        regexp: Default::default(),
+        json: Default::default(),
+        type_error: Default::default(),
+        range_error: Default::default(),
+        reference_error: Default::default(),
+        syntax_error: Default::default(),
+        eval_error: Default::default(),
+        uri_error: Default::default(),
+        aggregate_error: Default::default(),
+        global_this: Default::default(),
+        global: Default::default(),
+        array_buffer: Default::default(),
+        shared_array_buffer: Default::default(),
+        data_view: Default::default(),
+        int8_array: Default::default(),
+        uint8_array: Default::default(),
+        uint8_clamped_array: Default::default(),
+        int16_array: Default::default(),
+        uint16_array: Default::default(),
+        int32_array: Default::default(),
+        uint32_array: Default::default(),
+        float16_array: Default::default(),
+        float32_array: Default::default(),
+        float64_array: Default::default(),
+        bigint64_array: Default::default(),
+        biguint64_array: Default::default(),
+        atomics: Default::default(),
+        escape: Default::default(),
+        unescape: Default::default(),
+        encode_uri: Default::default(),
+        decode_uri: Default::default(),
+        encode_uri_component: Default::default(),
+        decode_uri_component: Default::default(),
+        map: Default::default(),
+        weak_map: Default::default(),
+        weak_ref: Default::default(),
+        set: Default::default(),
+        weak_set: Default::default(),
+        date: Default::default(),
+        reflect: Default::default(),
+        proxy: Default::default(),
+        temporal: Default::default(),
+        signal: Default::default(),
+        promise: Default::default(),
+        parse_int: Default::default(),
+        parse_float: Default::default(),
+        is_nan: Default::default(),
+        is_finite: Default::default(),
+        intl: Default::default(),
+
+        __deleted_properties: Cell::default(),
+        __written_properties: Cell::default(),
+    };
+
+    let handle = InlineObject::new(inline, realm).into_object();
 
     #[cfg(feature = "out-of-spec-experiments")]
-    crate::experiments::init(handle, realm)?;
+    crate::experiments::init(&handle, realm)?;
+
+    realm.global = handle;
 
     Ok(())
+}
+
+#[derive(Debug)]
+pub struct GlobalInitializer<T> {
+    marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Intrinsic> Initializer<ObjectHandle> for GlobalInitializer<T> {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        T::get_global(realm)
+    }
+}
+
+
+pub struct GlobalThis;
+
+impl Initializer<ObjectHandle> for GlobalThis {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(realm.global.clone())
+    }
 }

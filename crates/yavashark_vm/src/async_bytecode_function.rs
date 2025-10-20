@@ -86,7 +86,7 @@ impl Func for AsyncBytecodeFunction {
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
 
-        let args = Arguments::new(args, None, realm);
+        let args = Arguments::new(args, None, realm)?;
 
         let args = ObjectHandle::new(args);
 

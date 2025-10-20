@@ -37,7 +37,9 @@ impl Constructor for MapConstructor {
 
         let map = Map {
             inner: RefCell::new(MutableMap {
-                object: MutObject::with_proto(realm.intrinsics.map.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().map.get(realm)?.clone(),
+                ),
                 map,
             }),
         };
@@ -55,7 +57,7 @@ impl MapConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -64,7 +66,7 @@ impl MapConstructor {
 #[properties_new(raw)]
 impl MapConstructor {}
 
-#[properties_new(constructor(MapConstructor::new))]
+#[properties_new(intrinsic_name(map), constructor(MapConstructor::new))]
 impl Map {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();
@@ -158,7 +160,7 @@ impl Map {
         Ok((inner.map.len() as i32).into())
     }
 
-    fn keys(&self, #[realm] realm: &Realm) -> ValueResult {
+    fn keys(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
 
         let keys = inner.map.keys().cloned().collect::<Vec<_>>();

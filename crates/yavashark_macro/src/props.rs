@@ -26,6 +26,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut mode = Mode::Prototype;
     let mut constructor = None;
     let mut proto_default = None;
+    let mut no_intrinsic = false;
+    let mut intrinsic_name = None;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -57,12 +59,40 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             });
 
             Ok(())
+        } else if meta.path.is_ident("no_intrinsic") {
+            no_intrinsic = true;
+            Ok(())
+        } else if meta.path.is_ident("intrinsic_name") {
+            meta.parse_nested_meta(|meta| {
+                intrinsic_name = Some(meta.path);
+
+                Ok(())
+            });
+            Ok(())
         } else {
             Err(meta.error("Unknown attribute"))
         }
     });
 
     syn::parse_macro_input!(attrs with attr_parser);
+
+    if no_intrinsic && intrinsic_name.is_some() {
+        return syn::Error::new(
+            Span::call_site(),
+            "Cannot have both no_intrinsic and intrinsic_name",
+        )
+        .to_compile_error()
+        .into();
+    }
+
+    if !no_intrinsic && intrinsic_name.is_none() && mode == Mode::Prototype {
+        return syn::Error::new(
+            Span::call_site(),
+            "Must have either no_intrinsic or intrinsic_name",
+        )
+        .to_compile_error()
+        .into();
+    }
 
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
 
@@ -280,7 +310,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 quote! {#variable::write_config},
             ),
             Prop::Constant(constant) => {
-
                 let variable_fn = if constant.writable {
                     quote! {#variable::write}
                 } else {
@@ -294,7 +323,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     Type::Normal,
                     variable_fn,
                 )
-            },
+            }
         };
 
         let name = js_name
@@ -336,7 +365,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let (constructor, proto_define) = if let Some(constructor) = constructor {
         (
             quote! {
-                let constructor = #constructor(&obj, func_proto.clone(), realm)?;
+                let constructor = #constructor(&obj, realm.intrinsics.func.clone(), realm)?;
                 obj.define_property_attributes("constructor".into(), #variable::write_config(constructor.clone().into()), realm)?;
 
             },
@@ -348,41 +377,102 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         (TokenStream::new(), TokenStream::new())
     };
 
-    let init_fn = match mode {
-        Mode::Prototype => quote! {
-            pub fn initialize_proto(mut obj: #object, func_proto: #handle, realm: &mut #realm) -> Result<#handle, #error> {
-                use #env::value::{Obj, IntoValue, FromValue};
-                use #try_into_value;
+    match mode {
+        Mode::Prototype => {
+            let intrinsic = &config.intrinsic;
+            let struct_name = &item.self_ty;
+            let obj = &config.object;
+            let res = &config.res;
+            let object_handle = &config.object_handle;
+
+            let intrinsic_get = if let Some(name) = intrinsic_name.as_ref() {
+                quote! {
+                    Ok(realm.intrinsics.clone_public().#name.get(realm)?.clone())
+                }
+            } else {
+                quote! {
+                    Self::initialize(realm)
+                }
+            };
+
+            let init = quote! {
+                impl #intrinsic for #struct_name {
+                    fn initialize(realm: &mut #realm) -> Result<#handle, #error> {
+                        use #env::value::{Obj, IntoValue, FromValue};
+                        use #try_into_value;
+
+                        let mut obj = #obj::raw_with_proto(
+                            realm.intrinsics.obj.clone(),
+                        );
+
+                        #init
+
+                        #constructor
+
+                        let obj = obj.into_object();
+
+                        #proto_define
+
+
+                        Ok(obj)
+                    }
+
+                    fn get_intrinsic(realm: &mut #realm) -> #res<#object_handle> {
+                        #intrinsic_get
+                    }
+
+                    fn get_global(realm: &mut Realm) -> #res<#object_handle> {
+                        let this = Self::get_intrinsic(realm)?;
+
+                        this.get("constructor", realm)?
+                            .to_object()
+                    }
+                }
+
+
+                // pub fn initialize_proto(mut obj: #object, func_proto: #handle, realm: &mut #realm) -> Result<#handle, #error> {
+                //     use #env::value::{Obj, IntoValue, FromValue};
+                //     use #try_into_value;
+                //
+                //     #init
+                //
+                //     #constructor
+                //
+                //     let obj = obj.into_object();
+                //
+                //     #proto_define
+                //
+                //
+                //     Ok(obj)
+                // }
+            };
+
+            quote! {
+                #item
 
                 #init
-
-                #constructor
-
-                let obj = obj.into_object();
-
-                #proto_define
-
-
-                Ok(obj)
             }
-        },
-        Mode::Raw => quote! {
-            pub fn initialize(&mut self, func_proto: #handle, realm: &mut #realm) -> Result<(), #error> {
-                use #env::value::{Obj, IntoValue, FromValue};
-                use #try_into_value;
+        }
+        Mode::Raw => {
+            let init_fn = quote! {
+                pub fn initialize(&mut self, realm: &mut #realm) -> Result<(), #error> {
+                    use #env::value::{Obj, IntoValue, FromValue};
+                    use #try_into_value;
 
-                let obj = self;
+                    let obj = self;
 
-                #init
+                    #init
 
-                Ok(())
-            }
-        },
-    };
+                    Ok(())
+                }
+            };
 
-    item.items.push(ImplItem::Verbatim(init_fn));
+            item.items.push(ImplItem::Verbatim(init_fn));
 
-    item.to_token_stream().into()
+            item.to_token_stream()
+        }
+    }
+    .into()
 }
 
 enum Prop {
@@ -475,7 +565,7 @@ impl Method {
                     let mut guard = None;
                     let mut def = None::<Self>;
 
-                    let this = if this.as_object() == Ok(&realm.intrinsics.#def) {
+                    let this = if this.as_object() == Ok(realm.intrinsics.clone_public().#def.get(realm)?) {
                         &*def.insert(#env::utils::ProtoDefault::#f)
                     } else {
                         let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
@@ -530,7 +620,7 @@ impl Method {
                 #arg_prepare
                 #prepare_receiver
                 #call.try_into_value(realm)
-            }, func_proto.clone(), #length, realm)
+            }, realm.intrinsics.func.clone(), #length, realm)
         }
     }
 }

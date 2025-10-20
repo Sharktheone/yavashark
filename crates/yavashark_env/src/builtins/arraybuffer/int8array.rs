@@ -10,7 +10,16 @@ pub struct Int8Array {}
 
 impl Int8Array {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int8array.clone().into(), realm)?;
+        ty.set_prototype(
+            realm
+                .intrinsics
+                .clone_public()
+                .int8array
+                .get(realm)?
+                .clone()
+                .into(),
+            realm,
+        )?;
 
         Ok(Self {
             inner: RefCell::new(MutableInt8Array {}),
@@ -19,7 +28,7 @@ impl Int8Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = int8array, extends = TypedArray)]
 impl Int8Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<i8>();

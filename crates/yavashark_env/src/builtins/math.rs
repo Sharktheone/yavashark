@@ -1,3 +1,4 @@
+use crate::partial_init::Initializer;
 use crate::utils::ValueIterator;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -12,14 +13,14 @@ pub struct Math {}
 
 impl Math {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMath {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
-        this.initialize(func.into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -288,5 +289,11 @@ fn float_min(left: f64, right: f64) -> f64 {
         }
     } else {
         left + right
+    }
+}
+
+impl Initializer<ObjectHandle> for Math {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Math::new(realm)
     }
 }

@@ -103,41 +103,42 @@ impl Flags {
 
 impl RegExp {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use]
     pub fn new(
-        realm: &Realm,
+        realm: &mut Realm,
         regex: Regex,
         flags: Flags,
         source: YSString,
         flags_str: YSString,
-    ) -> ObjectHandle {
-        Self {
+    ) -> Res<ObjectHandle> {
+        Ok(Self {
             regex,
             inner: RefCell::new(MutableRegExp {
-                object: MutObject::with_proto(realm.intrinsics.regexp.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().regexp.get(realm)?.clone(),
+                ),
             }),
             flags,
             original_source: source,
             original_flags: flags_str,
             last_index: Cell::new(0),
         }
-        .into_object()
+        .into_object())
     }
 
-    pub fn new_from_str(realm: &Realm, source: &str) -> Res<ObjectHandle> {
+    pub fn new_from_str(realm: &mut Realm, source: &str) -> Res<ObjectHandle> {
         let regex = Regex::new(source).map_err(|e| ControlFlow::error(e.to_string()))?;
 
-        Ok(Self::new(
+        Self::new(
             realm,
             regex,
             Flags::default(),
             YSString::from_ref(source),
             YSString::new(),
-        ))
+        )
     }
 
     pub fn new_from_str_with_flags(
-        realm: &Realm,
+        realm: &mut Realm,
         source: &str,
         flags_str: &str,
     ) -> Res<ObjectHandle> {
@@ -146,13 +147,13 @@ impl RegExp {
         let regex = Regex::from_unicode(source.chars().map(u32::from), flags)
             .map_err(|e| Error::syn_error(e.text))?;
 
-        Ok(Self::new(
+        Self::new(
             realm,
             regex,
             flags,
             YSString::from_ref(source),
             canonical_flags,
-        ))
+        )
     }
 
     fn set_last_index_value(&self, this: &Value, value: usize, realm: &mut Realm) -> Res<()> {
@@ -186,7 +187,7 @@ impl RegExpConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -224,7 +225,7 @@ impl Func for RegExpConstructor {
     }
 }
 
-#[properties_new(constructor(RegExpConstructor::new))]
+#[properties_new(intrinsic_name(regexp), constructor(RegExpConstructor::new))]
 impl RegExp {
     #[prop("exec")]
     pub fn exec(
@@ -270,14 +271,14 @@ impl RegExp {
             self.set_last_index_value(this, 0, realm)?;
         }
 
-        let result = Array::from_realm(realm);
+        let result = Array::from_realm(realm)?;
         let matched_slice = input.get(match_start..match_end).unwrap_or("");
         result.insert_array(YSString::from_ref(matched_slice).into(), 0)?;
         result.define_property("index".into(), match_start.into(), realm)?;
         result.define_property("input".into(), inp.clone().into(), realm)?;
 
         let indices_array = if self.flags.has_indices {
-            let arr = Array::from_realm(realm);
+            let arr = Array::from_realm(realm)?;
             let range = Array::with_elements(realm, vec![match_start.into(), match_end.into()])?;
             arr.insert_array(range.into_value(), 0)?;
             Some(arr)
@@ -381,7 +382,7 @@ impl RegExp {
         }
 
         self.set_last_index_value(this, 0, realm)?;
-        let matches = Array::from_realm(realm);
+        let matches = Array::from_realm(realm)?;
         let mut found = false;
 
         loop {

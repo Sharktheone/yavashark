@@ -5,7 +5,7 @@ use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
-pub use prototype::*;
+pub use prototype::Prototype;
 use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
@@ -455,7 +455,6 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-
             if !self.array.get(i).is_some_and(|v| {
                 let Some(v) = self.values.get(v.1) else {
                     return false;
@@ -648,11 +647,14 @@ impl MutObj for MutObject {
                 };
 
                 if !e.set.is_undefined() {
-                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value));
+                    return Ok(DefinePropertyResult::Setter(
+                        e.set.as_object()?.clone(),
+                        value,
+                    ));
                 }
 
                 if !e.get.is_undefined() {
-                    return Ok(DefinePropertyResult::ReadOnly)
+                    return Ok(DefinePropertyResult::ReadOnly);
                 }
 
                 return Ok(if e.attributes.is_writable() {
@@ -660,9 +662,8 @@ impl MutObj for MutObject {
                     e.get = Value::Undefined;
 
                     e.value = value;
-                        DefinePropertyResult::Handled
+                    DefinePropertyResult::Handled
                 } else {
-
                     DefinePropertyResult::ReadOnly
                 });
             }
@@ -699,15 +700,16 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-
                 if !e.set.is_undefined() {
-                    return Ok(DefinePropertyResult::Setter(e.set.as_object()?.clone(), value.value));
+                    return Ok(DefinePropertyResult::Setter(
+                        e.set.as_object()?.clone(),
+                        value.value,
+                    ));
                 }
 
                 if !e.get.is_undefined() {
-                    return Ok(DefinePropertyResult::ReadOnly)
+                    return Ok(DefinePropertyResult::ReadOnly);
                 }
-
 
                 return Ok(if e.attributes.is_writable() {
                     *e = value.into();
@@ -744,21 +746,21 @@ impl MutObj for MutObject {
             //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
 
-        if let Some(prop) =  self
+        if let Some(prop) = self
             .properties
             .get::<PropertyKey>(&name.clone().into())
-            .and_then(|idx| self.values.get(*idx).map(ObjectProperty::property)) {
+            .and_then(|idx| self.values.get(*idx).map(ObjectProperty::property))
+        {
             return Ok(Some(prop));
         }
 
-
-            match &self.prototype {
-                ObjectOrNull::Object(o) => {
-                    o.resolve_property_no_get_set(name, realm)
-                    //TODO: this is wrong, we need a realm here!
-                }
-                _ => Ok(None),
+        match &self.prototype {
+            ObjectOrNull::Object(o) => {
+                o.resolve_property_no_get_set(name, realm)
+                //TODO: this is wrong, we need a realm here!
             }
+            _ => Ok(None),
+        }
     }
 
     fn get_own_property(

@@ -10,6 +10,7 @@ pub fn generate_contains_property(props: &[Property], config: &Config) -> proc_m
     let mut symbols = Vec::new();
 
     let mut config_idx = 0usize;
+    let mut write_idx = 0usize;
 
     for prop in props {
         let key = &prop.name;
@@ -18,10 +19,23 @@ pub fn generate_contains_property(props: &[Property], config: &Config) -> proc_m
         if prop.configurable {
             config_idx += 1;
         }
+        let w = write_idx;
+        if !prop.readonly {
+            write_idx += 1;
+        }
 
-        let prop_exists = if prop.configurable {
+        let prop_exists = if prop.configurable && prop.readonly {
             quote! {
                 (self.__deleted_properties.get() & (1 << #c)) == 0
+            }
+        } else if prop.configurable && !prop.readonly {
+            quote! {
+                (self.__deleted_properties.get() & (1 << #c)) == 0 &&
+                (self.__written_properties.get() & (1 << #w)) == 0
+            }
+        } else if !prop.configurable && !prop.readonly {
+            quote! {
+                (self.__written_properties.get() & (1 << #w)) == 0
             }
         } else {
             quote! { true }

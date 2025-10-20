@@ -1,3 +1,4 @@
+use crate::partial_init::Initializer;
 use crate::utils::ProtoDefault;
 use crate::value::{fmt_num, Constructor, Func, Obj};
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
@@ -16,13 +17,15 @@ pub struct NumberObj {
 }
 
 impl ProtoDefault for NumberObj {
-    fn proto_default(realm: &Realm) -> Self {
-        Self {
+    fn proto_default(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.number.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().number.get(realm)?.clone(),
+                ),
                 number: 0.0,
             }),
-        }
+        })
     }
 
     fn null_proto_default() -> Self {
@@ -48,7 +51,7 @@ impl NumberConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -172,14 +175,16 @@ impl Func for NumberConstructor {
 
 impl NumberObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> crate::Res<ObjectHandle> {
         Self::with_number(realm, 0.0)
     }
 
-    pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Res<ObjectHandle> {
+    pub fn with_number(realm: &mut Realm, number: impl Into<f64>) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.number.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().number.get(realm)?.clone(),
+                ),
                 number: number.into(),
             }),
         };
@@ -188,7 +193,11 @@ impl NumberObj {
     }
 }
 
-#[properties_new(default_null(number), constructor(NumberConstructor::new))]
+#[properties_new(
+    intrinsic_name(number),
+    default_null(number),
+    constructor(NumberConstructor::new)
+)]
 impl NumberObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> Res<YSString> {
@@ -510,6 +519,14 @@ pub fn get_is_nan(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+pub struct IsNan;
+
+impl Initializer<ObjectHandle> for IsNan {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_is_nan(realm))
+    }
+}
+
 #[must_use]
 pub fn get_is_finite(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -524,6 +541,15 @@ pub fn get_is_finite(realm: &mut Realm) -> ObjectHandle {
         realm,
         1,
     )
+}
+
+#[derive(Debug)]
+pub struct IsFinite;
+
+impl Initializer<ObjectHandle> for IsFinite {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_is_finite(realm))
+    }
 }
 
 #[must_use]
@@ -548,6 +574,14 @@ pub fn get_parse_int(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+pub struct ParseInt;
+
+impl Initializer<ObjectHandle> for ParseInt {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_parse_int(realm))
+    }
+}
+
 #[must_use]
 pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -563,4 +597,12 @@ pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
         realm,
         1,
     )
+}
+
+pub struct ParseFloat;
+
+impl Initializer<ObjectHandle> for ParseFloat {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(get_parse_float(realm))
+    }
 }

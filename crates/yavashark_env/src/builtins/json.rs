@@ -1,4 +1,6 @@
 use crate::array::Array;
+use crate::partial_init::Initializer;
+use crate::realm::Intrinsic;
 use crate::value::{Hint, IntoValue, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
@@ -11,14 +13,14 @@ pub struct JSON {}
 
 impl JSON {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableJSON {
-                object: MutObject::with_proto(proto),
+                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
             }),
         };
 
-        this.initialize(func.into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -75,7 +77,7 @@ impl JSON {
 
                 visited.push(o.as_ptr().addr());
 
-                if value.instance_of(&realm.intrinsics.array_constructor().value, realm)? {
+                if value.instance_of(&Array::get_global(realm)?.into(), realm)? {
                     let mut index = 0;
 
                     let mut array = Vec::new();
@@ -150,5 +152,11 @@ impl JSON {
             || Ok(Value::Undefined),
             |value| Ok(serde_json::to_string(&value).unwrap_or_default().into()),
         )
+    }
+}
+
+impl Initializer<ObjectHandle> for JSON {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        JSON::new(realm)
     }
 }

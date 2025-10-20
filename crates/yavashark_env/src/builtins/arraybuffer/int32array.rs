@@ -10,7 +10,16 @@ pub struct Int32Array {}
 
 impl Int32Array {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int32array.clone().into(), realm)?;
+        ty.set_prototype(
+            realm
+                .intrinsics
+                .clone_public()
+                .int32array
+                .get(realm)?
+                .clone()
+                .into(),
+            realm,
+        )?;
 
         Ok(Self {
             inner: RefCell::new(MutableInt32Array {}),
@@ -19,7 +28,7 @@ impl Int32Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = int32array, extends = TypedArray)]
 impl Int32Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<i32>();

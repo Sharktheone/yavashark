@@ -15,7 +15,7 @@ pub struct Date {
     date: DateTime<Local>,
 }
 
-#[properties_new(constructor(DateConstructor::new))]
+#[properties_new(intrinsic_name(date), constructor(DateConstructor::new))]
 impl Date {
     #[prop("getDate")]
     pub fn get_date(&self) -> u32 {
@@ -459,14 +459,15 @@ impl Date {
         self.inner.borrow().date
     }
 
-    #[must_use]
-    pub fn new(date: DateTime<Local>, realm: &Realm) -> Self {
-        Self {
+    pub fn new(date: DateTime<Local>, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableDate {
-                object: MutObject::with_proto(realm.intrinsics.date.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().date.get(realm)?.clone(),
+                ),
                 date,
             }),
-        }
+        })
     }
 
     pub fn js_construct(args: &[Value], realm: &mut Realm) -> Res<Self> {
@@ -534,7 +535,7 @@ impl Date {
             }
         };
 
-        Ok(Self::new(date, realm))
+        Ok(Self::new(date, realm)?)
     }
 }
 
@@ -551,7 +552,7 @@ impl DateConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }

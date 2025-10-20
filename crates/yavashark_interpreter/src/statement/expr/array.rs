@@ -7,7 +7,7 @@ use yavashark_env::{Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_array(realm: &mut Realm, stmt: &ArrayLit, scope: &mut Scope) -> RuntimeResult {
-        let mut arr = Array::from_realm(realm);
+        let mut arr = Array::from_realm(realm)?;
 
         for elem in &stmt.elems {
             if let Some(elem) = elem {

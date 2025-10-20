@@ -48,7 +48,7 @@ impl Ui {
     }
 }
 
-#[props]
+#[props(no_intrinsic)]
 impl Ui {
     fn heading(&self, heading: String) -> Res {
         self.ui.with(move |ui| {

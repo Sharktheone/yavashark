@@ -1,3 +1,4 @@
+mod args;
 mod contains_property;
 mod delete_property;
 mod get_property;
@@ -8,15 +9,31 @@ mod set_property;
 mod values;
 
 use crate::config::Config;
+use crate::inline_props::args::InlinePropsArgs;
 use crate::inline_props::property::{Kind, Property};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
+use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::TokenStream;
 use syn::spanned::Spanned;
 use syn::Fields;
 
 pub fn inline_props(
-    _attrs: proc_macro::TokenStream,
+    attrs: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
+    let attr_args = match NestedMeta::parse_meta_list(attrs.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream1::from(darling::Error::from(e).write_errors());
+        }
+    };
+
+    let args = match InlinePropsArgs::from_list(&attr_args) {
+        Ok(args) => args,
+        Err(e) => return e.write_errors().into(),
+    };
+
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
 
     let config = Config::new(input.span());
@@ -32,7 +49,7 @@ pub fn inline_props(
     let mut props = Vec::with_capacity(fields.len());
 
     for field in fields.iter_mut() {
-        let mut prop = match Property::from_field(field) {
+        let mut prop = match Property::from_field(field, args) {
             Ok(f) => f,
             Err(e) => return e.to_compile_error().into(),
         };
@@ -86,6 +103,28 @@ pub fn inline_props(
 
         fields.named.push(syn::parse_quote! {
             __deleted_properties: ::core::cell::Cell<#ty>
+        });
+    }
+
+    let write_amount = props.iter().filter(|p| !p.readonly).count();
+
+    if write_amount > 0 {
+        let Fields::Named(fields) = &mut input.fields else {
+            return syn::Error::new_spanned(input, "Expected a struct with named fields")
+                .to_compile_error()
+                .into();
+        };
+
+        let ty = if let Some(t) = bits_to_int_type(write_amount) {
+            t
+        } else {
+            return syn::Error::new_spanned(input, "Too many writable properties (max 128)")
+                .to_compile_error()
+                .into();
+        };
+
+        fields.named.push(syn::parse_quote! {
+            __written_properties: ::core::cell::Cell<#ty>
         });
     }
 

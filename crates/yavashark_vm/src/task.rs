@@ -30,7 +30,7 @@ impl BytecodeAsyncTask {
         scope: Scope,
     ) -> Res<ObjectHandle> {
         let state = VmState::new(code, scope);
-        let promise_obj = Promise::new(realm).into_object();
+        let promise_obj = Promise::new(realm)?.into_object();
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let this = Self {
@@ -122,7 +122,7 @@ impl BytecodeAsyncTask {
                     match ret {
                         Ok(()) => self.promise.resolve(&state.acc, realm)?,
                         Err(e) => {
-                            let e = ErrorObj::error_to_value(e, realm);
+                            let e = ErrorObj::error_to_value(e, realm)?;
                             self.promise.reject(&e, realm)?;
                         }
                     }

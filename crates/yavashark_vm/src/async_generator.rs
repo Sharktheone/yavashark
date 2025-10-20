@@ -12,9 +12,10 @@ use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::Error;
+use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
-use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -83,7 +84,7 @@ impl AsyncGeneratorFunction {
     }
 }
 
-#[props]
+#[props(intrinsic_name = async_generator_function, no_partial)]
 impl AsyncGeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -140,7 +141,7 @@ impl Func for AsyncGeneratorFunction {
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
 
-        let args = Arguments::new(args, None, realm);
+        let args = Arguments::new(args, None, realm)?;
 
         let args = ObjectHandle::new(args);
 
@@ -172,17 +173,9 @@ impl AsyncGenerator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        let gf = AsyncGeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
-            realm,
-        )?;
+        let gf = AsyncGeneratorFunction::initialize(realm)?;
 
-        let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone()),
-            realm.intrinsics.func.clone().into(),
-            realm,
-        )?;
+        let g = Self::initialize(realm)?;
 
         realm.intrinsics.async_generator_function = gf;
         realm.intrinsics.async_generator = g;
@@ -191,7 +184,7 @@ impl AsyncGenerator {
     }
 }
 
-#[props]
+#[props(intrinsic_name = async_generator, no_partial)]
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, realm: &mut Realm) -> ValueResult {

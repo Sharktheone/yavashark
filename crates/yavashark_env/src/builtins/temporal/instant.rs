@@ -24,13 +24,20 @@ pub struct Instant {
 }
 
 impl Instant {
-    pub fn from_stamp(stamp: temporal_rs::Instant, realm: &Realm) -> Self {
-        Self {
+    pub fn from_stamp(stamp: temporal_rs::Instant, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableInstant {
-                object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .temporal_instant
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             stamp,
-        }
+        })
     }
 
     #[allow(unused)]
@@ -38,31 +45,31 @@ impl Instant {
         if let Value::Object(obj) = &value {
             let instant = downcast_obj::<Self>(value)?;
 
-            return Ok(Self::from_stamp(instant.stamp, realm));
+            return Ok(Self::from_stamp(instant.stamp, realm)?);
         }
 
         let str = value.to_string(realm)?;
 
         temporal_rs::Instant::from_str(str.as_str())
-            .map(|dt| Self::from_stamp(dt, realm))
             .map_err(Error::from_temporal)
+            .and_then(|dt| Self::from_stamp(dt, realm))
     }
 
     pub fn now() -> Res<temporal_rs::Instant> {
         Temporal::now().instant().map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm) -> Res<ObjectHandle> {
         let i = Self::now()?;
 
-        Ok(Self::from_stamp(i, realm).into_object())
+        Ok(Self::from_stamp(i, realm)?.into_object())
     }
 }
 
-#[props(to_string_tag = "Temporal.Instant")]
+#[props(intrinsic_name = temporal_instant, to_string_tag = "Temporal.Instant")]
 impl Instant {
     #[constructor]
-    fn construct(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn construct(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         Self::from_epoch_nanoseconds(epoch, realm)
     }
 
@@ -93,16 +100,16 @@ impl Instant {
         }
         .map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(stamp, realm).into_object())
+        Ok(Self::from_stamp(stamp, realm)?.into_object())
     }
 
     #[prop("fromEpochNanoseconds")]
-    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
 
-        Ok(Self::from_stamp(i, realm).into_object())
+        Ok(Self::from_stamp(i, realm)?.into_object())
     }
 
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -110,7 +117,7 @@ impl Instant {
 
         let i = self.stamp.add(&other.dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(i, realm).into_object())
+        Ok(Self::from_stamp(i, realm)?.into_object())
     }
 
     fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
@@ -124,7 +131,7 @@ impl Instant {
 
         let stamp = self.stamp.round(opts).map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(stamp, realm).into_object())
+        Ok(Self::from_stamp(stamp, realm)?.into_object())
     }
 
     fn since(
@@ -146,7 +153,7 @@ impl Instant {
             .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, res).into_object())
+        Ok(Duration::with_duration(realm, res)?.into_object())
     }
 
     pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -157,7 +164,7 @@ impl Instant {
             .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(i, realm).into_object())
+        Ok(Self::from_stamp(i, realm)?.into_object())
     }
 
     #[prop("toJSON")]
@@ -210,7 +217,7 @@ impl Instant {
             .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur).into_object())
+        Ok(Duration::with_duration(realm, dur)?.into_object())
     }
 
     #[prop("valueOf")]
@@ -236,7 +243,12 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
             if let Some(other_instant) = obj.downcast::<Instant>() {
                 Ok(other_instant.stamp)
             } else {
-                if obj.eq(&realm.intrinsics.temporal_instant) {
+                if obj.eq(realm
+                    .intrinsics
+                    .clone_public()
+                    .temporal_instant
+                    .get(realm)?)
+                {
                     return Err(Error::ty("Expected a Temporal.Instant object"));
                 }
 

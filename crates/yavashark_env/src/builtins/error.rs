@@ -1,14 +1,19 @@
 use crate::error_obj::ErrorObj;
+use crate::realm::Intrinsic;
 use crate::value::Obj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Variable};
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Value, Variable};
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(
-            error: ObjectHandle,
-            error_proto: ObjectHandle,
-            realm: &mut Realm,
-        ) -> Res<ObjectHandle> {
+        pub fn $get(realm: &mut Realm) -> Res<ObjectHandle> {
+            let error = realm.intrinsics.clone_public().error.get(realm)?.clone();
+
+            let error_proto = error
+                .resolve_property("constructor", realm)
+                .unwrap_or(Value::Undefined.into())
+                .unwrap_or(Value::Undefined.into())
+                .to_object()?;
+
             let proto = Object::with_proto(error);
 
             proto.define_property_attributes(
@@ -26,7 +31,7 @@ macro_rules! error {
                             Ok(x.to_string(realm)?.to_string())
                         })?;
 
-                    let obj = ErrorObj::raw(Error::$create(msg), realm);
+                    let obj = ErrorObj::raw(Error::$create(msg), realm)?;
 
                     Ok(obj.into_object())
                 },
@@ -58,6 +63,24 @@ macro_rules! error {
             )?;
 
             Ok(proto.into())
+        }
+
+        pub struct $name;
+
+        impl Intrinsic for $name {
+            fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+                $get(realm)
+            }
+
+            fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
+                Ok(realm.intrinsics.clone_public().$create.get(realm)?.clone())
+            }
+
+            fn get_global(realm: &mut Realm) -> Res<ObjectHandle> {
+                Self::get_intrinsic(realm)?
+                    .get("constructor", realm)?
+                    .to_object()
+            }
         }
     };
 }

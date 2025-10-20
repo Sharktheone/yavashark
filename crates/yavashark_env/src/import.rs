@@ -22,7 +22,7 @@ impl DynamicImport {
         cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let promise = Promise::new(realm);
+        let promise = Promise::new(realm)?;
 
         let module = realm.get_module_async(specifier, cur_path, cb)?;
 
@@ -67,7 +67,7 @@ impl AsyncTask for DynamicImport {
             Poll::Pending => return Poll::Pending,
             Poll::Ready(Ok(res)) => res,
             Poll::Ready(Err(e)) => {
-                let err = ErrorObj::error_to_value(e.clone(), realm);
+                let err = ErrorObj::error_to_value(e.clone(), realm)?;
 
                 if let Err(e) = self.promise.reject(&err, realm) {
                     return Poll::Ready(Err(e));

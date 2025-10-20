@@ -1,4 +1,4 @@
-use crate::{MutObject, Realm};
+use crate::{MutObject, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -8,16 +8,23 @@ pub struct Locale {}
 
 impl Locale {
     #[allow(unused)]
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableLocale {
-                object: MutObject::with_proto(realm.intrinsics.intl_locale.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_locale
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
-        }
+        })
     }
 }
 
-#[props(to_string_tag = "Intl.Locale")]
+#[props(intrinsic_name = intl_locale, to_string_tag = "Intl.Locale")]
 impl Locale {
     #[constructor]
     fn construct() {}

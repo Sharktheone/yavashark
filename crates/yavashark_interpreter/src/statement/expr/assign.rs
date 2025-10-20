@@ -120,7 +120,7 @@ impl Interpreter {
             let key = name.into_internal_property_key(realm)?;
 
             match obj.define_property(key, value, realm)? {
-                DefinePropertyResult::Handled => {},
+                DefinePropertyResult::Handled => {}
                 DefinePropertyResult::ReadOnly => {
                     if scope.is_strict_mode()? {
                         return Err(Error::ty("Cannot assign to read only property"));
@@ -394,23 +394,32 @@ impl Interpreter {
 
             let name = name.into_internal_property_key(realm)?;
 
-            let (left, writable) = (if let Some(v) = obj
-                .resolve_property_no_get_set(name.clone(), realm)? {
-                match v {
-                    Property::Value(v, a) => (v, a.is_writable()),
-                    Property::Getter(get, _) => (get.call(Vec::new(), scope.fn_this()?, realm)?, false),
-                }
-            } else {
-                if scope.is_strict_mode()? {
-                    return Err(Error::ty_error(format!(
-                        "Property {name:?} does not exist on object",
-                    )).into());
-                }
+            let (left, writable) =
+                (if let Some(v) = obj.resolve_property_no_get_set(name.clone(), realm)? {
+                    match v {
+                        Property::Value(v, a) => (v, a.is_writable()),
+                        Property::Getter(get, _) => {
+                            (get.call(Vec::new(), scope.fn_this()?, realm)?, false)
+                        }
+                    }
+                } else {
+                    if scope.is_strict_mode()? {
+                        return Err(Error::ty_error(format!(
+                            "Property {name:?} does not exist on object",
+                        ))
+                        .into());
+                    }
 
-                (Value::Undefined, true)
-            });
+                    (Value::Undefined, true)
+                });
 
-            if !writable && !matches!(op, AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign) && scope.is_strict_mode()? {
+            if !writable
+                && !matches!(
+                    op,
+                    AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign
+                )
+                && scope.is_strict_mode()?
+            {
                 return Err(Error::ty("Cannot assign to read only property").into());
             }
 

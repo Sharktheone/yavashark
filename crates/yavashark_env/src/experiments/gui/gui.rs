@@ -48,7 +48,7 @@ impl Gui {
     }
 }
 
-#[props]
+#[props(no_intrinsic)]
 impl Gui {
     #[constructor]
     pub fn construct(name: String, h: f32, w: f32, #[realm] realm: &Realm) -> Res<ObjectHandle> {

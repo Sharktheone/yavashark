@@ -29,7 +29,7 @@ impl SymbolConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -129,19 +129,20 @@ impl Func for SymbolConstructor {
 
 impl SymbolObj {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use]
-    pub fn new(realm: &Realm, symbol: Symbol) -> ObjectHandle {
-        Self {
+    pub fn new(realm: &mut Realm, symbol: Symbol) -> Res<ObjectHandle> {
+        Ok(Self {
             inner: RefCell::new(MutableSymbolObj {
-                object: MutObject::with_proto(realm.intrinsics.symbol.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().symbol.get(realm)?.clone(),
+                ),
                 symbol,
             }),
         }
-        .into_object()
+        .into_object())
     }
 }
 
-#[properties_new(constructor(SymbolConstructor::new))]
+#[properties_new(intrinsic_name(symbol), constructor(SymbolConstructor::new))]
 impl SymbolObj {
     #[prop("valueOf")]
     fn value_of(&self) -> Symbol {

@@ -1,3 +1,4 @@
+use crate::metadata::Flags;
 use crate::test262::{print, Test262};
 use crate::utils::parse_file;
 use crate::{ObjectHandle, TEST262_FALLBACK_DIR};
@@ -7,7 +8,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_interpreter::Interpreter;
-use crate::metadata::Flags;
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
@@ -37,7 +37,7 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope, harness: &Path) 
     let async_path = harness.join("harness/doneprintHandle.js");
 
     let (prog, meta) = parse_file(async_path.as_path());
-    
+
     if meta.flags.contains(Flags::ONLY_STRICT) {
         scope.set_strict_mode()?;
     }
@@ -51,7 +51,12 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope, harness: &Path) 
     Ok(())
 }
 
-pub fn setup_global(file: PathBuf, raw: bool, async_: bool, strict: bool) -> Res<(Realm, Scope, PathBuf)> {
+pub fn setup_global(
+    file: PathBuf,
+    raw: bool,
+    async_: bool,
+    strict: bool,
+) -> Res<(Realm, Scope, PathBuf)> {
     #[cfg(feature = "timings")]
     let now = std::time::Instant::now();
     let mut r = Realm::new()?;
@@ -60,7 +65,7 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool, strict: bool) -> Res
         crate::REALM_DURATION = now.elapsed();
     }
     let mut s = Scope::global(&r, file);
-    
+
     if strict {
         s.set_strict_mode()?;
     }

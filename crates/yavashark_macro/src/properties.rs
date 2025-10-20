@@ -330,7 +330,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     #value::Object(ref x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
                 }
-            }, func_proto.clone(), realm).into();
+            }, realm.intrinsics.func.clone(), realm).into();
 
             #def
         };

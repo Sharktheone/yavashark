@@ -30,7 +30,7 @@ impl AsyncGeneratorTask {
         state: Option<VmState>,
         gen: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
     ) -> Res<ObjectHandle> {
-        let promise_obj = Promise::new(realm).into_object();
+        let promise_obj = Promise::new(realm)?.into_object();
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let gen_notify = if state.is_none() {
@@ -151,7 +151,7 @@ impl AsyncGeneratorTask {
                         }
                         Err(e) => {
                             self.gen.notify.notify_waiters();
-                            let e = ErrorObj::error_to_value(e, realm);
+                            let e = ErrorObj::error_to_value(e, realm)?;
                             self.promise.reject(&e, realm)?;
                         }
                     }

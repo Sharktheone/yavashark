@@ -1,4 +1,7 @@
 use crate::array::convert_index;
+use crate::builtins::dataview::DataView;
+use crate::builtins::typed_array::TypedArray;
+use crate::realm::Intrinsic;
 use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
@@ -23,7 +26,14 @@ impl ArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -31,17 +41,24 @@ impl ArrayBuffer {
         })
     }
 
-    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Self {
+    pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Res<Self> {
         let len = buffer.len();
 
-        Self {
+        Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
             resizable: true,
-        }
+        })
     }
 
     pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
@@ -66,7 +83,7 @@ impl ArrayBuffer {
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
 
-#[props(to_string_tag = "ArrayBuffer")]
+#[props(intrinsic_name = arraybuffer, to_string_tag = "ArrayBuffer")]
 impl ArrayBuffer {
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {
@@ -100,7 +117,14 @@ impl ArrayBuffer {
 
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .arraybuffer
+                        .get(realm)?
+                        .clone(),
+                ),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(max_len),
@@ -148,7 +172,7 @@ impl ArrayBuffer {
             return Ok(Self::new(realm, 0)?.into_value());
         };
 
-        Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
+        Ok(Self::from_buffer(realm, buffer.to_vec())?.into_value())
     }
 
     fn transfer(&self, realm: &mut Realm) -> ValueResult {
@@ -158,7 +182,7 @@ impl ArrayBuffer {
             return Err(Error::ty("ArrayBuffer is detached"));
         };
 
-        Ok(Self::from_buffer(realm, buf).into_value())
+        Ok(Self::from_buffer(realm, buf)?.into_value())
     }
 
     #[prop("transferToFixedLength")]
@@ -173,7 +197,7 @@ impl ArrayBuffer {
             buf.resize(new_len, 0);
         }
 
-        Ok(Self::from_buffer(realm, buf).into_value())
+        Ok(Self::from_buffer(realm, buf)?.into_value())
     }
 
     #[get("resizable")]
@@ -207,8 +231,8 @@ impl ArrayBuffer {
     #[prop("isView")]
     pub fn is_view(view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
         Ok(
-            view.instance_of(&realm.intrinsics.typed_array_constructor().value, realm)?
-                || view.instance_of(&realm.intrinsics.data_view_constructor().value, realm)?,
+            view.instance_of(&TypedArray::get_global(realm)?.into(), realm)?
+                || view.instance_of(&DataView::get_global(realm)?.into(), realm)?,
         )
     }
 }

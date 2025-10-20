@@ -672,7 +672,7 @@ impl ScopeInternal {
                         }
                     }
                     DefinePropertyResult::Setter(_, _) => Ok(()),
-                }
+                };
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
@@ -977,14 +977,13 @@ impl Scope {
         Ok(self.scope.borrow()?.this.copy())
     }
 
-
     pub fn fn_this(&self) -> Res<Value> {
         let s = self.scope.borrow()?;
-        
+
         if s.state.is_strict_mode() {
-            return Ok(Value::Undefined)
+            return Ok(Value::Undefined);
         }
-        
+
         Ok(s.this.copy())
     }
 

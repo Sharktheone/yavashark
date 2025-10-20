@@ -12,12 +12,12 @@ use yavashark_garbage::OwningGcGuard;
 pub type GcPromise = OwningGcGuard<'static, BoxedObj, Promise>;
 
 pub trait IntoPromise {
-    fn into_promise(self, realm: &mut Realm) -> ObjectHandle;
+    fn into_promise(self, realm: &mut Realm) -> Res<ObjectHandle>;
 }
 
 impl IntoPromise for Promise {
-    fn into_promise(self, _: &mut Realm) -> ObjectHandle {
-        self.into_object()
+    fn into_promise(self, _: &mut Realm) -> Res<ObjectHandle> {
+        Ok(self.into_object())
     }
 }
 
@@ -48,8 +48,8 @@ impl<F: Future<Output = O>, O: TryIntoValue> AsyncTask for FutureTask<F, O> {
 }
 
 impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for F {
-    fn into_promise(self, realm: &mut Realm) -> ObjectHandle {
-        let promise_obj = Promise::new(realm).into_object();
+    fn into_promise(self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let promise_obj = Promise::new(realm)?.into_object();
 
         #[allow(clippy::expect_used)]
         let promise = downcast_obj::<Promise>(promise_obj.clone().into()).expect("unreachable");
@@ -61,6 +61,6 @@ impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for
 
         AsyncTaskQueue::queue_task(task, realm);
 
-        promise_obj
+        Ok(promise_obj)
     }
 }

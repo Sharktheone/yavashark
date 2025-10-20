@@ -120,19 +120,20 @@ pub struct RejectedHandler {
 }
 
 impl Promise {
-    #[must_use]
-    pub fn new(realm: &Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             notify: PromiseNotify::new(),
             state: Cell::new(PromiseState::Pending),
             inner: RefCell::new(MutablePromise {
-                object: MutObject::with_proto(realm.intrinsics.promise.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().promise.get(realm)?.clone(),
+                ),
                 value: None,
                 on_fulfilled: Vec::new(),
                 on_rejected: Vec::new(),
                 finally: Vec::new(),
             }),
-        }
+        })
     }
 
     pub async fn wait(&self) -> ValueResult {
@@ -214,7 +215,7 @@ impl Promise {
         match res {
             Ok(val) => self.resolve(&val, realm)?,
             Err(err) => {
-                let val = ErrorObj::error_to_value(err, realm);
+                let val = ErrorObj::error_to_value(err, realm)?;
                 self.reject(&val, realm)?;
             }
         }
@@ -253,7 +254,7 @@ impl Promise {
     }
 
     pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
-        let promise = Self::new(realm).into_object();
+        let promise = Self::new(realm)?.into_object();
 
         let gc = Self::get_gc(promise.clone())?;
 
@@ -265,7 +266,7 @@ impl Promise {
             Value::Undefined,
             realm,
         ) {
-            let val = ErrorObj::error_to_value(e, realm);
+            let val = ErrorObj::error_to_value(e, realm)?;
             let gc = Self::get_gc(promise.clone())?;
             gc.reject(&val, realm)?;
         }
@@ -274,19 +275,19 @@ impl Promise {
     }
 
     pub fn rejected(val: &Value, realm: &mut Realm) -> Res<ObjectHandle> {
-        let promise = Self::new(realm);
+        let promise = Self::new(realm)?;
         promise.reject(val, realm)?;
         Ok(promise.into_object())
     }
 
     pub fn resolved(val: &Value, realm: &mut Realm) -> Res<ObjectHandle> {
-        let promise = Self::new(realm);
+        let promise = Self::new(realm)?;
         promise.resolve(val, realm)?;
         Ok(promise.into_object())
     }
 }
 
-#[props(to_string_tag = "Promise")]
+#[props(intrinsic_name = promise, to_string_tag = "Promise")]
 impl Promise {
     #[constructor]
     pub fn construct(callback: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -304,7 +305,7 @@ impl Promise {
 
         let state = self.state.get();
 
-        let promise = Self::new(realm).into_object();
+        let promise = Self::new(realm)?.into_object();
 
         let promise_obj = downcast_obj::<Self>(promise.clone().into())?;
 
@@ -349,7 +350,7 @@ impl Promise {
     pub fn finally(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let mut inner = self.inner.try_borrow_mut()?;
 
-        let promise = Self::new(realm);
+        let promise = Self::new(realm)?;
 
         match self.state.get() {
             PromiseState::Pending => {
@@ -357,7 +358,7 @@ impl Promise {
             }
             _ => match f.call(vec![], Value::Undefined, realm) {
                 Err(e) => {
-                    let val = ErrorObj::error_to_value(e, realm);
+                    let val = ErrorObj::error_to_value(e, realm)?;
                     promise.reject(&val, realm)?;
                 }
                 Ok(val) => {
@@ -387,7 +388,7 @@ impl Promise {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
-        let promise = Self::new(realm);
+        let promise = Self::new(realm)?;
 
         promise.resolve(val, realm)?;
 
@@ -414,7 +415,7 @@ impl Promise {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
-        let promise = Self::new(realm);
+        let promise = Self::new(realm)?;
 
         let ret = callback.call(args, this, realm);
 
@@ -431,7 +432,7 @@ impl Promise {
 
         let ret = Object::new(realm);
 
-        let promise = Self::new(realm).into_object();
+        let promise = Self::new(realm)?.into_object();
         ret.set("promise", promise.clone(), realm)?;
 
         let gc = Self::get_gc(promise)?;
@@ -453,7 +454,7 @@ impl Promise {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 return Self::rejected(&err, realm);
             }
@@ -464,7 +465,7 @@ impl Promise {
         while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 iter.close(realm)?;
 
@@ -490,7 +491,13 @@ impl Promise {
 
         let fut = join_all(futures);
 
-        let array_proto = realm.intrinsics.array.clone().into();
+        let array_proto = realm
+            .intrinsics
+            .clone_public()
+            .array
+            .get(realm)?
+            .clone()
+            .into();
 
         let fut = async move {
             let results = fut.await;
@@ -508,7 +515,7 @@ impl Promise {
             Ok(array.into_object())
         };
 
-        Ok(fut.into_promise(realm))
+        fut.into_promise(realm)
     }
     #[prop("allSettled")]
     pub fn all_settled(
@@ -523,7 +530,7 @@ impl Promise {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 return Self::rejected(&err, realm);
             }
@@ -534,7 +541,7 @@ impl Promise {
         while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 iter.close(realm)?;
 
@@ -560,7 +567,7 @@ impl Promise {
 
         let fut = join_all(futures);
 
-        let array_proto = realm.intrinsics.array.clone();
+        let array_proto = realm.intrinsics.clone_public().array.get(realm)?.clone();
         let obj_proto = realm.intrinsics.obj.clone();
 
         let fut = async move {
@@ -593,7 +600,7 @@ impl Promise {
             Ok(array.into_object())
         };
 
-        Ok(fut.into_promise(realm))
+        fut.into_promise(realm)
     }
 
     fn any(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
@@ -604,7 +611,7 @@ impl Promise {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 return Self::rejected(&err, realm);
             }
@@ -615,7 +622,7 @@ impl Promise {
         while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 iter.close(realm)?;
 
@@ -638,7 +645,7 @@ impl Promise {
         iter.close(realm)?;
 
         if promises.is_empty() {
-            return Self::resolved(&Array::from_realm(realm).into_value(), realm);
+            return Self::resolved(&Array::from_realm(realm)?.into_value(), realm);
         }
 
         for prom in &promises {
@@ -676,7 +683,7 @@ impl Promise {
             }
         };
 
-        Ok(fut.into_promise(realm))
+        fut.into_promise(realm)
     }
 
     fn race(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
@@ -687,7 +694,7 @@ impl Promise {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 return Self::rejected(&err, realm);
             }
@@ -698,7 +705,7 @@ impl Promise {
         while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
-                let err = ErrorObj::error_to_value(err, realm);
+                let err = ErrorObj::error_to_value(err, realm)?;
 
                 iter.close(realm)?;
 
@@ -721,7 +728,7 @@ impl Promise {
         iter.close(realm)?;
 
         if promises.is_empty() {
-            return Self::resolved(&Array::from_realm(realm).into_value(), realm);
+            return Self::resolved(&Array::from_realm(realm)?.into_value(), realm);
         }
 
         for prom in &promises {
@@ -763,7 +770,7 @@ impl Promise {
             }
         };
 
-        Ok(fut.into_promise(realm))
+        fut.into_promise(realm)
     }
 }
 
@@ -824,7 +831,7 @@ impl FullfilledHandler {
                 self.promise.resolve(&ret, realm)
             }
             Err(err) => {
-                let val = ErrorObj::error_to_value(err, realm);
+                let val = ErrorObj::error_to_value(err, realm)?;
 
                 self.promise.reject(&val, realm)
             }
@@ -845,7 +852,7 @@ impl RejectedHandler {
         match self.f.call(realm, value, Value::Undefined) {
             Ok(ret) => self.promise.resolve(&ret, realm),
             Err(err) => {
-                let val = ErrorObj::error_to_value(err, realm);
+                let val = ErrorObj::error_to_value(err, realm)?;
 
                 self.promise.reject(&val, realm)
             }

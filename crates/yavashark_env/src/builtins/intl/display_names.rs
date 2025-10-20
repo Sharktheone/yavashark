@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -9,29 +9,36 @@ use yavashark_macro::{object, props};
 pub struct DisplayNames {}
 
 impl DisplayNames {
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
+    pub fn new(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableDisplayNames {
-                object: MutObject::with_proto(realm.intrinsics.intl_display_names.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .intl_display_names
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
-        }
+        })
     }
 }
 
-#[props(to_string_tag = "Intl.DisplayNames")]
+#[props(intrinsic_name = intl_display_names, to_string_tag = "Intl.DisplayNames")]
 impl DisplayNames {
     #[constructor]
-    fn construct(_locales: String, _options: ObjectHandle, realm: &mut Realm) -> ObjectHandle {
-        Self::new(realm).into_object()
+    fn construct(_locales: String, _options: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(Self::new(realm)?.into_object())
     }
 
     #[prop("supportedLocalesOf")]
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &Realm,
-    ) -> ObjectHandle {
-        Array::from_realm(realm).into_object()
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     fn of(&self, _code: String) -> String {

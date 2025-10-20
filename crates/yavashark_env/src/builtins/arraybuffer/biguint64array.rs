@@ -10,7 +10,16 @@ pub struct BigUint64Array {}
 
 impl BigUint64Array {
     pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.biguint64array.clone().into(), realm)?;
+        ty.set_prototype(
+            realm
+                .intrinsics
+                .clone_public()
+                .biguint64array
+                .get(realm)?
+                .clone()
+                .into(),
+            realm,
+        )?;
 
         Ok(Self {
             inner: RefCell::new(MutableBigUint64Array {}),
@@ -19,7 +28,7 @@ impl BigUint64Array {
     }
 }
 
-#[props(extends = TypedArray)]
+#[props(intrinsic_name = biguint64array, extends = TypedArray)]
 impl BigUint64Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u64>();

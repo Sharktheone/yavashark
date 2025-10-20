@@ -36,7 +36,9 @@ impl Constructor for WeakMapConstructor {
 
         let map = WeakMap {
             inner: RefCell::new(MutableWeakMap {
-                object: MutObject::with_proto(realm.intrinsics.weak_map.clone()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.clone_public().weak_map.get(realm)?.clone(),
+                ),
                 map,
             }),
         };
@@ -54,7 +56,7 @@ impl WeakMapConstructor {
             }),
         };
 
-        this.initialize(func, realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -63,7 +65,7 @@ impl WeakMapConstructor {
 #[properties_new(raw)]
 impl WeakMapConstructor {}
 
-#[properties_new(constructor(WeakMapConstructor::new))]
+#[properties_new(intrinsic_name(weak_map), constructor(WeakMapConstructor::new))]
 impl WeakMap {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();
@@ -184,7 +186,7 @@ impl WeakMap {
         Ok((inner.map.len() as i32).into())
     }
 
-    fn keys(&self, #[realm] realm: &Realm) -> ValueResult {
+    fn keys(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
 
         let keys = inner
