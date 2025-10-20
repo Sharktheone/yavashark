@@ -18,6 +18,7 @@ pub struct FunctionPrototype {
     pub constructor: Partial<ObjectHandle, FunctionConstructor>,
     pub length: usize,
     pub name: &'static str,
+    #[prop("toString")]
     pub to_string: Partial<ObjectHandle, ToString>,
     #[prop("caller")]
     #[get]
