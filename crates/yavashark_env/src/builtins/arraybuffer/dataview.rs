@@ -73,7 +73,7 @@ impl DataView {
     }
 
     pub fn extract<T: FromBytes>(&self, offset: isize, le: bool) -> Res<T> {
-        if offset < 0 {
+        if offset < 0 || offset == isize::MAX {
             return Err(Error::range("Out of bounds"));
         }
 
