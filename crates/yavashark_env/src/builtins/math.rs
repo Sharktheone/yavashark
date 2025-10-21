@@ -117,9 +117,17 @@ impl Math {
         value as f32 as f64
     }
 
-    fn hypot(left: f64, right: f64) -> f64 {
-        left.hypot(right)
+    #[length(2)]
+    fn hypot(vals: &[f64]) -> f64 {
+        let mut res = 0.0f64;
+
+        for &v in vals {
+            res = res.hypot(v);
+        }
+
+        res
     }
+
 
     const fn imul(left: u32, right: u32) -> i32 {
         left.wrapping_mul(right) as i32
