@@ -4,7 +4,6 @@ use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value};
 use num_traits::{One, Zero};
 use std::cell::RefCell;
-use std::ops::Rem;
 use xsum::Xsum;
 use yavashark_macro::{object, properties_new};
 
@@ -122,14 +121,8 @@ impl Math {
         left.hypot(right)
     }
 
-    fn imul(left: i32, right: i32) -> i32 {
-        let res = left.wrapping_mul(right).rem(232);
-
-        if res >= 231 {
-            return res - 232;
-        }
-
-        res
+    const fn imul(left: u32, right: u32) -> i32 {
+        left.wrapping_mul(right) as i32
     }
 
     fn log(value: f64) -> f64 {
