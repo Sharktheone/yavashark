@@ -169,6 +169,7 @@ impl Math {
             .unwrap_or(f64::NEG_INFINITY))
     }
 
+    #[length(2)]
     fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
         Ok(args
             .iter()
