@@ -205,6 +205,10 @@ impl Math {
     }
 
     fn round(value: f64) -> f64 {
+        if (value.fract() + 0.5).abs() < f64::EPSILON {
+            return value.ceil();
+        }
+
         value.round()
     }
 
