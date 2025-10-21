@@ -106,9 +106,11 @@ impl DataView {
     }
 
     pub fn set<T: FromBytes>(&self, offset: isize, value: T, le: bool) -> Res {
-        if offset < 0 {
+        if offset < 0 || offset == isize::MAX {
             return Err(Error::range("Out of bounds"));
         }
+
+        let mut slice = self.buffer.get_slice_mut()?;
 
         let offset = offset as usize;
 
@@ -116,7 +118,6 @@ impl DataView {
             return Err(Error::range("Out of bounds"));
         }
 
-        let mut slice = self.buffer.get_slice_mut()?;
 
         if offset + T::N_BYTES > self.byte_length {
             return Err(Error::range("Out of bounds"));
