@@ -11,6 +11,12 @@ impl ValueIterator {
         Ok(Self(iter))
     }
 
+    pub fn new_obj(val: &ObjectHandle, realm: &mut Realm) -> Res<Self> {
+        let iter = val.call_method(Symbol::ITERATOR, realm, Vec::new())?;
+
+        Ok(Self(iter))
+    }
+
     pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
         let res = self.0.call_method(&"next".into(), realm, Vec::new())?;
 
