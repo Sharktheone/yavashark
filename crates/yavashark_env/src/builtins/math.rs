@@ -5,6 +5,7 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value};
 use num_traits::{One, Zero};
 use std::cell::RefCell;
 use std::ops::Rem;
+use xsum::Xsum;
 use yavashark_macro::{object, properties_new};
 
 #[object]
@@ -239,20 +240,22 @@ impl Math {
     }
 
     #[prop("sumPrecise")]
-    fn sum_precise(iter: &Value, #[realm] realm: &mut Realm) -> Res<f64> {
-        let mut sum = 0.0;
-
-        let iter = ValueIterator::new(iter, realm)?;
+    fn sum_precise(iter: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<f64> {
+        let iter = ValueIterator::new_obj(iter, realm)?;
+        let mut sum = xsum::XsumAuto::new();
 
         while let Some(value) = iter.next(realm)? {
             if let Value::Number(num) = value {
-                sum += num;
+                sum.add(num);
             } else {
+                iter.close(realm)?;
                 return Err(Error::ty("Iterator value is not a number"));
             }
         }
 
-        Ok(sum)
+        iter.close(realm)?;
+
+        Ok(sum.sum())
     }
 
     fn tan(value: f64) -> f64 {

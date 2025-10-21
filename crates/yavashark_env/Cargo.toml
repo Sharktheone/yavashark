@@ -33,6 +33,7 @@ egui = { version = "0.31.1", optional = true}
 eframe = { version = "0.31.1", optional = true}
 egui_extras = { version = "0.31.1", optional = true}
 iana-time-zone = "0.1.63"
+xsum = "0.1.6"
 
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
