@@ -77,13 +77,14 @@ impl DataView {
             return Err(Error::range("Out of bounds"));
         }
 
+        let slice = self.buffer.get_slice()?;
+
         let offset = offset as usize;
 
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));
         }
 
-        let slice = self.buffer.get_slice()?;
 
         if slice.len() < self.byte_offset + self.byte_length {
             return Err(Error::ty("ArrayBuffer is detached"));
