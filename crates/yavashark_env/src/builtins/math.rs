@@ -113,8 +113,8 @@ impl Math {
         value.round() //TODO: Implement f16round
     }
 
-    fn fround(value: f64) -> f64 {
-        value.round()
+    const fn fround(value: f64) -> f64 {
+        value as f32 as f64
     }
 
     fn hypot(left: f64, right: f64) -> f64 {
