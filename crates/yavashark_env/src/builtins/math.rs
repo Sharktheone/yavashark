@@ -241,6 +241,13 @@ impl Math {
 
     #[prop("sumPrecise")]
     fn sum_precise(iter: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<f64> {
+        if !iter.contains_key(Symbol::ITERATOR.into(), realm)? {
+            return Err(Error::ty(
+                "Value is not iterable: missing @@iterator method",
+            ));
+        }
+
+
         let iter = ValueIterator::new_obj(iter, realm)?;
         let mut sum = xsum::XsumAuto::new();
 
