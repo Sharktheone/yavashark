@@ -4,7 +4,7 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Expr, ImplItem, Path};
+use syn::{Expr, ImplItem, Lit, Path};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -108,6 +108,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut mode = mode;
                 let mut has_receiver = false;
                 let mut ty = Type::Normal;
+                let mut length = None;
 
                 let mut args = Vec::new();
 
@@ -159,6 +160,29 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                     if attr.path().is_ident("prop") {
                         js_name = Some(attr.parse_args().unwrap());
+                        return false;
+                    }
+
+                    if attr.path().is_ident("length") {
+                        if let Err(e) = attr.meta.require_list() {
+                            error = Some(e);
+                        };
+
+
+                        match attr.parse_args() {
+                            Ok(Lit::Int(len)) => length = Some(len.base10_parse::<usize>().unwrap()),
+                            Ok(_) => {
+                                error = Some(syn::Error::new(
+                                    attr.span(),
+                                    "length attribute must be an integer",
+                                ))
+                            }
+                            Err(e) => {
+                                error = Some(e);
+                                return false;
+                            }
+                        };
+
                         return false;
                     }
 
@@ -244,6 +268,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     mode,
                     has_receiver,
                     ty,
+                    length,
                 }))
             }
 
@@ -498,6 +523,7 @@ struct Method {
     name: syn::Ident,
     js_name: Option<Expr>,
     args: Vec<syn::Type>,
+    length: Option<usize>,
     this: Option<usize>,
     realm: Option<usize>,
     #[allow(unused)]
@@ -604,14 +630,7 @@ impl Method {
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
-        let mut length = self.args.len();
 
-        if self.this.is_some() {
-            length -= 1;
-        }
-        if self.realm.is_some() {
-            length -= 1;
-        }
 
         let optionals = self
             .args
@@ -629,7 +648,25 @@ impl Method {
             })
             .count();
 
-        length -= optionals;
+
+        let length = if let Some(length) = self.length {
+            length
+        } else {
+            let mut length = self.args.len();
+
+            if self.this.is_some() {
+                length -= 1;
+            }
+            if self.realm.is_some() {
+                length -= 1;
+            }
+
+            length -= optionals;
+
+            length
+        };
+
+
 
         quote! {
             #native_function::with_proto_and_len(#name.as_ref(), |mut args, mut this, realm| {
