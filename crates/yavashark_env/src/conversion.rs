@@ -465,6 +465,34 @@ macro_rules! impl_from_value_output {
     };
 }
 
+
+macro_rules! impl_from_value_float_output {
+    ($($t:ty),*) => {
+        $(
+            impl FromValueOutput for $t {
+                type Output = $t;
+
+                fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+                    match value {
+                        Value::Number(n) => Ok(n as $t),
+                        Value::String(ref s) => Ok(s.as_str().num() as $t),
+                        Value::Boolean(b) => Ok(b.into()),
+                        Value::Undefined => Ok(<$t>::NAN),
+                        Value::Object(_) => {
+                            let v = value.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+                            return Self::from_value_out(v, realm);
+                        }
+                        #[allow(clippy::cast_lossless)]
+                        Value::Null => Ok(0 as $t),
+                        _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
+                    }
+                }
+            }
+        )*
+    };
+}
+
 macro_rules! impl_from_value_output_nonfract {
     ($($t:ty),*) => {
         $(
@@ -506,9 +534,54 @@ macro_rules! impl_from_value_output_nonfract {
     () => {};
 }
 
-impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
+macro_rules! impl_from_value_float_output_nonfract {
+    ($($t:ty),*) => {
+        $(
+            impl FromValueOutput for NonFract<$t> {
+                type Output = NonFract<$t>;
+
+                fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+                    match value {
+                        Value::Number(n) => {
+                            if n.fract() != 0.0 {
+                                return Err(Error::range("Expected integer, found a float"));
+                            }
+                            Ok(NonFract(n as $t))
+                        },
+                        Value::String(ref s) => {
+                            let n = s.as_str().num();
+                            if n.fract() != 0.0 {
+                                return Err(Error::range("Expected integer, found a float"));
+                            }
+
+                            Ok(NonFract(n as $t))
+                        }
+                        Value::Boolean(b) => Ok(NonFract(b.into())),
+                        Value::Undefined => Ok(NonFract(<$t>::NAN)),
+                        #[allow(clippy::cast_lossless)]
+                        Value::Null => Ok(NonFract(0 as $t)),
+                        Value::Object(_) => {
+                            let v = value.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+                            return Self::from_value_out(v, realm);
+                        }
+                        _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
+                    }
+                }
+            }
+        )*
+    };
+    () => {};
+}
+
+impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize);
+impl_from_value_float_output!(f32, f64);
 impl_from_value_output_nonfract!(
-    u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64
+    u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize
+);
+
+impl_from_value_float_output_nonfract!(
+    f32, f64
 );
 
 pub struct Extractor<'a> {
