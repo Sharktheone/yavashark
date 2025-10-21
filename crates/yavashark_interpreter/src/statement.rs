@@ -1,7 +1,7 @@
 use swc_common::Spanned;
 use swc_ecma_ast::{Decl, Stmt};
 
-use yavashark_env::{scope::Scope, Realm, RuntimeResult, Value};
+use yavashark_env::{scope::Scope, Realm, Res, RuntimeResult, Value};
 
 use crate::location::get_location;
 use crate::Interpreter;
@@ -65,11 +65,7 @@ impl Interpreter {
         script: &Vec<Stmt>,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        for stmt in script {
-            if let Stmt::Decl(decl) = stmt {
-                Self::hoist_decl(realm, decl, scope)?;
-            }
-        }
+        Self::hoist_statements(realm, script, scope)?;
 
         let mut last_value = Value::Undefined;
         for stmt in script {
@@ -82,6 +78,51 @@ impl Interpreter {
         }
 
         Ok(last_value)
+    }
+
+    fn hoist_statements(
+        realm: &mut Realm,
+        script: &Vec<Stmt>,
+        scope: &mut Scope,
+    ) -> Res<()> {
+        for stmt in script {
+
+            match stmt {
+                Stmt::Decl(decl) => {
+                    Self::hoist_decl(realm, decl, scope)?;
+                }
+                Stmt::Block(block) => {
+                    Self::hoist_globals(realm, block, scope)?;
+
+                }
+
+                _ => {}
+            }
+
+        }
+
+        Ok(())
+    }
+    
+    fn hoist_globals(
+        realm: &mut Realm,
+        block: &swc_ecma_ast::BlockStmt,
+        scope: &mut Scope,
+    ) -> Res<()> {
+        for stmt in &block.stmts {
+            match stmt {
+                Stmt::Decl(decl) => {
+                    Self::hoist_global_decl(realm, decl, scope)?;
+                }
+                Stmt::Block(inner_block) => {
+                    Self::hoist_globals(realm, inner_block, scope)?;
+                }
+
+                _ => {}
+            }
+        }
+
+        Ok(())
     }
 }
 
