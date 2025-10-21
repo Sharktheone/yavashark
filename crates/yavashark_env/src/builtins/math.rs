@@ -110,7 +110,7 @@ impl Math {
     }
 
     fn f16round(value: f64) -> f64 {
-        value.round() //TODO: Implement f16round
+        half::f16::from_f64(value).to_f64()
     }
 
     const fn fround(value: f64) -> f64 {
