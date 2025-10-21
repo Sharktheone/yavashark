@@ -251,6 +251,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut js_name = None;
                 let mut mode = mode;
                 let mut writable = false;
+                let mut configurable = false;
+                let mut enumerable = false;
 
                 constant.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("prototype") {
@@ -273,6 +275,16 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
 
+                    if attr.path().is_ident("configurable") {
+                        configurable = true;
+                        return false;
+                    }
+
+                    if attr.path().is_ident("enumerable") {
+                        enumerable = true;
+                        return false;
+                    }
+
                     true
                 });
 
@@ -281,6 +293,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     js_name,
                     mode,
                     writable,
+                    configurable,
+                    enumerable,
                 }))
             }
 
@@ -307,14 +321,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 method.name,
                 method.js_name,
                 method.ty,
-                quote! {#variable::write_config},
+                quote! {#variable::write_config(prop.into())},
             ),
             Prop::Constant(constant) => {
-                let variable_fn = if constant.writable {
-                    quote! {#variable::write}
-                } else {
-                    quote! {#variable::new_read_only}
-                };
+                let writable = constant.writable;
+                let enumerable = constant.enumerable;
+                let configurable = constant.configurable;
+
+                let variable_fn = quote! { #variable::new_with_attributes(prop.into(), #writable, #enumerable, #configurable) };
 
                 (
                     constant.init_tokens(&config),
@@ -336,7 +350,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_property_attributes(#name.into(), #variable_fn(prop.into()), realm)?;
+                        obj.define_property_attributes(#name.into(), #variable_fn, realm)?;
                     }
                 });
             }
@@ -498,6 +512,8 @@ struct Constant {
     js_name: Option<Expr>,
     mode: Mode,
     writable: bool,
+    configurable: bool,
+    enumerable: bool,
 }
 
 impl Method {
