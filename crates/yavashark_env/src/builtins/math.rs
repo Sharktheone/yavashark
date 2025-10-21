@@ -147,6 +147,7 @@ impl Math {
         value.log2()
     }
 
+    #[length(2)]
     fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
         Ok(args
             .iter()
