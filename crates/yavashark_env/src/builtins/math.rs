@@ -1,8 +1,8 @@
 use crate::partial_init::Initializer;
 use crate::utils::ValueIterator;
 use crate::value::Obj;
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use num_traits::One;
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value};
+use num_traits::{One, Zero};
 use std::cell::RefCell;
 use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
@@ -36,6 +36,10 @@ impl Math {
     const PI: f64 = std::f64::consts::PI;
     const SQRT1_2: f64 = std::f64::consts::FRAC_1_SQRT_2;
     const SQRT2: f64 = std::f64::consts::SQRT_2;
+
+    #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "Math";
 
     const fn abs(value: f64) -> f64 {
         value.abs()
@@ -185,6 +189,10 @@ impl Math {
     }
 
     fn pow(base: f64, exponent: f64) -> f64 {
+        if exponent.is_zero() {
+            return 1.0;
+        }
+
         if base.is_nan() || exponent.is_nan() {
             return f64::NAN;
         }
