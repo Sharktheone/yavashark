@@ -1066,6 +1066,12 @@ impl MutObj for MutObject {
     fn freeze(&mut self) -> Res {
         self.frozen = true;
         self.extensible = false;
+
+        for value in &mut self.values {
+            value.attributes.set_writable(false);
+            value.attributes.set_configurable(false);
+        }
+
         Ok(())
     }
 
