@@ -33,7 +33,7 @@ fn collect_var_declared_names_from_block<'a>(block: &'a BlockStmt, out: &mut Vec
     }
 }
 
-fn collect_var_declared_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
+pub fn collect_var_declared_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
     match stmt {
         Stmt::Decl(Decl::Var(var_decl)) if var_decl.kind == VarDeclKind::Var => {
             for decl in &var_decl.decls {
@@ -103,7 +103,7 @@ fn collect_var_declared_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
     }
 }
 
-fn collect_lexical_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
+pub fn collect_lexical_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
     if let Stmt::Decl(decl) = stmt {
         match decl {
             Decl::Var(var_decl) if var_decl.kind != VarDeclKind::Var => {
