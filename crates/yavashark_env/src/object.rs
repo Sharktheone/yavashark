@@ -30,6 +30,9 @@ pub struct MutObject {
     pub array: Vec<(usize, usize)>,
     pub values: Vec<ObjectProperty>,
     pub prototype: ObjectOrNull,
+    pub sealed: bool,
+    pub frozen: bool,
+    pub extensible: bool,
 }
 
 impl Object {
@@ -256,6 +259,9 @@ impl MutObject {
             array: Vec::new(),
             values: Vec::new(),
             prototype,
+            sealed: false,
+            frozen: false,
+            extensible: true,
         }
     }
 
@@ -266,6 +272,9 @@ impl MutObject {
             prototype: ObjectOrNull::Null,
             values: Vec::new(),
             array: Vec::new(),
+            sealed: false,
+            frozen: false,
+            extensible: true,
         }
     }
 
@@ -276,6 +285,9 @@ impl MutObject {
             prototype: proto.into(),
             values: Vec::new(),
             array: Vec::new(),
+            sealed: false,
+            frozen: false,
+            extensible: true,
         }
     }
 
@@ -1011,6 +1023,35 @@ impl MutObj for MutObject {
         }
 
         refs
+    }
+
+    fn is_extensible(&self) -> bool {
+        self.extensible
+    }
+
+    fn prevent_extensions(&mut self) -> Res {
+        self.extensible = false;
+        Ok(())
+    }
+
+    fn is_frozen(&self) -> bool {
+        self.frozen
+    }
+
+    fn freeze(&mut self) -> Res {
+        self.frozen = true;
+        self.extensible = false;
+        Ok(())
+    }
+
+    fn is_sealed(&self) -> bool {
+        self.sealed
+    }
+
+    fn seal(&mut self) -> Res {
+        self.sealed = true;
+        self.extensible = false;
+        Ok(())
     }
 
     // fn constructor(&self) -> Result<ObjectProperty, Error> {
