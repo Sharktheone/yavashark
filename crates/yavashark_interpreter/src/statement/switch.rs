@@ -10,29 +10,59 @@ impl Interpreter {
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_breakable()?;
 
-        let mut had_pass = false;
-        for case in &stmt.cases {
-            if !had_pass {
+        let mut ret = None;
+
+        let mut default = None;
+
+        for (i, case) in stmt.cases.iter().enumerate() {
+            if ret.is_none() {
                 if let Some(test) = &case.test {
                     let test = Self::run_expr(realm, test, case.span, scope)?;
                     if discriminant == test {
                     } else {
                         continue;
                     }
+                } else {
+                    default = Some(i);
+                    continue;
                 }
             }
 
-            had_pass = true;
 
-            if let Err(e) = Self::run_statements(realm, &case.cons, scope) {
-                return match &e {
-                    ControlFlow::Break(_) => Ok(Value::Undefined),
-                    _ => Err(e),
-                };
+            match Self::run_statements(realm, &case.cons, scope) {
+                Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
+                Err(e) => return Err(e),
+                Ok(v) => {
+                    if v.is_nullish() {
+                        ret = ret.or(Some(v));
+                    } else {
+                        ret = Some(v);
+                    }
+                },
             }
         }
 
-        Ok(Value::Undefined)
+        if ret.is_none() {
+            if let Some(default_index) = default {
+                for case in stmt.cases.iter().skip(default_index) {
+                    match Self::run_statements(realm, &case.cons, scope) {
+                        Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
+                        Err(e) => return Err(e),
+                        Ok(v) => {
+                            if v.is_nullish() {
+                                ret = ret.or(Some(v));
+                            } else {
+                                ret = Some(v);
+                            }
+                        },
+                    }
+                }
+            }
+        }
+
+
+
+        Ok(ret.unwrap_or(Value::Undefined))
     }
 }
 
