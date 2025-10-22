@@ -353,24 +353,24 @@ impl MutObject {
             }
         }
 
-        let property_key = InternalPropertyKey::Index(index).into();
-
-        if let Some(prop) = self.properties.get(&property_key) {
-            let Some(v) = self.values.get_mut(*prop) else {
-                return;
-            };
-
-            if v.attributes.is_writable() {
-                *v = value.into();
-                return;
-            }
-        }
+        // let property_key = InternalPropertyKey::Index(index).into();
+        //
+        // if let Some(prop) = self.properties.get(&property_key) {
+        //     let Some(v) = self.values.get_mut(*prop) else {
+        //         return;
+        //     };
+        //
+        //     if v.attributes.is_writable() {
+        //         *v = value.into();
+        //         return;
+        //     }
+        // }
 
         let len = self.values.len();
         self.values.push(value.into());
 
         self.array.insert(i, (index, len));
-        self.properties.insert(property_key, len);
+        // self.properties.insert(property_key, len);
     }
 
     #[must_use]
@@ -909,13 +909,18 @@ impl MutObj for MutObject {
 
     fn properties(&self, _realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         Ok(self
-            .properties
+            .array
             .iter()
-            .filter_map(|(k, v)| {
+            .filter_map(|(i, v)| {
+                let v = self.values.get(*v)?;
+
+                Some((InternalPropertyKey::Index(*i).into(), v.value.copy()))
+            })
+            .chain(self.properties.iter().filter_map(|(k, v)| {
                 let v = self.values.get(*v)?;
 
                 Some((k.clone(), v.value.copy()))
-            })
+            }))
             .collect())
     }
 
@@ -938,9 +943,18 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         Ok(self
-            .properties
+            .array
             .iter()
-            .filter_map(|(k, v)| {
+            .filter_map(|(i, v)| {
+                let v = self.values.get(*v)?;
+
+                if v.attributes.is_enumerable() {
+                    Some((InternalPropertyKey::Index(*i).into(), v.value.copy()))
+                } else {
+                    None
+                }
+            })
+            .chain(self.properties.iter().filter_map(|(k, v)| {
                 let v = self.values.get(*v)?;
 
                 if v.attributes.is_enumerable() {
@@ -948,7 +962,7 @@ impl MutObj for MutObject {
                 } else {
                     None
                 }
-            })
+            }))
             .collect())
     }
 
@@ -1082,6 +1096,11 @@ impl MutObj for MutObject {
     fn seal(&mut self) -> Res {
         self.sealed = true;
         self.extensible = false;
+
+        for value in &mut self.values {
+            value.attributes.set_configurable(false);
+        }
+
         Ok(())
     }
 
