@@ -618,6 +618,11 @@ impl MutObj for MutObject {
                 });
             }
             Entry::Vacant(entry) => {
+                if !self.extensible {
+                    //TODO: readonly is not correct
+                    return Ok(DefinePropertyResult::ReadOnly);
+                }
+
                 let idx = self.values.len();
                 self.values.push(ObjectProperty::new(value));
                 entry.insert(idx);
