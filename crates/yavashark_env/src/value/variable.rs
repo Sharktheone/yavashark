@@ -216,6 +216,30 @@ impl Attributes {
     pub const fn make_configurable(&mut self) {
         self.0 |= Self::CONFIGURABLE;
     }
+    
+    pub const fn set_writable(&mut self, writable: bool) {
+        if writable {
+            self.make_writable();
+        } else {
+            self.0 &= !Self::WRITABLE;
+        }
+    }
+    
+    pub const fn set_enumerable(&mut self, enumerable: bool) {
+        if enumerable {
+            self.make_enumerable();
+        } else {
+            self.0 &= !Self::ENUMERABLE;
+        }
+    }
+    
+    pub const fn set_configurable(&mut self, configurable: bool) {
+        if configurable {
+            self.make_configurable();
+        } else {
+            self.0 &= !Self::CONFIGURABLE;
+        }
+    }
 
     #[must_use]
     pub const fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
