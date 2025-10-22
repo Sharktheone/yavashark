@@ -247,6 +247,26 @@ impl Obj for Object {
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         self.inner.borrow().gc_refs()
     }
+
+    fn is_extensible(&self) -> bool {
+        self.inner.borrow().is_extensible()
+    }
+
+    fn prevent_extensions(&self) -> Res {
+        self.inner_mut()?.prevent_extensions()
+    }
+
+    fn is_frozen(&self) -> bool {
+        self.inner.borrow().is_frozen()
+    }
+
+    fn freeze(&self) -> Res {
+        self.inner_mut()?.freeze()
+    }
+
+    fn is_sealed(&self) -> bool {
+        self.inner.borrow().is_sealed()
+    }
 }
 
 impl MutObject {
