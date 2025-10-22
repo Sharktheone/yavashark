@@ -479,26 +479,33 @@ impl ObjectConstructor {
     }
 
     #[prop("preventExtensions")]
-    const fn prevent_extensions(_: &ObjectHandle) {}
+    fn prevent_extensions(o: &ObjectHandle) -> Res {
+        o.prevent_extensions()
+    }
 
     #[prop("isExtensible")]
-    const fn is_extensible(_: &ObjectHandle) -> bool {
-        true
+    fn is_extensible(o: &ObjectHandle) -> bool {
+        o.is_extensible()
     }
 
     #[prop("seal")]
-    const fn seal(_: &ObjectHandle) {}
+    fn seal(o: &ObjectHandle) -> Res {
+        o.seal()
+    }
 
     #[prop("isSealed")]
-    const fn is_sealed(_: &ObjectHandle) -> bool {
-        false
+    fn is_sealed(o: &ObjectHandle) -> bool {
+        o.is_sealed()
     }
 
     #[prop("freeze")]
-    const fn freeze(_: &ObjectHandle) {}
+    fn freeze(o: &ObjectHandle) -> Res {
+        o.freeze()
+
+    }
 
     #[prop("isFrozen")]
-    const fn is_frozen(_: &ObjectHandle) -> bool {
-        false
+    fn is_frozen(o: &ObjectHandle) -> bool {
+        o.is_frozen()
     }
 }
