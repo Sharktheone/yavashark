@@ -1096,8 +1096,9 @@ impl Array {
 
         let (_, val) = this.get_array_or_done(idx, realm)?;
 
-        this.define_property("length".into(), idx.into(), realm)?;
         this.define_property(idx.into(), Value::Undefined, realm)?;
+        this.define_property("length".into(), idx.into(), realm)?;
+
 
         Ok(val.unwrap_or(Value::Undefined))
     }
