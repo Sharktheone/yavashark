@@ -17,24 +17,35 @@ impl Interpreter {
 
         if stmt.function.is_async || stmt.function.is_generator {
             #[cfg(feature = "vm")]
-            return Ok(
-                yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
+                let function = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                     &stmt.function,
                     name,
-                    fn_scope,
+                    fn_scope.clone(),
                     realm,
-                )?
-                .into(),
-            );
+                )?;
+
+            #[cfg(feature = "vm")]
+            if let Some(ident) = &stmt.ident {
+                fn_scope.declare_var(ident.sym.to_string(), function.clone().into(), realm);
+            }
+
+            #[cfg(feature = "vm")]
+            return Ok(function.into());
+
         }
 
         let function = JSFunction::new(
             name,
             stmt.function.params.clone(),
             stmt.function.body.clone(),
-            fn_scope,
+            fn_scope.clone(),
             realm,
         )?;
+
+
+        if let Some(ident) = &stmt.ident {
+            fn_scope.declare_var(ident.sym.to_string(), function.clone().into(), realm);
+        }
 
         Ok(function.into())
     }
