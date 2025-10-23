@@ -136,6 +136,8 @@ impl<'a> Validator<'a> {
             VFlagValidator::new(&pattern).validate()?;
         }
 
+        Self::validate_pattern_structure(&pattern, unicode_enabled)?;
+
         let mut idx = 0usize;
         let mut in_class = false;
         let mut first_in_class = false;
@@ -326,6 +328,192 @@ impl<'a> Validator<'a> {
             }
 
             idx += 1;
+        }
+
+        Ok(())
+    }
+
+    fn validate_pattern_structure(pattern: &[char], _unicode_enabled: bool) -> Result<(), String> {
+        let mut idx = 0;
+        let mut in_class = false;
+        let mut depth = 0;
+
+        let mut can_quantify = false;
+
+        while idx < pattern.len() {
+            let ch = pattern[idx];
+
+            if ch == '\\' {
+                idx += 1;
+                if idx >= pattern.len() {
+                    return Err("Dangling escape in regular expression literal".to_string());
+                }
+                can_quantify = true;
+                idx += 1;
+                continue;
+            }
+
+            if in_class {
+                if ch == ']' {
+                    in_class = false;
+                    can_quantify = true;
+                }
+                idx += 1;
+                continue;
+            }
+
+            match ch {
+                '[' => {
+                    in_class = true;
+                    can_quantify = false;
+                    idx += 1;
+                    continue;
+                }
+                '(' => {
+                    if idx + 1 < pattern.len() && pattern[idx + 1] == '?' {
+                        idx += 2; // Skip '(?'
+                        
+                        if idx >= pattern.len() {
+                            return Err("Incomplete group".to_string());
+                        }
+
+                        let next = pattern[idx];
+                        
+                        if next != ':' && next != '=' && next != '!' && next != '<' {
+                            // This might be a modifiers group
+                            let start = idx;
+                            let mut add_flags = String::new();
+                            let mut remove_flags = String::new();
+                            let mut in_remove = false;
+                            let mut has_colon = false;
+                            
+                            while idx < pattern.len() {
+                                let flag_ch = pattern[idx];
+                                
+                                if flag_ch == ':' {
+                                    has_colon = true;
+                                    break;
+                                }
+                                
+                                if flag_ch == ')' {
+                                    break;
+                                }
+                                
+                                if flag_ch == '-' {
+                                    if in_remove {
+                                        return Err("Multiple '-' in regexp modifiers".to_string());
+                                    }
+                                    in_remove = true;
+                                    idx += 1;
+                                    continue;
+                                }
+                                
+                                if !matches!(flag_ch, 'i' | 'm' | 's' | 'g' | 'd' | 'u' | 'y') {
+                                    // Invalid flag character
+                                    return Err(format!(
+                                        "Invalid character '{flag_ch}' in regexp modifiers",
+                                    ));
+                                }
+                                
+                                if in_remove {
+                                    remove_flags.push(flag_ch);
+                                } else {
+                                    add_flags.push(flag_ch);
+                                }
+                                
+                                idx += 1;
+                            }
+                            
+                            if start != idx {
+                                if add_flags.is_empty() && remove_flags.is_empty() {
+                                    return Err(
+                                        "At least one RegularExpressionFlags must be present in modifiers"
+                                            .to_string(),
+                                    );
+                                }
+                                
+                                for flag in add_flags.chars() {
+                                    if remove_flags.contains(flag) {
+                                        return Err(format!(
+                                            "Flag '{}' appears in both add and remove sets",
+                                            flag
+                                        ));
+                                    }
+                                }
+                                
+                                let mut seen = std::collections::HashSet::new();
+                                for flag in add_flags.chars().chain(remove_flags.chars()) {
+                                    if !seen.insert(flag) {
+                                        return Err(format!("Duplicate flag '{}' in modifiers", flag));
+                                    }
+                                }
+                                
+                                if !has_colon && !remove_flags.is_empty() {
+                                    return Err(
+                                        "Arithmetic modifiers require ':' before the pattern".to_string()
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    depth += 1;
+                    can_quantify = false;
+                    idx += 1;
+                    continue;
+                }
+                ')' => {
+                    if depth == 0 {
+                        return Err("Unmatched closing parenthesis".to_string());
+                    }
+                    depth -= 1;
+                    can_quantify = true;
+                    idx += 1;
+                    continue;
+                }
+                '?' | '*' | '+' => {
+                    if !can_quantify {
+                        return Err(format!("Nothing to repeat at position {}", idx));
+                    }
+                    can_quantify = false;
+                    idx += 1;
+                    continue;
+                }
+                '{' => {
+                    if pattern.get(idx + 1).map_or(false, |c| c.is_ascii_digit()) {
+                        if !can_quantify {
+                            return Err(format!("Nothing to repeat at position {}", idx));
+                        }
+                        can_quantify = false;
+                    } else {
+                        can_quantify = true;
+                    }
+                    idx += 1;
+                    continue;
+                }
+                '|' => {
+                    can_quantify = false;
+                    idx += 1;
+                    continue;
+                }
+                '^' | '$' => {
+                    can_quantify = false;
+                    idx += 1;
+                    continue;
+                }
+                _ => {
+                    can_quantify = true;
+                    idx += 1;
+                    continue;
+                }
+            }
+        }
+
+        if depth != 0 {
+            return Err("Unclosed group in regular expression".to_string());
+        }
+
+        if in_class {
+            return Err("Unterminated character class".to_string());
         }
 
         Ok(())
