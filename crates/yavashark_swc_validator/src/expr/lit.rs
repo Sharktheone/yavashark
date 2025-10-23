@@ -16,6 +16,14 @@ enum ClassToken {
     Dash,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum AssertionType {
+    Lookahead,
+    NegativeLookahead,
+    Lookbehind,
+    NegativeLookbehind,
+}
+
 impl<'a> Validator<'a> {
     pub fn validate_lit(&mut self, lit: &Lit) -> Result<(), String> {
         match lit {
@@ -333,13 +341,14 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 
-    fn validate_pattern_structure(pattern: &[char], _unicode_enabled: bool) -> Result<(), String> {
+    fn validate_pattern_structure(pattern: &[char], unicode_enabled: bool) -> Result<(), String> {
         let mut idx = 0;
         let mut in_class = false;
         let mut depth = 0;
         let mut can_quantify = false;
         let mut named_groups = std::collections::HashSet::new();
         let mut group_references = Vec::new();
+        let mut assertion_stack: Vec<Option<AssertionType>> = Vec::new(); // Stack to track assertions
 
         while idx < pattern.len() {
             let ch = pattern[idx];
@@ -351,6 +360,51 @@ impl<'a> Validator<'a> {
                 }
                 
                 let next = pattern[idx];
+                
+                // Validate unicode mode identity escapes
+                if unicode_enabled && !in_class {
+                    // In unicode mode, only certain characters can be escaped
+                    let is_allowed_escape = matches!(next, 
+                        // Syntax characters
+                        '^' | '$' | '\\' | '.' | '*' | '+' | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|' | '/'
+                        // Character class escapes
+                        | 'd' | 'D' | 's' | 'S' | 'w' | 'W'
+                        // Special escapes
+                        | 'b' | 'B' | 'f' | 'n' | 'r' | 't' | 'v'
+                        // Hex/Unicode escapes
+                        | 'x' | 'u'
+                        // Control escape (needs letter after)
+                        | 'c'
+                        // Backreference
+                        | 'k'
+                        // Property escapes
+                        | 'p' | 'P'
+                    ) || next.is_ascii_digit(); // Also allow digits for backreferences like \1, \2, etc.
+                    
+                    if !is_allowed_escape {
+                        return Err(format!(
+                            "Invalid escape sequence '\\{}' in unicode mode",
+                            next
+                        ));
+                    }
+                }
+                
+                // Validate \c escape requires letter
+                if next == 'c' {
+                    if idx + 1 >= pattern.len() {
+                        if unicode_enabled {
+                            return Err("Control escape requires a letter in unicode mode".to_string());
+                        }
+                    } else if unicode_enabled {
+                        let control_char = pattern[idx + 1];
+                        if !control_char.is_ascii_alphabetic() {
+                            return Err(format!(
+                                "Control escape requires a letter, got '{}' in unicode mode",
+                                control_char
+                            ));
+                        }
+                    }
+                }
                 
                 // Check for named group backreference: \k<name>
                 if next == 'k' {
@@ -407,6 +461,8 @@ impl<'a> Validator<'a> {
                     continue;
                 }
                 '(' => {
+                    let mut assertion_type_for_this_group: Option<AssertionType> = None;
+                    
                     if idx + 1 < pattern.len() && pattern[idx + 1] == '?' {
                         idx += 2; // Skip '(?'
                         
@@ -415,6 +471,23 @@ impl<'a> Validator<'a> {
                         }
 
                         let next = pattern[idx];
+                        
+                        // Track assertion types for quantifier validation
+                        // Check for lookahead/lookbehind assertions
+                        if next == '=' {
+                            assertion_type_for_this_group = Some(AssertionType::Lookahead);
+                        } else if next == '!' {
+                            assertion_type_for_this_group = Some(AssertionType::NegativeLookahead);
+                        } else if next == '<' {
+                            if idx + 1 < pattern.len() {
+                                let lookahead_char = pattern[idx + 1];
+                                if lookahead_char == '=' {
+                                    assertion_type_for_this_group = Some(AssertionType::Lookbehind);
+                                } else if lookahead_char == '!' {
+                                    assertion_type_for_this_group = Some(AssertionType::NegativeLookbehind);
+                                }
+                            }
+                        }
                         
                         // Check for named groups: (?<name>...)
                         if next == '<' {
@@ -473,6 +546,13 @@ impl<'a> Validator<'a> {
                                 }
                                 
                                 idx += 1; // Skip '>'
+                                
+                                // Process group opening now, then continue
+                                // (to avoid the idx += 1 at the end which would skip a character)
+                                depth += 1;
+                                can_quantify = false;
+                                assertion_stack.push(None); // Named groups are not assertions
+                                continue;
                             }
                         } else if next != ':' && next != '=' && next != '!' {
                             // This might be a modifiers group
@@ -554,6 +634,7 @@ impl<'a> Validator<'a> {
                     }
                     depth += 1;
                     can_quantify = false;
+                    assertion_stack.push(assertion_type_for_this_group);
                     idx += 1;
                     continue;
                 }
@@ -562,12 +643,29 @@ impl<'a> Validator<'a> {
                         return Err("Unmatched closing parenthesis".to_string());
                     }
                     depth -= 1;
-                    can_quantify = true;
+                    
+                    // Pop the assertion type from the stack
+                    let was_assertion = assertion_stack.pop().flatten();
+                    
+                    // If this was an assertion, we can't quantify it
+                    if was_assertion.is_some() {
+                        can_quantify = false; // Will be checked by quantifier
+                    } else {
+                        can_quantify = true;
+                    }
+                    
                     idx += 1;
                     continue;
                 }
                 '?' | '*' | '+' => {
+                    // Check if the last thing was an assertion
+                    // We need to check if we just closed a group that was an assertion
                     if !can_quantify {
+                        // This could be because we just closed an assertion
+                        // Check the pattern to see if the previous char was ')'
+                        if idx > 0 && pattern[idx - 1] == ')' {
+                            return Err("Assertions cannot be quantified".to_string());
+                        }
                         return Err(format!("Nothing to repeat at position {}", idx));
                     }
                     can_quantify = false;
@@ -577,6 +675,9 @@ impl<'a> Validator<'a> {
                 '{' => {
                     if pattern.get(idx + 1).map_or(false, |c| c.is_ascii_digit()) {
                         if !can_quantify {
+                            if idx > 0 && pattern[idx - 1] == ')' {
+                                return Err("Assertions cannot be quantified".to_string());
+                            }
                             return Err(format!("Nothing to repeat at position {}", idx));
                         }
                         can_quantify = false;
