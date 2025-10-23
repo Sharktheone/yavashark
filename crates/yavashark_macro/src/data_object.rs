@@ -1,10 +1,10 @@
-mod structure;
 mod enumeration;
+mod structure;
 
-use syn::{Data, DeriveInput, Token};
-use syn::parse::Parse;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
+use syn::parse::Parse;
+use syn::{Data, DeriveInput, Token};
 
 pub fn data_object(
     _attrs: proc_macro::TokenStream,
@@ -16,10 +16,9 @@ pub fn data_object(
         StructOrEnum::Struct(s) => data_struct(s),
         StructOrEnum::Enum(e) => data_enum(e),
     }
-        .unwrap_or_else(|e| e.to_compile_error())
-        .into()
+    .unwrap_or_else(|e| e.to_compile_error())
+    .into()
 }
-
 
 pub enum StructOrEnum {
     Struct(syn::ItemStruct),
@@ -40,4 +39,3 @@ impl Parse for StructOrEnum {
         }
     }
 }
-

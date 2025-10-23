@@ -16,18 +16,17 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    intl, signal, temporal, AggregateError,
-    Arguments, Atomics, BigIntObj, BooleanObj, Date, EvalError, Map, NumberObj, Promise,
-    Proxy, RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError,
-    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
+    intl, signal, temporal, AggregateError, Arguments, Atomics, BigIntObj, BooleanObj, Date,
+    EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp, Set, StringObj,
+    SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::Partial;
 use crate::realm::initialize::Intrinsic;
+use crate::value::Obj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
-use crate::value::Obj;
 
 type PartialIntrinsic<T> = Partial<ObjectHandle, IntrinsicInitializer<T>>;
 
@@ -106,7 +105,6 @@ pub struct Intrinsics {
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
-
 
 #[allow(clippy::similar_names)]
 impl Intrinsics {

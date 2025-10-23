@@ -128,7 +128,6 @@ impl Math {
         res
     }
 
-
     const fn imul(left: u32, right: u32) -> i32 {
         left.wrapping_mul(right) as i32
     }
@@ -251,7 +250,6 @@ impl Math {
                 "Value is not iterable: missing @@iterator method",
             ));
         }
-
 
         let iter = ValueIterator::new_obj(iter, realm)?;
         let mut sum = xsum::XsumAuto::new();

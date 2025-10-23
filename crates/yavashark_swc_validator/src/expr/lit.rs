@@ -358,13 +358,14 @@ impl<'a> Validator<'a> {
                 if idx >= pattern.len() {
                     return Err("Dangling escape in regular expression literal".to_string());
                 }
-                
+
                 let next = pattern[idx];
-                
+
                 // Validate unicode mode identity escapes
                 if unicode_enabled && !in_class {
                     // In unicode mode, only certain characters can be escaped
-                    let is_allowed_escape = matches!(next, 
+                    let is_allowed_escape = matches!(
+                        next,
                         // Syntax characters
                         '^' | '$' | '\\' | '.' | '*' | '+' | '?' | '(' | ')' | '[' | ']' | '{' | '}' | '|' | '/'
                         // Character class escapes
@@ -380,7 +381,7 @@ impl<'a> Validator<'a> {
                         // Property escapes
                         | 'p' | 'P'
                     ) || next.is_ascii_digit(); // Also allow digits for backreferences like \1, \2, etc.
-                    
+
                     if !is_allowed_escape {
                         return Err(format!(
                             "Invalid escape sequence '\\{}' in unicode mode",
@@ -388,12 +389,14 @@ impl<'a> Validator<'a> {
                         ));
                     }
                 }
-                
+
                 // Validate \c escape requires letter
                 if next == 'c' {
                     if idx + 1 >= pattern.len() {
                         if unicode_enabled {
-                            return Err("Control escape requires a letter in unicode mode".to_string());
+                            return Err(
+                                "Control escape requires a letter in unicode mode".to_string()
+                            );
                         }
                     } else if unicode_enabled {
                         let control_char = pattern[idx + 1];
@@ -405,40 +408,42 @@ impl<'a> Validator<'a> {
                         }
                     }
                 }
-                
+
                 // Check for named group backreference: \k<name>
                 if next == 'k' {
                     idx += 1; // Skip 'k'
-                    
+
                     if idx >= pattern.len() || pattern[idx] != '<' {
-                        return Err("Invalid group backreference: expected '<' after \\k".to_string());
+                        return Err(
+                            "Invalid group backreference: expected '<' after \\k".to_string()
+                        );
                     }
-                    
+
                     idx += 1; // Skip '<'
                     let mut ref_name = String::new();
-                    
+
                     // Collect the reference name until '>'
                     while idx < pattern.len() && pattern[idx] != '>' {
                         ref_name.push(pattern[idx]);
                         idx += 1;
                     }
-                    
+
                     if idx >= pattern.len() {
                         return Err("Unterminated group backreference".to_string());
                     }
-                    
+
                     if ref_name.is_empty() {
                         return Err("Group backreference name cannot be empty".to_string());
                     }
-                    
+
                     // Store the reference to validate later (after we've collected all group names)
                     group_references.push(ref_name);
-                    
+
                     idx += 1; // Skip '>'
                     can_quantify = true;
                     continue;
                 }
-                
+
                 can_quantify = true;
                 idx += 1;
                 continue;
@@ -462,16 +467,16 @@ impl<'a> Validator<'a> {
                 }
                 '(' => {
                     let mut assertion_type_for_this_group: Option<AssertionType> = None;
-                    
+
                     if idx + 1 < pattern.len() && pattern[idx + 1] == '?' {
                         idx += 2; // Skip '(?'
-                        
+
                         if idx >= pattern.len() {
                             return Err("Incomplete group".to_string());
                         }
 
                         let next = pattern[idx];
-                        
+
                         // Track assertion types for quantifier validation
                         // Check for lookahead/lookbehind assertions
                         if next == '=' {
@@ -484,41 +489,44 @@ impl<'a> Validator<'a> {
                                 if lookahead_char == '=' {
                                     assertion_type_for_this_group = Some(AssertionType::Lookbehind);
                                 } else if lookahead_char == '!' {
-                                    assertion_type_for_this_group = Some(AssertionType::NegativeLookbehind);
+                                    assertion_type_for_this_group =
+                                        Some(AssertionType::NegativeLookbehind);
                                 }
                             }
                         }
-                        
+
                         // Check for named groups: (?<name>...)
                         if next == '<' {
                             idx += 1; // Skip '<'
-                            
+
                             if idx >= pattern.len() {
                                 return Err("Incomplete named group".to_string());
                             }
-                            
+
                             // Check if it's not a lookbehind (which would be (?<=...) or (?<!...))
                             if pattern[idx] != '=' && pattern[idx] != '!' {
                                 // This is a named capture group
                                 let mut group_name = String::new();
-                                
+
                                 // Collect the group name until '>'
                                 while idx < pattern.len() && pattern[idx] != '>' {
                                     group_name.push(pattern[idx]);
                                     idx += 1;
                                 }
-                                
+
                                 if idx >= pattern.len() {
                                     return Err("Unterminated named group".to_string());
                                 }
-                                
+
                                 // Validate the group name
                                 if group_name.is_empty() {
                                     return Err("Named group name cannot be empty".to_string());
                                 }
-                                
+
                                 // Check if first character is a valid ID_Start
-                                let first_char = group_name.chars().next()
+                                let first_char = group_name
+                                    .chars()
+                                    .next()
                                     .ok_or("Named group name cannot be empty")?;
                                 if !is_id_start(first_char) {
                                     return Err(format!(
@@ -526,7 +534,7 @@ impl<'a> Validator<'a> {
                                         first_char
                                     ));
                                 }
-                                
+
                                 // Check remaining characters are valid ID_Continue
                                 for ch in group_name.chars().skip(1) {
                                     if !is_id_continue(ch) {
@@ -536,7 +544,7 @@ impl<'a> Validator<'a> {
                                         ));
                                     }
                                 }
-                                
+
                                 // Check for duplicate group names
                                 if !named_groups.insert(group_name.clone()) {
                                     return Err(format!(
@@ -544,9 +552,9 @@ impl<'a> Validator<'a> {
                                         group_name
                                     ));
                                 }
-                                
+
                                 idx += 1; // Skip '>'
-                                
+
                                 // Process group opening now, then continue
                                 // (to avoid the idx += 1 at the end which would skip a character)
                                 depth += 1;
@@ -561,19 +569,19 @@ impl<'a> Validator<'a> {
                             let mut remove_flags = String::new();
                             let mut in_remove = false;
                             let mut has_colon = false;
-                            
+
                             while idx < pattern.len() {
                                 let flag_ch = pattern[idx];
-                                
+
                                 if flag_ch == ':' {
                                     has_colon = true;
                                     break;
                                 }
-                                
+
                                 if flag_ch == ')' {
                                     break;
                                 }
-                                
+
                                 if flag_ch == '-' {
                                     if in_remove {
                                         return Err("Multiple '-' in regexp modifiers".to_string());
@@ -582,7 +590,7 @@ impl<'a> Validator<'a> {
                                     idx += 1;
                                     continue;
                                 }
-                                
+
                                 // Only i, m, s are allowed in modifiers (not g, d, u, y, v)
                                 if !matches!(flag_ch, 'i' | 'm' | 's') {
                                     return Err(format!(
@@ -590,16 +598,16 @@ impl<'a> Validator<'a> {
                                         flag_ch
                                     ));
                                 }
-                                
+
                                 if in_remove {
                                     remove_flags.push(flag_ch);
                                 } else {
                                     add_flags.push(flag_ch);
                                 }
-                                
+
                                 idx += 1;
                             }
-                            
+
                             if start != idx {
                                 if add_flags.is_empty() && remove_flags.is_empty() {
                                     return Err(
@@ -607,7 +615,7 @@ impl<'a> Validator<'a> {
                                             .to_string(),
                                     );
                                 }
-                                
+
                                 for flag in add_flags.chars() {
                                     if remove_flags.contains(flag) {
                                         return Err(format!(
@@ -616,17 +624,21 @@ impl<'a> Validator<'a> {
                                         ));
                                     }
                                 }
-                                
+
                                 let mut seen = std::collections::HashSet::new();
                                 for flag in add_flags.chars().chain(remove_flags.chars()) {
                                     if !seen.insert(flag) {
-                                        return Err(format!("Duplicate flag '{}' in modifiers", flag));
+                                        return Err(format!(
+                                            "Duplicate flag '{}' in modifiers",
+                                            flag
+                                        ));
                                     }
                                 }
-                                
+
                                 if !has_colon && !remove_flags.is_empty() {
                                     return Err(
-                                        "Arithmetic modifiers require ':' before the pattern".to_string()
+                                        "Arithmetic modifiers require ':' before the pattern"
+                                            .to_string(),
                                     );
                                 }
                             }
@@ -643,17 +655,17 @@ impl<'a> Validator<'a> {
                         return Err("Unmatched closing parenthesis".to_string());
                     }
                     depth -= 1;
-                    
+
                     // Pop the assertion type from the stack
                     let was_assertion = assertion_stack.pop().flatten();
-                    
+
                     // If this was an assertion, we can't quantify it
                     if was_assertion.is_some() {
                         can_quantify = false; // Will be checked by quantifier
                     } else {
                         can_quantify = true;
                     }
-                    
+
                     idx += 1;
                     continue;
                 }
@@ -712,7 +724,7 @@ impl<'a> Validator<'a> {
         if in_class {
             return Err("Unterminated character class".to_string());
         }
-        
+
         // Validate that all group references point to existing groups
         for ref_name in group_references {
             if !named_groups.contains(&ref_name) {
@@ -1092,10 +1104,7 @@ fn is_id_start(ch: char) -> bool {
     // ID_Start includes:
     // - Letters (Unicode categories Lu, Ll, Lt, Lm, Lo, Nl)
     // - $ and _
-    ch == '$' 
-        || ch == '_' 
-        || ch.is_alphabetic()
-        || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ
+    ch == '$' || ch == '_' || ch.is_alphabetic() || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ
 }
 
 // Helper function to check if a character is valid in an identifier (after the first char)
@@ -1104,7 +1113,7 @@ fn is_id_continue(ch: char) -> bool {
     // - Digits
     // - Combining marks (Mn, Mc)
     // - Connector punctuation (Pc)
-    is_id_start(ch) 
+    is_id_start(ch)
         || ch.is_ascii_digit()
         || ch.is_numeric()
         || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ

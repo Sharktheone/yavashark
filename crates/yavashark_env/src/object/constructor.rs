@@ -1,6 +1,7 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::prototype::common;
+use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull, Property};
@@ -12,7 +13,6 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use crate::partial_init::Initializer;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -68,8 +68,6 @@ impl ObjectConstructor {
         };
 
         this.initialize(realm)?;
-
-
 
         Ok(this.into_object())
     }
@@ -501,7 +499,6 @@ impl ObjectConstructor {
     #[prop("freeze")]
     fn freeze(o: &ObjectHandle) -> Res {
         o.freeze()
-
     }
 
     #[prop("isFrozen")]

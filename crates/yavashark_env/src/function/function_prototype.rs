@@ -1,13 +1,16 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use std::cell::{Cell, RefCell};
-use yavashark_macro::inline_props;
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
-use crate::realm::Realm;
-use crate::{proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
+use crate::realm::Realm;
+use crate::{
+    proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult,
+    Variable,
+};
+use std::cell::{Cell, RefCell};
+use yavashark_macro::inline_props;
 
 #[inline_props(enumerable = false, configurable)]
 #[derive(Default, Debug)]
@@ -26,7 +29,6 @@ pub struct FunctionPrototype {
     pub caller_get: Partial<ObjectHandle, Caller>,
 }
 
-
 proto!(Apply, apply, "apply", 2);
 proto!(Bind, bind, "bind", 1);
 proto!(Call, call, "call", 1);
@@ -35,10 +37,14 @@ proto!(ToString, to_string, "toString", 0);
 pub struct Caller;
 impl Initializer<ObjectHandle> for Caller {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(realm.intrinsics.clone_public().throw_type_error.get(realm)?.clone())
+        Ok(realm
+            .intrinsics
+            .clone_public()
+            .throw_type_error
+            .get(realm)?
+            .clone())
     }
 }
-
 
 impl FunctionPrototype {
     pub fn new(realm: &mut Realm) -> InlineObject<FunctionPrototype> {
@@ -47,20 +53,17 @@ impl FunctionPrototype {
         proto.length = Cell::new(0);
         proto.name = RefCell::new("Function");
 
-
-        InlineObject::with_proto(
-            proto,
-            realm.intrinsics.obj.clone(),
-        )
+        InlineObject::with_proto(proto, realm.intrinsics.obj.clone())
     }
 }
-
 
 pub struct GlobalFunctionConstructor;
 
 impl Initializer<ObjectHandle> for GlobalFunctionConstructor {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        realm.intrinsics.func
+        realm
+            .intrinsics
+            .func
             .clone()
             .get("constructor", realm)?
             .to_object()
@@ -71,18 +74,13 @@ pub struct FunctionConstructor;
 
 impl Initializer<ObjectHandle> for FunctionConstructor {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        let ctor = NativeConstructor::special(
-            "Function".to_string(),
-            constructor,
-            realm
-        );
+        let ctor = NativeConstructor::special("Function".to_string(), constructor, realm);
 
         ctor.define_property_attributes(
             "prototype".into(),
             Variable::new_read_only(realm.intrinsics.func.clone().into()),
             realm,
         )?;
-
 
         Ok(ctor)
     }
@@ -171,8 +169,6 @@ fn to_string(_args: Vec<Value>, this: Value, _realm: &mut Realm) -> ValueResult 
 
     Ok("function () { } ".into())
 }
-
-
 
 // impl Obj for FunctionPrototype {
 //     fn define_property(

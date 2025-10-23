@@ -168,9 +168,10 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             error = Some(e);
                         };
 
-
                         match attr.parse_args() {
-                            Ok(Lit::Int(len)) => length = Some(len.base10_parse::<usize>().unwrap()),
+                            Ok(Lit::Int(len)) => {
+                                length = Some(len.base10_parse::<usize>().unwrap())
+                            }
                             Ok(_) => {
                                 error = Some(syn::Error::new(
                                     attr.span(),
@@ -630,8 +631,6 @@ impl Method {
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
-
-
         let optionals = self
             .args
             .iter()
@@ -647,7 +646,6 @@ impl Method {
                 }
             })
             .count();
-
 
         let length = if let Some(length) = self.length {
             length
@@ -665,8 +663,6 @@ impl Method {
 
             length
         };
-
-
 
         quote! {
             #native_function::with_proto_and_len(#name.as_ref(), |mut args, mut this, realm| {

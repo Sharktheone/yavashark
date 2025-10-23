@@ -1,17 +1,15 @@
+use crate::inline_props::InlineObject;
+use crate::object::constructor::ObjectConstructor;
+use crate::object::prototype::common::get_own_property_descriptor;
+use crate::partial_init::{Initializer, Partial};
+use crate::realm::Realm;
 use crate::value::ObjectOrNull;
+use crate::{NativeFunction, ObjectHandle, Res};
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
     property_is_enumerable, to_locale_string, to_string, value_of,
 };
 use yavashark_macro::inline_props;
-use crate::object::constructor::ObjectConstructor;
-use crate::object::prototype::common::get_own_property_descriptor;
-use crate::realm::Realm;
-use crate::{
-    NativeFunction, ObjectHandle, Res,
-};
-use crate::inline_props::InlineObject;
-use crate::partial_init::{Initializer, Partial};
 
 pub mod common;
 
@@ -54,7 +52,6 @@ pub struct Prototype {
     value_of: Partial<ObjectHandle, ValueOf>,
 }
 
-
 #[macro_export]
 macro_rules! proto {
     ($init_name:ident, $ident:ident, $name:literal, $len:literal) => {
@@ -62,15 +59,9 @@ macro_rules! proto {
 
         impl Initializer<ObjectHandle> for $init_name {
             fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-                Ok(NativeFunction::with_len(
-                    $name,
-                    $ident,
-                    realm,
-                    $len,
-                ))
+                Ok(NativeFunction::with_len($name, $ident, realm, $len))
             }
         }
-
     };
 }
 
@@ -79,21 +70,27 @@ proto!(DefineSetter, define_setter, "__defineSetter__", 2);
 proto!(LookupGetter, lookup_getter, "__lookupGetter__", 1);
 proto!(LookupSetter, lookup_setter, "__lookupSetter__", 1);
 proto!(HasOwnProperty, has_own_property, "hasOwnProperty", 1);
-proto!(GetOwnPropertyDescriptor, get_own_property_descriptor, "getOwnPropertyDescriptor", 1);
+proto!(
+    GetOwnPropertyDescriptor,
+    get_own_property_descriptor,
+    "getOwnPropertyDescriptor",
+    1
+);
 proto!(IsPrototypeOf, is_prototype_of, "isPrototypeOf", 1);
-proto!(PropertyIsEnumerable, property_is_enumerable, "propertyIsEnumerable", 1);
+proto!(
+    PropertyIsEnumerable,
+    property_is_enumerable,
+    "propertyIsEnumerable",
+    1
+);
 proto!(ToLocaleString, to_locale_string, "toLocaleString", 0);
 proto!(ToString, to_string, "toString", 0);
 proto!(ValueOf, value_of, "valueOf", 0);
 
-
 impl Prototype {
     #[must_use]
     pub fn new() -> InlineObject<Self> {
-        InlineObject::with_proto(
-            Prototype::default(),
-            ObjectOrNull::Null,
-        )
+        InlineObject::with_proto(Prototype::default(), ObjectOrNull::Null)
     }
 }
 
@@ -101,7 +98,9 @@ pub struct GlobalObjectConstructor;
 
 impl Initializer<ObjectHandle> for GlobalObjectConstructor {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        realm.intrinsics.obj
+        realm
+            .intrinsics
+            .obj
             .clone()
             .get("constructor", realm)?
             .to_object()

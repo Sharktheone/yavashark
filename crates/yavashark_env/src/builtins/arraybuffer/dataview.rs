@@ -85,7 +85,6 @@ impl DataView {
             return Err(Error::range("Out of bounds"));
         }
 
-
         if slice.len() < self.byte_offset + self.byte_length {
             return Err(Error::ty("ArrayBuffer is detached"));
         }
@@ -117,7 +116,6 @@ impl DataView {
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));
         }
-
 
         if offset + T::N_BYTES > self.byte_length {
             return Err(Error::range("Out of bounds"));

@@ -28,7 +28,6 @@ impl Interpreter {
                 }
             }
 
-
             match Self::run_statements(realm, &case.cons, scope) {
                 Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
                 Err(e) => return Err(e),
@@ -38,7 +37,7 @@ impl Interpreter {
                     } else {
                         ret = Some(v);
                     }
-                },
+                }
             }
         }
 
@@ -54,13 +53,11 @@ impl Interpreter {
                             } else {
                                 ret = Some(v);
                             }
-                        },
+                        }
                     }
                 }
             }
         }
-
-
 
         Ok(ret.unwrap_or(Value::Undefined))
     }

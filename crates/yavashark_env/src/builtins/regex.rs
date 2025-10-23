@@ -123,13 +123,13 @@ impl RegExp {
             last_index: Cell::new(0),
         }
         .into_object();
-        
+
         obj.define_property_attributes(
             "lastIndex".into(),
             crate::Variable::write(Value::from(0)),
             realm,
         )?;
-        
+
         Ok(obj)
     }
 

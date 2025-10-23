@@ -1,9 +1,9 @@
 mod properties;
 
+use crate::config::Config;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{DataStruct, ItemStruct};
-use crate::config::Config;
 
 pub fn data_struct(mut s: ItemStruct) -> syn::Result<TokenStream> {
     let properties = properties::parse_properties(&mut s.fields)?;
@@ -18,7 +18,6 @@ pub fn data_struct(mut s: ItemStruct) -> syn::Result<TokenStream> {
     let object = &config.object;
 
     let struct_name = &s.ident;
-
 
     let mut gen_props = TokenStream::new();
 
@@ -49,9 +48,7 @@ pub fn data_struct(mut s: ItemStruct) -> syn::Result<TokenStream> {
         });
     }
 
-    let prop_names = properties.iter().map(|prop| {
-        &prop.id
-    });
+    let prop_names = properties.iter().map(|prop| &prop.id);
 
     let mut into_props = TokenStream::new();
 

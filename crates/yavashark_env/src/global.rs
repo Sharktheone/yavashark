@@ -17,23 +17,23 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    AggregateError, Atomics, BigIntObj,
-    BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI, EncodeURIComponent, Escape,
-    EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy,
-    RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal,
-    TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
+    AggregateError, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI,
+    EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat,
+    ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj,
+    SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet,
+    JSON,
 };
 use crate::error_obj::ErrorObj;
+use crate::function::function_prototype::GlobalFunctionConstructor;
 use crate::inline_props::InlineObject;
+use crate::object::prototype::GlobalObjectConstructor;
 use crate::partial_init::{Initializer, Partial};
 use crate::realm::{Intrinsic, Realm};
 use crate::value::Obj;
-use crate::{ObjectHandle, Res};
 use crate::{Console, Value};
+use crate::{ObjectHandle, Res};
 use std::cell::Cell;
 use yavashark_macro::inline_props;
-use crate::function::function_prototype::GlobalFunctionConstructor;
-use crate::object::prototype::GlobalObjectConstructor;
 
 #[inline_props(enumerable = false, configurable)]
 #[derive(Debug)]
@@ -336,7 +336,6 @@ impl<T: Intrinsic> Initializer<ObjectHandle> for GlobalInitializer<T> {
         T::get_global(realm)
     }
 }
-
 
 pub struct GlobalThis;
 

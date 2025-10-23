@@ -1046,7 +1046,6 @@ impl Object {
                 return Ok(format!("[object {}]", to_string_tag.to_string(realm)?).into());
             }
 
-
             return Ok(format!("[object {}]", self.name()).into());
         };
 

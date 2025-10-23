@@ -1,6 +1,5 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use yavashark_string::YSString;
 use crate::array::Array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
@@ -9,6 +8,7 @@ use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::Property;
 use crate::{Error, Object, ObjectOrNull, Symbol, Value, ValueResult};
+use yavashark_string::YSString;
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {

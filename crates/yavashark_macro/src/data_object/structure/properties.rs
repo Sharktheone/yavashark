@@ -10,19 +10,14 @@ pub struct Property {
 
 pub fn parse_properties(fields: &mut syn::Fields) -> syn::Result<Vec<Property>> {
     let syn::Fields::Named(fields) = fields else {
-        return Err(syn::Error::new_spanned(
-            fields,
-            "Expected named fields",
-        ));
+        return Err(syn::Error::new_spanned(fields, "Expected named fields"));
     };
-
 
     let mut properties = Vec::with_capacity(fields.named.len());
 
     for field in fields.named.iter_mut() {
         let mut property_name = None;
         let mut required = false;
-        
 
         for attr in &field.attrs {
             if attr.meta.path().is_ident("prop") {
@@ -38,13 +33,12 @@ pub fn parse_properties(fields: &mut syn::Fields) -> syn::Result<Vec<Property>> 
 
                 property_name = Some(n);
             }
-            
+
             if attr.meta.path().is_ident("required") {
                 required = true;
             }
         }
-        
-        
+
         //TODO: hacky
         field.attrs.retain(|attr| {
             !attr.meta.path().is_ident("prop") && !attr.meta.path().is_ident("required")

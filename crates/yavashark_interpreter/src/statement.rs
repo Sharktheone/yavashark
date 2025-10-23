@@ -80,30 +80,23 @@ impl Interpreter {
         Ok(last_value)
     }
 
-    fn hoist_statements(
-        realm: &mut Realm,
-        script: &Vec<Stmt>,
-        scope: &mut Scope,
-    ) -> Res<()> {
+    fn hoist_statements(realm: &mut Realm, script: &Vec<Stmt>, scope: &mut Scope) -> Res<()> {
         for stmt in script {
-
             match stmt {
                 Stmt::Decl(decl) => {
                     Self::hoist_decl(realm, decl, scope)?;
                 }
                 Stmt::Block(block) => {
                     Self::hoist_globals(realm, block, scope)?;
-
                 }
 
                 _ => {}
             }
-
         }
 
         Ok(())
     }
-    
+
     fn hoist_globals(
         realm: &mut Realm,
         block: &swc_ecma_ast::BlockStmt,

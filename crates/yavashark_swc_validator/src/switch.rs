@@ -1,10 +1,9 @@
-use std::collections::HashSet;
 use crate::Validator;
+use std::collections::HashSet;
 use swc_ecma_ast::SwitchStmt;
 
 impl<'a> Validator<'a> {
     pub fn validate_switch(&mut self, brk: &'a SwitchStmt) -> Result<(), String> {
-
         let mut lexical = Vec::new();
         let mut var_names = Vec::new();
 
@@ -15,8 +14,7 @@ impl<'a> Validator<'a> {
             }
             self.validate_statements(&case.cons)?;
 
-
-            for stmt in &case.cons{
+            for stmt in &case.cons {
                 crate::block::collect_lexical_names(stmt, &mut lexical);
                 crate::block::collect_var_declared_names(stmt, &mut var_names);
             }
