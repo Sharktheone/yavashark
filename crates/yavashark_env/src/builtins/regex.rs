@@ -110,7 +110,7 @@ impl RegExp {
         source: YSString,
         flags_str: YSString,
     ) -> Res<ObjectHandle> {
-        Ok(Self {
+        let obj = Self {
             regex,
             inner: RefCell::new(MutableRegExp {
                 object: MutObject::with_proto(
@@ -122,7 +122,15 @@ impl RegExp {
             original_flags: flags_str,
             last_index: Cell::new(0),
         }
-        .into_object())
+        .into_object();
+        
+        obj.define_property_attributes(
+            "lastIndex".into(),
+            crate::Variable::write(Value::from(0)),
+            realm,
+        )?;
+        
+        Ok(obj)
     }
 
     pub fn new_from_str(realm: &mut Realm, source: &str) -> Res<ObjectHandle> {
