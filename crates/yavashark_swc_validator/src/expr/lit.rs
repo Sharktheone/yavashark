@@ -337,8 +337,9 @@ impl<'a> Validator<'a> {
         let mut idx = 0;
         let mut in_class = false;
         let mut depth = 0;
-
         let mut can_quantify = false;
+        let mut named_groups = std::collections::HashSet::new();
+        let mut group_references = Vec::new();
 
         while idx < pattern.len() {
             let ch = pattern[idx];
@@ -348,6 +349,42 @@ impl<'a> Validator<'a> {
                 if idx >= pattern.len() {
                     return Err("Dangling escape in regular expression literal".to_string());
                 }
+                
+                let next = pattern[idx];
+                
+                // Check for named group backreference: \k<name>
+                if next == 'k' {
+                    idx += 1; // Skip 'k'
+                    
+                    if idx >= pattern.len() || pattern[idx] != '<' {
+                        return Err("Invalid group backreference: expected '<' after \\k".to_string());
+                    }
+                    
+                    idx += 1; // Skip '<'
+                    let mut ref_name = String::new();
+                    
+                    // Collect the reference name until '>'
+                    while idx < pattern.len() && pattern[idx] != '>' {
+                        ref_name.push(pattern[idx]);
+                        idx += 1;
+                    }
+                    
+                    if idx >= pattern.len() {
+                        return Err("Unterminated group backreference".to_string());
+                    }
+                    
+                    if ref_name.is_empty() {
+                        return Err("Group backreference name cannot be empty".to_string());
+                    }
+                    
+                    // Store the reference to validate later (after we've collected all group names)
+                    group_references.push(ref_name);
+                    
+                    idx += 1; // Skip '>'
+                    can_quantify = true;
+                    continue;
+                }
+                
                 can_quantify = true;
                 idx += 1;
                 continue;
@@ -379,7 +416,65 @@ impl<'a> Validator<'a> {
 
                         let next = pattern[idx];
                         
-                        if next != ':' && next != '=' && next != '!' && next != '<' {
+                        // Check for named groups: (?<name>...)
+                        if next == '<' {
+                            idx += 1; // Skip '<'
+                            
+                            if idx >= pattern.len() {
+                                return Err("Incomplete named group".to_string());
+                            }
+                            
+                            // Check if it's not a lookbehind (which would be (?<=...) or (?<!...))
+                            if pattern[idx] != '=' && pattern[idx] != '!' {
+                                // This is a named capture group
+                                let mut group_name = String::new();
+                                
+                                // Collect the group name until '>'
+                                while idx < pattern.len() && pattern[idx] != '>' {
+                                    group_name.push(pattern[idx]);
+                                    idx += 1;
+                                }
+                                
+                                if idx >= pattern.len() {
+                                    return Err("Unterminated named group".to_string());
+                                }
+                                
+                                // Validate the group name
+                                if group_name.is_empty() {
+                                    return Err("Named group name cannot be empty".to_string());
+                                }
+                                
+                                // Check if first character is a valid ID_Start
+                                let first_char = group_name.chars().next()
+                                    .ok_or("Named group name cannot be empty")?;
+                                if !is_id_start(first_char) {
+                                    return Err(format!(
+                                        "Invalid character '{}' at start of group name",
+                                        first_char
+                                    ));
+                                }
+                                
+                                // Check remaining characters are valid ID_Continue
+                                for ch in group_name.chars().skip(1) {
+                                    if !is_id_continue(ch) {
+                                        return Err(format!(
+                                            "Invalid character '{}' in group name",
+                                            ch
+                                        ));
+                                    }
+                                }
+                                
+                                // Check for duplicate group names
+                                if !named_groups.insert(group_name.clone()) {
+                                    return Err(format!(
+                                        "Duplicate capture group name '{}'",
+                                        group_name
+                                    ));
+                                }
+                                
+                                idx += 1; // Skip '>'
+                            }
+                        } else if next != ':' && next != '=' && next != '!' {
                             // This might be a modifiers group
                             let start = idx;
                             let mut add_flags = String::new();
@@ -408,10 +503,11 @@ impl<'a> Validator<'a> {
                                     continue;
                                 }
                                 
-                                if !matches!(flag_ch, 'i' | 'm' | 's' | 'g' | 'd' | 'u' | 'y') {
-                                    // Invalid flag character
+                                // Only i, m, s are allowed in modifiers (not g, d, u, y, v)
+                                if !matches!(flag_ch, 'i' | 'm' | 's') {
                                     return Err(format!(
-                                        "Invalid character '{flag_ch}' in regexp modifiers",
+                                        "Invalid flag '{}' in regexp modifiers (only i, m, s are allowed)",
+                                        flag_ch
                                     ));
                                 }
                                 
@@ -514,6 +610,16 @@ impl<'a> Validator<'a> {
 
         if in_class {
             return Err("Unterminated character class".to_string());
+        }
+        
+        // Validate that all group references point to existing groups
+        for ref_name in group_references {
+            if !named_groups.contains(&ref_name) {
+                return Err(format!(
+                    "Invalid group backreference: group '{}' does not exist",
+                    ref_name
+                ));
+            }
         }
 
         Ok(())
@@ -878,4 +984,27 @@ fn is_valid_property_with_value(name: &str, value: &str) -> bool {
 
 fn contains(collection: &[&str], value: &str) -> bool {
     collection.binary_search(&value).is_ok()
+}
+
+// Helper function to check if a character is valid as the start of an identifier
+fn is_id_start(ch: char) -> bool {
+    // ID_Start includes:
+    // - Letters (Unicode categories Lu, Ll, Lt, Lm, Lo, Nl)
+    // - $ and _
+    ch == '$' 
+        || ch == '_' 
+        || ch.is_alphabetic()
+        || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ
+}
+
+// Helper function to check if a character is valid in an identifier (after the first char)
+fn is_id_continue(ch: char) -> bool {
+    // ID_Continue includes ID_Start plus:
+    // - Digits
+    // - Combining marks (Mn, Mc)
+    // - Connector punctuation (Pc)
+    is_id_start(ch) 
+        || ch.is_ascii_digit()
+        || ch.is_numeric()
+        || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ
 }
