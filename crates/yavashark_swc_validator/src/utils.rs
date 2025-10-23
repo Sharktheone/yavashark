@@ -325,6 +325,7 @@ fn is_valid_identifier_part(ch: char) -> bool {
         || is_xid_continue(ch)
         || matches!(ch, '\u{200C}' | '\u{200D}')
         || is_other_id_continue(ch)
+        || is_other_id_start(ch)
 }
 
 pub fn single_stmt_contains_decl(stmt: &Stmt) -> bool {
