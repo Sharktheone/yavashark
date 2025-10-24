@@ -10,7 +10,7 @@ use yavashark_macro::{object, properties_new};
 pub struct Set {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    set: IndexSet<Value>,
+    pub set: IndexSet<Value>,
 }
 
 impl Set {

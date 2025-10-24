@@ -15,6 +15,8 @@ use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
+use crate::builtins::{Map, Set};
+use crate::conversion::TryIntoValue;
 
 #[derive(Debug)]
 pub struct Array {
@@ -1791,6 +1793,42 @@ impl ArrayConstructor {
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
             return Ok(Obj::into_object(Array::from_string(realm, str)?));
+        }
+
+        if let Value::Object(obj) = &items {
+            if let Some(set) = obj.downcast::<Set>() {
+                let inner = set.inner.try_borrow()?;
+
+                let mut values = Vec::with_capacity(inner.set.len());
+
+                let mut iter = inner.set.iter();
+
+                for value in iter {
+                    values.push(value.clone());
+                }
+
+                let array = if let Some(mapper) = mapper {
+                    let mut res = Vec::with_capacity(values.len());
+
+                    let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+
+                    for val in values {
+                        let val = mapper.call(vec![val], this_arg.clone(), realm)?;
+
+                        res.push(val);
+                    }
+
+                    res
+                } else {
+                    values
+                };
+
+                return Ok(Obj::into_object(Array::with_elements(realm, array)?));
+            }
+
+
+
+
         }
 
         let mut it = ArrayLike::new(items, realm)?;
