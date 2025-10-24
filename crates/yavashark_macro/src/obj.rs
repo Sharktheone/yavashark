@@ -93,7 +93,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
 
-    fields.named.push(syn::Field {
+    fields.named.insert(0, syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Public(Token![pub](Span::call_site())),
         mutability: FieldMutability::None,
