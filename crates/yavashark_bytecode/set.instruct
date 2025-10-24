@@ -184,3 +184,5 @@ BitwiseNot(Data) => Data
 
 GetNewTarget => Data
 GetImportMeta => Data
+
+ImportDynamic(VarName, VarName) => Data
