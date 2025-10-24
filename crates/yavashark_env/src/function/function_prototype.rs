@@ -47,13 +47,25 @@ impl Initializer<ObjectHandle> for Caller {
 }
 
 impl FunctionPrototype {
-    pub fn new(realm: &mut Realm) -> InlineObject<FunctionPrototype> {
-        let mut proto = Self::default();
+    #[must_use]
+    pub fn new(realm: &mut Realm) -> InlineObject<Self> {
+        let proto = Self {
+            name: RefCell::new("Function"),
+            ..Self::default()
+        };
 
-        proto.length = Cell::new(0);
-        proto.name = RefCell::new("Function");
 
         InlineObject::with_proto(proto, realm.intrinsics.obj.clone())
+    }
+
+    #[must_use]
+    pub fn with_proto(obj: ObjectHandle) -> InlineObject<Self> {
+        let proto = Self {
+            name: RefCell::new("Function"),
+            ..Self::default()
+        };
+
+        InlineObject::with_proto(proto, obj)
     }
 }
 

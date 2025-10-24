@@ -69,9 +69,17 @@ impl Debug for Realm {
 
 impl Realm {
     pub fn new() -> Res<Self> {
-        let mut realm = Self::default();
+        let intrinsics = Intrinsics::new();
+        let proto = intrinsics.obj.clone();
 
-        Intrinsics::initialize(&mut realm)?;
+        let mut realm = Self {
+            intrinsics: PrivateRc(Rc::new(intrinsics)),
+            global: Object::null(),
+            env: Environment {
+                modules: HashMap::new(),
+            },
+            queue: AsyncTaskQueue::new(),
+        };
 
         init_global_obj(&mut realm)?;
 
