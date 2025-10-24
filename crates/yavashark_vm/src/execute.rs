@@ -62054,6 +62054,18 @@ impl Execute for Instruction {
             Self::GetImportMetaToStack(output) => {
                 instruction::get_import_meta(output, vm)?
             }
+            Self::ImportDynamicToVar(arg0, arg1, output) => {
+                instruction::import_dynamic(arg0, arg1, output, vm)?
+            }
+            Self::ImportDynamicToReg(arg0, arg1, output) => {
+                instruction::import_dynamic(arg0, arg1, output, vm)?
+            }
+            Self::ImportDynamicToAcc(arg0, arg1, output) => {
+                instruction::import_dynamic(arg0, arg1, output, vm)?
+            }
+            Self::ImportDynamicToStack(arg0, arg1, output) => {
+                instruction::import_dynamic(arg0, arg1, output, vm)?
+            }
         }
         Ok(())
     }
@@ -62327,6 +62339,9 @@ impl Execute for Instruction {
             Self::BitwiseNot(arg0, output) => instruction::bitwise_not(arg0, output, vm)?,
             Self::GetNewTarget(output) => instruction::get_new_target(output, vm)?,
             Self::GetImportMeta(output) => instruction::get_import_meta(output, vm)?,
+            Self::ImportDynamic(arg0, arg1, output) => {
+                instruction::import_dynamic(arg0, arg1, output, vm)?
+            }
         }
         Ok(())
     }

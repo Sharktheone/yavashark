@@ -21038,6 +21038,10 @@ pub enum Instruction {
     GetImportMetaToReg(Reg),
     GetImportMetaToAcc(Acc),
     GetImportMetaToStack(Stack),
+    ImportDynamicToVar(VarName, VarName, VarName),
+    ImportDynamicToReg(VarName, VarName, Reg),
+    ImportDynamicToAcc(VarName, VarName, Acc),
+    ImportDynamicToStack(VarName, VarName, Stack),
 }
 #[cfg(feature = "simple_bytecode")]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -21193,4 +21197,5 @@ pub enum Instruction {
     BitwiseNot(DataType, OutputDataType),
     GetNewTarget(OutputDataType),
     GetImportMeta(OutputDataType),
+    ImportDynamic(VarName, VarName, OutputDataType),
 }

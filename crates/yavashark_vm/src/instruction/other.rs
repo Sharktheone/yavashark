@@ -1,6 +1,6 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_bytecode::data::{ControlIdx, Label};
+use yavashark_bytecode::data::{ControlIdx, Label, VarName};
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
@@ -605,4 +605,14 @@ pub fn get_private_member(
     return Err(Error::ty_error(format!(
         "Private name {name} can only be used in class"
     )));
+}
+
+
+pub fn import_dynamic(
+    name: VarName,
+    path: VarName,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> ControlResult {
+    Err(Error::new("Dynamic import is not supported in VM yet").into())
 }

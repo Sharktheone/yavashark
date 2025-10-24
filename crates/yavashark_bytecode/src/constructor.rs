@@ -77956,6 +77956,21 @@ impl Instruction {
             OutputDataType::Var(output) => Self::GetImportMetaToVar(output),
         }
     }
+    #[must_use]
+    pub fn import_dynamic(
+        arg0: VarName,
+        arg1: VarName,
+        output: impl OutputData,
+    ) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::ImportDynamicToAcc(arg0, arg1, output),
+            OutputDataType::Reg(output) => Self::ImportDynamicToReg(arg0, arg1, output),
+            OutputDataType::Stack(output) => {
+                Self::ImportDynamicToStack(arg0, arg1, output)
+            }
+            OutputDataType::Var(output) => Self::ImportDynamicToVar(arg0, arg1, output),
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -78610,5 +78625,13 @@ impl Instruction {
     #[must_use]
     pub fn get_import_meta(output: impl OutputData) -> Self {
         Self::GetImportMeta(output.data_type())
+    }
+    #[must_use]
+    pub fn import_dynamic(
+        arg0: VarName,
+        arg1: VarName,
+        output: impl OutputData,
+    ) -> Self {
+        Self::ImportDynamic(arg0, arg1, output.data_type())
     }
 }
