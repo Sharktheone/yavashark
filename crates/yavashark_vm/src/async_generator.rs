@@ -28,33 +28,31 @@ pub struct AsyncGeneratorFunction {
 }
 
 impl AsyncGeneratorFunction {
-    #[must_use]
     pub fn new(
         code: Rc<BytecodeFunctionCode>,
         scope: Scope,
-        realm: &Realm,
+        realm: &mut Realm,
         params: BytecodeFunctionParams,
-    ) -> Self {
-        Self {
+    ) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.async_generator_function.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator_function.get(realm)?.clone()),
             }),
             code,
             scope,
             params: VMParams::from(params),
-        }
+        })
     }
 
-    #[must_use]
-    pub fn empty(realm: &Realm) -> Self {
-        Self {
+    pub fn empty(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.async_generator_function.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator_function.get(realm)?.clone()),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
             params: VMParams::default(),
-        }
+        })
     }
 
     pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
@@ -84,7 +82,7 @@ impl AsyncGeneratorFunction {
     }
 }
 
-#[props(intrinsic_name = async_generator_function, no_partial)]
+#[props(intrinsic_name = async_generator_function)]
 impl AsyncGeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -92,7 +90,7 @@ impl AsyncGeneratorFunction {
     #[constructor]
     pub fn construct(#[realm] realm: &mut Realm, mut args: Vec<Value>) -> ValueResult {
         let Some(code) = args.pop() else {
-            return Ok(Self::empty(realm).into_value());
+            return Ok(Self::empty(realm)?.into_value());
         };
 
         let mut buf = "function* anonymous(".to_owned();
@@ -147,7 +145,7 @@ impl Func for AsyncGeneratorFunction {
 
         scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
-        let generator = AsyncGenerator::new(realm, Rc::clone(&self.code), scope);
+        let generator = AsyncGenerator::new(realm, Rc::clone(&self.code), scope)?;
 
         Ok(generator.into_value())
     }
@@ -160,16 +158,15 @@ pub struct AsyncGenerator {
 }
 
 impl AsyncGenerator {
-    #[must_use]
-    pub fn new(realm: &Realm, code: Rc<BytecodeFunctionCode>, scope: Scope) -> Self {
+    pub fn new(realm: &mut Realm, code: Rc<BytecodeFunctionCode>, scope: Scope) -> Res<Self> {
         let state = VmState::new(code, scope);
-        Self {
+        Ok(Self {
             inner: RefCell::new(MutableAsyncGenerator {
-                object: MutObject::with_proto(realm.intrinsics.async_generator.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator.get(realm)?.clone()),
             }),
             state: RefCell::new(Some(state)),
             notify: Notify::new(),
-        }
+        })
     }
 
     pub fn init(realm: &mut Realm) -> Res {
@@ -177,14 +174,14 @@ impl AsyncGenerator {
 
         let g = Self::initialize(realm)?;
 
-        realm.intrinsics.async_generator_function = gf;
-        realm.intrinsics.async_generator = g;
+        realm.intrinsics.async_generator_function.set(gf);
+        realm.intrinsics.async_generator.set(g);
 
         Ok(())
     }
 }
 
-#[props(intrinsic_name = async_generator, no_partial)]
+#[props(intrinsic_name = async_generator)]
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, realm: &mut Realm) -> ValueResult {

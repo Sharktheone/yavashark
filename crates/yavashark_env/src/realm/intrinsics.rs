@@ -83,10 +83,10 @@ pub struct Intrinsics {
     pub temporal_plain_year_month: PartialIntrinsic<temporal::PlainYearMonth>,
     pub temporal_zoned_date_time: PartialIntrinsic<temporal::ZonedDateTime>,
     pub promise: PartialIntrinsic<Promise>,
-    pub generator_function: ObjectHandle,
-    pub generator: ObjectHandle,
-    pub async_generator: ObjectHandle,
-    pub async_generator_function: ObjectHandle,
+    pub generator_function: Partial<ObjectHandle, NullObjInitializer>,
+    pub generator: Partial<ObjectHandle, NullObjInitializer>,
+    pub async_generator: Partial<ObjectHandle, NullObjInitializer>,
+    pub async_generator_function: Partial<ObjectHandle, NullObjInitializer>,
     pub signal_state: PartialIntrinsic<signal::State>,
     pub signal_computed: PartialIntrinsic<signal::Computed>,
     pub arguments: PartialIntrinsic<Arguments>,
@@ -182,10 +182,10 @@ impl Default for Intrinsics {
             temporal_plain_year_month: Default::default(),
             temporal_zoned_date_time: Default::default(),
             promise: Default::default(),
-            generator_function: Object::null(),
-            generator: Object::null(),
-            async_generator_function: Object::null(),
-            async_generator: Object::null(),
+            generator_function: Default::default(),
+            generator: Default::default(),
+            async_generator_function: Default::default(),
+            async_generator:  Default::default(),
             signal_state: Default::default(),
             signal_computed: Default::default(),
             arguments: Default::default(),
@@ -214,5 +214,14 @@ pub struct IntrinsicInitializer<T> {
 impl<T: Intrinsic> crate::partial_init::Initializer<ObjectHandle> for IntrinsicInitializer<T> {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         T::initialize(realm)
+    }
+}
+
+
+pub struct NullObjInitializer;
+
+impl crate::partial_init::Initializer<ObjectHandle> for NullObjInitializer {
+    fn initialize(_realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(Object::null())
     }
 }

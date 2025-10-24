@@ -79,7 +79,7 @@ impl ByteCodeInterpreter {
         };
 
         if func.is_generator && !func.is_async {
-            let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
+            let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params)?;
 
             g.define_property_attributes("length".into(), len.into(), realm)?;
             g.define_property_attributes("name".into(), name.into(), realm)?;
@@ -88,7 +88,7 @@ impl ByteCodeInterpreter {
         }
 
         if func.is_generator && func.is_async {
-            let g = AsyncGeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
+            let g = AsyncGeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params)?;
 
             g.define_property_attributes("length".into(), len.into(), realm)?;
             g.define_property_attributes("name".into(), name.into(), realm)?;

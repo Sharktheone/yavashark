@@ -37,16 +37,15 @@ impl BytecodeFunction {
         }
     }
 
-    #[must_use]
-    pub fn empty(realm: &Realm) -> Self {
-        Self {
+    pub fn empty(realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
             inner: RefCell::new(MutableBytecodeFunction {
-                object: MutObject::with_proto(realm.intrinsics.generator_function.clone()),
+                object: MutObject::with_proto(realm.intrinsics.clone_public().generator_function.get(realm)?.clone()),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
             params: VMParams::default(),
-        }
+        })
     }
 
     pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
