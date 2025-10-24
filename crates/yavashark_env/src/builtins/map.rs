@@ -13,7 +13,7 @@ use yavashark_macro::{object, properties_new};
 pub struct Map {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    map: IndexMap<Value, Value, FxBuildHasher>,
+    pub map: IndexMap<Value, Value, FxBuildHasher>,
 }
 
 #[object(constructor)]

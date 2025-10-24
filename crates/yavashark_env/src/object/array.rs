@@ -1826,6 +1826,35 @@ impl ArrayConstructor {
                 return Ok(Obj::into_object(Array::with_elements(realm, array)?));
             }
 
+            if let Some(map) = obj.downcast::<Map>() {
+                let inner = map.inner.try_borrow()?;
+
+                let mut values = Vec::with_capacity(inner.map.len());
+
+                let mut iter = inner.map.iter();
+
+                for (key, value) in iter {
+                    values.push(vec![key.clone(), value.clone()].try_into_value(realm)?);
+                }
+
+                let array = if let Some(mapper) = mapper {
+                    let mut res = Vec::with_capacity(values.len());
+
+                    let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+
+                    for val in values {
+                        let val = mapper.call(vec![val], this_arg.clone(), realm)?;
+
+                        res.push(val);
+                    }
+
+                    res
+                } else {
+                    values
+                };
+
+                return Ok(Obj::into_object(Array::with_elements(realm, array)?));
+            }
 
 
 
