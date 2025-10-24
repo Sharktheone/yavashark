@@ -1,6 +1,6 @@
 use crate::utils::ValueIterator;
 use crate::value::{Constructor, IntoValue, MutObj, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -206,6 +206,17 @@ impl Set {
 
         inner.set.len()
     }
+
+    // #[prop(Symbol::ITERATOR)]
+    // fn iterator(&self, #[realm] realm: &mut Realm) -> ValueResult {
+    //     let inner = self.inner.borrow();
+    // 
+    //     let vec: Vec<Value> = inner.set.iter().cloned().collect();
+    // 
+    //     let array = realm.array_from_vec(vec)?;
+    // 
+    //     Ok(array.into())
+    // }
 
     // fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
     //     let inner = self.inner.borrow();

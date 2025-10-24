@@ -25,6 +25,7 @@ yavashark_env = { path = "crates/yavashark_env" }
 yavashark_swc_validator = { path = "crates/yavashark_swc_validator" }
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 swc_ecma_ast = "15.0.0"
+memmap2 = "0.9.9"
 
 
 
@@ -50,6 +51,8 @@ crate-type = ["cdylib"]
 
 [features]
 default = ["simple_bytecode"]
+minimal = []
+memmap = []
 vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler", "yavashark_interpreter/vm"]
 simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/simple_bytecode"]
 out_of_spec_experiments = ["yavashark_env/out-of-spec-experiments"]
