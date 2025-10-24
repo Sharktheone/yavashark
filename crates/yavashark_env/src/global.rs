@@ -243,7 +243,7 @@ pub struct GlobalProperties {
     intl: Partial<ObjectHandle, Intl>,
 }
 
-pub fn init_global_obj(realm: &mut Realm) -> Res {
+pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
     let inline = GlobalProperties {
         undefined: (),
         nan: f64::NAN,
@@ -316,12 +316,16 @@ pub fn init_global_obj(realm: &mut Realm) -> Res {
         __written_properties: Cell::default(),
     };
 
-    let handle = InlineObject::new(inline, realm).into_object();
+    let handle = InlineObject::with_proto(inline, proto).into_object();
 
+    Ok(handle)
+}
+
+#[allow(unused)]
+#[inline(always)]
+pub fn init_global_obj(realm: &mut Realm) -> Res<()> {
     #[cfg(feature = "out-of-spec-experiments")]
-    crate::experiments::init(&handle, realm)?;
-
-    realm.global = handle;
+    crate::experiments::init(&realm.global.clone(), realm)?;
 
     Ok(())
 }

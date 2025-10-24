@@ -4,7 +4,7 @@ mod intrinsics;
 
 pub mod resolve;
 
-use crate::global::init_global_obj;
+use crate::global::{init_global_obj, new_global_obj};
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
@@ -74,7 +74,7 @@ impl Realm {
 
         let mut realm = Self {
             intrinsics: PrivateRc(Rc::new(intrinsics)),
-            global: Object::null(),
+            global: new_global_obj(proto)?,
             env: Environment {
                 modules: HashMap::new(),
             },
