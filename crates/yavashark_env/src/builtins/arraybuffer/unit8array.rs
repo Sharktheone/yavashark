@@ -1,4 +1,4 @@
-use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::typed_array::{Type, TypedArray};
 use crate::value::{IntoValue, Obj};
 use crate::{Error, Object, ObjectHandle, Realm, Res, Value};

@@ -3,7 +3,7 @@ mod conv;
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
-use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
 use crate::builtins::float64array::Float64Array;

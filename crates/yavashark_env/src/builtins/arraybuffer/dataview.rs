@@ -1,6 +1,6 @@
 mod from_bytes;
 
-use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::conversion::downcast_obj;
 use crate::error::Error;
