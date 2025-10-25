@@ -1,7 +1,7 @@
 use crate::array::{Array, ArrayIterator};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
-use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
@@ -21,7 +21,7 @@ use crate::builtins::{
     SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
-use crate::partial_init::Partial;
+use crate::partial_init::{DynamicPartial, Partial};
 use crate::realm::initialize::Intrinsic;
 use crate::value::Obj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res};
@@ -83,10 +83,10 @@ pub struct Intrinsics {
     pub temporal_plain_year_month: PartialIntrinsic<temporal::PlainYearMonth>,
     pub temporal_zoned_date_time: PartialIntrinsic<temporal::ZonedDateTime>,
     pub promise: PartialIntrinsic<Promise>,
-    pub generator_function: Partial<ObjectHandle, NullObjInitializer>,
-    pub generator: Partial<ObjectHandle, NullObjInitializer>,
-    pub async_generator: Partial<ObjectHandle, NullObjInitializer>,
-    pub async_generator_function: Partial<ObjectHandle, NullObjInitializer>,
+    pub generator_function: DynamicPartial<ObjectHandle>,
+    pub generator: DynamicPartial<ObjectHandle>,
+    pub async_generator: DynamicPartial<ObjectHandle>,
+    pub async_generator_function: DynamicPartial<ObjectHandle>,
     pub signal_state: PartialIntrinsic<signal::State>,
     pub signal_computed: PartialIntrinsic<signal::Computed>,
     pub arguments: PartialIntrinsic<Arguments>,
@@ -165,10 +165,10 @@ impl Intrinsics {
             temporal_plain_year_month: Default::default(),
             temporal_zoned_date_time: Default::default(),
             promise: Default::default(),
-            generator_function: Default::default(),
-            generator: Default::default(),
-            async_generator_function: Default::default(),
-            async_generator: Default::default(),
+            generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            generator: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            async_generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            async_generator: DynamicPartial::from_initializer::<NullObjInitializer>(),
             signal_state: Default::default(),
             signal_computed: Default::default(),
             arguments: Default::default(),
@@ -262,10 +262,10 @@ impl Default for Intrinsics {
             temporal_plain_year_month: Default::default(),
             temporal_zoned_date_time: Default::default(),
             promise: Default::default(),
-            generator_function: Default::default(),
-            generator: Default::default(),
-            async_generator_function: Default::default(),
-            async_generator: Default::default(),
+            generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            generator: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            async_generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
+            async_generator: DynamicPartial::from_initializer::<NullObjInitializer>(),
             signal_state: Default::default(),
             signal_computed: Default::default(),
             arguments: Default::default(),
