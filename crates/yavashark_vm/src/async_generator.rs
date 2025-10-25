@@ -36,7 +36,14 @@ impl AsyncGeneratorFunction {
     ) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator_function.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .async_generator_function
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             code,
             scope,
@@ -47,7 +54,14 @@ impl AsyncGeneratorFunction {
     pub fn empty(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator_function.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .async_generator_function
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
@@ -162,7 +176,14 @@ impl AsyncGenerator {
         let state = VmState::new(code, scope);
         Ok(Self {
             inner: RefCell::new(MutableAsyncGenerator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().async_generator.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .async_generator
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             state: RefCell::new(Some(state)),
             notify: Notify::new(),

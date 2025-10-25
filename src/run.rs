@@ -1,3 +1,4 @@
+use crate::conf;
 use crate::repl::{old_repl, repl};
 use std::path::PathBuf;
 use swc_common::input::StringInput;
@@ -9,7 +10,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
-use crate::conf;
 
 #[allow(clippy::unwrap_used)]
 pub(crate) fn main() {

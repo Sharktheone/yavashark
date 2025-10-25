@@ -34,8 +34,8 @@ pub mod import;
 pub mod inline_props;
 pub mod value;
 
-pub mod partial_init;
 mod iter;
+pub mod partial_init;
 
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;

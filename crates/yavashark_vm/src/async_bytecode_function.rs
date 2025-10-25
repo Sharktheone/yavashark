@@ -40,7 +40,14 @@ impl AsyncBytecodeFunction {
     pub fn empty(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableAsyncBytecodeFunction {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().generator_function.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .generator_function
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),

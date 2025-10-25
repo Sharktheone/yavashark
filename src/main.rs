@@ -1,10 +1,10 @@
 mod conf;
+mod minimal;
 #[cfg(feature = "vm")]
 mod optimizer;
 mod repl;
-mod simplerepl;
 mod run;
-mod minimal;
+mod simplerepl;
 
 fn main() {
     #[cfg(not(feature = "minimal"))]

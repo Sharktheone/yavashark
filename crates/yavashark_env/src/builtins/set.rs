@@ -210,11 +210,11 @@ impl Set {
     // #[prop(Symbol::ITERATOR)]
     // fn iterator(&self, #[realm] realm: &mut Realm) -> ValueResult {
     //     let inner = self.inner.borrow();
-    // 
+    //
     //     let vec: Vec<Value> = inner.set.iter().cloned().collect();
-    // 
+    //
     //     let array = realm.array_from_vec(vec)?;
-    // 
+    //
     //     Ok(array.into())
     // }
 

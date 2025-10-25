@@ -93,17 +93,20 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
 
-    fields.named.insert(0, syn::Field {
-        attrs: Vec::new(),
-        vis: syn::Visibility::Public(Token![pub](Span::call_site())),
-        mutability: FieldMutability::None,
-        ident: Some(Ident::new("inner", Span::call_site())),
-        colon_token: None,
-        ty: syn::Type::Path(syn::TypePath {
-            qself: None,
-            path: inner_path,
-        }),
-    });
+    fields.named.insert(
+        0,
+        syn::Field {
+            attrs: Vec::new(),
+            vis: syn::Visibility::Public(Token![pub](Span::call_site())),
+            mutability: FieldMutability::None,
+            ident: Some(Ident::new("inner", Span::call_site())),
+            colon_token: None,
+            ty: syn::Type::Path(syn::TypePath {
+                qself: None,
+                path: inner_path,
+            }),
+        },
+    );
 
     let downcast = if args.extends.is_some() {
         quote! {

@@ -125,7 +125,7 @@ impl Realm {
     pub async fn run_event_loop(&mut self) {
         self.queue.runner().run(self).await;
     }
-    
+
     #[must_use]
     pub fn has_pending_jobs(&self) -> bool {
         !self.queue.is_empty()

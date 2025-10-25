@@ -1,4 +1,6 @@
+use crate::builtins::{Map, Set};
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
+use crate::conversion::TryIntoValue;
 use crate::object::Object;
 use crate::realm::{Intrinsic, Realm};
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
@@ -15,8 +17,6 @@ use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
-use crate::builtins::{Map, Set};
-use crate::conversion::TryIntoValue;
 
 #[derive(Debug)]
 pub struct Array {
@@ -1855,9 +1855,6 @@ impl ArrayConstructor {
 
                 return Ok(Obj::into_object(Array::with_elements(realm, array)?));
             }
-
-
-
         }
 
         let mut it = ArrayLike::new(items, realm)?;

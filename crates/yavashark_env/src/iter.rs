@@ -1,9 +1,9 @@
+use crate::conversion::TryIntoValue;
+use crate::value::Obj;
+use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_macro::object;
-use crate::{MutObject, ObjectHandle, Realm, Res, Value};
-use crate::conversion::TryIntoValue;
-use crate::value::Obj;
 
 pub trait IntoJsIter {
     fn into_js_iter(self, realm: &mut Realm) -> Res<ObjectHandle>;
@@ -26,12 +26,10 @@ impl<T: Iterator<Item = I> + 'static, I: TryIntoValue> JSIterator for T {
     }
 }
 
-
 #[object]
 pub struct NativeIterator {
     iter: RefCell<Box<dyn JSIterator>>,
 }
-
 
 impl NativeIterator {
     pub fn new(iter: impl JSIterator, proto: ObjectHandle) -> Self {

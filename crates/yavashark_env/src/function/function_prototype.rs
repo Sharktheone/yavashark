@@ -54,7 +54,6 @@ impl FunctionPrototype {
             ..Self::default()
         };
 
-
         InlineObject::with_proto(proto, realm.intrinsics.obj.clone())
     }
 

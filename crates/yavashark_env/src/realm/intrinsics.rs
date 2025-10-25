@@ -186,7 +186,6 @@ impl Intrinsics {
             throw_type_error: Default::default(),
             other: FxHashMap::default(),
         }
-
     }
 
     pub(crate) fn initialize(realm: &mut Realm) -> Res {
@@ -266,7 +265,7 @@ impl Default for Intrinsics {
             generator_function: Default::default(),
             generator: Default::default(),
             async_generator_function: Default::default(),
-            async_generator:  Default::default(),
+            async_generator: Default::default(),
             signal_state: Default::default(),
             signal_computed: Default::default(),
             arguments: Default::default(),
@@ -297,7 +296,6 @@ impl<T: Intrinsic> crate::partial_init::Initializer<ObjectHandle> for IntrinsicI
         T::initialize(realm)
     }
 }
-
 
 pub struct NullObjInitializer;
 

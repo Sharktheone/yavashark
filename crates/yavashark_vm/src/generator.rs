@@ -31,7 +31,14 @@ impl GeneratorFunction {
     ) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().generator_function.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .generator_function
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             code,
             scope,
@@ -42,7 +49,14 @@ impl GeneratorFunction {
     pub fn empty(realm: &mut Realm) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutableGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().generator_function.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .generator_function
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
@@ -147,7 +161,14 @@ impl Generator {
         let state = VmState::new(code, scope);
         Ok(Self {
             inner: RefCell::new(MutableGenerator {
-                object: MutObject::with_proto(realm.intrinsics.clone_public().generator.get(realm)?.clone()),
+                object: MutObject::with_proto(
+                    realm
+                        .intrinsics
+                        .clone_public()
+                        .generator
+                        .get(realm)?
+                        .clone(),
+                ),
             }),
             state: RefCell::new(Some(state)),
         })
