@@ -72,6 +72,10 @@ impl AsyncTaskQueue {
             queue: mem::take(&mut self.queue),
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.microtasks.is_empty() && self.queue.is_empty()
+    }
 }
 
 pub type Microtask = Box<dyn FnOnce(&mut Realm)>;

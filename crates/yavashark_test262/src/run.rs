@@ -87,7 +87,7 @@ pub fn run_file_in(
         }
     }
 
-    if res.is_ok() {
+    if res.is_ok() && realm.has_pending_jobs() {
         tokio::runtime::Builder::new_current_thread()
             .build()?
             .block_on(realm.run_event_loop())
