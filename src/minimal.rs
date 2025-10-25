@@ -8,12 +8,13 @@ use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_interpreter::eval::InterpreterEval;
 
+#[allow(clippy::expect_used)]
 pub fn main() {
     let path = std::env::args().nth(1).expect("Please provide a file path");
 
     let file = std::fs::File::open(&path).expect("Failed to open file");
     let mmap = unsafe { memmap2::Mmap::map(&file).expect("Failed to map file") };
-    let input = String::from_utf8_lossy(&mmap);
+    let input = str::from_utf8(&mmap).expect("Failed to read file as UTF-8");
 
     if input.is_empty() {
         return;
@@ -21,7 +22,7 @@ pub fn main() {
 
 
 
-    let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32));
+    let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
 
     let c = EsSyntax {
         jsx: false,
@@ -42,6 +43,7 @@ pub fn main() {
 
 
     let mut realm = Realm::new().expect("Failed to create realm");
+
     let mut scope = Scope::global(&realm, PathBuf::from(path));
     realm.set_eval(InterpreterEval, false).expect("Failed to set eval");
 
@@ -61,10 +63,8 @@ pub fn main() {
         }
     };
 
-
-    let rt = Builder::new_current_thread().enable_all().build().expect("Failed to build runtime");
-    rt.block_on(realm.run_event_loop());
-
-
-
+    if realm.has_pending_jobs() {
+        let rt = Builder::new_current_thread().enable_all().build().expect("Failed to build runtime");
+        rt.block_on(realm.run_event_loop());
+    }
 }
