@@ -14,19 +14,11 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
 
         variant.attrs.retain(|attr| {
             if attr.meta.path().is_ident("name") {
-                attr.parse_nested_meta(|meta| {
-                    let Ok(value) = meta.value() else {
-                        return Err(syn::Error::new_spanned(
-                            &meta.path,
-                            "Expected a string literal",
-                        ));
-                    };
+                let Ok(x) = attr.parse_args::<syn::LitStr>() else  {
+                    return true
+                };
 
-                    variant_name = value.parse::<syn::LitStr>()?.value();
-                    Ok(())
-                })
-                .ok();
-
+                variant_name = x.value();
                 return false;
             }
 
