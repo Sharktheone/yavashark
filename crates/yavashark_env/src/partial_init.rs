@@ -68,6 +68,25 @@ impl<T, I> Partial<T, I> {
                 .ok_or_else(|| Error::new("Failed to initialize Partial value"))
         }
     }
+
+
+    pub fn get_with_fn(&self, realm: &mut Realm, initialize: fn(&mut Realm) -> Res<T>) -> Res<&T> {
+        unsafe {
+            if (*self.value.get()).is_none() {
+                let v = initialize(realm)?;
+
+                if (*self.value.get()).is_some() {
+                    return Err(Error::new("Partial value was initialized concurrently"));
+                }
+
+                *self.value.get() = Some(v);
+            }
+
+            (*self.value.get())
+                .as_ref()
+                .ok_or_else(|| Error::new("Failed to initialize Partial value"))
+        }
+    }
 }
 
 impl<T, I: Initializer<T>> Partial<T, I> {
@@ -87,6 +106,42 @@ impl<T, I: Initializer<T>> Partial<T, I> {
                 .as_ref()
                 .ok_or_else(|| Error::new("Failed to initialize Partial value"))
         }
+    }
+}
+
+pub type InitializeFn<T> = fn(&mut Realm) -> Res<T>;
+
+pub struct DynamicPartial<T> {
+    func: Cell<InitializeFn<T>>,
+    inner: Partial<T, ()>,
+}
+
+impl<T> DynamicPartial<T> {
+    pub const fn new(init_func: InitializeFn<T>) -> Self {
+        Self {
+            func: Cell::new(init_func),
+            inner: Partial::new(),
+        }
+    }
+
+    pub const fn from_initializer<I: Initializer<T>>() -> Self {
+        Self {
+            func: Cell::new(I::initialize),
+            inner: Partial::new(),
+        }
+    }
+
+    pub fn get(&self, realm: &mut Realm) -> Res<&T> {
+        let f = self.func.get();
+        self.inner.get_with_fn(realm, f)
+    }
+
+    pub fn set_initializer(&self, init_func: fn(&mut Realm) -> Res<T>) {
+        self.func.set(init_func);
+    }
+
+    pub fn set_from_initializer<I: Initializer<T>>(&self) {
+        self.func.set(I::initialize);
     }
 }
 
