@@ -69,7 +69,6 @@ impl<T, I> Partial<T, I> {
         }
     }
 
-
     pub fn get_with_fn(&self, realm: &mut Realm, initialize: fn(&mut Realm) -> Res<T>) -> Res<&T> {
         unsafe {
             if (*self.value.get()).is_none() {

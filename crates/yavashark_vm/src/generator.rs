@@ -175,7 +175,10 @@ impl Generator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        realm.intrinsics.generator_function.set_initializer(GeneratorFunction::initialize);
+        realm
+            .intrinsics
+            .generator_function
+            .set_initializer(GeneratorFunction::initialize);
         realm.intrinsics.generator.set_initializer(Self::initialize);
 
         Ok(())

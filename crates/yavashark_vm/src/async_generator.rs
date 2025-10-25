@@ -191,8 +191,14 @@ impl AsyncGenerator {
     }
 
     pub fn init(realm: &mut Realm) -> Res {
-        realm.intrinsics.async_generator_function.set_initializer(AsyncGeneratorFunction::initialize);
-        realm.intrinsics.async_generator.set_initializer(Self::initialize);
+        realm
+            .intrinsics
+            .async_generator_function
+            .set_initializer(AsyncGeneratorFunction::initialize);
+        realm
+            .intrinsics
+            .async_generator
+            .set_initializer(Self::initialize);
 
         Ok(())
     }

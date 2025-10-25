@@ -1,6 +1,6 @@
+pub mod array_buf;
 pub mod bigint64array;
 pub mod biguint64array;
-pub mod array_buf;
 pub mod dataview;
 pub mod float16array;
 pub mod float32array;
@@ -14,5 +14,5 @@ pub mod uint32array;
 pub mod uint8clampedarray;
 pub mod unit8array;
 
-pub mod shared_buf;
 mod buf;
+pub mod shared_buf;

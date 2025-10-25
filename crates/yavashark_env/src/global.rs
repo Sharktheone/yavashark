@@ -1,7 +1,7 @@
 use crate::array::Array;
+use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
-use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
