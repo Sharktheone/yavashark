@@ -323,9 +323,6 @@ impl Array {
                 inner.values.push(Variable::new(val.clone()).into());
 
                 inner.array.push((idx, len));
-                inner
-                    .properties
-                    .insert(InternalPropertyKey::Index(idx).into(), len);
             }
         }
 
@@ -382,9 +379,6 @@ impl Array {
         inner.values.push(Variable::new(value).into());
 
         inner.array.push((index, len));
-        inner
-            .properties
-            .insert(InternalPropertyKey::Index(index).into(), len);
         self.length.set(index + 1);
 
         Ok(Value::Undefined)
@@ -432,9 +426,6 @@ impl Array {
             inner.values.push(value.clone());
 
             inner.array.push((*idx, len));
-            inner
-                .properties
-                .insert(InternalPropertyKey::Index(*idx).into(), len);
         }
 
         drop(inner);
