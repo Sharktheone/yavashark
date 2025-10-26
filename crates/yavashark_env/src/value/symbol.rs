@@ -125,4 +125,6 @@ impl Symbol {
     symbol!(TO_PRIMITIVE, toPrimitive);
     symbol!(TO_STRING_TAG, toStringTag);
     symbol!(UNSCOPABLES, unscopables);
+    symbol!(DISPOSE, dispose);
+    symbol!(ASYNC_DISPOSE, asyncDispose);
 }

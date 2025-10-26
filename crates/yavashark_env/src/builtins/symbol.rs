@@ -85,6 +85,12 @@ impl SymbolConstructor {
     #[prop("unscopables")]
     const UNSCOPABLES: &'static Symbol = Symbol::UNSCOPABLES;
 
+    #[prop("dispose")]
+    const DISPOSE: &'static Symbol = Symbol::DISPOSE;
+
+    #[prop("asyncDispose")]
+    const ASYNC_DISPOSE: &'static Symbol = Symbol::ASYNC_DISPOSE;
+
     #[prop("keyFor")]
     fn key_for(symbol: Symbol) -> Value {
         let str = symbol.to_ys_string();
