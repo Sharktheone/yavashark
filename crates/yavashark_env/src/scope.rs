@@ -696,7 +696,7 @@ impl ScopeInternal {
             }
         }
 
-        self.declare_var(name, value, realm)?;
+        self.declare_global_var(name, value, realm)?;
 
         Ok(())
     }
