@@ -126,5 +126,6 @@ trait IsHoistable {
 impl IsHoistable for Stmt {
     fn skip_statements(&self) -> bool {
         matches!(self, Self::Decl(Decl::Fn(_)) | Self::Empty(_))
+        || matches!(self, Self::Block(block) if block.stmts.is_empty())
     }
 }
