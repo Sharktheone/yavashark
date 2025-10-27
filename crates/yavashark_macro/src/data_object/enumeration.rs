@@ -14,8 +14,8 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
 
         variant.attrs.retain(|attr| {
             if attr.meta.path().is_ident("name") {
-                let Ok(x) = attr.parse_args::<syn::LitStr>() else  {
-                    return true
+                let Ok(x) = attr.parse_args::<syn::LitStr>() else {
+                    return true;
                 };
 
                 variant_name = x.value();
