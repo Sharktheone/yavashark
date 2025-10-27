@@ -15,7 +15,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{intl, signal, temporal, AggregateError, Arguments, Atomics, BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet};
+use crate::builtins::{intl, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet};
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
 use crate::realm::initialize::Intrinsic;
@@ -100,6 +100,7 @@ pub struct Intrinsics {
     pub throw_type_error: Partial<ObjectHandle, ThrowTypeError>,
 
     pub disposable_stack: PartialIntrinsic<DisposableStack>,
+    pub async_disposable_stack: PartialIntrinsic<AsyncDisposableStack>,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -183,6 +184,7 @@ impl Intrinsics {
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
             disposable_stack: Default::default(),
+            async_disposable_stack: Default::default(),
             other: FxHashMap::default(),
         }
     }
@@ -281,6 +283,7 @@ impl Default for Intrinsics {
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
             disposable_stack: Default::default(),
+            async_disposable_stack: Default::default(),
             other: FxHashMap::default(),
         }
     }

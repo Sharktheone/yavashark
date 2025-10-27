@@ -25,6 +25,7 @@ mod weakmap;
 mod weakref;
 mod weakset;
 mod disposable_stack;
+mod async_disposable_stack;
 
 pub use arguments::*;
 pub use arraybuffer::*;
@@ -51,3 +52,4 @@ pub use weakmap::*;
 pub use weakref::*;
 pub use weakset::*;
 pub use disposable_stack::*;
+pub use async_disposable_stack::*;
