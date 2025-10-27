@@ -24,6 +24,7 @@ mod throw_type_error;
 mod weakmap;
 mod weakref;
 mod weakset;
+mod disposable_stack;
 
 pub use arguments::*;
 pub use arraybuffer::*;
@@ -49,3 +50,4 @@ pub use throw_type_error::*;
 pub use weakmap::*;
 pub use weakref::*;
 pub use weakset::*;
+pub use disposable_stack::*;
