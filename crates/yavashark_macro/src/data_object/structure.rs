@@ -3,7 +3,7 @@ mod properties;
 use crate::config::Config;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{DataStruct, ItemStruct};
+use syn::ItemStruct;
 
 pub fn data_struct(mut s: ItemStruct) -> syn::Result<TokenStream> {
     let properties = properties::parse_properties(&mut s.fields)?;

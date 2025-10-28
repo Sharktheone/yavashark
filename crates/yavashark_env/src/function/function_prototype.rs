@@ -9,7 +9,7 @@ use crate::{
     proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult,
     Variable,
 };
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use yavashark_macro::inline_props;
 
 #[inline_props(enumerable = false, configurable)]

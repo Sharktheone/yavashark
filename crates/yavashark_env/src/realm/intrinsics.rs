@@ -189,13 +189,6 @@ impl Intrinsics {
         }
     }
 
-    pub(crate) fn initialize(realm: &mut Realm) -> Res {
-        realm.intrinsics.obj = Prototype::new().into_object();
-        realm.intrinsics.func = FunctionPrototype::new(realm).into_object();
-
-        Ok(())
-    }
-
     pub fn get_of<T: 'static>(&self) -> Res<ObjectHandle> {
         self.other
             .get(&TypeId::of::<T>())

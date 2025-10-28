@@ -1,3 +1,4 @@
+#![allow(unused)]
 use yavashark_macro::{object, props};
 use crate::{Object, ObjectHandle, Realm, Value, Symbol};
 

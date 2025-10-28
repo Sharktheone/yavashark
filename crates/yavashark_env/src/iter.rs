@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::conversion::TryIntoValue;
 use crate::value::Obj;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
@@ -32,6 +33,7 @@ pub struct NativeIterator {
 }
 
 impl NativeIterator {
+    #[allow(unused)]
     pub fn new(iter: impl JSIterator, proto: ObjectHandle) -> Self {
         Self {
             inner: RefCell::new(MutableNativeIterator {

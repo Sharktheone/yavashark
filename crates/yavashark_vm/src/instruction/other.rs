@@ -602,16 +602,16 @@ pub fn get_private_member(
         return resolve_private_member(realm, member, base.copy());
     }
 
-    return Err(Error::ty_error(format!(
+    Err(Error::ty_error(format!(
         "Private name {name} can only be used in class"
-    )));
+    )))
 }
 
 pub fn import_dynamic(
-    name: VarName,
-    path: VarName,
-    output: impl OutputData,
-    vm: &mut impl VM,
+    _name: VarName,
+    _path: VarName,
+    _output: impl OutputData,
+    _vm: &mut impl VM,
 ) -> ControlResult {
     Err(Error::new("Dynamic import is not supported in VM yet").into())
 }

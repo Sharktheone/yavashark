@@ -4,7 +4,7 @@ mod structure;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
 use syn::parse::Parse;
-use syn::{Data, DeriveInput, Token};
+use syn::Token;
 
 pub fn data_object(
     _attrs: proc_macro::TokenStream,

@@ -1792,7 +1792,7 @@ impl ArrayConstructor {
 
                 let mut values = Vec::with_capacity(inner.set.len());
 
-                let mut iter = inner.set.iter();
+                let iter = inner.set.iter();
 
                 for value in iter {
                     values.push(value.clone());
@@ -1822,7 +1822,7 @@ impl ArrayConstructor {
 
                 let mut values = Vec::with_capacity(inner.map.len());
 
-                let mut iter = inner.map.iter();
+                let iter = inner.map.iter();
 
                 for (key, value) in iter {
                     values.push(vec![key.clone(), value.clone()].try_into_value(realm)?);

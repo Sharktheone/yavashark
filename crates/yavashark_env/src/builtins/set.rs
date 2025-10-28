@@ -1,6 +1,6 @@
 use crate::utils::ValueIterator;
 use crate::value::{Constructor, IntoValue, MutObj, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
