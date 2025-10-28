@@ -16,13 +16,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    AggregateError, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, EncodeURI,
-    EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat,
-    ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj,
-    SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet,
-    JSON,
-};
+use crate::builtins::{AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON};
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
 use crate::inline_props::InlineObject;
@@ -241,6 +235,12 @@ pub struct GlobalProperties {
 
     #[prop("Intl")]
     intl: Partial<ObjectHandle, Intl>,
+
+    #[prop("DisposableStack")]
+    disposable_stack: Partial<ObjectHandle, GlobalInitializer<DisposableStack>>,
+
+    #[prop("AsyncDisposableStack")]
+    async_disposable_stack: Partial<ObjectHandle, GlobalInitializer<AsyncDisposableStack>>,
 }
 
 pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
@@ -311,6 +311,8 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         is_nan: Default::default(),
         is_finite: Default::default(),
         intl: Default::default(),
+        disposable_stack: Default::default(),
+        async_disposable_stack: Default::default(),
 
         __deleted_properties: Cell::default(),
         __written_properties: Cell::default(),
