@@ -241,10 +241,16 @@ fn contains_super(expr: &Expr) -> bool {
     finder.found
 }
 
-fn prop_name_to_string(prop_name: &PropName) -> Result<Option<String>, String>{
+fn prop_name_to_string(prop_name: &PropName) -> Result<Option<String>, String> {
     Ok(match prop_name {
         PropName::Ident(ident) => Some(ident.sym.as_str().to_string()),
-        PropName::Str(str_lit) => Some(str_lit.value.as_str().ok_or("invalid wtf-8 surrogate".to_string())?.to_string()),
+        PropName::Str(str_lit) => Some(
+            str_lit
+                .value
+                .as_str()
+                .ok_or("invalid wtf-8 surrogate".to_string())?
+                .to_string(),
+        ),
         _ => None,
     })
 }

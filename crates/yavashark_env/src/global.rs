@@ -16,7 +16,13 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON};
+use crate::builtins::{
+    AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
+    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
+    IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError,
+    ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal, TypeError,
+    URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
+};
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
 use crate::inline_props::InlineObject;

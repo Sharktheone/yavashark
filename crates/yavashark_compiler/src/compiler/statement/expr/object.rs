@@ -1,7 +1,7 @@
 use super::MoveOptimization;
 use crate::{Compiler, Res};
-use std::rc::Rc;
 use anyhow::anyhow;
+use std::rc::Rc;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_bytecode::data::{OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
@@ -125,7 +125,12 @@ impl Compiler {
     ) -> Res<DataTypeValue> {
         Ok(match key {
             PropName::Ident(id) => DataTypeValue::String(id.sym.to_string()),
-            PropName::Str(s) => DataTypeValue::String(s.value.as_str().ok_or(anyhow!("Invalid wtf-8 surrogate"))?.to_string()),
+            PropName::Str(s) => DataTypeValue::String(
+                s.value
+                    .as_str()
+                    .ok_or(anyhow!("Invalid wtf-8 surrogate"))?
+                    .to_string(),
+            ),
             PropName::Num(n) => DataTypeValue::Number(n.value),
             PropName::Computed(c) => {
                 let reg = self.alloc_reg_or_stack();

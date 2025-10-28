@@ -8,7 +8,11 @@ use yavashark_string::YSString;
 impl Interpreter {
     pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
-            Lit::Str(s) => Value::String(YSString::from_ref(s.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?)),
+            Lit::Str(s) => Value::String(YSString::from_ref(
+                s.value
+                    .as_str()
+                    .ok_or(Error::new("Invalid wtf-8 surrogate"))?,
+            )),
             Lit::Bool(b) => Value::Boolean(b.value),
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),

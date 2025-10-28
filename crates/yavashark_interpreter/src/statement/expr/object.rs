@@ -145,7 +145,12 @@ impl Interpreter {
     pub fn run_prop_name(realm: &mut Realm, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?)),
+            PropName::Str(str_) => Value::String(YSString::from_ref(
+                &str_
+                    .value
+                    .as_str()
+                    .ok_or(Error::new("Invalid wtf-8 surrogate"))?,
+            )),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),

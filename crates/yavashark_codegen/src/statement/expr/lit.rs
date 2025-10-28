@@ -6,7 +6,12 @@ use yavashark_bytecode::ConstValue;
 impl ByteCodegen {
     pub fn compile_lit(&mut self, stmt: &Lit) -> Res {
         let val = match stmt {
-            Lit::Str(s) => ConstValue::String(s.value.as_str().ok_or(anyhow!("Invalid wtf-8 surrogate"))?.to_string()),
+            Lit::Str(s) => ConstValue::String(
+                s.value
+                    .as_str()
+                    .ok_or(anyhow!("Invalid wtf-8 surrogate"))?
+                    .to_string(),
+            ),
             Lit::Num(n) => ConstValue::Number(n.value),
             Lit::Bool(b) => ConstValue::Boolean(b.value),
             Lit::Null(_) => ConstValue::Null,

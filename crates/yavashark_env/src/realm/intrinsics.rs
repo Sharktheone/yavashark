@@ -15,7 +15,12 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{intl, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet};
+use crate::builtins::{
+    intl, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj,
+    BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError,
+    ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError,
+    URIError, WeakMap, WeakRef, WeakSet,
+};
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
 use crate::realm::initialize::Intrinsic;

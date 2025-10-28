@@ -1,11 +1,10 @@
 #![allow(unused)]
+use crate::{Object, ObjectHandle, Realm, Symbol, Value};
 use yavashark_macro::{object, props};
-use crate::{Object, ObjectHandle, Realm, Value, Symbol};
 
 #[object]
 #[derive(Debug)]
 pub struct DisposableStack {}
-
 
 #[props(intrinsic_name = disposable_stack)]
 impl DisposableStack {
@@ -13,13 +12,9 @@ impl DisposableStack {
         value
     }
 
-    pub fn defer(&self, on_dispose: ObjectHandle) {
+    pub fn defer(&self, on_dispose: ObjectHandle) {}
 
-    }
-
-    pub fn dispose(&self) {
-
-    }
+    pub fn dispose(&self) {}
 
     pub fn move_(&self) -> ObjectHandle {
         Object::null()
@@ -31,7 +26,5 @@ impl DisposableStack {
     }
 
     #[prop(Symbol::DISPOSE)]
-    pub fn symbol_dispose(&self) {
-
-    }
+    pub fn symbol_dispose(&self) {}
 }
