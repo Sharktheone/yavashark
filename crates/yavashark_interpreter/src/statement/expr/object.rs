@@ -5,7 +5,7 @@ use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, Object, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -145,7 +145,7 @@ impl Interpreter {
     pub fn run_prop_name(realm: &mut Realm, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value)),
+            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?)),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),

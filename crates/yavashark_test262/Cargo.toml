@@ -18,9 +18,9 @@ oxc = { version = "0.89.0", optional = true}
 pprof = { version = "0.15.0", features = ["prost-codec"], optional = true }
 flate2 = { version = "1.0", optional = true }
 
-swc_common = "14.0.3"
-swc_ecma_parser = { version = "24.0.1", features = ["verify"] }
-swc_ecma_ast = "15.0.0"
+swc_common = "16.0.0"
+swc_ecma_parser = { version = "26.0.0", features = ["verify"] }
+swc_ecma_ast = "17.0.0"
 yaml-rust2 = "0.10.0"
 bitflags = "2.6.0"
 

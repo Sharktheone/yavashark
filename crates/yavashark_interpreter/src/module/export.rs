@@ -75,7 +75,7 @@ impl Interpreter {
         };
 
         let module = Self::resolve_module(
-            &src.value,
+            &src.value.as_str().ok_or(Error::new("Invalid wtf-8 string"))?,
             stmt.with.as_deref(),
             &scope.scope.get_current_path()?,
             realm,
@@ -88,11 +88,11 @@ impl Interpreter {
                 ExportSpecifier::Named(named) => {
                     let name = match &named.orig {
                         ModuleExportName::Ident(id) => id.sym.to_string(),
-                        ModuleExportName::Str(str) => str.value.to_string(),
+                        ModuleExportName::Str(str) => str.value.as_str().ok_or(Error::new("Invalid wtf-8 string"))?.to_string(),
                     };
                     let export = match &named.exported {
                         Some(ModuleExportName::Ident(id)) => id.sym.to_string(),
-                        Some(ModuleExportName::Str(str)) => str.value.to_string(),
+                        Some(ModuleExportName::Str(str)) => str.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?.to_string(),
                         None => name.clone(),
                     };
 
@@ -128,7 +128,7 @@ impl Interpreter {
                 ExportSpecifier::Namespace(ns) => {
                     let name = match &ns.name {
                         ModuleExportName::Ident(id) => id.sym.to_string(),
-                        ModuleExportName::Str(str) => str.value.to_string(),
+                        ModuleExportName::Str(str) => str.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?.to_string(),
                     };
 
                     scope
@@ -191,7 +191,7 @@ impl Interpreter {
         scope: &mut ModuleScope,
     ) -> RuntimeResult {
         let module = Self::resolve_module(
-            stmt.src.value.as_str(),
+            stmt.src.value.as_str().ok_or(Error::new("Invalid wtf-8 string"))?,
             stmt.with.as_deref(),
             &scope.scope.get_current_path()?,
             realm,

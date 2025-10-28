@@ -155,7 +155,7 @@ impl<'a> Validator<'a> {
                 self.validate_prop_name(&method.key)?;
 
                 if method.is_static {
-                    if let Some(name) = prop_name_to_string(&method.key) {
+                    if let Some(name) = prop_name_to_string(&method.key)? {
                         if name == "prototype" {
                             return Err("Static method cannot be named 'prototype'".to_string());
                         }
@@ -178,7 +178,7 @@ impl<'a> Validator<'a> {
             ClassMember::ClassProp(prop) => {
                 self.validate_prop_name(&prop.key)?;
                 if prop.is_static {
-                    if let Some(name) = prop_name_to_string(&prop.key) {
+                    if let Some(name) = prop_name_to_string(&prop.key)? {
                         if matches!(name.as_str(), "prototype" | "constructor") {
                             return Err(format!("Static field cannot be named '{name}'"));
                         }
@@ -241,12 +241,12 @@ fn contains_super(expr: &Expr) -> bool {
     finder.found
 }
 
-fn prop_name_to_string(prop_name: &PropName) -> Option<String> {
-    match prop_name {
-        PropName::Ident(ident) => Some(ident.sym.to_string()),
-        PropName::Str(str_lit) => Some(str_lit.value.to_string()),
+fn prop_name_to_string(prop_name: &PropName) -> Result<Option<String>, String>{
+    Ok(match prop_name {
+        PropName::Ident(ident) => Some(ident.sym.as_str().to_string()),
+        PropName::Str(str_lit) => Some(str_lit.value.as_str().ok_or("invalid wtf-8 surrogate".to_string())?.to_string()),
         _ => None,
-    }
+    })
 }
 
 struct ContainsIdentifier<'a> {

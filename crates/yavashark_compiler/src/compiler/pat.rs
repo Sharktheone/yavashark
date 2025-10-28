@@ -110,7 +110,7 @@ impl Compiler {
             match prop {
                 ObjectPatProp::KeyValue(prop) => {
                     let mut dealloc = Vec::new();
-                    let key = self.convert_pat_prop_name(&prop.key, &mut dealloc);
+                    let key = self.convert_pat_prop_name(&prop.key, &mut dealloc)?;
 
                     if has_rest {
                         self.instructions.push(Instruction::push_spread(key));
@@ -215,8 +215,8 @@ impl Compiler {
         &mut self,
         key: &PropName,
         dealloc: &mut Vec<OutputDataType>,
-    ) -> DataType {
-        match key {
+    ) -> anyhow::Result<DataType> {
+        Ok(match key {
             PropName::Ident(id) => {
                 let id = id.sym.to_string();
 
@@ -225,7 +225,9 @@ impl Compiler {
                 DataType::Const(c)
             }
             PropName::Str(s) => {
-                let s = s.value.to_string();
+                let Some(s) = s.value.as_str() else {
+                    return Err(anyhow!("Invalid string in property name"));
+                };
 
                 let c = self.alloc_const(s);
 
@@ -246,6 +248,6 @@ impl Compiler {
 
                 DataType::Const(c)
             }
-        }
+        })
     }
 }

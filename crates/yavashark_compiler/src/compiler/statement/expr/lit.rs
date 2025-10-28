@@ -1,6 +1,6 @@
 use crate::compiler::statement::expr::MoveOptimization;
 use crate::{Compiler, Res};
-use anyhow::anyhow;
+use anyhow::{anyhow, Error};
 use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_bytecode::ConstValue;
@@ -30,7 +30,7 @@ impl Compiler {
 
 pub fn lit_to_const_value(lit: &Lit) -> Res<ConstValue> {
     Ok(match lit {
-        Lit::Str(s) => ConstValue::String(s.value.to_string()),
+        Lit::Str(s) => ConstValue::String(s.value.as_str().ok_or_else(|| anyhow!("Invalid string literal"))?.to_string()),
         Lit::Num(n) => ConstValue::Number(n.value),
         Lit::Bool(b) => ConstValue::Boolean(b.value),
         Lit::Null(_) => ConstValue::Null,

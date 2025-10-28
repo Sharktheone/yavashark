@@ -206,7 +206,7 @@ impl Interpreter {
     ) -> Res<PropertyKey> {
         Ok(match prop {
             PropName::Ident(ident) => PropertyKey::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => PropertyKey::String(YSString::from_ref(&str_.value)),
+            PropName::Str(str_) => PropertyKey::String(YSString::from_ref(&str_.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?)),
             PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
             PropName::Computed(expr) => {
                 Self::run_expr(realm, &expr.expr, expr.span, scope)?.into_property_key(realm)?

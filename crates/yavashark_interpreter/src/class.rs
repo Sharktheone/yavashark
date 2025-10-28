@@ -237,7 +237,7 @@ fn prop_name_to_value(
             Interpreter::run_expr(realm, expr, span, scope)?
         }
         PropName::Num(num) => num.value.to_string().into(),
-        PropName::Str(str) => str.value.to_string().into(),
+        PropName::Str(str) => str.value.as_str().ok_or(Error::new("Invalid wtf-8 surrogate"))?.to_string().into(),
         PropName::BigInt(_) => unimplemented!(),
     })
 }

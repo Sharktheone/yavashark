@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 yavashark_bytecode = { path = "../yavashark_bytecode" }
-swc_ecma_ast = "15.0.0"
+swc_ecma_ast = "17.0.0"
 anyhow = "1.0.86"
 log = "0.4.22"
 num-traits = "0.2.19"

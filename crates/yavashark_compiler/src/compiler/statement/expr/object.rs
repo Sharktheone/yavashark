@@ -1,6 +1,7 @@
 use super::MoveOptimization;
 use crate::{Compiler, Res};
 use std::rc::Rc;
+use anyhow::anyhow;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_bytecode::data::{OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
@@ -31,7 +32,7 @@ impl Compiler {
                         properties.push((id, dt));
                     }
                     Prop::KeyValue(kv) => {
-                        let prop = self.convert_prop_name(&kv.key, &mut dealloc);
+                        let prop = self.convert_prop_name(&kv.key, &mut dealloc)?;
 
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
@@ -40,7 +41,7 @@ impl Compiler {
                         properties.push((prop, storage.into()));
                     }
                     Prop::Getter(g) => {
-                        let prop = self.convert_prop_name(&g.key, &mut dealloc);
+                        let prop = self.convert_prop_name(&g.key, &mut dealloc)?;
 
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
@@ -59,7 +60,7 @@ impl Compiler {
                         properties.push((prop, DataTypeValue::Get(bp)));
                     }
                     Prop::Setter(s) => {
-                        let prop = self.convert_prop_name(&s.key, &mut dealloc);
+                        let prop = self.convert_prop_name(&s.key, &mut dealloc)?;
 
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
@@ -84,7 +85,7 @@ impl Compiler {
                         properties.push((prop, DataTypeValue::Set(bp)));
                     }
                     Prop::Method(m) => {
-                        let prop = self.convert_prop_name(&m.key, &mut dealloc);
+                        let prop = self.convert_prop_name(&m.key, &mut dealloc)?;
 
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
@@ -121,10 +122,10 @@ impl Compiler {
         &mut self,
         key: &PropName,
         dealloc: &mut Vec<OutputDataType>,
-    ) -> DataTypeValue {
-        match key {
+    ) -> Res<DataTypeValue> {
+        Ok(match key {
             PropName::Ident(id) => DataTypeValue::String(id.sym.to_string()),
-            PropName::Str(s) => DataTypeValue::String(s.value.to_string()),
+            PropName::Str(s) => DataTypeValue::String(s.value.as_str().ok_or(anyhow!("Invalid wtf-8 surrogate"))?.to_string()),
             PropName::Num(n) => DataTypeValue::Number(n.value),
             PropName::Computed(c) => {
                 let reg = self.alloc_reg_or_stack();
@@ -134,6 +135,6 @@ impl Compiler {
                 reg.into()
             }
             PropName::BigInt(b) => DataTypeValue::BigInt(Rc::new((*b.value).clone())),
-        }
+        })
     }
 }
