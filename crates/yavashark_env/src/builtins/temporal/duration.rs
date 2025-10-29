@@ -178,7 +178,7 @@ impl Duration {
         microseconds: Option<NonFract<i128>>,
         nanoseconds: Option<NonFract<i128>>,
         #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    ) -> Res<Self> {
         let years = years.map(|n| n.0);
         let months = months.map(|n| n.0);
         let weeks = weeks.map(|n| n.0);
@@ -190,7 +190,7 @@ impl Duration {
         let microseconds = microseconds.map(|n| n.0);
         let nanoseconds = nanoseconds.map(|n| n.0);
 
-        Ok(Self::constructor(
+        Self::constructor(
             years,
             months,
             weeks,
@@ -202,12 +202,11 @@ impl Duration {
             microseconds,
             nanoseconds,
             realm,
-        )?
-        .into_object())
+        )
     }
 
-    fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(Self::from_value(info, realm)?.into_object())
+    fn from(info: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+        Self::from_value(info, realm)
     }
 
     fn compare(
@@ -227,27 +226,27 @@ impl Duration {
             .map_err(Error::from_temporal)? as i8)
     }
 
-    fn abs(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn abs(&self, #[realm] realm: &mut Realm) -> Res<Self> {
         let res = self.dur.abs();
 
-        Ok(Self::with_duration(realm, res)?.into_object())
+        Self::with_duration(realm, res)
     }
 
-    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         let other = Self::from_value_ref(other, realm)?;
 
         let dur = self.dur.add(&other.dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur)?.into_object())
+        Self::with_duration(realm, dur)
     }
 
-    fn negated(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn negated(&self, #[realm] realm: &mut Realm) -> Res<Self> {
         let neg = self.dur.negated();
 
-        Ok(Self::with_duration(realm, neg)?.into_object())
+        Self::with_duration(realm, neg)
     }
 
-    fn round(&self, unit: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn round(&self, unit: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         if unit.is_undefined() {
             return Err(Error::ty("Invalid unit for Duration.round"));
         }
@@ -259,10 +258,10 @@ impl Duration {
             .round_with_provider(opts, rel, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur)?.into_object())
+        Self::with_duration(realm, dur)
     }
 
-    fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         let other = Self::from_value(other, realm)?;
 
         let dur = self
@@ -270,7 +269,7 @@ impl Duration {
             .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::with_duration(realm, dur)?.into_object())
+        Self::with_duration(realm, dur)
     }
 
     #[prop("toJSON")]
