@@ -22,13 +22,23 @@ pub trait PropertiesHook {
         value: Value,
         realm: &mut Realm,
     ) -> Res<UpdatePropertyResult>;
-    fn get_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>>;
+    fn get_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        Ok(None)
+    }
 
-    fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool>;
+    fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool> {
+        Ok(false)
+    }
 
-    fn properties(&self, realm: &mut Realm) -> Res<impl Iterator<Item = (PropertyKey, Property)>>;
-    fn keys(&self, realm: &mut Realm) -> Res<impl Iterator<Item = PropertyKey>>;
-    fn values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>>;
+    fn properties(&self, realm: &mut Realm) -> Res<impl Iterator<Item = (PropertyKey, Property)>> {
+        Ok(::core::iter::empty())
+    }
+    fn keys(&self, realm: &mut Realm) -> Res<impl Iterator<Item = PropertyKey>> {
+        Ok(::core::iter::empty())
+    }
+    fn values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>> {
+        Ok(::core::iter::empty())
+    }
 
     fn enumerable_properties(
         &self,
@@ -42,9 +52,13 @@ pub trait PropertiesHook {
     fn enumerable_values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>> {
         self.values(realm)
     }
-    fn delete_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
+    fn delete_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        Ok(false)
+    }
 
-    fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
+    fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>> {
+        ::core::iter::empty()
+    }
 }
 
 #[derive(Debug)]
