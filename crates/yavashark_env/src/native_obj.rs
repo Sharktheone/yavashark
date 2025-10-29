@@ -1,45 +1,20 @@
 #![allow(unused)]
 
 use std::cell::RefCell;
+use std::fmt::Debug;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
+use crate::conversion::TryIntoValue;
+use crate::inline_props::{InlineObject, PropertiesHook};
+use crate::realm::Intrinsic;
+use crate::value::IntoValue;
 
-pub struct NativeObject<N: ?Sized> {
-    pub inner: RefCell<MutObject>,
-    pub native_inner: N,
-}
-
-pub trait SetupNativeObj {
-    fn get_prototype(realm: &Realm) -> &ObjectHandle;
-    fn get_prototype_mut(realm: &mut Realm) -> &mut ObjectHandle;
-
-    fn setup_callback(&self, realm: &mut Realm) {}
-}
-
-pub trait NativeObj: SetupNativeObj {
-    fn set_property(&self, name: Value, value: Value) -> Res<bool> {
-        Ok(false)
-    }
-}
-
-pub trait DynNativeObj: 'static {
-    fn foo(&self) -> String {
-        "Default foo implementation".to_string()
-    }
-}
-
-pub struct Bar;
-
-impl DynNativeObj for Bar {
-    fn foo(&self) -> String {
-        "Bar's foo implementation".to_string()
-    }
-}
-
-impl<N: DynNativeObj> NativeObject<N> {
-    pub const fn new(inner: MutObject, native_inner: N) -> Self {
-        Self {
-            inner: RefCell::new(inner),
-            native_inner,
-        }
-    }
-}
+// TODO: maybe this is possible at some point - sigh >'_'<
+// default impl<T: Intrinsic + PropertiesHook + Debug + 'static> TryIntoValue for T {
+//     fn try_into_value(self, realm: &mut Realm) -> Res<Value> {
+//         let proto = T::get_intrinsic(realm)?;
+//
+//         let obj = InlineObject::with_proto(self, proto);
+//
+//         Ok(obj.into_value())
+//     }
+// }
