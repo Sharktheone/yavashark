@@ -43,10 +43,10 @@ impl PlainTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainTime> {
         let time = Self::now(tz)?;
 
-        Ok(Self::new(time, realm)?.into_object())
+        Self::new(time, realm)
     }
 }
 

@@ -48,9 +48,9 @@ impl PlainDate {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<Self> {
         let date = Self::now(tz)?;
-        Ok(Self::new(date, realm)?.into_object())
+        Self::new(date, realm)
     }
 }
 

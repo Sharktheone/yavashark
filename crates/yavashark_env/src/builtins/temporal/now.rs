@@ -14,12 +14,12 @@ pub struct Now {}
 
 #[props(intrinsic_name = temporal_now, to_string_tag = "Temporal.Now")]
 impl Now {
-    fn instant(realm: &mut Realm) -> Res<ObjectHandle> {
+    fn instant(realm: &mut Realm) -> Res<Instant> {
         Instant::now_obj(realm)
     }
 
     #[prop("plainDateISO")]
-    fn plain_date_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+    fn plain_date_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainDate> {
         let tz = tz
             .as_deref()
             .map(TimeZone::try_from_str)
@@ -30,7 +30,7 @@ impl Now {
     }
 
     #[prop("plainDateTimeISO")]
-    fn plain_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+    fn plain_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainDateTime> {
         let tz = tz
             .as_deref()
             .map(TimeZone::try_from_str)
@@ -41,7 +41,7 @@ impl Now {
     }
 
     #[prop("plainTimeISO")]
-    fn plain_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+    fn plain_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainTime> {
         let tz = tz
             .as_deref()
             .map(TimeZone::try_from_str)
@@ -61,7 +61,7 @@ impl Now {
     }
 
     #[prop("zonedDateTimeISO")]
-    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ZonedDateTime> {
         let tz = tz
             .as_deref()
             .map(TimeZone::try_from_str)

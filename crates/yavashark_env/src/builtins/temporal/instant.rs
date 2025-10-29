@@ -59,10 +59,10 @@ impl Instant {
         Temporal::now().instant().map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn now_obj(realm: &mut Realm) -> Res<Self> {
         let i = Self::now()?;
 
-        Ok(Self::from_stamp(i, realm)?.into_object())
+        Self::from_stamp(i, realm)
     }
 }
 
