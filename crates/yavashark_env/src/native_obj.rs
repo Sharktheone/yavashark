@@ -1,9 +1,10 @@
 #![allow(unused)]
 
+use std::cell::RefCell;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 
-pub struct NativeObject<N: DynNativeObj + ?Sized> {
-    pub inner: MutObject,
+pub struct NativeObject<N: ?Sized> {
+    pub inner: RefCell<MutObject>,
     pub native_inner: N,
 }
 
@@ -37,7 +38,7 @@ impl DynNativeObj for Bar {
 impl<N: DynNativeObj> NativeObject<N> {
     pub const fn new(inner: MutObject, native_inner: N) -> Self {
         Self {
-            inner,
+            inner: RefCell::new(inner),
             native_inner,
         }
     }
