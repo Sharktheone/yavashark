@@ -69,7 +69,7 @@ impl Instant {
 #[props(intrinsic_name = temporal_instant, to_string_tag = "Temporal.Instant")]
 impl Instant {
     #[constructor]
-    fn construct(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn construct(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<Self> {
         Self::from_epoch_nanoseconds(epoch, realm)
     }
 
@@ -104,20 +104,20 @@ impl Instant {
     }
 
     #[prop("fromEpochNanoseconds")]
-    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<Self> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
 
-        Ok(Self::from_stamp(i, realm)?.into_object())
+        Self::from_stamp(i, realm)
     }
 
-    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         let other = Duration::from_value_ref(other, realm)?;
 
         let i = self.stamp.add(&other.dur).map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(i, realm)?.into_object())
+        Self::from_stamp(i, realm)
     }
 
     fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
@@ -126,12 +126,12 @@ impl Instant {
         Ok(self.stamp == other)
     }
 
-    fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         let (opts, _) = rounding_options(opts, realm)?;
 
         let stamp = self.stamp.round(opts).map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(stamp, realm)?.into_object())
+        Self::from_stamp(stamp, realm)
     }
 
     fn since(
@@ -139,7 +139,7 @@ impl Instant {
         other: Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    ) -> Res<Duration> {
         let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
@@ -153,10 +153,10 @@ impl Instant {
             .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, res)?.into_object())
+        Duration::with_duration(realm, res)
     }
 
-    pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
         let other = Duration::from_value_ref(other, realm)?;
 
         let i = self
@@ -164,7 +164,7 @@ impl Instant {
             .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self::from_stamp(i, realm)?.into_object())
+        Self::from_stamp(i, realm)
     }
 
     #[prop("toJSON")]
@@ -203,7 +203,7 @@ impl Instant {
         other: Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    ) -> Res<Duration> {
         let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
@@ -217,7 +217,7 @@ impl Instant {
             .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
-        Ok(Duration::with_duration(realm, dur)?.into_object())
+        Duration::with_duration(realm, dur)
     }
 
     #[prop("valueOf")]
