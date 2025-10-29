@@ -1,9 +1,11 @@
+use std::any::TypeId;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property};
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 
 pub enum UpdatePropertyResult {
@@ -249,5 +251,17 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         inner_refs.extend(props_refs);
 
         inner_refs
+    }
+
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            return Some(NonNull::from(self).cast());
+        }
+
+        if ty == TypeId::of::<P>() {
+            return Some(NonNull::from(&self.props).cast());
+        }
+
+        None
     }
 }
