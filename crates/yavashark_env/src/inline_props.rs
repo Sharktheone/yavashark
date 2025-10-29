@@ -46,9 +46,9 @@ pub trait PropertiesHook {
 }
 
 #[derive(Debug)]
-pub struct InlineObject<P> {
-    pub props: P,
+pub struct InlineObject<P: ?Sized> {
     pub inner: RefCell<MutObject>,
+    pub props: P,
 }
 
 impl<P: PropertiesHook + Debug + 'static> InlineObject<P> {
