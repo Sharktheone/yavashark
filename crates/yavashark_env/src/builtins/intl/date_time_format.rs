@@ -41,8 +41,8 @@ impl DateTimeFormat {
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
     fn format(&self) -> String {
@@ -60,8 +60,8 @@ impl DateTimeFormat {
         _start: String,
         _end: String,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
     #[prop("formatToParts")]
