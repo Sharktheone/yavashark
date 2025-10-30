@@ -37,8 +37,8 @@ impl DisplayNames {
         _locales: String,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
     fn of(&self, _code: String) -> String {
