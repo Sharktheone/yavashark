@@ -32,8 +32,8 @@ impl PluralRules {
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Self::new(realm)?.into_object())
+    ) -> Res<Self> {
+        Self::new(realm)
     }
 
     #[prop("supportedLocalesOf")]
@@ -41,8 +41,8 @@ impl PluralRules {
         _locales: String,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
     #[prop("resolvedOptions")]
