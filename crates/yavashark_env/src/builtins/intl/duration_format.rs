@@ -41,8 +41,8 @@ impl DurationFormat {
         _locales: String,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
     fn format(&self, _duration: ObjectHandle) -> String {
@@ -50,8 +50,8 @@ impl DurationFormat {
     }
 
     #[prop("formatToParts")]
-    fn format_to_parts(&self, _duration: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    fn format_to_parts(&self, _duration: ObjectHandle, realm: &mut Realm) -> Vec<String> {
+        Vec::new()
     }
 
     #[prop("resolvedOptions")]
