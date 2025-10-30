@@ -15,6 +15,7 @@ pub enum UpdatePropertyResult {
     ReadOnly,
 }
 
+#[allow(unused_variables)]
 pub trait PropertiesHook {
     fn set_property(
         &self,

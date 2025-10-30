@@ -1,5 +1,3 @@
-use crate::array::Array;
-use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
@@ -40,12 +38,11 @@ impl Segmenter {
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
     ) -> Vec<String>  {
         Vec::new()
     }
 
-    fn segment(&self, _duration: ObjectHandle, realm: &mut Realm) -> Vec<String> {
+    fn segment(&self, _duration: ObjectHandle) -> Vec<String> {
         Vec::new()
     }
 

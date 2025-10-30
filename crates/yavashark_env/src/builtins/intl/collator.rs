@@ -1,5 +1,3 @@
-use swc_ecma_ast::Str;
-use crate::value::Obj;
 use crate::{
     Object, ObjectHandle, Realm, Res, Value
 };
@@ -13,20 +11,19 @@ pub struct Collator {}
 impl Collator {
     #[constructor]
     fn construct(
-        locales: Option<Value>,
-        options: Option<Value>,
-        #[realm] realm: &mut Realm,
+        _locales: Option<Value>,
+        _options: Option<Value>,
     ) -> Res<ObjectHandle> {
         Ok(Object::null())
     }
 
     #[get("compare")]
-    fn compare(&self, #[realm] realm: &mut Realm) -> i8 {
+    fn compare(&self) -> i8 {
         0
     }
 
     #[prop("resolvedOptions")]
-    fn resolved_options(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn resolved_options(&self) -> Res<ObjectHandle> {
         Ok(Object::null())
     }
 
@@ -34,7 +31,6 @@ impl Collator {
     fn supported_locales_of(
         _locales: Option<Value>,
         _options: Option<Value>,
-        #[realm] realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }

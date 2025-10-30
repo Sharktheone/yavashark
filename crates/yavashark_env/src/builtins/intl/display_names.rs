@@ -1,4 +1,3 @@
-use crate::array::Array;
 use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
@@ -36,7 +35,6 @@ impl DisplayNames {
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }

@@ -1,4 +1,3 @@
-use crate::array::Array;
 use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
@@ -40,7 +39,6 @@ impl DurationFormat {
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }
@@ -50,7 +48,7 @@ impl DurationFormat {
     }
 
     #[prop("formatToParts")]
-    fn format_to_parts(&self, _duration: ObjectHandle, realm: &mut Realm) -> Vec<String> {
+    fn format_to_parts(&self, _duration: ObjectHandle) -> Vec<String> {
         Vec::new()
     }
 

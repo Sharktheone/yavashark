@@ -1,5 +1,3 @@
-use crate::array::Array;
-use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
@@ -40,7 +38,6 @@ impl PluralRules {
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }

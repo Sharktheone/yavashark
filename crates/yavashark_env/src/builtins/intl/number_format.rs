@@ -1,7 +1,4 @@
-use crate::array::Array;
-use crate::conversion::downcast_obj;
-use crate::value::Obj;
-use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, Variable};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -31,15 +28,15 @@ impl NumberFormat {
 impl NumberFormat {
     #[constructor]
     fn construct(
-        locales: Option<Value>,
-        options: Option<Value>,
+        _locales: Option<Value>,
+        _options: Option<Value>,
         #[realm] realm: &mut Realm,
     ) -> Res<Self> {
         Self::new(realm)
     }
 
     #[get("format")]
-    fn format(&self, #[realm] realm: &mut Realm) -> Res<String> {
+    fn format(&self) -> Res<String> {
         Ok(String::new())
     }
 
@@ -49,9 +46,8 @@ impl NumberFormat {
     }
 
     pub fn supported_locales_of(
-        locales: Value,
+        _locales: Value,
         _options: Option<ObjectHandle>,
-        #[realm] realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }

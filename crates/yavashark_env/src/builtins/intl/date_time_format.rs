@@ -40,7 +40,6 @@ impl DateTimeFormat {
     fn supported_locales_of(
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }
@@ -59,7 +58,6 @@ impl DateTimeFormat {
         &self,
         _start: String,
         _end: String,
-        realm: &mut Realm,
     ) -> Vec<String> {
         Vec::new()
     }
