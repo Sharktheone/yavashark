@@ -32,8 +32,8 @@ impl Segmenter {
         _locales: Option<String>,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Self::new(realm)?.into_object())
+    ) -> Res<Self> {
+        Self::new(realm)
     }
 
     #[prop("supportedLocalesOf")]
@@ -41,12 +41,12 @@ impl Segmenter {
         _locales: String,
         _options: Option<ObjectHandle>,
         realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String>  {
+        Vec::new()
     }
 
-    fn segment(&self, _duration: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    fn segment(&self, _duration: ObjectHandle, realm: &mut Realm) -> Vec<String> {
+        Vec::new()
     }
 
     #[prop("resolvedOptions")]
