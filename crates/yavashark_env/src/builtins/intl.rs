@@ -10,7 +10,6 @@ mod plural_rules;
 mod relative_time_format;
 mod segmenter;
 mod supported_values_of;
-mod utils;
 
 pub use collator::*;
 pub use date_time_format::*;

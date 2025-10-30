@@ -1,7 +1,4 @@
 use crate::array::Array;
-use crate::builtins::intl::utils::{
-    canonicalize_locale_list, get_option_string, validate_currency_code,
-};
 use crate::conversion::downcast_obj;
 use crate::value::Obj;
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, Variable};
