@@ -1,3 +1,4 @@
+use swc_ecma_ast::Str;
 use crate::value::Obj;
 use crate::{
     Object, ObjectHandle, Realm, Res, Value
@@ -27,5 +28,14 @@ impl Collator {
     #[prop("resolvedOptions")]
     fn resolved_options(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(Object::null())
+    }
+
+    #[prop("supportedLocalesOf")]
+    fn supported_locales_of(
+        _locales: Option<Value>,
+        _options: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Vec<String> {
+        Vec::new()
     }
 }
