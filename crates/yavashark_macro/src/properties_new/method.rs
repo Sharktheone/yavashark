@@ -312,7 +312,7 @@ pub fn parse_method(
             ty = Type::Set;
 
             return false;
-        } else if attr.path().is_ident("static") {
+        } else if attr.path().is_ident("static_method") {
             maybe_static = MethodType::Static;
 
             return false;
