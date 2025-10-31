@@ -54,11 +54,7 @@ impl DateTimeFormat {
     }
 
     #[prop("formatRangeToParts")]
-    fn format_range_to_parts(
-        &self,
-        _start: String,
-        _end: String,
-    ) -> Vec<String> {
+    fn format_range_to_parts(&self, _start: String, _end: String) -> Vec<String> {
         Vec::new()
     }
 

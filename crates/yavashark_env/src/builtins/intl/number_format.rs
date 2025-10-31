@@ -4,8 +4,7 @@ use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
-pub struct NumberFormat {
-}
+pub struct NumberFormat {}
 
 impl NumberFormat {
     pub fn new(realm: &mut Realm) -> Res<Self> {
@@ -45,10 +44,7 @@ impl NumberFormat {
         Ok(Object::new(realm))
     }
 
-    pub fn supported_locales_of(
-        _locales: Value,
-        _options: Option<ObjectHandle>,
-    ) -> Vec<String> {
+    pub fn supported_locales_of(_locales: Value, _options: Option<ObjectHandle>) -> Vec<String> {
         Vec::new()
     }
 }

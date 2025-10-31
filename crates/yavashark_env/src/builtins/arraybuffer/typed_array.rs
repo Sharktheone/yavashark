@@ -1,6 +1,5 @@
 mod conv;
 
-use std::any::TypeId;
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
@@ -25,6 +24,7 @@ use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
 use half::f16;
 use num_traits::{FromPrimitive, ToPrimitive};
+use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
@@ -586,12 +586,7 @@ impl TypedArray {
 
         let buffer = convert_buffer(elems, ty, realm)?;
 
-
-        create_ta_from_buffer(
-            realm,
-            ty,
-            buffer,
-        )
+        create_ta_from_buffer(realm, ty, buffer)
     }
 
     #[get("buffer")]
@@ -1583,7 +1578,6 @@ fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
 
     create_ta_from_buffer(realm, ty, buffer)
 }
-
 
 fn create_ta_from_buffer(realm: &mut Realm, ty: Type, buffer: ArrayBuffer) -> Res<ObjectHandle> {
     let ta = TypedArray::from_buffer(realm, buffer, ty)?;

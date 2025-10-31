@@ -1,7 +1,7 @@
-use std::any::TypeId;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property};
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
+use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};

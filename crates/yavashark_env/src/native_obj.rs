@@ -1,12 +1,12 @@
 #![allow(unused)]
 
-use std::cell::RefCell;
-use std::fmt::Debug;
-use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use crate::conversion::TryIntoValue;
 use crate::inline_props::{InlineObject, PropertiesHook};
 use crate::realm::Intrinsic;
 use crate::value::IntoValue;
+use crate::{MutObject, ObjectHandle, Realm, Res, Value};
+use std::cell::RefCell;
+use std::fmt::Debug;
 
 // TODO: maybe this is possible at some point - sigh >'_'<
 // default impl<T: Intrinsic + PropertiesHook + Debug + 'static> TryIntoValue for T {

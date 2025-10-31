@@ -1,6 +1,4 @@
-use crate::{
-    Object, ObjectHandle, Realm, Res, Value
-};
+use crate::{Object, ObjectHandle, Realm, Res, Value};
 use yavashark_macro::{object, props};
 
 #[object]
@@ -10,10 +8,7 @@ pub struct Collator {}
 #[props(intrinsic_name = intl_collator, to_string_tag = "Intl.Collator")]
 impl Collator {
     #[constructor]
-    fn construct(
-        _locales: Option<Value>,
-        _options: Option<Value>,
-    ) -> Res<ObjectHandle> {
+    fn construct(_locales: Option<Value>, _options: Option<Value>) -> Res<ObjectHandle> {
         Ok(Object::null())
     }
 
@@ -28,10 +23,7 @@ impl Collator {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(
-        _locales: Option<Value>,
-        _options: Option<Value>,
-    ) -> Vec<String> {
+    fn supported_locales_of(_locales: Option<Value>, _options: Option<Value>) -> Vec<String> {
         Vec::new()
     }
 }

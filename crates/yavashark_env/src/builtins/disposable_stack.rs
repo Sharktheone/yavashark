@@ -4,9 +4,7 @@ use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
-pub struct DisposableStack {
-
-}
+pub struct DisposableStack {}
 
 #[props(intrinsic_name = disposable_stack)]
 impl DisposableStack {

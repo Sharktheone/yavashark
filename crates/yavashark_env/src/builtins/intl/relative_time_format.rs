@@ -36,10 +36,7 @@ impl RelativeTimeFormat {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(
-        _locales: String,
-        _options: Option<ObjectHandle>,
-    ) -> Vec<String> {
+    fn supported_locales_of(_locales: String, _options: Option<ObjectHandle>) -> Vec<String> {
         Vec::new()
     }
 
