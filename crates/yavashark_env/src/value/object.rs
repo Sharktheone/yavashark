@@ -410,6 +410,10 @@ pub trait Obj: Debug + 'static {
         std::any::type_name::<Self>()
     }
 
+    fn object_type_id(&self) -> TypeId {
+        TypeId::of::<Self>()
+    }
+
     /// # Safety
     /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
     /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
@@ -458,6 +462,10 @@ pub trait Obj: Debug + 'static {
     {
         Object::from_boxed(Box::new(self))
     }
+
+    // fn as_any_object_ref(&self) -> &(dyn std::any::Any + '_) {
+    //     &self
+    // }
 }
 
 pub trait MutObj: Debug + 'static {
