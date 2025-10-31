@@ -1,18 +1,19 @@
 mod conv;
 
+use std::any::{Any, TypeId};
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::array_buf::ArrayBuffer;
-use crate::builtins::bigint64array::BigInt64Array;
-use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
+use crate::builtins::biguint64array::{BigUint64Array, BigUint64ArrayConstructor};
 use crate::builtins::float16array::Float16Array;
-use crate::builtins::float32array::Float32Array;
-use crate::builtins::float64array::Float64Array;
-use crate::builtins::int16array::Int16Array;
-use crate::builtins::int32array::Int32Array;
-use crate::builtins::int8array::Int8Array;
-use crate::builtins::uint16array::Uint16Array;
-use crate::builtins::uint32array::Uint32Array;
-use crate::builtins::unit8array::Uint8Array;
+use crate::builtins::float32array::{Float32Array, Float32ArrayConstructor};
+use crate::builtins::float64array::{Float64Array, Float64ArrayConstructor};
+use crate::builtins::int16array::{Int16Array, Int16ArrayConstructor};
+use crate::builtins::int32array::{Int32Array, Int32ArrayConstructor};
+use crate::builtins::int8array::{Int8Array, Int8ArrayConstructor};
+use crate::builtins::uint16array::{Uint16Array, Uint16ArrayConstructor};
+use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
+use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::value::{DefinePropertyResult, IntoValue, MutObj, Obj, Property};
@@ -551,6 +552,22 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
     ArrayBuffer::from_buffer(realm, buffer)
 }
 
+fn constructor_type_id_to_type(ty: TypeId) -> Res<Type> {
+    Ok(match ty {
+        x if x == TypeId::of::<Uint8ArrayConstructor>() => Type::U8,
+        x if x == TypeId::of::<Int8ArrayConstructor>() => Type::I8,
+        x if x == TypeId::of::<Uint16ArrayConstructor>() => Type::U16,
+        x if x == TypeId::of::<Int16ArrayConstructor>() => Type::I16,
+        x if x == TypeId::of::<Uint32ArrayConstructor>() => Type::U32,
+        x if x == TypeId::of::<Int32ArrayConstructor>() => Type::I32,
+        x if x == TypeId::of::<Float32ArrayConstructor>() => Type::F32,
+        x if x == TypeId::of::<Float64ArrayConstructor>() => Type::F64,
+        x if x == TypeId::of::<BigInt64ArrayConstructor>() => Type::I64,
+        x if x == TypeId::of::<BigUint64ArrayConstructor>() => Type::U64,
+        _ => return Err(Error::ty("Invalid TypedArray constructor")),
+    })
+}
+
 #[props(intrinsic_name = typed_array)]
 impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
@@ -560,6 +577,21 @@ impl TypedArray {
         Err(Error::ty(
             "Abstract class TypedArray not directly constructable",
         ))
+    }
+
+    pub fn of(this: Value, elems: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        let obj = &**this.as_object()?.guard();
+
+        let ty = constructor_type_id_to_type(obj.type_id())?;
+
+        let buffer = convert_buffer(elems, ty, realm)?;
+
+
+        create_ta_from_buffer(
+            realm,
+            ty,
+            buffer,
+        )
     }
 
     #[get("buffer")]
@@ -1549,6 +1581,11 @@ impl TypedArray {
 fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
     let buffer = ArrayBuffer::from_buffer(realm, bytes)?;
 
+    create_ta_from_buffer(realm, ty, buffer)
+}
+
+
+fn create_ta_from_buffer(realm: &mut Realm, ty: Type, buffer: ArrayBuffer) -> Res<ObjectHandle> {
     let ta = TypedArray::from_buffer(realm, buffer, ty)?;
 
     Ok(match ty {
