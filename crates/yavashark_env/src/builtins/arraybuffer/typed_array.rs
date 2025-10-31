@@ -1,6 +1,6 @@
 mod conv;
 
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
@@ -580,9 +580,9 @@ impl TypedArray {
     }
 
     pub fn of(this: Value, elems: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        let obj = &**this.as_object()?.guard();
+        let obj = this.as_object()?;
 
-        let ty = constructor_type_id_to_type(obj.type_id())?;
+        let ty = constructor_type_id_to_type(obj.object_type_id())?;
 
         let buffer = convert_buffer(elems, ty, realm)?;
 
