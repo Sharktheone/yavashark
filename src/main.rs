@@ -1,8 +1,10 @@
 mod conf;
+#[cfg(feature = "minimal")]
 mod minimal;
 #[cfg(feature = "vm")]
 mod optimizer;
 mod repl;
+#[cfg(not(feature = "minimal"))]
 mod run;
 mod simplerepl;
 

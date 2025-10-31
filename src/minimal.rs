@@ -49,7 +49,7 @@ pub fn main() {
     // #[cfg(feature = "vm")]
     // yavashark_vm::init(&mut realm).expect("Failed to init VM");
 
-    let result =
+    let _result =
         match yavashark_interpreter::Interpreter::run_in(&script.body, &mut realm, &mut scope) {
             Ok(v) => v,
             Err(e) => {
