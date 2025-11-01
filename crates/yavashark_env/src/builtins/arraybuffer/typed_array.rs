@@ -66,12 +66,6 @@ impl<T> From<T> for Packed<T> {
     }
 }
 
-// impl<T> Into<T> for Packed<T> {
-//     fn into(self) -> T {
-//         self.0
-//     }
-// }
-
 unsafe impl<T: Zeroable> Zeroable for Packed<T> {}
 
 impl<T: Copy> Copy for Packed<T> {}
