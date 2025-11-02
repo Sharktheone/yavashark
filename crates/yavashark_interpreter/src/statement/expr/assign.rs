@@ -399,7 +399,7 @@ impl Interpreter {
                     match v {
                         Property::Value(v, a) => (v, a.is_writable()),
                         Property::Getter(get, _) => {
-                            (get.call(Vec::new(), scope.fn_this()?, realm)?, false)
+                            (get.call(Vec::new(), obj.clone().into(), realm)?, false)
                         }
                     }
                 } else {
