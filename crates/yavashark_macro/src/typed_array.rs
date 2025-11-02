@@ -1,15 +1,20 @@
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
 
-const TYPES: [&str; 11] = [
-    "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f16", "f32", "f64",
+const RUST_TYPES: [&str; 12] = [
+    "u8", "u8", "u16", "u32", "u64", "i8", "i16", "i32", "i64", "f16", "f32", "f64",
+];
+
+
+const TYPES: [&str; 12] = [
+    "U8C", "U8", "U16", "U32", "U64", "I8", "I16", "I32", "I64", "F16", "F32", "F64",
 ];
 
 pub fn typed_array_run(input: TokenStream) -> TokenStream {
     let mut cases = TokenStream::new();
 
-    for ty in TYPES.iter() {
-        let t = Ident::new(&ty.to_uppercase(), proc_macro2::Span::call_site());
+    for (ty, t) in RUST_TYPES.iter().zip(TYPES.iter()) {
+        let t = Ident::new(&t, proc_macro2::Span::call_site());
         let ty = Ident::new(ty, proc_macro2::Span::call_site());
 
         cases.extend(quote! {
@@ -38,8 +43,8 @@ pub fn typed_array_run(input: TokenStream) -> TokenStream {
 pub fn typed_array_run_mut(input: TokenStream) -> TokenStream {
     let mut cases = TokenStream::new();
 
-    for ty in TYPES.iter() {
-        let t = Ident::new(&ty.to_uppercase(), proc_macro2::Span::call_site());
+    for (ty, t) in RUST_TYPES.iter().zip(TYPES.iter()) {
+        let t = Ident::new(&t, proc_macro2::Span::call_site());
         let ty = Ident::new(ty, proc_macro2::Span::call_site());
 
         cases.extend(quote! {

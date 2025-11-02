@@ -29,10 +29,11 @@ use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
-use crate::builtins::uint8clampedarray::Uint8ClampedArrayConstructor;
+use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
+    U8C,
     U8,
     U16,
     U32,
@@ -50,7 +51,7 @@ impl Type {
     #[must_use]
     pub const fn size(&self) -> usize {
         match self {
-            Self::U8 | Self::I8 => 1,
+            Self::U8C | Self::U8 | Self::I8 => 1,
             Self::U16 | Self::I16 | Self::F16 => 2,
             Self::U32 | Self::I32 | Self::F32 => 4,
             Self::U64 | Self::I64 | Self::F64 => 8,
@@ -494,7 +495,7 @@ impl TypedArray {
 fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBuffer> {
     let len = items.len()
         * match ty {
-            Type::U8 | Type::I8 => 1,
+            Type::U8C | Type::U8 | Type::I8 => 1,
             Type::U16 | Type::I16 | Type::F16 => 2,
             Type::U32 | Type::I32 | Type::F32 => 4,
             Type::U64 | Type::I64 | Type::F64 => 8,
@@ -504,7 +505,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 
     for item in items {
         match ty {
-            Type::U8 => {
+            Type::U8 | Type::U8C => {
                 buffer.push(item.to_number(realm)? as u8);
             }
             Type::U16 => {
@@ -549,7 +550,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 
 fn constructor_type_id_to_type(ty: TypeId) -> Res<Type> {
     Ok(match ty {
-        x if x == TypeId::of::<Uint8ClampedArrayConstructor>() => Type::U8,
+        x if x == TypeId::of::<Uint8ClampedArrayConstructor>() => Type::U8C,
         x if x == TypeId::of::<Uint8ArrayConstructor>() => Type::U8,
         x if x == TypeId::of::<Int8ArrayConstructor>() => Type::I8,
         x if x == TypeId::of::<Uint16ArrayConstructor>() => Type::U16,
@@ -1581,6 +1582,7 @@ fn create_ta_from_buffer(realm: &mut Realm, ty: Type, buffer: ArrayBuffer) -> Re
     let ta = TypedArray::from_buffer(realm, buffer, ty)?;
 
     Ok(match ty {
+        Type::U8C => Uint8ClampedArray::new(realm, ta)?.into_object(),
         Type::U8 => Uint8Array::new(realm, ta)?.into_object(),
         Type::U16 => Uint16Array::new(realm, ta)?.into_object(),
         Type::U32 => Uint32Array::new(realm, ta)?.into_object(),
@@ -1599,6 +1601,17 @@ fn extend_as_bytes(bytes: &mut Vec<u8>, value: Value, ty: Type) -> Res<()> {
     let value = value.to_number_or_null();
 
     match ty {
+        Type::U8C => {
+            let v = value.round();
+            let v = if v.is_nan() || v < 0.0 {
+                0
+            } else if v > 255.0 {
+                255
+            } else {
+                v as u8
+            };
+            bytes.push(v);
+        }
         Type::U8 => {
             bytes.push(value as u8);
         }
