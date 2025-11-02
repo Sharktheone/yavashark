@@ -29,6 +29,7 @@ use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
+use crate::builtins::uint8clampedarray::Uint8ClampedArrayConstructor;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -548,6 +549,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 
 fn constructor_type_id_to_type(ty: TypeId) -> Res<Type> {
     Ok(match ty {
+        x if x == TypeId::of::<Uint8ClampedArrayConstructor>() => Type::U8,
         x if x == TypeId::of::<Uint8ArrayConstructor>() => Type::U8,
         x if x == TypeId::of::<Int8ArrayConstructor>() => Type::I8,
         x if x == TypeId::of::<Uint16ArrayConstructor>() => Type::U16,
