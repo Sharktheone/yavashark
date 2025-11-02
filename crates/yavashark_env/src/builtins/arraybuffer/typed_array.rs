@@ -4,7 +4,7 @@ use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
 use crate::builtins::biguint64array::{BigUint64Array, BigUint64ArrayConstructor};
-use crate::builtins::float16array::Float16Array;
+use crate::builtins::float16array::{Float16Array, Float16ArrayConstructor};
 use crate::builtins::float32array::{Float32Array, Float32ArrayConstructor};
 use crate::builtins::float64array::{Float64Array, Float64ArrayConstructor};
 use crate::builtins::int16array::{Int16Array, Int16ArrayConstructor};
@@ -554,6 +554,7 @@ fn constructor_type_id_to_type(ty: TypeId) -> Res<Type> {
         x if x == TypeId::of::<Int16ArrayConstructor>() => Type::I16,
         x if x == TypeId::of::<Uint32ArrayConstructor>() => Type::U32,
         x if x == TypeId::of::<Int32ArrayConstructor>() => Type::I32,
+        x if x == TypeId::of::<Float16ArrayConstructor>() => Type::F16,
         x if x == TypeId::of::<Float32ArrayConstructor>() => Type::F32,
         x if x == TypeId::of::<Float64ArrayConstructor>() => Type::F64,
         x if x == TypeId::of::<BigInt64ArrayConstructor>() => Type::I64,
