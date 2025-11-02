@@ -573,6 +573,7 @@ impl TypedArray {
         ))
     }
 
+    #[length(0)]
     pub fn of(this: Value, elems: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         let obj = this.as_object()?;
 
