@@ -10,6 +10,8 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
+const MAX_INDEX: usize = (1 << 53) - 1;
+
 impl PropertyKey {
     pub fn as_str(&self) -> &str {
         match self {
@@ -257,7 +259,7 @@ impl IntoPropertyKey for Value {
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
             Self::Number(n) => {
-                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
+                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() && n as usize <= MAX_INDEX {
                     InternalPropertyKey::Index(n as usize)
                 } else {
                     InternalPropertyKey::String(fmt_num(n))
@@ -271,10 +273,16 @@ impl IntoPropertyKey for Value {
 }
 
 fn string_to_internal_property_key(s: YSString) -> InternalPropertyKey {
-    s.parse::<usize>().map_or_else(
-        |_| InternalPropertyKey::String(s),
-        InternalPropertyKey::Index,
-    )
+    let Ok(i) = s.parse::<usize>() else {
+        return InternalPropertyKey::String(s);
+    };
+
+    if i <= MAX_INDEX {
+        InternalPropertyKey::Index(i)
+    } else {
+        InternalPropertyKey::String(s)
+    }
+
     //TODO: this is a hack, we should not parse strings to usize
 }
 
