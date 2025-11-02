@@ -10,7 +10,14 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
+#[cfg(target_pointer_width = "64")]
 const MAX_INDEX: usize = (1 << 53) - 1;
+#[cfg(target_pointer_width = "32")]
+const MAX_INDEX: usize = (1 << 31) - 1;
+
+#[cfg(target_pointer_width = "16")]
+const MAX_INDEX: usize = (1 << 15) - 1;
+
 
 impl PropertyKey {
     pub fn as_str(&self) -> &str {
