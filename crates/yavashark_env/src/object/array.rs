@@ -1626,10 +1626,9 @@ impl Array {
             };
 
             buf.push_str(value.value.to_string(realm)?.as_str());
-            buf.push_str(", ");
+            buf.push(',');
         }
 
-        buf.pop();
         buf.pop();
 
         Ok(buf.into())
