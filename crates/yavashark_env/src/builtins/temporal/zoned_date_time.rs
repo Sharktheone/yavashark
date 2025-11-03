@@ -645,7 +645,9 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
     }
 
     if let Some(offset) = obj.get_opt("offset", realm)? {
-        let offset = offset.to_string(realm)?;
+        let Value::String(offset) = offset else {
+            return Err(Error::ty("Expected offset to be a string"));
+        };
         let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
 
         partial.fields.offset = Some(offset);
