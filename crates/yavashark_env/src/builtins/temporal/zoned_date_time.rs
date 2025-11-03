@@ -537,6 +537,15 @@ pub fn value_to_zoned_date_time(
 pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<PartialZonedDateTime> {
     let mut partial = PartialZonedDateTime::new();
 
+    if let Some(offset) = obj.get_opt("offset", realm)? {
+        let Value::String(offset) = offset else {
+            return Err(Error::ty("Expected offset to be a string"));
+        };
+        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
+
+        partial.fields.offset = Some(offset);
+    }
+
     if let Some(calendar) = obj.get_opt("calendar", realm)? {
         let calendar = calendar.to_string(realm)?;
         let calendar = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
@@ -644,14 +653,6 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         return Err(Error::ty("Expected timeZone to be defined"));
     }
 
-    if let Some(offset) = obj.get_opt("offset", realm)? {
-        let Value::String(offset) = offset else {
-            return Err(Error::ty("Expected offset to be a string"));
-        };
-        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
-
-        partial.fields.offset = Some(offset);
-    }
 
     Ok(partial)
 }
