@@ -378,7 +378,7 @@ impl PlainDate {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let overflow = overflow_options_opt(overflow.as_ref(), realm)?;
-        let fields = value_to_calendar_fields(other, realm)?;
+        let fields = value_to_calendar_fields(other, false, realm)?;
 
         let date = self
             .date

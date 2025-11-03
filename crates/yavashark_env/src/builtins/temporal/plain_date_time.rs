@@ -369,7 +369,7 @@ impl PlainDateTime {
     pub fn with(&self, other: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let overflow = overflow_options(other, realm)?;
 
-        let fields = value_to_date_time_fields(other, realm)?;
+        let fields = value_to_date_time_fields(other, true, realm)?;
 
         let date = self
             .date

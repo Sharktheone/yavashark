@@ -294,7 +294,7 @@ impl ZonedDateTime {
         let disambiguation = disambiguation_opt(Some(other), realm)?;
         let offset_disambiguation = offset_disambiguation_opt(Some(other), realm)?;
 
-        let fields = value_to_zoned_date_time_fields(other, realm)?;
+        let fields = value_to_zoned_date_time_fields(other, false, realm)?;
 
         let date = self
             .date

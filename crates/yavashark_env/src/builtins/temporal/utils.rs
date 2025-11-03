@@ -396,7 +396,7 @@ pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDir
     }
 }
 
-pub fn value_to_calendar_fields(value: &ObjectHandle, realm: &mut Realm) -> Res<CalendarFields> {
+pub fn value_to_calendar_fields(value: &ObjectHandle, needs_fields: bool, realm: &mut Realm) -> Res<CalendarFields> {
     const INVALID_KEYS: [&str; 3] = ["calendar", "timeZone", "months"];
 
     for key in INVALID_KEYS {
@@ -459,14 +459,14 @@ pub fn value_to_calendar_fields(value: &ObjectHandle, realm: &mut Realm) -> Res<
         had_fields = true;
     }
 
-    if !had_fields {
+    if !had_fields && needs_fields {
         return Err(Error::ty("At least one field must be provided"));
     }
 
     Ok(fields)
 }
 
-pub fn value_to_partial_time(value: &ObjectHandle, realm: &mut Realm) -> Res<PartialTime> {
+pub fn value_to_partial_time(value: &ObjectHandle, needs_time: bool, realm: &mut Realm) -> Res<PartialTime> {
     let mut partial_time = PartialTime::new();
     let mut had_time = false;
 
@@ -512,16 +512,16 @@ pub fn value_to_partial_time(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
         had_time = true;
     }
 
-    if !had_time {
+    if !had_time && needs_time {
         return Err(Error::ty("At least one time field must be provided"));
     }
 
     Ok(partial_time)
 }
 
-pub fn value_to_date_time_fields(other: &ObjectHandle, realm: &mut Realm) -> Res<DateTimeFields> {
-    let calendar_fields = value_to_calendar_fields(other, realm)?;
-    let time = value_to_partial_time(other, realm)?;
+pub fn value_to_date_time_fields(other: &ObjectHandle, needs_fields: bool, realm: &mut Realm) -> Res<DateTimeFields> {
+    let calendar_fields = value_to_calendar_fields(other, needs_fields, realm)?;
+    let time = value_to_partial_time(other, needs_fields, realm)?;
 
     Ok(DateTimeFields {
         calendar_fields,
@@ -585,10 +585,11 @@ pub fn value_to_year_month_fields(
 
 pub fn value_to_zoned_date_time_fields(
     value: &ObjectHandle,
+    needs_fields: bool,
     realm: &mut Realm,
 ) -> Res<ZonedDateTimeFields> {
-    let calendar_fields = value_to_calendar_fields(value, realm)?;
-    let time = value_to_partial_time(value, realm)?;
+    let calendar_fields = value_to_calendar_fields(value, needs_fields, realm)?;
+    let time = value_to_partial_time(value, needs_fields, realm)?;
 
     let offset = if let Some(offset) = value.get_opt("offset", realm)? {
         let offset = offset.to_string(realm)?;
