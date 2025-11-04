@@ -1,5 +1,5 @@
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property};
+use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property, PropertyDescriptor};
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -55,6 +55,10 @@ pub trait PropertiesHook {
     }
     fn delete_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         Ok(false)
+    }
+
+    fn get_descriptor(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+        Ok(None)
     }
 
     fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>> {
