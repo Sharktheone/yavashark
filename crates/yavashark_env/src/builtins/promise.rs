@@ -548,13 +548,26 @@ impl Promise {
                 return Self::rejected(&err, realm);
             }
         } {
-            let then = p
-                .get_property_opt("then", realm)?
-                .unwrap_or(Value::Undefined);
+            let then = match p
+                .get_property_opt("then", realm) {
+                Ok(then) => then,
+                Err(err) => {
+                    let err = ErrorObj::error_to_value(err, realm)?;
 
-            if !then.is_callable() {
+                    iter.close(realm)?;
+                    return Self::rejected(&err, realm);
+                }
+            };
+
+
+            if let Some(then) = then {
+                if !then.is_callable() {
+                    p = Self::resolved(&p, realm)?.into();
+                }
+            }  else {
                 p = Self::resolved(&p, realm)?.into();
             }
+
 
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
