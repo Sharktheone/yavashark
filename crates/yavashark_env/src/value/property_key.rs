@@ -280,6 +280,9 @@ impl IntoPropertyKey for Value {
 }
 
 fn string_to_internal_property_key(s: YSString) -> InternalPropertyKey {
+    if s.starts_with("+") || s.starts_with("-") {
+        return InternalPropertyKey::String(s);
+    }
     let Ok(i) = s.parse::<usize>() else {
         return InternalPropertyKey::String(s);
     };
