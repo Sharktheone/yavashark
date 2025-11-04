@@ -1,6 +1,7 @@
 mod args;
 mod contains_property;
 mod delete_property;
+mod get_descriptor;
 mod get_property;
 mod keys;
 mod properties;
@@ -141,6 +142,7 @@ pub fn inline_props(
 fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) -> TokenStream {
     let set_property = set_property::generate_set_property(props, config);
     let get_property = get_property::generate_get_property(props, config);
+    let get_descriptor = get_descriptor::generate_get_descriptor(props, config);
     let contains_property = contains_property::generate_contains_property(props, config);
     let properties = properties::generate_properties(props, config);
     let keys = keys::generate_keys(props, config);
@@ -156,6 +158,7 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
         impl #env::inline_props::PropertiesHook for #struct_name {
             #set_property
             #get_property
+            #get_descriptor
             #contains_property
             #properties
             #keys
