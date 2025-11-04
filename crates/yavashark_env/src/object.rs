@@ -1063,7 +1063,7 @@ impl MutObj for MutObject {
         }
 
         if let Some(prop) = self.properties.get::<PropertyKey>(&name.into()) {
-            return Ok(self.values.get(*prop).map(|v| dbg!(v).into()));
+            return Ok(self.values.get(*prop).map(|v| v.into()));
         }
 
         Ok(None)

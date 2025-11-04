@@ -206,7 +206,6 @@ impl From<Property> for PropertyDescriptor {
 
 impl From<&ObjectProperty> for PropertyDescriptor {
     fn from(prop: &ObjectProperty) -> Self {
-        dbg!(prop);
         if !prop.set.is_undefined() || !prop.get.is_undefined() {
             PropertyDescriptor::Accessor {
                 get: if let Value::Object(obj) = &prop.get {
