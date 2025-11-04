@@ -263,6 +263,12 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         Ok(result)
     }
 
+    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+        Ok(match self.props.get_descriptor(&name, realm)? {
+            Some(desc) => Some(desc),
+            None => self.get_wrapped_object().get_property_descriptor(name, realm)?,
+        })
+    }
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         let mut inner_refs = self.get_inner().gc_refs();
         let props_refs = self.props.gc_refs();
