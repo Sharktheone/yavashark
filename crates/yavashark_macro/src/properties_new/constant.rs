@@ -7,6 +7,10 @@ use syn::Expr;
 pub struct Constant {
     pub name: syn::Ident,
     pub js_name: Option<Expr>,
+    pub writable: bool,
+    pub enumerable: bool,
+    pub configurable: bool,
+
 }
 
 impl Constant {
@@ -31,6 +35,9 @@ pub fn parse_constant(
 
     let mut is_static = true;
     let mut is_both = false;
+    let mut writable = false;
+    let mut enumerable = false;
+    let mut configurable = false;
 
     let mut error = None;
     constant.attrs.retain_mut(|attr| {
@@ -52,6 +59,15 @@ pub fn parse_constant(
             is_both = true;
             is_static = false;
             return false;
+        } else if attr.path().is_ident("writable") {
+            writable = true;
+            return false;
+        } else if attr.path().is_ident("enumerable") {
+            enumerable = true;
+            return false;
+        } else if attr.path().is_ident("configurable") {
+            configurable = true;
+            return false;
         }
 
         true
@@ -70,5 +86,8 @@ pub fn parse_constant(
     }(Constant {
         name: constant.ident.clone(),
         js_name,
+        writable,
+        enumerable,
+        configurable,
     }))
 }

@@ -243,6 +243,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -> TokenStream {
     let mut init = TokenStream::new();
     let self_ty = self_ty.unwrap_or_else(|| quote! { Self });
+    let variable = &config.variable;
 
     for prop in props {
         let (prop_tokens, name, js_name, prop_type, var_create) = match prop {
@@ -251,15 +252,23 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 method.name,
                 method.js_name,
                 method.ty,
-                quote! { write_config },
+                quote! {#variable::write_config(prop.into())},
             ),
-            Prop::Constant(constant) => (
-                constant.init_tokens(config, self_ty.clone()),
-                constant.name,
-                constant.js_name,
-                Type::Normal,
-                quote! { new_read_only },
-            ),
+            Prop::Constant(constant) => {
+                let writable = constant.writable;
+                let enumerable = constant.enumerable;
+                let configurable = constant.configurable;
+
+                let variable_fn = quote! { #variable::new_with_attributes(prop.into(), #writable, #enumerable, #configurable) };
+
+                (
+                    constant.init_tokens(config, self_ty.clone()),
+                    constant.name,
+                    constant.js_name,
+                    Type::Normal,
+                    variable_fn
+                )
+            },
         };
 
         let name = js_name
@@ -268,12 +277,11 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
 
         let tokens = match prop_type {
             Type::Normal => {
-                let variable = &config.variable;
-
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_property_attributes(#name.into(), #variable::#var_create(prop.into()), realm)?;
+
+                        obj.define_property_attributes(#name.into(), #var_create, realm)?;
                     }
                 }
             }
