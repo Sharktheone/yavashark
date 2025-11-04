@@ -1,6 +1,6 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
-use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
+use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor};
 use crate::{
     InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable,
 };
@@ -336,6 +336,56 @@ impl ObjectImpl for Arguments {
             Ok((true, None))
         }
     }
+
+    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if let Some(value) = self.resolve_array(idx) {
+                return Ok(Some(PropertyDescriptor::Data {
+                    value,
+                    writable: true,
+                    enumerable: true,
+                    configurable: true,
+                }));
+            }
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "length" {
+                return Ok(Some(PropertyDescriptor::Data {
+                    value: self.length.borrow().clone(),
+                    writable: true,
+                    enumerable: false,
+                    configurable: false,
+                }));
+            }
+            if s == "callee" {
+                let Some(callee) = &self.callee else {
+                    return Ok(Some(PropertyDescriptor::Accessor {
+                        get: Some(realm
+                            .intrinsics
+                            .clone_public()
+                            .throw_type_error
+                            .get(realm)?
+                            .clone()),
+                        set: None,
+                        enumerable: false,
+                        configurable: false,
+                    }));
+                };
+
+                return Ok(Some(PropertyDescriptor::Data {
+                    value: callee.clone(),
+                    writable: true,
+                    enumerable: false,
+                    configurable: true,
+                }));
+            }
+        }
+
+        self.get_wrapped_object()
+            .get_property_descriptor(name, realm)
+    }
+
     //
     // fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
     //     Ok("[object Arguments]".into())
