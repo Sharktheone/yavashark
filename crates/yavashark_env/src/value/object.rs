@@ -185,6 +185,54 @@ impl From<Value> for PropertyDescriptor {
     }
 }
 
+impl From<Property> for PropertyDescriptor {
+    fn from(value: Property) -> Self {
+        match value {
+            Property::Value(v, a) => PropertyDescriptor::Data {
+                value: v,
+                writable: a.is_writable(),
+                enumerable: a.is_enumerable(),
+                configurable: a.is_configurable(),
+            },
+            Property::Getter(g, props) => PropertyDescriptor::Accessor {
+                get: Some(g),
+                set: None,
+                enumerable: props.is_enumerable(),
+                configurable: props.is_configurable(),
+            },
+        }
+    }
+}
+
+impl From<&ObjectProperty> for PropertyDescriptor {
+    fn from(prop: &ObjectProperty) -> Self {
+        dbg!(prop);
+        if !prop.set.is_undefined() || !prop.get.is_undefined() {
+            PropertyDescriptor::Accessor {
+                get: if let Value::Object(obj) = &prop.get {
+                    Some(obj.clone())
+                } else {
+                    None
+                },
+                set: if let Value::Object(obj) = &prop.set {
+                    Some(obj.clone())
+                } else {
+                    None
+                },
+                enumerable: prop.attributes.is_enumerable(),
+                configurable: prop.attributes.is_configurable(),
+            }
+        } else {
+            PropertyDescriptor::Data {
+                value: prop.value.clone(),
+                writable: prop.attributes.is_writable(),
+                enumerable: prop.attributes.is_enumerable(),
+                configurable: prop.attributes.is_configurable(),
+            }
+        }
+    }
+}
+
 impl From<Variable> for PropertyDescriptor {
     fn from(var: Variable) -> Self {
         PropertyDescriptor::Data {
@@ -634,6 +682,32 @@ pub trait MutObj: Debug + 'static {
     fn is_constructable(&self) -> bool {
         false
     }
+
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+        let Some(prop) = self.get_own_property(name, realm)? else {
+            return Ok(None);
+        };
+
+        match prop {
+            Property::Value(v, a) => Ok(Some(PropertyDescriptor::Data {
+                value: v,
+                writable: a.is_writable(),
+                enumerable: a.is_enumerable(),
+                configurable: a.is_configurable(),
+            })),
+            Property::Getter(g, props) => Ok(Some(PropertyDescriptor::Accessor {
+                get: Some(g),
+                set: None,
+                enumerable: props.is_enumerable(),
+                configurable: props.is_configurable(),
+            })),
+        }
+    }
+
 
     fn class_name(&mut self) -> &'static str {
         std::any::type_name::<Self>()

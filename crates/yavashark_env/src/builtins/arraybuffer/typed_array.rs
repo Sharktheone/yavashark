@@ -15,7 +15,7 @@ use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
 use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::value::{DefinePropertyResult, IntoValue, MutObj, Obj, Property};
+use crate::value::{self, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor};
 use crate::{
     Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -96,7 +96,7 @@ pub struct TypedArray {
 impl crate::value::ObjectImpl for TypedArray {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl value::MutObj> {
         self.inner.borrow_mut()
     }
 
@@ -337,6 +337,25 @@ impl crate::value::ObjectImpl for TypedArray {
             index < slice.len(),
             slice.get(index).map(|x| to_value(x.0))
         )))
+    }
+
+    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().get_property_descriptor(name, realm);
+        }
+
+        if let InternalPropertyKey::Index(idx) = name {
+            typed_array_run!({
+                return Ok(slice.get(idx).map(|x| PropertyDescriptor::Data {
+                    value: to_value(x.0),
+                    writable: true,
+                    enumerable: true,
+                    configurable: false,
+                }));
+            });
+        }
+
+        self.get_wrapped_object().get_property_descriptor(name, realm)
     }
 }
 

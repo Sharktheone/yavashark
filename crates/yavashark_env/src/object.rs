@@ -1,6 +1,6 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
+use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor};
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -396,6 +396,20 @@ impl MutObject {
                 .array
                 .get(i)
                 .and_then(|v| self.values.get(v.1).map(|p| p.property()));
+        }
+
+        None
+    }
+
+    #[must_use]
+    pub fn get_array_descriptor(&self, index: usize) -> Option<PropertyDescriptor> {
+        let (i, found) = self.array_position(index);
+
+        if found {
+            return self
+                .array
+                .get(i)
+                .and_then(|v| self.values.get(v.1).map(|p| p.into()));
         }
 
         None
@@ -1036,6 +1050,23 @@ impl MutObj for MutObject {
     fn set_prototype(&mut self, proto: ObjectOrNull, _realm: &mut Realm) -> Res {
         self.prototype = proto;
         Ok(())
+    }
+
+    fn get_property_descriptor(&self, name: InternalPropertyKey, _realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
+            let val: Value = self.prototype.clone().into();
+            return Ok(Some(val.into()));
+        }
+
+        if let InternalPropertyKey::Index(n) = name {
+            return Ok(self.get_array_descriptor(n));
+        }
+
+        if let Some(prop) = self.properties.get::<PropertyKey>(&name.into()) {
+            return Ok(self.values.get(*prop).map(|v| dbg!(v).into()));
+        }
+
+        Ok(None)
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
