@@ -3,7 +3,7 @@ use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::PlainTime;
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
-use crate::{Error, Realm, Res};
+use crate::{Error, Realm, Res, Symbol};
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
@@ -14,6 +14,9 @@ pub struct Now {}
 
 #[props(intrinsic_name = temporal_now, to_string_tag = "Temporal.Now")]
 impl Now {
+    #[prop(Symbol::TO_STRING_TAG)]
+    const TO_STRING_TAG: &'static str = "Temporal.Now";
+
     fn instant(realm: &mut Realm) -> Res<Instant> {
         Instant::now_obj(realm)
     }
