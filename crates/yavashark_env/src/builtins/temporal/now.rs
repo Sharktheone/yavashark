@@ -15,6 +15,7 @@ pub struct Now {}
 #[props(intrinsic_name = temporal_now, to_string_tag = "Temporal.Now")]
 impl Now {
     #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
     const TO_STRING_TAG: &'static str = "Temporal.Now";
 
     fn instant(realm: &mut Realm) -> Res<Instant> {
