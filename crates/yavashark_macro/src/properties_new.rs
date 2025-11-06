@@ -50,6 +50,8 @@ pub struct PropertiesArgs {
     no_intrinsic: bool,
     #[darling(default)]
     no_partial: bool,
+    #[darling(default)]
+    raw: bool,
 }
 
 #[allow(unused)]
@@ -117,12 +119,26 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 
                 match property {
                     MaybeStatic::Impl(property) => {
+                        if args.raw {
+                            return Err(syn::Error::new(
+                                constant.span(),
+                                "Cannot use 'impl' with 'raw' option",
+                            ));
+                        }
+
                         props.push(Prop::Constant(property));
                     }
                     MaybeStatic::Static(property) => {
                         static_props.push(Prop::Constant(property));
                     }
                     MaybeStatic::Both(property) => {
+                        if args.raw {
+                            return Err(syn::Error::new(
+                                constant.span(),
+                                "Cannot use 'both' with 'raw' option",
+                            ));
+
+                        }
                         props.push(Prop::Constant(property.clone()));
                         static_props.push(Prop::Constant(property));
                     }
