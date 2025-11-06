@@ -196,25 +196,6 @@ impl ObjectImpl for Arguments {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if let InternalPropertyKey::Index(idx) = name {
-            if idx < self.args.borrow().len() {
-                return Ok(true);
-            }
-        }
-
-        if let InternalPropertyKey::String(s) = &name {
-            if s == "length" {
-                return Ok(true);
-            }
-            if s == "callee" {
-                return Ok(true);
-            }
-        }
-
-        self.get_wrapped_object().contains_key(name, realm)
-    }
-
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::Index(idx) = name {
             if idx < self.args.borrow().len() {
@@ -232,6 +213,25 @@ impl ObjectImpl for Arguments {
         }
 
         self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if idx < self.args.borrow().len() {
+                return Ok(true);
+            }
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "length" {
+                return Ok(true);
+            }
+            if s == "callee" {
+                return Ok(true);
+            }
+        }
+
+        self.get_wrapped_object().contains_key(name, realm)
     }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
