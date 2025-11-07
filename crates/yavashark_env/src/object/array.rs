@@ -197,7 +197,20 @@ impl Array {
         Ok(array)
     }
 
-    pub fn with_elements_this(realm: &mut Realm, elements: Vec<Value>, _this: Value) -> Res<Self> {
+    pub fn with_elements_this(realm: &mut Realm, elements: Vec<Value>, this: Value) -> Res<ObjectHandle> {
+        if let Value::Object(this) = this {
+            if this.is_constructable() && &this != realm.intrinsics.clone_public().array.get(realm)? {
+                let array = this.construct(Vec::new(), realm)?;
+
+                for (i, element) in elements.into_iter().enumerate() {
+                    array.define_property(i.into(), element, realm)?;
+                }
+
+                return Ok(array)
+            }
+        }
+
+
         let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -207,7 +220,7 @@ impl Array {
 
         drop(inner);
 
-        Ok(array)
+        Ok(array.into_object())
     }
 
     pub fn with_elements_and_proto(proto: ObjectHandle, elements: Vec<Value>) -> Res<Self> {
@@ -310,7 +323,7 @@ impl Array {
         realm: &mut Realm,
         string: &str,
         this: Value,
-    ) -> Res<Self> {
+    ) -> Res<ObjectHandle> {
         let elements = string
             .chars()
             .map(|c| c.to_string().into())
@@ -1811,7 +1824,7 @@ impl ArrayConstructor {
         this: Value,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
-            return Ok(Obj::into_object(Array::from_string_this(realm, str, this)?));
+            return Ok(Array::from_string_this(realm, str, this)?);
         }
 
         if let Value::Object(obj) = &items {
@@ -1842,7 +1855,7 @@ impl ArrayConstructor {
                     values
                 };
 
-                return Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?));
+                return Ok(Array::with_elements_this(realm, array, this)?);
             }
 
             if let Some(map) = obj.downcast::<Map>() {
@@ -1872,7 +1885,7 @@ impl ArrayConstructor {
                     values
                 };
 
-                return Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?));
+                return Ok(Array::with_elements_this(realm, array, this)?);
             }
         }
 
@@ -1896,7 +1909,7 @@ impl ArrayConstructor {
 
         it.close(realm)?;
 
-        Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?))
+        Ok(Array::with_elements_this(realm, array, this)?)
     }
 }
 
