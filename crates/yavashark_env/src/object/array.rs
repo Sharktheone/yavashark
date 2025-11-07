@@ -1808,9 +1808,10 @@ impl ArrayConstructor {
         mapper: Option<ObjectHandle>,
         this_arg: Option<Value>,
         #[realm] realm: &mut Realm,
+        this: Value,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
-            return Ok(Obj::into_object(Array::from_string(realm, str)?));
+            return Ok(Obj::into_object(Array::from_string_this(realm, str, this)?));
         }
 
         if let Value::Object(obj) = &items {
@@ -1841,7 +1842,7 @@ impl ArrayConstructor {
                     values
                 };
 
-                return Ok(Obj::into_object(Array::with_elements(realm, array)?));
+                return Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?));
             }
 
             if let Some(map) = obj.downcast::<Map>() {
@@ -1871,7 +1872,7 @@ impl ArrayConstructor {
                     values
                 };
 
-                return Ok(Obj::into_object(Array::with_elements(realm, array)?));
+                return Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?));
             }
         }
 
@@ -1895,7 +1896,7 @@ impl ArrayConstructor {
 
         it.close(realm)?;
 
-        Ok(Obj::into_object(Array::with_elements(realm, array)?))
+        Ok(Obj::into_object(Array::with_elements_this(realm, array, this)?))
     }
 }
 
