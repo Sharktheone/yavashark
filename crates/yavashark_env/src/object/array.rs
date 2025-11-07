@@ -197,6 +197,19 @@ impl Array {
         Ok(array)
     }
 
+    pub fn with_elements_this(realm: &mut Realm, elements: Vec<Value>, _this: Value) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array(elements.into_iter());
+
+        drop(inner);
+
+        Ok(array)
+    }
+
     pub fn with_elements_and_proto(proto: ObjectHandle, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(proto);
 
@@ -289,6 +302,21 @@ impl Array {
             .collect::<Vec<Value>>();
 
         let array = Self::with_elements(realm, elements)?;
+
+        Ok(array)
+    }
+
+    pub fn from_string_this(
+        realm: &mut Realm,
+        string: &str,
+        this: Value,
+    ) -> Res<Self> {
+        let elements = string
+            .chars()
+            .map(|c| c.to_string().into())
+            .collect::<Vec<Value>>();
+
+        let array = Self::with_elements_this(realm, elements, this)?;
 
         Ok(array)
     }
