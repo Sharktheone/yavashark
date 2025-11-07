@@ -1821,7 +1821,7 @@ impl ArrayConstructor {
         mapper: Option<ObjectHandle>,
         this_arg: Option<Value>,
         #[realm] realm: &mut Realm,
-        this: Value,
+        #[this] this: Value,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
             return Ok(Array::from_string_this(realm, str, this)?);
