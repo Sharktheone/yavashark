@@ -1,12 +1,12 @@
 use crate::array::Array;
 use crate::utils::ValueIterator;
-use crate::value::{Constructor, IntoValue, MutObj, Obj};
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
+use crate::value::{IntoValue, MutObj};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -15,16 +15,14 @@ pub struct WeakMap {
     map: IndexMap<WeakValue, WeakValue, FxBuildHasher>,
 }
 
-#[object(constructor)]
-#[derive(Debug)]
-pub struct WeakMapConstructor {}
-
-impl Constructor for WeakMapConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+#[props(intrinsic_name = weak_map)]
+impl WeakMap {
+    #[constructor]
+    fn construct(realm: &mut Realm, iter: Option<Value>) -> Res<WeakMap> {
         let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 
-        if let Some(iter) = args.first() {
-            let iter = ValueIterator::new(iter, realm)?;
+        if let Some(iter) = iter {
+            let iter = ValueIterator::new(&iter, realm)?;
 
             while let Some(val) = iter.next(realm)? {
                 let key = val.get_property(0, realm)?;
@@ -43,30 +41,9 @@ impl Constructor for WeakMapConstructor {
             }),
         };
 
-        Ok(map.into_object())
+        Ok(map)
     }
-}
 
-impl WeakMapConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
-        let mut this = Self {
-            inner: RefCell::new(MutableWeakMapConstructor {
-                object: MutObject::with_proto(func.clone()),
-            }),
-        };
-
-        this.initialize(realm)?;
-
-        Ok(this.into_object())
-    }
-}
-
-#[properties_new(raw)]
-impl WeakMapConstructor {}
-
-#[properties_new(intrinsic_name(weak_map), constructor(WeakMapConstructor::new))]
-impl WeakMap {
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();
 
