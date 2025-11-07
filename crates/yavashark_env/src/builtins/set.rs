@@ -1,9 +1,9 @@
 use crate::utils::ValueIterator;
-use crate::value::{Constructor, IntoValue, MutObj, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::value::{IntoValue, MutObj, Obj};
+use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use indexmap::IndexSet;
 use std::cell::RefCell;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object,  props};
 
 #[object]
 #[derive(Debug)]
@@ -31,16 +31,14 @@ impl Set {
     }
 }
 
-#[object(constructor)]
-#[derive(Debug)]
-pub struct SetConstructor {}
-
-impl Constructor for SetConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+#[props(intrinsic_name = set)]
+impl Set {
+    #[constructor]
+    fn construct(realm: &mut Realm, iter: Option<Value>) -> Res<ObjectHandle> {
         let mut set = IndexSet::new();
 
-        if let Some(iter) = args.first() {
-            let iter = ValueIterator::new(iter, realm)?;
+        if let Some(iter) = iter {
+            let iter = ValueIterator::new(&iter, realm)?;
 
             while let Some(val) = iter.next(realm)? {
                 set.insert(val);
@@ -49,28 +47,7 @@ impl Constructor for SetConstructor {
 
         Ok(Set::with_set(realm, set)?.into_object())
     }
-}
 
-impl SetConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
-        let mut this = Self {
-            inner: RefCell::new(MutableSetConstructor {
-                object: MutObject::with_proto(func.clone()),
-            }),
-        };
-
-        this.initialize(realm)?;
-
-        Ok(this.into_object())
-    }
-}
-
-#[properties_new(raw)]
-impl SetConstructor {}
-
-#[properties_new(intrinsic_name(set), constructor(SetConstructor::new))]
-impl Set {
     fn add(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
