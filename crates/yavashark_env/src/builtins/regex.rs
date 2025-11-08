@@ -1,11 +1,11 @@
 use crate::array::Array;
 use crate::console::print::PrettyObjectOverride;
-use crate::value::{Constructor, Func, IntoValue, Obj, Symbol};
+use crate::value::{IntoValue, Obj, Symbol};
 use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
 #[object()]
@@ -175,44 +175,11 @@ impl RegExp {
     }
 }
 
-#[object(constructor, function, to_string)]
-#[derive(Debug)]
-pub struct RegExpConstructor {}
-
-#[properties_new(raw)]
-impl RegExpConstructor {
-    fn escape(value: &str) -> String {
-        escape(value)
-    }
-}
-
-impl RegExpConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
-        let mut this = Self {
-            inner: RefCell::new(MutableRegExpConstructor {
-                object: MutObject::with_proto(func.clone()),
-            }),
-        };
-
-        this.initialize(realm)?;
-
-        Ok(this.into_object())
-    }
-
-    #[allow(clippy::unused_self, unused)]
-    fn override_to_string_internal(&self) -> Res<YSString> {
-        Ok("function RegExp() { [native code] }".into())
-    }
-
-    #[allow(clippy::unused_self, unused)]
-    fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
-        Ok("function RegExp() { [native code] }".into())
-    }
-}
-
-impl Constructor for RegExpConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+#[props(intrinsic_name = regexp)]
+impl RegExp {
+    #[constructor]
+    #[call_constructor]
+    fn construct(realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let regex = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
             Ok(v.to_string(realm)?.to_string())
         })?;
@@ -225,16 +192,11 @@ impl Constructor for RegExpConstructor {
 
         Ok(obj)
     }
-}
 
-impl Func for RegExpConstructor {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        Ok(Constructor::construct(self, realm, args)?.into())
+    fn escape(value: &str) -> String {
+        escape(value)
     }
-}
 
-#[properties_new(intrinsic_name(regexp), constructor(RegExpConstructor::new))]
-impl RegExp {
     #[prop("exec")]
     pub fn exec(
         &self,
