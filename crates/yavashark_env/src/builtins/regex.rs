@@ -1,7 +1,7 @@
 use crate::array::Array;
 use crate::console::print::PrettyObjectOverride;
 use crate::value::{IntoValue, Obj, Symbol};
-use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{ControlFlow, Error, MutObject, Object, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
@@ -109,7 +109,7 @@ impl RegExp {
         flags: Flags,
         source: YSString,
         flags_str: YSString,
-    ) -> Res<ObjectHandle> {
+    ) -> Res<Self> {
         let obj = Self {
             regex,
             inner: RefCell::new(MutableRegExp {
@@ -121,8 +121,7 @@ impl RegExp {
             original_source: source,
             original_flags: flags_str,
             last_index: Cell::new(0),
-        }
-        .into_object();
+        };
 
         obj.define_property_attributes(
             "lastIndex".into(),
@@ -133,7 +132,7 @@ impl RegExp {
         Ok(obj)
     }
 
-    pub fn new_from_str(realm: &mut Realm, source: &str) -> Res<ObjectHandle> {
+    pub fn new_from_str(realm: &mut Realm, source: &str) -> Res<Self> {
         let regex = Regex::new(source).map_err(|e| ControlFlow::error(e.to_string()))?;
 
         Self::new(
@@ -149,7 +148,7 @@ impl RegExp {
         realm: &mut Realm,
         source: &str,
         flags_str: &str,
-    ) -> Res<ObjectHandle> {
+    ) -> Res<Self> {
         let (flags, canonical_flags) = Flags::try_from_str(flags_str)?;
 
         let regex = Regex::from_unicode(source.chars().map(u32::from), flags)
@@ -179,7 +178,7 @@ impl RegExp {
 impl RegExp {
     #[constructor]
     #[call_constructor]
-    fn construct(regex: Option<String>, flags: Option<String>, realm: &mut Realm) -> Res<ObjectHandle> {
+    fn construct(regex: Option<String>, flags: Option<String>, realm: &mut Realm) -> Res<Self> {
         let regex = regex.as_deref().unwrap_or_default();
         let flags = flags.as_deref().unwrap_or_default();
 

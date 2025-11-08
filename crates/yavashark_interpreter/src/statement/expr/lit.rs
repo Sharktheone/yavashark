@@ -3,6 +3,7 @@ use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
+use yavashark_env::value::Obj;
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -21,7 +22,7 @@ impl Interpreter {
                 realm,
                 r.exp.as_str(),
                 r.flags.as_str(),
-            )?),
+            )?.into_object()),
             Lit::JSXText(_) => {
                 return Err(ControlFlow::error("JSXText is not supported".to_owned()));
             }

@@ -65,7 +65,7 @@ impl ConstIntoValue for ConstValue {
             }
             Self::BigInt(b) => Value::BigInt(b),
             Self::Regex(exp, flags) => {
-                RegExp::new_from_str_with_flags(vm.get_realm(), &exp, &flags)?.into()
+                RegExp::new_from_str_with_flags(vm.get_realm(), &exp, &flags)?.into_value()
             }
         })
     }
@@ -241,7 +241,7 @@ impl ConstIntoValue for DataTypeValue {
             }
             Self::BigInt(b) => Value::BigInt(b),
             Self::Regex(exp, flags) => {
-                RegExp::new_from_str_with_flags(vm.get_realm(), &exp, &flags)?.into()
+                RegExp::new_from_str_with_flags(vm.get_realm(), &exp, &flags)?.into_value()
             }
             Self::Symbol(ref s) => Value::Symbol(s.into()),
             Self::Acc(_) => vm.acc(),
