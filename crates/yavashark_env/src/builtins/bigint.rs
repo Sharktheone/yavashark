@@ -69,6 +69,7 @@ impl BigIntObj {
     }
 
     #[prop("valueOf")]
+    #[nonstatic]
     fn value_of(#[this] this: Value) -> ValueResult {
         if let Value::BigInt(bi) = this {
             return Ok(bi.into());
