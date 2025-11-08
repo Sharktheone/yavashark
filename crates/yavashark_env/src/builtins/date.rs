@@ -15,7 +15,6 @@ pub struct Date {
     date: DateTime<Local>,
 }
 
-
 #[props(intrinsic_name = date)]
 impl Date {
     #[constructor]

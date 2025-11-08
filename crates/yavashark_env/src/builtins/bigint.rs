@@ -1,9 +1,9 @@
-use std::cell::RefCell;
 use crate::builtins::check_radix;
 use crate::conversion::downcast_obj;
-use crate::value::{Obj};
+use crate::value::Obj;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
+use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, props};
 
@@ -14,7 +14,6 @@ pub struct BigIntObj {
     #[primitive]
     big_int: Rc<BigInt>,
 }
-
 
 impl BigIntObj {
     #[allow(clippy::new_ret_no_self)]
@@ -27,7 +26,7 @@ impl BigIntObj {
                 big_int,
             }),
         }
-            .into_object())
+        .into_object())
     }
 }
 
