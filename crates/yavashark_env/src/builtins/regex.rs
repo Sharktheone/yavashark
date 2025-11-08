@@ -179,18 +179,11 @@ impl RegExp {
 impl RegExp {
     #[constructor]
     #[call_constructor]
-    fn construct(realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        let regex = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
-            Ok(v.to_string(realm)?.to_string())
-        })?;
+    fn construct(regex: Option<String>, flags: Option<String>, realm: &mut Realm) -> Res<ObjectHandle> {
+        let regex = regex.as_deref().unwrap_or_default();
+        let flags = flags.as_deref().unwrap_or_default();
 
-        let flags = args.get(1).map_or(Res::<String>::Ok(String::new()), |v| {
-            Ok(v.to_string(realm)?.to_string())
-        })?;
-
-        let obj = RegExp::new_from_str_with_flags(realm, &regex, &flags)?;
-
-        Ok(obj)
+        Ok(RegExp::new_from_str_with_flags(realm, &regex, &flags)?)
     }
 
     fn escape(value: &str) -> String {
