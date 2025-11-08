@@ -4,13 +4,13 @@ use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::conversion::downcast_obj;
 use crate::error::Error;
-use crate::value::{Constructor, Obj};
-use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::value::Obj;
+use crate::{GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use half::f16;
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -138,8 +138,31 @@ impl DataView {
     }
 }
 
-#[properties_new(intrinsic_name(data_view), constructor(DataViewConstructor::new))]
+#[props(intrinsic_name = data_view)]
 impl DataView {
+    #[constructor]
+    fn construct(realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+        let buffer = args
+            .first()
+            .map_or(Err(Error::ty("DataView requires a buffer argument")), |v| {
+                Ok(v.clone())
+            })?;
+
+        let byte_offset = match args.get(1).map(|v| v.to_number(realm).map(|v| v as usize)) {
+            Some(Ok(v)) => Some(v),
+            Some(Err(e)) => return Err(e),
+            None => None,
+        };
+
+        let byte_length = match args.get(2).map(|v| v.to_number(realm).map(|v| v as usize)) {
+            Some(Ok(v)) => Some(v),
+            Some(Err(e)) => return Err(e),
+            None => None,
+        };
+
+        Ok(DataView::new(realm, buffer, byte_offset, byte_length)?.into_object())
+    }
+
     #[get("byteLength")]
     pub const fn byte_length(&self) -> usize {
         self.byte_length
@@ -356,45 +379,5 @@ impl DataView {
         self.set(offset, value, le)?;
 
         Ok(Value::Undefined)
-    }
-}
-#[object(constructor)]
-#[derive(Debug)]
-pub struct DataViewConstructor {}
-
-impl DataViewConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, _realm: &mut Realm) -> crate::Res<ObjectHandle> {
-        let this = Self {
-            inner: RefCell::new(MutableDataViewConstructor {
-                object: MutObject::with_proto(func),
-            }),
-        };
-
-        Ok(this.into_object())
-    }
-}
-
-impl Constructor for DataViewConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        let buffer = args
-            .first()
-            .map_or(Err(Error::ty("DataView requires a buffer argument")), |v| {
-                Ok(v.clone())
-            })?;
-
-        let byte_offset = match args.get(1).map(|v| v.to_number(realm).map(|v| v as usize)) {
-            Some(Ok(v)) => Some(v),
-            Some(Err(e)) => return Err(e),
-            None => None,
-        };
-
-        let byte_length = match args.get(2).map(|v| v.to_number(realm).map(|v| v as usize)) {
-            Some(Ok(v)) => Some(v),
-            Some(Err(e)) => return Err(e),
-            None => None,
-        };
-
-        Ok(DataView::new(realm, buffer, byte_offset, byte_length)?.into_object())
     }
 }
