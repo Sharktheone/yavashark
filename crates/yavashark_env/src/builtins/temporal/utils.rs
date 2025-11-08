@@ -396,7 +396,11 @@ pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDir
     }
 }
 
-pub fn value_to_calendar_fields(value: &ObjectHandle, needs_fields: bool, realm: &mut Realm) -> Res<CalendarFields> {
+pub fn value_to_calendar_fields(
+    value: &ObjectHandle,
+    needs_fields: bool,
+    realm: &mut Realm,
+) -> Res<CalendarFields> {
     const INVALID_KEYS: [&str; 3] = ["calendar", "timeZone", "months"];
 
     for key in INVALID_KEYS {
@@ -466,7 +470,11 @@ pub fn value_to_calendar_fields(value: &ObjectHandle, needs_fields: bool, realm:
     Ok(fields)
 }
 
-pub fn value_to_partial_time(value: &ObjectHandle, needs_time: bool, realm: &mut Realm) -> Res<PartialTime> {
+pub fn value_to_partial_time(
+    value: &ObjectHandle,
+    needs_time: bool,
+    realm: &mut Realm,
+) -> Res<PartialTime> {
     let mut partial_time = PartialTime::new();
     let mut had_time = false;
 
@@ -519,7 +527,11 @@ pub fn value_to_partial_time(value: &ObjectHandle, needs_time: bool, realm: &mut
     Ok(partial_time)
 }
 
-pub fn value_to_date_time_fields(other: &ObjectHandle, needs_fields: bool, realm: &mut Realm) -> Res<DateTimeFields> {
+pub fn value_to_date_time_fields(
+    other: &ObjectHandle,
+    needs_fields: bool,
+    realm: &mut Realm,
+) -> Res<DateTimeFields> {
     let calendar_fields = value_to_calendar_fields(other, needs_fields, realm)?;
     let time = value_to_partial_time(other, needs_fields, realm)?;
 

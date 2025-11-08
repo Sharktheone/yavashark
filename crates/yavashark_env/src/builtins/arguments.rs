@@ -1,6 +1,8 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
-use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor};
+use crate::value::{
+    Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
+};
 use crate::{
     InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable,
 };
@@ -337,7 +339,11 @@ impl ObjectImpl for Arguments {
         }
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
                 return Ok(Some(PropertyDescriptor::Data {
@@ -361,12 +367,14 @@ impl ObjectImpl for Arguments {
             if s == "callee" {
                 let Some(callee) = &self.callee else {
                     return Ok(Some(PropertyDescriptor::Accessor {
-                        get: Some(realm
-                            .intrinsics
-                            .clone_public()
-                            .throw_type_error
-                            .get(realm)?
-                            .clone()),
+                        get: Some(
+                            realm
+                                .intrinsics
+                                .clone_public()
+                                .throw_type_error
+                                .get(realm)?
+                                .clone(),
+                        ),
                         set: None,
                         enumerable: false,
                         configurable: false,

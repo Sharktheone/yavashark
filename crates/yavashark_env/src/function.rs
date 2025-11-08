@@ -1,6 +1,8 @@
 use crate::inline_props::{PropertiesHook, UpdatePropertyResult};
 use crate::realm::Realm;
-use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor};
+use crate::value::{
+    Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
+};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, Res, Value,
     ValueResult, Variable,
@@ -185,10 +187,16 @@ impl ObjectImpl for NativeFunction {
         self.props.name.into()
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         Ok(match self.props.get_descriptor(&name, realm)? {
             Some(prop) => Some(prop),
-            None => self.get_wrapped_object().get_property_descriptor(name, realm)?,
+            None => self
+                .get_wrapped_object()
+                .get_property_descriptor(name, realm)?,
         })
     }
 }

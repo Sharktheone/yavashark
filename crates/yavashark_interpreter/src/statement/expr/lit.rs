@@ -2,8 +2,8 @@ use crate::Interpreter;
 use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_env::builtins::RegExp;
-use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
 use yavashark_env::value::Obj;
+use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -18,11 +18,10 @@ impl Interpreter {
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),
             Lit::BigInt(b) => Value::BigInt(Rc::new(*b.value.clone())),
-            Lit::Regex(r) => Value::Object(RegExp::new_from_str_with_flags(
-                realm,
-                r.exp.as_str(),
-                r.flags.as_str(),
-            )?.into_object()),
+            Lit::Regex(r) => Value::Object(
+                RegExp::new_from_str_with_flags(realm, r.exp.as_str(), r.flags.as_str())?
+                    .into_object(),
+            ),
             Lit::JSXText(_) => {
                 return Err(ControlFlow::error("JSXText is not supported".to_owned()));
             }

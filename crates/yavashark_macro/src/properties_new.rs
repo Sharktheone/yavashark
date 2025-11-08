@@ -137,7 +137,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
                                 constant.span(),
                                 "Cannot use 'both' with 'raw' option",
                             ));
-
                         }
                         props.push(Prop::Constant(property.clone()));
                         static_props.push(Prop::Constant(property));
@@ -282,9 +281,9 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                     constant.name,
                     constant.js_name,
                     Type::Normal,
-                    variable_fn
+                    variable_fn,
                 )
-            },
+            }
         };
 
         let name = js_name

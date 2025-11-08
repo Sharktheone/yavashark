@@ -18,7 +18,6 @@ const MAX_INDEX: usize = (1 << 31) - 1;
 #[cfg(target_pointer_width = "16")]
 const MAX_INDEX: usize = (1 << 15) - 1;
 
-
 impl PropertyKey {
     pub fn as_str(&self) -> &str {
         match self {
@@ -266,7 +265,12 @@ impl IntoPropertyKey for Value {
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
             Self::Number(n) => {
-                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() && n as usize <= MAX_INDEX {
+                if !n.is_nan()
+                    && !n.is_infinite()
+                    && n.fract() == 0.0
+                    && n.is_sign_positive()
+                    && n as usize <= MAX_INDEX
+                {
                     InternalPropertyKey::Index(n as usize)
                 } else {
                     InternalPropertyKey::String(fmt_num(n))

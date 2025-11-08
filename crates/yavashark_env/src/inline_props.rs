@@ -1,5 +1,7 @@
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property, PropertyDescriptor};
+use crate::value::{
+    Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property, PropertyDescriptor,
+};
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -57,7 +59,11 @@ pub trait PropertiesHook {
         Ok(false)
     }
 
-    fn get_descriptor(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_descriptor(
+        &self,
+        key: &InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         Ok(None)
     }
 
@@ -263,10 +269,16 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         Ok(result)
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         Ok(match self.props.get_descriptor(&name, realm)? {
             Some(desc) => Some(desc),
-            None => self.get_wrapped_object().get_property_descriptor(name, realm)?,
+            None => self
+                .get_wrapped_object()
+                .get_property_descriptor(name, realm)?,
         })
     }
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {

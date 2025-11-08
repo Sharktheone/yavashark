@@ -10,7 +10,6 @@ pub struct Constant {
     pub writable: bool,
     pub enumerable: bool,
     pub configurable: bool,
-
 }
 
 impl Constant {

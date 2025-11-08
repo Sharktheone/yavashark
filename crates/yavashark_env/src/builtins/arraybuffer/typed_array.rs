@@ -12,6 +12,7 @@ use crate::builtins::int32array::{Int32Array, Int32ArrayConstructor};
 use crate::builtins::int8array::{Int8Array, Int8ArrayConstructor};
 use crate::builtins::uint16array::{Uint16Array, Uint16ArrayConstructor};
 use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
+use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
@@ -29,7 +30,6 @@ use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
-use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -339,9 +339,15 @@ impl crate::value::ObjectImpl for TypedArray {
         )))
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         if self.is_detached() {
-            return self.get_wrapped_object().get_property_descriptor(name, realm);
+            return self
+                .get_wrapped_object()
+                .get_property_descriptor(name, realm);
         }
 
         if let InternalPropertyKey::Index(idx) = name {
@@ -355,7 +361,8 @@ impl crate::value::ObjectImpl for TypedArray {
             });
         }
 
-        self.get_wrapped_object().get_property_descriptor(name, realm)
+        self.get_wrapped_object()
+            .get_property_descriptor(name, realm)
     }
 }
 

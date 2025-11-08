@@ -45,7 +45,6 @@ impl Map {
         Ok(map)
     }
 
-
     fn clear(&self) {
         let mut inner = self.inner.borrow_mut();
 

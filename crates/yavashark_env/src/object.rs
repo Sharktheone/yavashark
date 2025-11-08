@@ -1,6 +1,8 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor};
+use crate::value::{
+    BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor,
+};
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -1052,7 +1054,11 @@ impl MutObj for MutObject {
         Ok(())
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, _realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        _realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             let val: Value = self.prototype.clone().into();
             return Ok(Some(val.into()));

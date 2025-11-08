@@ -653,7 +653,6 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         return Err(Error::ty("Expected timeZone to be defined"));
     }
 
-
     Ok(partial)
 }
 

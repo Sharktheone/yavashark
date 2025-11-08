@@ -707,7 +707,6 @@ pub trait MutObj: Debug + 'static {
         }
     }
 
-
     fn class_name(&mut self) -> &'static str {
         std::any::type_name::<Self>()
     }

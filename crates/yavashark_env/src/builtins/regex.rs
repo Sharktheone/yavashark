@@ -144,11 +144,7 @@ impl RegExp {
         )
     }
 
-    pub fn new_from_str_with_flags(
-        realm: &mut Realm,
-        source: &str,
-        flags_str: &str,
-    ) -> Res<Self> {
+    pub fn new_from_str_with_flags(realm: &mut Realm, source: &str, flags_str: &str) -> Res<Self> {
         let (flags, canonical_flags) = Flags::try_from_str(flags_str)?;
 
         let regex = Regex::from_unicode(source.chars().map(u32::from), flags)

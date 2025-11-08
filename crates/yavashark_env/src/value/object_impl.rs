@@ -1,4 +1,6 @@
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value, Variable};
+use crate::value::{
+    BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value, Variable,
+};
 use crate::{
     InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue,
     PropertyKey, Realm, Res,
@@ -208,7 +210,6 @@ pub trait ObjectImpl: Debug + 'static {
     fn is_constructable(&self) -> bool {
         self.get_wrapped_object().is_constructable()
     }
-
 
     fn get_property_descriptor(
         &self,

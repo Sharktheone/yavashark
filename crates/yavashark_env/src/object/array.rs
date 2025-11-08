@@ -197,19 +197,24 @@ impl Array {
         Ok(array)
     }
 
-    pub fn with_elements_this(realm: &mut Realm, elements: Vec<Value>, this: Value) -> Res<ObjectHandle> {
+    pub fn with_elements_this(
+        realm: &mut Realm,
+        elements: Vec<Value>,
+        this: Value,
+    ) -> Res<ObjectHandle> {
         if let Value::Object(this) = this {
-            if this.is_constructable() && &this != realm.intrinsics.clone_public().array.get(realm)? {
+            if this.is_constructable()
+                && &this != realm.intrinsics.clone_public().array.get(realm)?
+            {
                 let array = this.construct(Vec::new(), realm)?;
 
                 for (i, element) in elements.into_iter().enumerate() {
                     array.define_property(i.into(), element, realm)?;
                 }
 
-                return Ok(array)
+                return Ok(array);
             }
         }
-
 
         let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
@@ -319,11 +324,7 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_string_this(
-        realm: &mut Realm,
-        string: &str,
-        this: Value,
-    ) -> Res<ObjectHandle> {
+    pub fn from_string_this(realm: &mut Realm, string: &str, this: Value) -> Res<ObjectHandle> {
         let elements = string
             .chars()
             .map(|c| c.to_string().into())
