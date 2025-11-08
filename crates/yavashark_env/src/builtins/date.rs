@@ -1,12 +1,12 @@
 use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
-use crate::value::{Constructor, Func, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::value::Obj;
+use crate::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
 use std::cell::RefCell;
 use std::ops::Rem;
 use std::str::FromStr;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -15,8 +15,72 @@ pub struct Date {
     date: DateTime<Local>,
 }
 
-#[properties_new(intrinsic_name(date), constructor(DateConstructor::new))]
+
+#[props(intrinsic_name = date)]
 impl Date {
+    #[constructor]
+    fn construct(realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+        Date::js_construct(&args, realm).map(Obj::into_object)
+    }
+
+    #[call_constructor]
+    fn js_call(realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        Date::js_construct(&args, realm).map(|date| {
+            let inner = date.inner.borrow();
+
+            inner.date.to_string().into()
+        })
+    }
+
+    pub fn now() -> ValueResult {
+        Ok(Local::now().timestamp_millis().into())
+    }
+
+    pub fn parse(s: &str) -> ValueResult {
+        let date = DateTime::from_str(s).unwrap_or(Local::now());
+        Ok(date.timestamp_millis().into())
+    }
+
+    #[prop("UTC")]
+    pub fn utc(args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
+        if args.is_empty() {
+            return Ok(f64::NAN.into());
+        }
+
+        let mut get = |idx: usize, def: i32| -> i32 {
+            args.get(idx)
+                .map_or(def, |v| v.to_number(realm).map(|x| x as i32).unwrap_or(def))
+        };
+
+        let year = get(0, 0);
+        let month = get(1, 0);
+        let day = get(2, 1) - 1;
+        let hour = get(3, 0);
+        let minute = get(4, 0);
+        let second = get(5, 0);
+        let ms = get(6, 0);
+
+        let (ms, second) = fixup(ms, 1000, second);
+        let (second, minute) = fixup(second, 60, minute);
+        let (minute, hour) = fixup(minute, 60, hour);
+        let (hour, day) = fixup(hour, 24, day);
+        let (day, month) = fixup(day, 31, month);
+        let (month, year) = fixup(month, 12, year);
+
+        let month = month + 1;
+        let day = day + 1;
+
+        let time = match Local.with_ymd_and_hms(year, month, day, hour, minute, second) {
+            LocalResult::Single(date) => date,
+            LocalResult::Ambiguous(e, _) => e,
+            LocalResult::None => Local::now(),
+        };
+
+        let time = time.with_nanosecond(ms * 1_000_000).unwrap_or(time);
+
+        Ok(time.timestamp_millis().into())
+    }
+
     #[prop("getDate")]
     pub fn get_date(&self) -> u32 {
         self.date().day()
@@ -536,93 +600,6 @@ impl Date {
         };
 
         Ok(Self::new(date, realm)?)
-    }
-}
-
-#[object(constructor, function)]
-#[derive(Debug)]
-pub struct DateConstructor {}
-
-impl DateConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
-        let mut this = Self {
-            inner: RefCell::new(MutableDateConstructor {
-                object: MutObject::with_proto(func.clone()),
-            }),
-        };
-
-        this.initialize(realm)?;
-
-        Ok(this.into_object())
-    }
-}
-
-impl Constructor for DateConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        Date::js_construct(&args, realm).map(Obj::into_object)
-    }
-}
-
-impl Func for DateConstructor {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        Date::js_construct(&args, realm).map(|date| {
-            let inner = date.inner.borrow();
-
-            inner.date.to_string().into()
-        })
-    }
-}
-
-#[properties_new(raw)]
-impl DateConstructor {
-    pub fn now(&self) -> ValueResult {
-        Ok(Local::now().timestamp_millis().into())
-    }
-
-    pub fn parse(&self, s: &str) -> ValueResult {
-        let date = DateTime::from_str(s).unwrap_or(Local::now());
-        Ok(date.timestamp_millis().into())
-    }
-
-    #[prop("UTC")]
-    pub fn utc(&self, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
-        if args.is_empty() {
-            return Ok(f64::NAN.into());
-        }
-
-        let mut get = |idx: usize, def: i32| -> i32 {
-            args.get(idx)
-                .map_or(def, |v| v.to_number(realm).map(|x| x as i32).unwrap_or(def))
-        };
-
-        let year = get(0, 0);
-        let month = get(1, 0);
-        let day = get(2, 1) - 1;
-        let hour = get(3, 0);
-        let minute = get(4, 0);
-        let second = get(5, 0);
-        let ms = get(6, 0);
-
-        let (ms, second) = fixup(ms, 1000, second);
-        let (second, minute) = fixup(second, 60, minute);
-        let (minute, hour) = fixup(minute, 60, hour);
-        let (hour, day) = fixup(hour, 24, day);
-        let (day, month) = fixup(day, 31, month);
-        let (month, year) = fixup(month, 12, year);
-
-        let month = month + 1;
-        let day = day + 1;
-
-        let time = match Local.with_ymd_and_hms(year, month, day, hour, minute, second) {
-            LocalResult::Single(date) => date,
-            LocalResult::Ambiguous(e, _) => e,
-            LocalResult::None => Local::now(),
-        };
-
-        let time = time.with_nanosecond(ms * 1_000_000).unwrap_or(time);
-
-        Ok(time.timestamp_millis().into())
     }
 }
 
