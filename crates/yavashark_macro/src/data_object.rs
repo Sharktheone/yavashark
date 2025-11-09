@@ -34,6 +34,18 @@ impl Parse for StructOrEnum {
         } else if lookahead.peek(Token![enum]) {
             let item_enum: syn::ItemEnum = input.parse()?;
             Ok(StructOrEnum::Enum(item_enum))
+        } else if lookahead.peek(Token![pub]) {
+            let _pub_token: syn::Token![pub] = input.parse()?;
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Token![struct]) {
+                let item_struct: syn::ItemStruct = input.parse()?;
+                Ok(StructOrEnum::Struct(item_struct))
+            } else if lookahead.peek(Token![enum]) {
+                let item_enum: syn::ItemEnum = input.parse()?;
+                Ok(StructOrEnum::Enum(item_enum))
+            } else {
+                Err(lookahead.error())
+            }
         } else {
             Err(lookahead.error())
         }
