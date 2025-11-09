@@ -81,15 +81,29 @@ impl Map {
     }
 
     #[prop("forEach")]
-    fn for_each(&self, func: &Value, this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.borrow();
+    fn for_each(&self, func: &ObjectHandle, this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+        if !func.is_callable() {
+            return Err(Error::ty("Callback must be a function"));
+        }
 
-        for (key, value) in &inner.map {
+        let mut idx = 0;
+
+        loop {
+            let inner = self.inner.borrow();
+            let Some((key, value)) = inner.map.get_index(idx) else {
+                break;
+            };
+
+            let args = vec![value.copy(), key.copy(), this.copy()];
+
+            drop(inner);
+
             func.call(
-                realm,
-                vec![value.copy(), key.copy(), this.copy()],
+                args,
                 realm.global.clone().into(),
+                realm,
             )?;
+            idx += 1;
         }
 
         Ok(Value::Undefined)
