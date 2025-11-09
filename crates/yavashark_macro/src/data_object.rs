@@ -6,7 +6,6 @@ use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
-use syn::Token;
 
 pub fn data_object(
     _attrs: proc_macro::TokenStream,
