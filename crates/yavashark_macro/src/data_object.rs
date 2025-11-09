@@ -1,9 +1,11 @@
 mod enumeration;
 mod structure;
 
+use syn::parse::discouraged::Speculative;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
 use syn::parse::Parse;
+use syn::spanned::Spanned;
 use syn::Token;
 
 pub fn data_object(
@@ -27,27 +29,18 @@ pub enum StructOrEnum {
 
 impl Parse for StructOrEnum {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let lookahead = input.lookahead1();
-        if lookahead.peek(Token![struct]) {
-            let item_struct: syn::ItemStruct = input.parse()?;
-            Ok(StructOrEnum::Struct(item_struct))
-        } else if lookahead.peek(Token![enum]) {
-            let item_enum: syn::ItemEnum = input.parse()?;
-            Ok(StructOrEnum::Enum(item_enum))
-        } else if lookahead.peek(Token![pub]) {
-            let _pub_token: syn::Token![pub] = input.parse()?;
-            let lookahead = input.lookahead1();
-            if lookahead.peek(Token![struct]) {
-                let item_struct: syn::ItemStruct = input.parse()?;
-                Ok(StructOrEnum::Struct(item_struct))
-            } else if lookahead.peek(Token![enum]) {
-                let item_enum: syn::ItemEnum = input.parse()?;
-                Ok(StructOrEnum::Enum(item_enum))
-            } else {
-                Err(lookahead.error())
+        let fork = input.fork();
+        let item: syn::Item = fork.parse()?;
+        match item {
+            syn::Item::Struct(s) => {
+                input.advance_to(&fork);
+                Ok(StructOrEnum::Struct(s))
             }
-        } else {
-            Err(lookahead.error())
+            syn::Item::Enum(e) => {
+                input.advance_to(&fork);
+                Ok(StructOrEnum::Enum(e))
+            }
+            _ => Err(syn::Error::new(item.span(), "expected struct or enum")),
         }
     }
 }
