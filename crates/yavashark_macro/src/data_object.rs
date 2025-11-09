@@ -1,9 +1,9 @@
 mod enumeration;
 mod structure;
 
-use syn::parse::discouraged::Speculative;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
+use syn::parse::discouraged::Speculative;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 

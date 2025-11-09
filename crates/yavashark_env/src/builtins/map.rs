@@ -81,7 +81,12 @@ impl Map {
     }
 
     #[prop("forEach")]
-    fn for_each(&self, func: &ObjectHandle, this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+    fn for_each(
+        &self,
+        func: &ObjectHandle,
+        this: &Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         if !func.is_callable() {
             return Err(Error::ty("Callback must be a function"));
         }
@@ -98,11 +103,7 @@ impl Map {
 
             drop(inner);
 
-            func.call(
-                args,
-                realm.global.clone().into(),
-                realm,
-            )?;
+            func.call(args, realm.global.clone().into(), realm)?;
             idx += 1;
         }
 
