@@ -1,6 +1,5 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::plain_month_day::value_to_partial_date;
 use crate::builtins::temporal::utils::{
     calendar_opt, difference_settings, display_calendar, overflow_options,
     value_to_year_month_fields,
@@ -10,6 +9,7 @@ use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
+use temporal_rs::fields::CalendarFields;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -156,9 +156,16 @@ impl PlainYearMonth {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let day_info = day_info
-            .map(|info| value_to_partial_date(&info, realm))
+            .map(|info| info.get("day", realm))
             .transpose()?
-            .map(|date| date.calendar_fields);
+            .map(|v| v.to_number(realm).map(|n| n as u8))
+            .transpose()?
+            .map(|day| CalendarFields {
+                day: Some(day),
+                ..Default::default()
+            });
+
+
 
         let plain_date = self
             .year_month
