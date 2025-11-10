@@ -4,7 +4,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::sync::futures::Notified;
-use yavashark_env::builtins::Promise;
+use yavashark_env::builtins::{Promise, PromiseState};
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::task_queue::{AsyncTask, AsyncTaskQueue};
@@ -83,7 +83,12 @@ impl AsyncTask for AsyncGeneratorTask {
                     inner.promise.resolve(&val, realm)?;
                     return Poll::Ready(Ok(()));
                 }
-                state.continue_async(val, realm)?;
+
+                if promise.0.state.get() == PromiseState::Rejected {
+                    state.handle_root_error(val)?;
+                } else {
+                    state.continue_async(val, realm)?;
+                }
             }
         }
 
@@ -130,7 +135,13 @@ impl AsyncGeneratorTask {
 
                             self.state
                                 .as_mut()
-                                .map(|state| state.continue_async(val, realm));
+                                .map(|state| {
+                                    if promise.state.get() == PromiseState::Rejected {
+                                        _ = state.handle_root_error(val);
+                                    } else {
+                                        _ = state.continue_async(val, realm);
+                                    }
+                                });
 
                             return self.poll_next(realm);
                         }

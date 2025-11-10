@@ -112,6 +112,31 @@ impl<T: VMStateFunctionCode> VmState<T> {
 
         Ok(())
     }
+
+
+    pub fn handle_root_error(&mut self, err: Value) -> Res {
+        if self.try_stack.is_empty() {
+            return Err(Error::throw(err));
+        }
+
+        self.handle_error(err);
+
+        Ok(())
+    }
+
+    fn handle_error(&mut self, err_val: Value) {
+        if let Some(tb) = self.try_stack.last_mut() {
+            if let Some(catch) = tb.catch.take() {
+                self.pc = catch;
+                self.acc = err_val;
+            } else if let Some(finally) = tb.finally.take() {
+                self.throw = Some(Error::throw(err_val));
+                self.pc = finally;
+
+                self.try_stack.pop();
+            }
+        }
+    }
 }
 
 impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
