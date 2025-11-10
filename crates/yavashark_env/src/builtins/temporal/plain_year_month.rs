@@ -1,9 +1,6 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{
-    calendar_opt, difference_settings, display_calendar, overflow_options,
-    value_to_year_month_fields,
-};
+use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options, overflow_options_opt, value_to_year_month_fields};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -218,12 +215,12 @@ impl PlainYearMonth {
         Err(Error::ty("`valueOf` is not supported for PlainYearMonth"))
     }
 
-    pub fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn with(&self, other: &ObjectHandle, options: &Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if other.contains_key("timeZone".into(), realm)? {
             return Err(Error::ty("Invalid property 'timeZone' for PlainYearMonth"));
         }
 
-        let overflow = overflow_options(other, realm)?;
+        let overflow = overflow_options_opt(options.as_ref(), realm)?;
         let year_month = value_to_year_month_fields(other, realm)?;
 
         let year_month = self
