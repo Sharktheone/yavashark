@@ -219,6 +219,10 @@ impl PlainYearMonth {
     }
 
     pub fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        if other.contains_key("timeZone".into(), realm)? {
+            return Err(Error::ty("Invalid property 'timeZone' for PlainYearMonth"));
+        }
+
         let overflow = overflow_options(other, realm)?;
         let year_month = value_to_year_month_fields(other, realm)?;
 
