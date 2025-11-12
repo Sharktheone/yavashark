@@ -4,7 +4,7 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull, Property};
+use crate::value::{Constructor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -352,20 +352,30 @@ impl ObjectConstructor {
 
     #[prop("fromEntries")]
     fn from_entries(entries: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let iter = entries.iter_no_realm(realm)?;
+        fn inner(iter: &Iter, realm: &mut Realm) -> ValueResult {
+            let obj = Object::new(realm);
 
-        let obj = Object::new(realm);
+            while let Some(entry) = iter.next(realm)? {
+                let entry = entry.as_object()?;
 
-        while let Some(entry) = iter.next(realm)? {
-            let entry = entry.as_object()?;
+                let key = entry.get(0, realm)?;
+                let value = entry.get(1, realm)?;
 
-            let key = entry.get(0, realm)?;
-            let value = entry.get(1, realm)?;
+                obj.define_property(key.into_internal_property_key(realm)?, value, realm)?;
+            }
 
-            obj.define_property(key.into_internal_property_key(realm)?, value, realm)?;
+            Ok(obj.into_value())
         }
 
-        Ok(obj.into_value())
+        let iter = entries.iter_no_realm(realm)?;
+
+
+        inner(&iter, realm)
+            .inspect_err(|_| {
+                _ = iter.close(realm);
+            })
+
+
     }
 
     #[prop("hasOwn")]
