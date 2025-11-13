@@ -7,7 +7,7 @@ edition = "2021"
 yavashark_string = { path = "../yavashark_string" }
 bincode = "2.0.0-rc.3"
 num-bigint = "0.4.6"
-swc_ecma_ast = "17.0.0"
+swc_ecma_ast = "18.0.0"
 
 
 [features]

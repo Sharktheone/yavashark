@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-swc_ecma_parser = "26.0.0"
-swc_ecma_ast = "17.0.0"
-swc_common = "16.0.0"
+swc_ecma_parser = "27.0.0"
+swc_ecma_ast = "18.0.0"
+swc_common = "17.0.1"
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_env = { path = "../yavashark_env", features = ["tests"] }
