@@ -28,7 +28,7 @@ log = "0.4.25"
 futures = "0.3.31"
 pin-project = "1.1.10"
 rustc-hash = "2.1.1"
-temporal_rs = { version = "0.1.1", features = ["sys", "tzdb", "compiled_data"] }
+temporal_rs = { version = "0.1.2", features = ["sys", "tzdb", "compiled_data"] }
 egui = { version = "0.31.1", optional = true}
 eframe = { version = "0.31.1", optional = true}
 egui_extras = { version = "0.31.1", optional = true}
