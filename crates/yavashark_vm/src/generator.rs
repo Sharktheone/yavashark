@@ -244,6 +244,39 @@ impl Generator {
         Ok(obj)
     }
 
+    fn throw(&self, realm: &mut Realm, exception: Value) -> Res<ObjectHandle> {
+        let Some(state) = self.state.take() else {
+            return Err(Error::new("Generator is already finished"));
+        };
+
+        let mut vm = ResumableVM::from_state(state, realm);
+
+        vm.handle_root_error(Error::throw(exception))?;
+
+        match vm.next() {
+            GeneratorPoll::Yield(state, val) => {
+                self.state.replace(Some(state));
+
+                let obj = Object::new(realm);
+
+                obj.define_property("done".into(), false.into(), realm)?;
+                obj.define_property("value".into(), val, realm)?;
+
+                Ok(obj)
+            }
+            GeneratorPoll::Ret(res) => {
+                let val = res?;
+
+                let obj = Object::new(realm);
+
+                obj.define_property("done".into(), true.into(), realm)?;
+                obj.define_property("value".into(), val, realm)?;
+
+                Ok(obj)
+            }
+        }
+    }
+
 
     #[prop(Symbol::ITERATOR)]
     #[nonstatic]
