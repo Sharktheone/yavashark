@@ -51,8 +51,8 @@ impl VMStateFunctionCode for Rc<BytecodeFunctionCode> {
 }
 
 pub struct ResumableVM<'a, T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
-    state: VmState<T>,
-    realm: &'a mut Realm,
+    pub(crate) state: VmState<T>,
+    pub(crate) realm: &'a mut Realm,
 }
 
 pub enum AsyncPoll {

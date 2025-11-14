@@ -2,7 +2,7 @@ mod task;
 
 use crate::async_generator::task::AsyncGeneratorTask;
 use crate::params::VMParams;
-use crate::VmState;
+use crate::{ResumableVM, VmState};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::path::PathBuf;
@@ -238,6 +238,25 @@ impl AsyncGenerator {
 
         Ok(obj)
     }
+
+    fn throw(this: Value, realm: &mut Realm, exception: Value) -> Res<ObjectHandle> {
+        let this = downcast_obj::<Self>(this)?;
+
+        //TODO: I think this is actually wrong since we should probably also be able to use this when there is already a task queued
+        let Some(state) = this.state.take() else {
+            return Err(Error::new("Generator is already finished"));
+        };
+
+        let mut vm = ResumableVM::from_state(state, realm);
+
+        vm.handle_root_error(Error::throw(exception))?;
+
+        let ResumableVM { state, ..} = vm;
+
+
+        Ok(AsyncGeneratorTask::new(realm, Some(state), this)?.into())
+    }
+
 
     #[prop(Symbol::ITERATOR)]
     #[nonstatic]
