@@ -110,7 +110,7 @@ func RunTest(path string, timings bool) results.Result {
 			}
 		}
 
-		if strings.Contains(out, "not yet implemented") && strings.Contains(out, "thread '") && strings.Contains(out, "' panicked at") {
+		if strings.Contains(out, "not yet implemented") && strings.Contains(out, "thread '") && strings.Contains(out, "panicked at") {
 			return results.Result{
 				Status:   status.NOT_IMPLEMENTED,
 				Msg:      out,
