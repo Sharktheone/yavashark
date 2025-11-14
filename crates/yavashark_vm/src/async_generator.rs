@@ -15,7 +15,7 @@ use yavashark_env::error::Error;
 use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
-use yavashark_env::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -215,6 +215,28 @@ impl AsyncGenerator {
         drop(state_ref);
 
         Ok(AsyncGeneratorTask::new(realm, state, this)?.into())
+    }
+
+
+    #[prop("return")]
+    fn ret(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        if self.state.borrow().is_none() {
+            let obj = Object::new(realm);
+
+            obj.define_property("done".into(), true.into(), realm)?;
+            obj.define_property("value".into(), Value::Undefined, realm)?;
+
+            return Ok(obj);
+        }
+
+
+        //TODO: handle return value properly
+        let obj = Object::new(realm);
+
+        obj.define_property("done".into(), false.into(), realm)?;
+        obj.define_property("value".into(), Value::Undefined, realm)?;
+
+        Ok(obj)
     }
 
     #[prop(Symbol::ITERATOR)]
