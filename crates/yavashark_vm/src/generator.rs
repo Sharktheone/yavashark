@@ -223,6 +223,28 @@ impl Generator {
         }
     }
 
+    #[prop("return")]
+    fn ret(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        if self.state.borrow().is_none() {
+            let obj = Object::new(realm);
+
+            obj.define_property("done".into(), true.into(), realm)?;
+            obj.define_property("value".into(), Value::Undefined, realm)?;
+
+            return Ok(obj);
+        }
+
+
+        //TODO: handle return value properly
+        let obj = Object::new(realm);
+
+        obj.define_property("done".into(), false.into(), realm)?;
+        obj.define_property("value".into(), Value::Undefined, realm)?;
+
+        Ok(obj)
+    }
+
+
     #[prop(Symbol::ITERATOR)]
     #[nonstatic]
     pub const fn iterator(this: Value) -> Value {
