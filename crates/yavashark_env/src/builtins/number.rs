@@ -464,6 +464,10 @@ fn parse_float(string: &str) -> f64 {
 }
 
 fn parse_int(string: &str, radix: Option<u32>) -> f64 {
+    if radix == Some(1) {
+        return f64::NAN;
+    }
+
     let radix = radix.unwrap_or(10);
 
     let radix = if (2..=36).contains(&radix) { radix } else { 10 };
