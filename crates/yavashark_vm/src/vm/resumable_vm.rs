@@ -113,7 +113,6 @@ impl<T: VMStateFunctionCode> VmState<T> {
         Ok(())
     }
 
-
     pub fn handle_root_error(&mut self, err: Value) -> Res {
         if self.try_stack.is_empty() {
             return Err(Error::throw(err));

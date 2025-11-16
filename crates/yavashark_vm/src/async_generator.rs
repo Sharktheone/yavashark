@@ -217,7 +217,6 @@ impl AsyncGenerator {
         Ok(AsyncGeneratorTask::new(realm, state, this)?.into())
     }
 
-
     #[prop("return")]
     fn ret(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         if self.state.borrow().is_none() {
@@ -228,7 +227,6 @@ impl AsyncGenerator {
 
             return Ok(obj);
         }
-
 
         //TODO: handle return value properly
         let obj = Object::new(realm);
@@ -251,12 +249,10 @@ impl AsyncGenerator {
 
         vm.handle_root_error(Error::throw(exception))?;
 
-        let ResumableVM { state, ..} = vm;
-
+        let ResumableVM { state, .. } = vm;
 
         Ok(AsyncGeneratorTask::new(realm, Some(state), this)?.into())
     }
-
 
     #[prop(Symbol::ITERATOR)]
     #[nonstatic]

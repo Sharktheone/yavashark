@@ -369,13 +369,9 @@ impl ObjectConstructor {
 
         let iter = entries.iter_no_realm(realm)?;
 
-
-        inner(&iter, realm)
-            .inspect_err(|_| {
-                _ = iter.close(realm);
-            })
-
-
+        inner(&iter, realm).inspect_err(|_| {
+            _ = iter.close(realm);
+        })
     }
 
     #[prop("hasOwn")]

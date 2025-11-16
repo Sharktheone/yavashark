@@ -270,7 +270,11 @@ impl Obj for Object {
         self.inner.borrow().is_sealed()
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         self.inner()?.get_property_descriptor(name, realm)
     }
 }

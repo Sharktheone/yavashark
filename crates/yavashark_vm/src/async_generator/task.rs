@@ -133,15 +133,13 @@ impl AsyncGeneratorTask {
                                 .clone()
                                 .unwrap_or(Value::Undefined);
 
-                            self.state
-                                .as_mut()
-                                .map(|state| {
-                                    if promise.state.get() == PromiseState::Rejected {
-                                        _ = state.handle_root_error(val);
-                                    } else {
-                                        _ = state.continue_async(val, realm);
-                                    }
-                                });
+                            self.state.as_mut().map(|state| {
+                                if promise.state.get() == PromiseState::Rejected {
+                                    _ = state.handle_root_error(val);
+                                } else {
+                                    _ = state.continue_async(val, realm);
+                                }
+                            });
 
                             return self.poll_next(realm);
                         }

@@ -234,7 +234,6 @@ impl Generator {
             return Ok(obj);
         }
 
-
         //TODO: handle return value properly
         let obj = Object::new(realm);
 
@@ -276,7 +275,6 @@ impl Generator {
             }
         }
     }
-
 
     #[prop(Symbol::ITERATOR)]
     #[nonstatic]
