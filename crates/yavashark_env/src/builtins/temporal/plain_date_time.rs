@@ -500,14 +500,11 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 
         let calendar = obj
             .resolve_property("calendar", realm)?
-            .and_then(|v| v.to_string(realm).ok())
-            .and_then(|s| {
-                if s.is_empty() {
-                    None
-                } else {
-                    Some(s.as_str().to_string())
-                }
-            });
+            .and_then(|v| v.to_string(realm).ok());
+
+        if calendar.as_ref().is_some_and(YSString::is_empty) {
+            return Err(Error::range("Invalid calendar"));
+        }
 
         let calendar = calendar
             .as_deref()
