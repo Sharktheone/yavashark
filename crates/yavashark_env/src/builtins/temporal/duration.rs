@@ -8,7 +8,6 @@ use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::{ToStringRoundingOptions, Unit};
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -222,7 +221,7 @@ impl Duration {
 
         Ok(left
             .dur
-            .compare_with_provider(&right.dur, rel, &*COMPILED_TZ_PROVIDER)
+            .compare(&right.dur, rel)
             .map_err(Error::from_temporal)? as i8)
     }
 
@@ -255,7 +254,7 @@ impl Duration {
 
         let dur = self
             .dur
-            .round_with_provider(opts, rel, &*COMPILED_TZ_PROVIDER)
+            .round(opts, rel)
             .map_err(Error::from_temporal)?;
 
         Self::with_duration(realm, dur)
@@ -313,7 +312,7 @@ impl Duration {
 
         let dur = self
             .dur
-            .total_with_provider(unit, rel, &*COMPILED_TZ_PROVIDER)
+            .total(unit, rel)
             .map_err(Error::from_temporal)?;
 
         Ok(dur.as_inner())

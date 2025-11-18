@@ -12,7 +12,6 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::Temporal;
 use yavashark_macro::{object, props};
@@ -170,10 +169,9 @@ impl Instant {
     #[prop("toJSON")]
     fn to_json(&self) -> Res<String> {
         self.stamp
-            .to_ixdtf_string_with_provider(
+            .to_ixdtf_string(
                 None,
                 ToStringRoundingOptions::default(),
-                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)
     }
@@ -183,17 +181,16 @@ impl Instant {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
-            .to_ixdtf_string_with_provider(None, opts, &*COMPILED_TZ_PROVIDER)
+            .to_ixdtf_string(None, opts)
             .map_err(Error::from_temporal)
     }
 
     #[prop("toLocaleString")]
     fn to_locale_string(&self) -> Res<String> {
         self.stamp
-            .to_ixdtf_string_with_provider(
+            .to_ixdtf_string(
                 None,
                 ToStringRoundingOptions::default(),
-                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)
     }

@@ -11,7 +11,7 @@ use temporal_rs::options::{
 };
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
-use temporal_rs::provider::{TransitionDirection, COMPILED_TZ_PROVIDER};
+use temporal_rs::provider::TransitionDirection;
 use temporal_rs::{Calendar, UtcOffset};
 
 pub fn opt_relative_to_wrap(
@@ -35,7 +35,7 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
             Some(RelativeTo::PlainDate(plain_date))
         }
         Value::String(str) => Some(
-            RelativeTo::try_from_str_with_provider(str.as_str(), &*COMPILED_TZ_PROVIDER)
+            RelativeTo::try_from_str(str.as_str())
                 .map_err(Error::from_temporal)?,
         ),
 
@@ -181,7 +181,7 @@ pub fn rounding_options(
                 Some(RelativeTo::PlainDate(plain_date))
             }
             Some(Value::String(str)) => Some(
-                RelativeTo::try_from_str_with_provider(str.as_str(), &*COMPILED_TZ_PROVIDER)
+                RelativeTo::try_from_str(str.as_str())
                     .map_err(Error::from_temporal)?,
             ),
 

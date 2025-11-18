@@ -18,8 +18,8 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -80,7 +80,7 @@ impl ZonedDateTime {
 
             temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
         } else {
-            temporal_rs::ZonedDateTime::try_new_iso_with_provider(nanos, tz, &*COMPILED_TZ_PROVIDER)
+            temporal_rs::ZonedDateTime::try_new_iso(nanos, tz)
         }
         .map_err(Error::from_temporal)?;
 
@@ -112,7 +112,7 @@ impl ZonedDateTime {
 
         let date = self
             .date
-            .add_with_provider(&duration, options, &*COMPILED_TZ_PROVIDER)
+            .add(&duration, options)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -122,7 +122,7 @@ impl ZonedDateTime {
         let other = value_to_zoned_date_time(&other, None, realm)?;
 
         self.date
-            .equals_with_provider(&other, &*COMPILED_TZ_PROVIDER)
+            .equals(&other)
             .map_err(Error::from_temporal)
     }
 
@@ -132,7 +132,7 @@ impl ZonedDateTime {
 
         let Some(transition) = self
             .date
-            .get_time_zone_transition_with_provider(direction, &*COMPILED_TZ_PROVIDER)
+            .get_time_zone_transition(direction)
             .map_err(Error::from_temporal)?
         else {
             return Ok(Value::Null);
@@ -146,7 +146,7 @@ impl ZonedDateTime {
 
         let date = self
             .date
-            .round_with_provider(opts, &*COMPILED_TZ_PROVIDER)
+            .round(opts)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -167,7 +167,7 @@ impl ZonedDateTime {
 
         let dur = self
             .date
-            .since_with_provider(&other, settings, &*COMPILED_TZ_PROVIDER)
+            .since(&other, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur)?.into_object())
@@ -177,7 +177,7 @@ impl ZonedDateTime {
     pub fn start_of_day(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self
             .date
-            .start_of_day_with_provider(&*COMPILED_TZ_PROVIDER)
+            .start_of_day()
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -195,7 +195,7 @@ impl ZonedDateTime {
 
         let date = self
             .date
-            .subtract_with_provider(&duration, options, &*COMPILED_TZ_PROVIDER)
+            .subtract(&duration, options)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -245,12 +245,11 @@ impl ZonedDateTime {
         let options = string_rounding_mode_opts(options, realm)?;
 
         self.date
-            .to_ixdtf_string_with_provider(
+            .to_ixdtf_string(
                 display_offset,
                 display_timezone,
                 display_calendar,
                 options,
-                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)
     }
@@ -277,7 +276,7 @@ impl ZonedDateTime {
 
         let dur = self
             .date
-            .until_with_provider(&other, settings, &*COMPILED_TZ_PROVIDER)
+            .until(&other, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur)?.into_object())
@@ -319,7 +318,7 @@ impl ZonedDateTime {
 
         let date = self
             .date
-            .with_plain_time_and_provider(Some(time), &*COMPILED_TZ_PROVIDER)
+            .with_plain_time(Some(time))
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -507,12 +506,11 @@ pub fn value_to_zoned_date_time(
 
             let partial = partial_zoned_date_time(obj, realm)?;
 
-            temporal_rs::ZonedDateTime::from_partial_with_provider(
+            temporal_rs::ZonedDateTime::from_partial(
                 partial,
                 overflow,
                 disambiguation,
                 offset_disambiguation,
-                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)?
         }
@@ -522,11 +520,10 @@ pub fn value_to_zoned_date_time(
                 offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
             _ = overflow_options_opt(options.as_ref(), realm)?;
 
-            temporal_rs::ZonedDateTime::from_utf8_with_provider(
+            temporal_rs::ZonedDateTime::from_utf8(
                 str.as_str().as_bytes(),
                 disambiguation,
                 offset_disambiguation,
-                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)?
         }

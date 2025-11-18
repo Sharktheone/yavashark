@@ -14,7 +14,6 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::DisplayCalendar;
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
@@ -44,7 +43,7 @@ impl PlainDate {
 
     fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
         Temporal::now()
-            .plain_date_iso_with_provider(tz, &*COMPILED_TZ_PROVIDER)
+            .plain_date_iso(tz)
             .map_err(Error::from_temporal)
     }
 
@@ -353,7 +352,7 @@ impl PlainDate {
 
         let zoned_date_time = self
             .date
-            .to_zoned_date_time_with_provider(tz, time, &*COMPILED_TZ_PROVIDER)
+            .to_zoned_date_time(tz, time)
             .map_err(Error::from_temporal)?;
 
         Ok(ZonedDateTime::new(zoned_date_time, realm)?.into_object())

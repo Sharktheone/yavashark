@@ -10,8 +10,8 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Temporal, TimeZone};
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 
 #[object]
