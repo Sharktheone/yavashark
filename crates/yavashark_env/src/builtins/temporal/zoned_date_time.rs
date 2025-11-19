@@ -544,7 +544,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
     }
 
     if let Some(calendar) = obj.get_opt("calendar", realm)? {
-        let calendar = calendar.to_string(realm)?;
+        let Value::String(calendar) = calendar else {
+            return Err(Error::ty("Expected calendar to be a string"));
+        };
+
         let calendar = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
 
         partial.calendar = calendar;
