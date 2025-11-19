@@ -153,6 +153,23 @@ impl JSON {
             |value| Ok(serde_json::to_string(&value).unwrap_or_default().into()),
         )
     }
+
+    #[prop("isRawJSON")]
+    fn is_raw_json(value: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        Ok(match value {
+            Value::Object(obj) => obj.is_frozen() && obj.prototype(realm)?.is_null(),
+            _ => false,
+        })
+    }
+
+    #[prop("rawJSON")]
+    fn raw_json(_str: &str) -> Res<ObjectHandle> {
+        let obj = Object::null();
+
+        obj.freeze()?;
+
+        Ok(obj)
+    }
 }
 
 impl Initializer<ObjectHandle> for JSON {
