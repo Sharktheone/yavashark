@@ -31,6 +31,14 @@ impl<T: TryIntoValue> TryIntoValue for Res<T, Error> {
     }
 }
 
+
+// impl<T: TryIntoValue> TryIntoValue for Option<T> {
+//     fn try_into_value(self, realm: &mut Realm) -> ValueResult {
+//         self.map_or(Ok(Value::Undefined), |v| v.try_into_value(realm))
+//     }
+// }
+
+
 impl<T: TryIntoValue> TryIntoValue for Vec<T> {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult {
         let proto = realm.intrinsics.clone_public().array.get(realm)?.clone();

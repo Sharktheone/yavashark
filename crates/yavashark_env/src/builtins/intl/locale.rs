@@ -1,7 +1,6 @@
-use crate::{MutObject, ObjectHandle, Realm, Res, Value};
+use crate::{MutObject, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::value::Obj;
 
 #[data_object]
 pub enum CaseFirst {

@@ -1,5 +1,5 @@
 use crate::array::Array;
-use crate::{NativeFunction, ObjectHandle, Realm, Value};
+use crate::{NativeFunction, ObjectHandle, Realm};
 use crate::value::IntoValue;
 
 pub fn get_supported_values_of(realm: &mut Realm) -> ObjectHandle {

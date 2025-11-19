@@ -1,5 +1,3 @@
-use crate::array::Array;
-use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};

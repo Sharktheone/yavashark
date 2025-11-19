@@ -37,7 +37,6 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
     let from_value_output = &config.from_value_output;
     let value = &config.value;
     let res = &config.res;
-    let value_result = &config.value_result;
     let realm = &config.realm;
 
     let from_cases = variants.iter().map(|(variant_name, variant_ident)| {
