@@ -1,7 +1,36 @@
+use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_macro::{object, props};
+use yavashark_macro::{data_object, object, props};
+
+#[data_object]
+pub enum LocaleMatcher {
+    Lookup,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum Numeric {
+    Always,
+    Auto,
+}
+
+#[data_object]
+pub enum Style {
+    Long,
+    Short,
+    Narrow,
+}
+
+#[data_object]
+pub struct RelativeTimeFormatOptions {
+    #[prop("localeMatcher")]
+    pub locale_matcher: Option<LocaleMatcher>,
+    pub numeric: Option<Numeric>,
+    pub style: Option<Style>,
+}
 
 #[object]
 #[derive(Debug)]
@@ -29,24 +58,23 @@ impl RelativeTimeFormat {
     #[constructor]
     fn construct(
         _locales: Option<String>,
-        _options: Option<ObjectHandle>,
+        _options: Option<RelativeTimeFormatOptions>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         Ok(Self::new(realm)?.into_object())
     }
 
-    #[prop("supportedLocalesOf")]
     fn supported_locales_of(_locales: String, _options: Option<ObjectHandle>) -> Vec<String> {
         Vec::new()
     }
 
-    fn format(&self, _duration: ObjectHandle) -> String {
+    fn format(&self, _value: f32, _unit: &str) -> String {
         String::new()
     }
 
     #[prop("formatToParts")]
-    fn format_to_parts(&self, _duration: ObjectHandle) -> Vec<String> {
-        Vec::new()
+    fn format_to_parts(&self, _value: f32, _unit: &str, realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(Array::from_realm(realm)?.into_object())
     }
 
     #[prop("resolvedOptions")]

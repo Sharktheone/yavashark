@@ -1,7 +1,55 @@
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_macro::{object, props};
+use yavashark_macro::{data_object, object, props};
+
+#[data_object]
+pub enum LocaleMatcher {
+    Lookup,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum Style {
+    Narrow,
+    Short,
+    Long,
+}
+
+#[data_object]
+pub enum Type {
+    Language,
+    Region,
+    Script,
+    Currency,
+    Calendar,
+    DateTimeField,
+}
+
+#[data_object]
+pub enum LanguageDisplay {
+    Dialect,
+    Standard,
+}
+
+#[data_object]
+pub enum Fallback {
+    Code,
+    None,
+}
+
+#[data_object]
+pub struct DisplayNamesOptions {
+    #[prop("localeMatcher")]
+    pub locale_matcher: Option<LocaleMatcher>,
+    pub style: Option<Style>,
+    #[prop("type")]
+    pub type_: Option<Type>,
+    #[prop("languageDisplay")]
+    pub language_display: Option<LanguageDisplay>,
+    pub fallback: Option<Fallback>,
+}
 
 #[object]
 #[derive(Debug)]
@@ -27,7 +75,11 @@ impl DisplayNames {
 #[props(intrinsic_name = intl_display_names, to_string_tag = "Intl.DisplayNames")]
 impl DisplayNames {
     #[constructor]
-    fn construct(_locales: String, _options: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    fn construct(
+        _locales: String,
+        _options: DisplayNamesOptions,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         Ok(Self::new(realm)?.into_object())
     }
 

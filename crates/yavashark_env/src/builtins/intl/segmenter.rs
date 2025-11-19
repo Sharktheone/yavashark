@@ -1,6 +1,28 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_macro::{object, props};
+use yavashark_macro::{data_object, object, props};
+use crate::value::Obj;
+
+#[data_object]
+pub enum LocaleMatcher {
+    Lookup,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum Granularity {
+    Grapheme,
+    Word,
+    Sentence,
+}
+
+#[data_object]
+pub struct SegmenterOptions {
+    #[prop("localeMatcher")]
+    pub locale_matcher: Option<LocaleMatcher>,
+    pub granularity: Option<Granularity>,
+}
 
 #[object]
 #[derive(Debug)]
@@ -28,7 +50,7 @@ impl Segmenter {
     #[constructor]
     fn construct(
         _locales: Option<String>,
-        _options: Option<ObjectHandle>,
+        _options: Option<SegmenterOptions>,
         realm: &mut Realm,
     ) -> Res<Self> {
         Self::new(realm)

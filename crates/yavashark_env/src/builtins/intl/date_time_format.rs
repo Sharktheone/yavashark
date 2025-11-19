@@ -1,8 +1,104 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_macro::{object, props};
+use yavashark_macro::{data_object, object, props};
+
+#[data_object]
+pub enum LocaleMatcher {
+    Lookup,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum FormatMatcher {
+    Basic,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum HourCycle {
+    H11,
+    H12,
+    H23,
+    H24,
+}
+
+#[data_object]
+pub enum DateTimeStyle {
+    Full,
+    Long,
+    Medium,
+    Short,
+}
+
+#[data_object]
+pub enum Width {
+    Narrow,
+    Short,
+    Long,
+}
+
+#[data_object]
+pub enum NumberDigit {
+    Numeric,
+    #[name("2-digit")]
+    TwoDigit,
+}
+
+#[data_object]
+pub enum Month {
+    Numeric,
+    #[name("2-digit")]
+    TwoDigit,
+    Narrow,
+    Short,
+    Long,
+}
+
+#[data_object]
+pub enum TimeZoneName {
+    Short,
+    Long,
+    ShortOffset,
+    LongOffset,
+    ShortGeneric,
+    LongGeneric,
+}
+
+#[data_object]
+pub struct DateTimeFormatOptions {
+    #[prop("localeMatcher")]
+    pub locale_matcher: Option<LocaleMatcher>,
+    pub calendar: Option<String>,
+    #[prop("numberingSystem")]
+    pub numbering_system: Option<String>,
+    pub hour12: Option<bool>,
+    #[prop("hourCycle")]
+    pub hour_cycle: Option<HourCycle>,
+    #[prop("timeZone")]
+    pub time_zone: Option<String>,
+    #[prop("formatMatcher")]
+    pub format_matcher: Option<FormatMatcher>,
+    pub weekday: Option<Width>,
+    pub era: Option<Width>,
+    pub year: Option<NumberDigit>,
+    pub month: Option<Month>,
+    pub day: Option<NumberDigit>,
+    pub hour: Option<NumberDigit>,
+    pub minute: Option<NumberDigit>,
+    pub second: Option<NumberDigit>,
+    #[prop("fractionalSecondDigits")]
+    pub fractional_second_digits: Option<u8>,
+    #[prop("timeZoneName")]
+    pub time_zone_name: Option<TimeZoneName>,
+    #[prop("dateStyle")]
+    pub date_style: Option<DateTimeStyle>,
+    #[prop("timeStyle")]
+    pub time_style: Option<DateTimeStyle>,
+}
 
 #[object]
 #[derive(Debug)]
@@ -30,7 +126,7 @@ impl DateTimeFormat {
     #[call_constructor]
     fn construct(
         _locales: Option<String>,
-        _options: Option<ObjectHandle>,
+        _options: Option<DateTimeFormatOptions>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         Ok(Self::new(realm)?.into_object())

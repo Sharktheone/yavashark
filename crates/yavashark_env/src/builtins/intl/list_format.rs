@@ -1,8 +1,38 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_macro::{object, props};
+use yavashark_macro::{data_object, object, props};
+
+#[data_object]
+pub enum LocaleMatcher {
+    Lookup,
+    #[name("best fit")]
+    BestFit,
+}
+
+#[data_object]
+pub enum Type {
+    Conjunction,
+    Disjunction,
+    Unit,
+}
+
+#[data_object]
+pub enum Style {
+    Long,
+    Short,
+    Narrow,
+}
+
+#[data_object]
+pub struct ListFormatOptions {
+    #[prop("localeMatcher")]
+    pub locale_matcher: Option<LocaleMatcher>,
+    #[prop("type")]
+    pub type_: Option<Type>,
+    pub style: Option<Style>,
+}
 
 #[object]
 #[derive(Debug)]
@@ -30,7 +60,7 @@ impl ListFormat {
     #[constructor]
     fn construct(
         _locales: Option<String>,
-        _options: Option<ObjectHandle>,
+        _options: Option<ListFormatOptions>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         Ok(Self::new(realm)?.into_object())
@@ -40,17 +70,16 @@ impl ListFormat {
     fn supported_locales_of(
         _locales: String,
         _options: Option<ObjectHandle>,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        Ok(Array::from_realm(realm)?.into_object())
+    ) -> Vec<String> {
+        Vec::new()
     }
 
-    fn format(&self, _duration: ObjectHandle) -> String {
+    fn format(&self, _list: ObjectHandle) -> String {
         String::new()
     }
 
     #[prop("formatToParts")]
-    fn format_to_parts(&self, _duration: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    fn format_to_parts(&self, _list: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(Array::from_realm(realm)?.into_object())
     }
 
