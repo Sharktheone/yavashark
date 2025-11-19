@@ -571,6 +571,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(year) = obj.get_opt("year", realm)? {
         let year = year.to_number(realm)?;
+        if year.is_infinite() {
+            return Err(Error::range("Year cannot be infinite"));
+        }
+
         partial.fields.calendar_fields.year = Some(year as i32);
         has_year = true;
     }
@@ -583,6 +587,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(month) = obj.get_opt("month", realm)? {
         let month = month.to_number(realm)?;
+        if month.is_infinite() {
+            return Err(Error::range("Month cannot be infinite"));
+        }
+
         partial.fields.calendar_fields.month = Some(month as u8);
         has_month = true;
     }
@@ -603,6 +611,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(day) = obj.get_opt("day", realm)? {
         let day = day.to_number(realm)?;
+        if day.is_infinite() {
+            return Err(Error::range("Day cannot be infinite"));
+        }
+
         partial.fields.calendar_fields.day = Some(day as u8);
     } else {
         return Err(Error::ty("Expected day to be defined"));
@@ -610,21 +622,37 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(hour) = obj.get_opt("hour", realm)? {
         let hour = hour.to_number(realm)?;
+        if hour.is_infinite() {
+            return Err(Error::range("Hour cannot be infinite"));
+        }
+
         partial.fields.time = partial.fields.time.with_hour(Some(hour as u8));
     }
 
     if let Some(minute) = obj.get_opt("minute", realm)? {
         let minute = minute.to_number(realm)?;
+        if minute.is_infinite() {
+            return Err(Error::range("Minute cannot be infinite"));
+        }
+
         partial.fields.time = partial.fields.time.with_minute(Some(minute as u8));
     }
 
     if let Some(second) = obj.get_opt("second", realm)? {
         let second = second.to_number(realm)?;
+        if second.is_infinite() {
+            return Err(Error::range("Second cannot be infinite"));
+        }
+
         partial.fields.time = partial.fields.time.with_second(Some(second as u8));
     }
 
     if let Some(millisecond) = obj.get_opt("millisecond", realm)? {
         let millisecond = millisecond.to_number(realm)?;
+        if millisecond.is_infinite() {
+            return Err(Error::range("Millisecond cannot be infinite"));
+        }
+
         partial.fields.time = partial
             .fields
             .time
@@ -633,6 +661,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(microsecond) = obj.get_opt("microsecond", realm)? {
         let microsecond = microsecond.to_number(realm)?;
+        if microsecond.is_infinite() {
+            return Err(Error::range("Microsecond cannot be infinite"));
+        }
+
         partial.fields.time = partial
             .fields
             .time
@@ -641,6 +673,10 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(nanosecond) = obj.get_opt("nanosecond", realm)? {
         let nanosecond = nanosecond.to_number(realm)?;
+        if nanosecond.is_infinite() {
+            return Err(Error::range("Nanosecond cannot be infinite"));
+        }
+
         partial.fields.time = partial.fields.time.with_nanosecond(Some(nanosecond as u16));
     }
 
