@@ -33,7 +33,7 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
     let config = Config::new(e.span());
 
     let error = &config.error;
-    let try_into_value = &config.try_into_value;
+    let into_value = &config.into_value;
     let from_value_output = &config.from_value_output;
     let value = &config.value;
     let res = &config.res;
@@ -76,9 +76,9 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
             }
         }
 
-        impl #try_into_value for #enum_name {
-            fn try_into_value(self, realm: &mut #realm) -> #value_result {
-                Ok(#value::String(self.as_str().into()))
+        impl #into_value for #enum_name {
+            fn into_value(self) -> #value {
+               #value::String(self.as_str().into())
             }
         }
 
