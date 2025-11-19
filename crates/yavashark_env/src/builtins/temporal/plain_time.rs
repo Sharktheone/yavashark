@@ -11,7 +11,6 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::{Temporal, TimeZone};
-use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -39,7 +38,7 @@ impl PlainTime {
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
         Temporal::now()
-            .plain_time_with_provider(tz, &*COMPILED_TZ_PROVIDER)
+            .plain_time_iso(tz)
             .map_err(Error::from_temporal)
     }
 
