@@ -3,27 +3,13 @@ use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-
-#[data_object]
-pub enum LocaleMatcher {
-    Lookup,
-    #[name("best fit")]
-    BestFit,
-}
+use crate::builtins::intl::utils::{HourCycle, LocaleMatcher, Style};
 
 #[data_object]
 pub enum FormatMatcher {
     Basic,
     #[name("best fit")]
     BestFit,
-}
-
-#[data_object]
-pub enum HourCycle {
-    H11,
-    H12,
-    H23,
-    H24,
 }
 
 #[data_object]
@@ -34,12 +20,6 @@ pub enum DateTimeStyle {
     Short,
 }
 
-#[data_object]
-pub enum Width {
-    Narrow,
-    Short,
-    Long,
-}
 
 #[data_object]
 pub enum NumberDigit {
@@ -82,8 +62,8 @@ pub struct DateTimeFormatOptions {
     pub time_zone: Option<String>,
     #[prop("formatMatcher")]
     pub format_matcher: Option<FormatMatcher>,
-    pub weekday: Option<Width>,
-    pub era: Option<Width>,
+    pub weekday: Option<Style>,
+    pub era: Option<Style>,
     pub year: Option<NumberDigit>,
     pub month: Option<Month>,
     pub day: Option<NumberDigit>,

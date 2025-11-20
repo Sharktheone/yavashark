@@ -3,27 +3,13 @@ use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-
-#[data_object]
-pub enum LocaleMatcher {
-    Lookup,
-    #[name("best fit")]
-    BestFit,
-}
+use crate::builtins::intl::utils::{LocaleMatcher, Style};
 
 #[data_object]
 pub enum Numeric {
     Always,
     Auto,
 }
-
-#[data_object]
-pub enum Style {
-    Long,
-    Short,
-    Narrow,
-}
-
 #[data_object]
 pub struct RelativeTimeFormatOptions {
     #[prop("localeMatcher")]
