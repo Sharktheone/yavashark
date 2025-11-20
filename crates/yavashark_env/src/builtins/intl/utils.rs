@@ -1,4 +1,5 @@
 use yavashark_macro::data_object;
+use crate::builtins::intl::Numeric;
 
 #[data_object]
 pub enum LocaleMatcher {
@@ -21,4 +22,9 @@ pub enum Style {
     Narrow,
     Short,
     Long,
+}
+
+#[data_object]
+pub struct LocaleMatcherOptions {
+    options: LocaleMatcher,
 }
