@@ -3,7 +3,7 @@ use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::{HourCycle, LocaleMatcher, Style};
+use crate::builtins::intl::utils::{HourCycle, LocaleMatcher, LocaleMatcherOptions, Style};
 
 #[data_object]
 pub enum FormatMatcher {
@@ -113,10 +113,7 @@ impl DateTimeFormat {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(
-        _locales: Option<String>,
-        _options: Option<ObjectHandle>,
-    ) -> Vec<String> {
+    fn supported_locales_of(_locales: String, _options: Option<LocaleMatcherOptions>) -> Vec<String> {
         Vec::new()
     }
 

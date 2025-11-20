@@ -2,7 +2,7 @@ use crate::value::Obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::LocaleMatcher;
+use crate::builtins::intl::utils::{LocaleMatcher, LocaleMatcherOptions};
 
 #[data_object]
 pub enum Style {
@@ -103,7 +103,7 @@ impl DurationFormat {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(_locales: String, _options: Option<ObjectHandle>) -> Vec<String> {
+    fn supported_locales_of(_locales: String, _options: Option<LocaleMatcherOptions>) -> Vec<String> {
         Vec::new()
     }
 
