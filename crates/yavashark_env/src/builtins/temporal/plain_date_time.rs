@@ -417,10 +417,7 @@ impl PlainDateTime {
 
         let date = self
             .date
-            .to_zoned_date_time(
-                tz,
-                disambiguation.unwrap_or_default(),
-            )
+            .to_zoned_date_time(tz, disambiguation.unwrap_or_default())
             .map_err(Error::from_temporal)?;
 
         Ok(ZonedDateTime::new(date, realm)?.into_object())

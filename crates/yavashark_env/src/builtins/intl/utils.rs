@@ -7,7 +7,6 @@ pub enum LocaleMatcher {
     BestFit,
 }
 
-
 #[data_object]
 pub enum HourCycle {
     H11,

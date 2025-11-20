@@ -252,10 +252,7 @@ impl Duration {
 
         let (opts, rel) = rounding_options(unit, realm)?;
 
-        let dur = self
-            .dur
-            .round(opts, rel)
-            .map_err(Error::from_temporal)?;
+        let dur = self.dur.round(opts, rel).map_err(Error::from_temporal)?;
 
         Self::with_duration(realm, dur)
     }
@@ -310,10 +307,7 @@ impl Duration {
 
         let rel = opt_relative_to_wrap(obj, realm)?;
 
-        let dur = self
-            .dur
-            .total(unit, rel)
-            .map_err(Error::from_temporal)?;
+        let dur = self.dur.total(unit, rel).map_err(Error::from_temporal)?;
 
         Ok(dur.as_inner())
     }

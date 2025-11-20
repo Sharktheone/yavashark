@@ -169,10 +169,7 @@ impl Instant {
     #[prop("toJSON")]
     fn to_json(&self) -> Res<String> {
         self.stamp
-            .to_ixdtf_string(
-                None,
-                ToStringRoundingOptions::default(),
-            )
+            .to_ixdtf_string(None, ToStringRoundingOptions::default())
             .map_err(Error::from_temporal)
     }
 
@@ -188,10 +185,7 @@ impl Instant {
     #[prop("toLocaleString")]
     fn to_locale_string(&self) -> Res<String> {
         self.stamp
-            .to_ixdtf_string(
-                None,
-                ToStringRoundingOptions::default(),
-            )
+            .to_ixdtf_string(None, ToStringRoundingOptions::default())
             .map_err(Error::from_temporal)
     }
 

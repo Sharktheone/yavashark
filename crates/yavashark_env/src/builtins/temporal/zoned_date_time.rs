@@ -18,8 +18,8 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
-use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
+use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -121,9 +121,7 @@ impl ZonedDateTime {
     fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
         let other = value_to_zoned_date_time(&other, None, realm)?;
 
-        self.date
-            .equals(&other)
-            .map_err(Error::from_temporal)
+        self.date.equals(&other).map_err(Error::from_temporal)
     }
 
     #[prop("getTimeZoneTransition")]
@@ -144,10 +142,7 @@ impl ZonedDateTime {
     pub fn round(&self, unit: Value, realm: &mut Realm) -> Res<ObjectHandle> {
         let (opts, _) = rounding_options(unit, realm)?;
 
-        let date = self
-            .date
-            .round(opts)
-            .map_err(Error::from_temporal)?;
+        let date = self.date.round(opts).map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
     }
@@ -175,10 +170,7 @@ impl ZonedDateTime {
 
     #[prop("startOfDay")]
     pub fn start_of_day(&self, realm: &mut Realm) -> Res<ObjectHandle> {
-        let date = self
-            .date
-            .start_of_day()
-            .map_err(Error::from_temporal)?;
+        let date = self.date.start_of_day().map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
     }
@@ -245,12 +237,7 @@ impl ZonedDateTime {
         let options = string_rounding_mode_opts(options, realm)?;
 
         self.date
-            .to_ixdtf_string(
-                display_offset,
-                display_timezone,
-                display_calendar,
-                options,
-            )
+            .to_ixdtf_string(display_offset, display_timezone, display_calendar, options)
             .map_err(Error::from_temporal)
     }
 

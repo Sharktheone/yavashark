@@ -1,7 +1,7 @@
+use crate::builtins::intl::utils::HourCycle;
 use crate::{MutObject, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::HourCycle;
 
 #[data_object]
 pub enum CaseFirst {
@@ -9,7 +9,6 @@ pub enum CaseFirst {
     Lower,
     False,
 }
-
 
 #[data_object]
 pub struct LocaleOptions {

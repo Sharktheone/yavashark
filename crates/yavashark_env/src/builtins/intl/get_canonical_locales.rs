@@ -1,6 +1,6 @@
 use crate::array::Array;
-use crate::{NativeFunction, ObjectHandle, Realm};
 use crate::value::IntoValue;
+use crate::{NativeFunction, ObjectHandle, Realm};
 
 pub fn get_get_canonical_locales(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(

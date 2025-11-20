@@ -34,10 +34,9 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
 
             Some(RelativeTo::PlainDate(plain_date))
         }
-        Value::String(str) => Some(
-            RelativeTo::try_from_str(str.as_str())
-                .map_err(Error::from_temporal)?,
-        ),
+        Value::String(str) => {
+            Some(RelativeTo::try_from_str(str.as_str()).map_err(Error::from_temporal)?)
+        }
 
         _ => None,
     })
@@ -180,10 +179,9 @@ pub fn rounding_options(
 
                 Some(RelativeTo::PlainDate(plain_date))
             }
-            Some(Value::String(str)) => Some(
-                RelativeTo::try_from_str(str.as_str())
-                    .map_err(Error::from_temporal)?,
-            ),
+            Some(Value::String(str)) => {
+                Some(RelativeTo::try_from_str(str.as_str()).map_err(Error::from_temporal)?)
+            }
 
             _ => None,
         };

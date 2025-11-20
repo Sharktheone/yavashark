@@ -1,7 +1,7 @@
+use crate::builtins::intl::utils::{LocaleMatcher, LocaleMatcherOptions};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::{LocaleMatcher, LocaleMatcherOptions};
 
 #[data_object]
 pub enum Granularity {
@@ -50,7 +50,10 @@ impl Segmenter {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(_locales: String, _options: Option<LocaleMatcherOptions>) -> Vec<String> {
+    fn supported_locales_of(
+        _locales: String,
+        _options: Option<LocaleMatcherOptions>,
+    ) -> Vec<String> {
         Vec::new()
     }
 
