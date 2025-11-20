@@ -1,4 +1,4 @@
-use crate::{Object, ObjectHandle, Realm, Res, Value};
+use crate::{Object, ObjectHandle, Realm, Res};
 use yavashark_macro::{data_object, object, props};
 use crate::builtins::intl::utils::LocaleMatcherOptions;
 

@@ -1,5 +1,4 @@
 use yavashark_macro::data_object;
-use crate::builtins::intl::Numeric;
 
 #[data_object]
 pub enum LocaleMatcher {
