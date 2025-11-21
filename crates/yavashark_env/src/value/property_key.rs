@@ -1,5 +1,5 @@
 use crate::value::{fmt_num, Symbol, Value};
-use crate::{Realm, Res};
+use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use yavashark_string::YSString;
@@ -255,7 +255,13 @@ impl IntoPropertyKey for Value {
             Self::Number(n) => PropertyKey::String(n.to_string().into()),
             Self::Boolean(b) => PropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => PropertyKey::String(b.to_string().into()),
-            Self::Object(obj) => PropertyKey::String(obj.to_string(realm)?),
+            Self::Object(obj) => {
+                if let Some(primitive) = obj.primitive(realm)? {
+                    return primitive.into_property_key(realm);
+                }
+
+                PropertyKey::String(obj.to_string(realm)?)
+            },
         })
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
@@ -278,7 +284,49 @@ impl IntoPropertyKey for Value {
             }
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
-            Self::Object(obj) => InternalPropertyKey::String(obj.to_string(realm)?),
+            Self::Object(obj) => {
+                if let Some(primitive) = obj.primitive(realm)? {
+                    return primitive.into_internal_property_key(realm);
+                }
+
+                InternalPropertyKey::String(obj.to_string(realm)?)
+            }
+        })
+    }
+}
+
+impl IntoPropertyKey for PrimitiveValue {
+    fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(match self {
+            PrimitiveValue::String(s) => PropertyKey::String(s),
+            PrimitiveValue::Symbol(s) => PropertyKey::Symbol(s),
+            PrimitiveValue::Null => PropertyKey::String("null".into()),
+            PrimitiveValue::Undefined => PropertyKey::String("undefined".into()),
+            PrimitiveValue::Number(n) => PropertyKey::String(n.to_string().into()),
+            PrimitiveValue::Boolean(b) => PropertyKey::String(b.to_string().into()),
+            PrimitiveValue::BigInt(b) => PropertyKey::String(b.to_string().into()),
+        })
+    }
+    fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(match self {
+            PrimitiveValue::String(s) => string_to_internal_property_key(s),
+            PrimitiveValue::Symbol(s) => InternalPropertyKey::Symbol(s),
+            PrimitiveValue::Null => InternalPropertyKey::String("null".into()),
+            PrimitiveValue::Undefined => InternalPropertyKey::String("undefined".into()),
+            PrimitiveValue::Number(n) => {
+                if !n.is_nan()
+                    && !n.is_infinite()
+                    && n.fract() == 0.0
+                    && n.is_sign_positive()
+                    && n as usize <= MAX_INDEX
+                {
+                    InternalPropertyKey::Index(n as usize)
+                } else {
+                    InternalPropertyKey::String(fmt_num(n))
+                }
+            }
+            PrimitiveValue::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
+            PrimitiveValue::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
         })
     }
 }
