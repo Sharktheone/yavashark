@@ -16,13 +16,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
-    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
-    IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError,
-    ReferenceError, Reflect, RegExp, Set, StringObj, SymbolObj, SyntaxError, Temporal, TypeError,
-    URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
-};
+use crate::builtins::{AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI, DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError, IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON};
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
 use crate::inline_props::InlineObject;
@@ -124,6 +118,9 @@ pub struct GlobalProperties {
 
     #[prop("AggregateError")]
     aggregate_error: Partial<ObjectHandle, GlobalInitializer<AggregateError>>,
+
+    #[prop("SuppressedError")]
+    suppressed_error: Partial<ObjectHandle, GlobalInitializer<SuppressedError>>,
 
     #[prop("globalThis")]
     global_this: Partial<ObjectHandle, GlobalThis>,
@@ -277,6 +274,7 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         eval_error: Default::default(),
         uri_error: Default::default(),
         aggregate_error: Default::default(),
+        suppressed_error: Default::default(),
         global_this: Default::default(),
         global: Default::default(),
         array_buffer: Default::default(),

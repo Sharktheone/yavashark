@@ -92,3 +92,4 @@ error!(SyntaxError, syn_error, get_syntax_error);
 error!(EvalError, eval_error, get_eval_error);
 error!(URIError, uri_error, get_uri_error);
 error!(AggregateError, aggregate_error, get_aggregate_error);
+error!(SuppressedError, suppressed_error, get_supressed_error);
