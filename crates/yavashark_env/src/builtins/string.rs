@@ -673,6 +673,12 @@ impl StringObj {
         Ok(format!("<sup>{str}</sup>").into())
     }
 
+
+    #[prop("toLocaleLowerCase")]
+    pub fn _to_locale_lower_case(#[this] str: &Stringable) -> ValueResult {
+        Ok(str.to_lowercase().into())
+    }
+
     #[prop("toLowerCase")]
     pub fn _to_lower_case(#[this] str: &Stringable) -> ValueResult {
         Ok(str.to_lowercase().into())
