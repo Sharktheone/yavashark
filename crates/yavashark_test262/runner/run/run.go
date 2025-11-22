@@ -1,13 +1,16 @@
 package run
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
+	"yavashark_test262_runner/scheduler"
 	"yavashark_test262_runner/status"
 	"yavashark_test262_runner/worker"
 )
@@ -26,24 +29,28 @@ func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results
 
 	wg.Add(workers)
 
+	num := countTests(testRoot)
+	progressTracker := progress.NewProgressTracker(num)
+
 	for i := range workers {
 		go worker.Worker(i, jobs, resultsChan, wg, timings)
 	}
 
-	num := countTests(testRoot)
-
 	testResults := results.New(num)
 
+	// Goroutine to process results and update progress
 	go func() {
 		for res := range resultsChan {
 			testResults.Add(res)
+			progressTracker.Add(res.Status)
 		}
 	}()
 
-	now := time.Now()
+	var testPaths []string
+	var skippedPaths []string
+
 	_ = filepath.Walk(testRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			//log.Printf("Failed to get file info for %s: %v", path, err)
 			return nil
 		}
 
@@ -61,30 +68,59 @@ func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results
 			return nil
 		}
 
+		shouldSkip := false
 		if skips {
 			for _, skip := range SKIP {
 				if strings.HasPrefix(p, skip) {
-					resultsChan <- results.Result{
-						Status:   status.SKIP,
-						Msg:      "skip",
-						Path:     path,
-						MemoryKB: 0,
-						Duration: 0,
-					}
-
-					return nil
+					skippedPaths = append(skippedPaths, path)
+					shouldSkip = true
+					break
 				}
 			}
 		}
 
-		jobs <- path
+		if !shouldSkip {
+			testPaths = append(testPaths, path)
+		}
 
 		return nil
 	})
 
-	close(jobs)
+	timingData := scheduler.LoadTestTimings("results.json")
+
+	scheduler.EnrichTimingsWithFallback(timingData, testPaths)
+
+	min, max, avg, fastCount, mediumCount, slowCount, riskCount := scheduler.GetStatistics(timingData)
+	log.Printf("Timing statistics - Min: %v, Max: %v, Avg: %v", min, max, avg)
+	log.Printf("Test distribution - Fast: %d, Medium: %d, Slow: %d, Risky: %d",
+		fastCount, mediumCount, slowCount, riskCount)
+
+	scheduledJobs := scheduler.ScheduleTests(testPaths, timingData)
+
+	now := time.Now()
+
+	go func() {
+		for _, job := range scheduledJobs {
+			jobs <- job.Path
+		}
+
+		for _, path := range skippedPaths {
+			resultsChan <- results.Result{
+				Status:   status.SKIP,
+				Msg:      "skip",
+				Path:     path,
+				MemoryKB: 0,
+				Duration: 0,
+			}
+		}
+
+		close(jobs)
+	}()
 
 	wg.Wait()
+
+	fmt.Printf("\n")
+
 	log.Printf("Finished running %d tests in %s", num, time.Since(now).String())
 
 	close(resultsChan)
