@@ -88,6 +88,14 @@ impl Error {
     }
 
     #[must_use]
+    pub fn suppressed_error(error: impl Into<YSString>) -> Self {
+        Self {
+            kind: ErrorKind::URI(error.into()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+
+    #[must_use]
     pub const fn unknown(error: Option<YSString>) -> Self {
         Self {
             kind: ErrorKind::Error(error),
@@ -157,6 +165,7 @@ impl Error {
             ErrorKind::Eval(_) => "EvalError",
             ErrorKind::URI(_) => "URIError",
             ErrorKind::Aggregate(_) => "AggregateError",
+            ErrorKind::Suppressed(_) => "SuppressedError",
         }
     }
 
@@ -170,6 +179,7 @@ impl Error {
             | ErrorKind::Eval(msg)
             | ErrorKind::URI(msg)
             | ErrorKind::Aggregate(msg)
+            | ErrorKind::Suppressed(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(realm)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
@@ -187,6 +197,7 @@ impl Error {
             | ErrorKind::Eval(msg)
             | ErrorKind::URI(msg)
             | ErrorKind::Aggregate(msg)
+            | ErrorKind::Suppressed(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_ys_string(),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
@@ -258,6 +269,7 @@ pub enum ErrorKind {
     Eval(YSString),
     URI(YSString),
     Aggregate(YSString),
+    Suppressed(YSString),
     Throw(Value),
     Error(Option<YSString>),
 }
