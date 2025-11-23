@@ -558,6 +558,11 @@ impl StringObj {
         Ok(str.replacen(search, replace, 1).into())
     }
 
+    #[prop("replaceAll")]
+    pub fn replace_all(#[this] str: &Stringable, search: &str, replace: &str) -> ValueResult {
+        Ok(str.replace(search, replace).into())
+    }
+
     // pub fn search(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
     //     //TODO: Symbol.search
     //
