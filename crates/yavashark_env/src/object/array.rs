@@ -1164,7 +1164,7 @@ impl Array {
         #[this] this: Value,
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
-        initial_value: &Value,
+        initial_value: Option<Value>,
     ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
@@ -1174,9 +1174,17 @@ impl Array {
 
         let len = len.to_number(realm)? as usize;
 
-        let mut acc = initial_value.clone();
+        let begin = usize::from(initial_value.is_none());
 
-        for idx in 0..len {
+        let mut acc = if let Some(initial_value) = initial_value {
+            initial_value
+        } else {
+            let (_, val) = this.get_array_or_done(0, realm)?;
+
+            val.unwrap_or(Value::Undefined)
+        };
+
+        for idx in begin..len {
             let (_, val) = this.get_array_or_done(idx, realm)?;
 
             if let Some(val) = val {
