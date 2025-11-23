@@ -96,23 +96,23 @@ impl Interpreter {
         span: Span,
         scope: &mut Scope,
     ) -> ValueResult {
-        if let Value::Object(f) = callee.copy() {
-            let mut values = Vec::with_capacity(args.len());
+        let mut values = Vec::with_capacity(args.len());
 
-            for arg in args {
-                let value = Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope)?;
+        for arg in args {
+            let value = Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope)?;
 
-                if arg.spread.is_some() {
-                    let iter = ValueIterator::new(&value, realm)?;
+            if arg.spread.is_some() {
+                let iter = ValueIterator::new(&value, realm)?;
 
-                    while let Some(value) = iter.next(realm)? {
-                        values.push(value);
-                    }
-                } else {
+                while let Some(value) = iter.next(realm)? {
                     values.push(value);
                 }
+            } else {
+                values.push(value);
             }
+        }
 
+        if let Value::Object(f) = callee.copy() {
             f.call(values, this, realm) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));
