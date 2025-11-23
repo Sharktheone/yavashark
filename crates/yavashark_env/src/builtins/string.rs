@@ -11,7 +11,8 @@ use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
-use yavashark_string::YSString;
+use yavashark_string::{ToYSString, YSString};
+use crate::builtins::RegExp;
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -502,6 +503,10 @@ impl StringObj {
     //
     //     pattern.exec(&inner.string, realm)
     // }
+    #[prop("match")]
+    pub fn match_(#[this] str: &Stringable, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
+        pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
+    }
 
     // #[prop("matchAll")]
     // pub fn match_all(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
