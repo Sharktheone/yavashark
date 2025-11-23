@@ -496,22 +496,15 @@ impl StringObj {
     //TODO: localization
     // }
 
-    // #[prop("match")]
-    // pub fn match_(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
-    //     //TODO: Symbol.search
-    //     let inner = self.inner.borrow();
-    //
-    //     pattern.exec(&inner.string, realm)
-    // }
     #[prop("match")]
     pub fn match_(#[this] str: &Stringable, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
         pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
     }
 
-    // #[prop("matchAll")]
-    // pub fn match_all(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
-    //     //TODO
-    // }
+    #[prop("matchAll")]
+    pub fn match_all(#[this] str: &Stringable, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
+        pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
+    }
 
     pub fn normalize(#[this] str: &Stringable, form: &str) -> ValueResult {
         let form = match form {
