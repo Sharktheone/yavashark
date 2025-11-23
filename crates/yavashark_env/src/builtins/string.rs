@@ -555,7 +555,7 @@ impl StringObj {
     }
 
     pub fn replace(#[this] str: &Stringable, search: &str, replace: &str) -> ValueResult {
-        Ok(str.replace(search, replace).into())
+        Ok(str.replacen(search, replace, 1).into())
     }
 
     // pub fn search(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
