@@ -468,6 +468,13 @@ pub trait Obj: Debug + 'static {
         self.define_setter(name, callback, realm)
     }
 
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res;
+
     fn delete_property(
         &self,
         name: InternalPropertyKey,
@@ -715,6 +722,13 @@ pub trait MutObj: Debug + 'static {
         &mut self,
         name: InternalPropertyKey,
         callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res;
+
+    fn define_empty_accessor(
+        &mut self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
         realm: &mut Realm,
     ) -> Res;
 

@@ -164,6 +164,10 @@ impl Obj for Proxy {
         self.inner.define_setter(name, value, realm)
     }
 
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.define_empty_accessor(name, attributes, realm)
+    }
+
     fn delete_property(
         &self,
         name: InternalPropertyKey,

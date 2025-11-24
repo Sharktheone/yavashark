@@ -10,6 +10,7 @@ pub struct Config {
     pub native_function: Path,
     pub native_constructor: Path,
     pub variable: Path,
+    pub attributes: Path,
     pub object_handle: Path,
     pub object: Path,
     pub value: Path,
@@ -66,6 +67,14 @@ impl Config {
         variable
             .segments
             .push(PathSegment::from(Ident::new("Variable", span)));
+
+        let mut attributes = env_path.clone();
+        attributes
+            .segments
+            .push(PathSegment::from(Ident::new("value", span)));
+        attributes
+            .segments
+            .push(PathSegment::from(Ident::new("Attributes", span)));
 
         let mut object_handle = env_path.clone();
         object_handle
@@ -207,6 +216,7 @@ impl Config {
             native_function,
             native_constructor,
             variable,
+            attributes,
             object_handle,
             object,
             value,

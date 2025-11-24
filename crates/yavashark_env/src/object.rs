@@ -1,8 +1,6 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{
-    BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor,
-};
+use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor};
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -276,6 +274,10 @@ impl Obj for Object {
         realm: &mut Realm,
     ) -> Res<Option<PropertyDescriptor>> {
         self.inner()?.get_property_descriptor(name, realm)
+    }
+
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner_mut()?.define_empty_accessor(name, attributes, realm)
     }
 }
 
@@ -1144,6 +1146,35 @@ impl MutObj for MutObject {
 
         for value in &mut self.values {
             value.attributes.set_configurable(false);
+        }
+
+        Ok(())
+    }
+
+    fn define_empty_accessor(&mut self, name: InternalPropertyKey, attributes: Attributes, _realm: &mut Realm) -> Res {
+        let key = name.into();
+
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+                e.value = Value::Undefined;
+                e.get = Value::Undefined;
+                e.set = Value::Undefined;
+                e.attributes = attributes;
+                return Ok(());
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                let mut prop = ObjectProperty::new(Value::Undefined);
+                prop.get = Value::Undefined;
+                prop.set = Value::Undefined;
+                prop.attributes = attributes;
+                self.values.push(prop);
+                entry.insert(idx);
+            }
         }
 
         Ok(())

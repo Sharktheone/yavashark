@@ -1,7 +1,5 @@
 use crate::realm::Realm;
-use crate::value::{
-    BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable,
-};
+use crate::value::{Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable};
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
     ValueResult,
@@ -130,6 +128,14 @@ impl Obj for Class {
         }
 
         self.inner.define_setter(name, value, realm)
+    }
+
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+            return Err(Error::new("Cannot set prototype property"));
+        }
+
+        self.inner.define_empty_accessor(name, attributes, realm)
     }
 
     fn delete_property(
@@ -567,6 +573,10 @@ impl Obj for ClassInstance {
         realm: &mut Realm,
     ) -> Res {
         self.inner.try_borrow()?.define_setter(name, value, realm)
+    }
+
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.try_borrow()?.define_empty_accessor(name, attributes, realm)
     }
 
     fn delete_property(

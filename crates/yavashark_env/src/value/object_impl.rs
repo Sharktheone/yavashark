@@ -1,6 +1,4 @@
-use crate::value::{
-    BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value, Variable,
-};
+use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value, Variable};
 use crate::{
     InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue,
     PropertyKey, Realm, Res,
@@ -72,6 +70,11 @@ pub trait ObjectImpl: Debug + 'static {
     ) -> Res {
         self.get_wrapped_object()
             .define_setter(name, callback, realm)
+    }
+
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.get_wrapped_object()
+            .define_empty_accessor(name, attributes, realm)
     }
 
     fn delete_property(
@@ -323,6 +326,10 @@ impl<T: ObjectImpl> Obj for T {
         realm: &mut Realm,
     ) -> Res {
         ObjectImpl::define_setter(self, name, callback, realm)
+    }
+
+    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+        ObjectImpl::define_empty_accessor(self, name, attributes, realm)
     }
 
     fn delete_property(

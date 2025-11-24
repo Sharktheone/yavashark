@@ -43,6 +43,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let res = &conf.res;
     let object_or_null = &conf.object_or_null;
     let object_handle = &conf.object_handle;
+    let attributes = &conf.attributes;
     let property = &conf.property;
     let define_property_result = &conf.define_property_result;
 
@@ -320,6 +321,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_setter(&self, name: #internal_property_key, setter: #object_handle, realm: &mut #realm) -> #res {
                 #inner_borrow_mut
                 #obj_path.define_setter(name, setter, realm)
+            }
+
+            fn define_empty_accessor(&self, name: #internal_property_key, attributes: #attributes, realm: &mut #realm) -> #res {
+                #inner_borrow_mut
+                #obj_path.define_empty_accessor(name, attributes, realm)
             }
 
             fn delete_property(&self, name: #internal_property_key, realm: &mut #realm) -> #res<Option<#property>> {
