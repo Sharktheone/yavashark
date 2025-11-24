@@ -296,24 +296,24 @@ impl IntoPropertyKey for Value {
 }
 
 impl IntoPropertyKey for PrimitiveValue {
-    fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
         Ok(match self {
-            PrimitiveValue::String(s) => PropertyKey::String(s),
-            PrimitiveValue::Symbol(s) => PropertyKey::Symbol(s),
-            PrimitiveValue::Null => PropertyKey::String("null".into()),
-            PrimitiveValue::Undefined => PropertyKey::String("undefined".into()),
-            PrimitiveValue::Number(n) => PropertyKey::String(n.to_string().into()),
-            PrimitiveValue::Boolean(b) => PropertyKey::String(b.to_string().into()),
-            PrimitiveValue::BigInt(b) => PropertyKey::String(b.to_string().into()),
+            Self::String(s) => PropertyKey::String(s),
+            Self::Symbol(s) => PropertyKey::Symbol(s),
+            Self::Null => PropertyKey::String("null".into()),
+            Self::Undefined => PropertyKey::String("undefined".into()),
+            Self::Number(n) => PropertyKey::String(n.to_string().into()),
+            Self::Boolean(b) => PropertyKey::String(b.to_string().into()),
+            Self::BigInt(b) => PropertyKey::String(b.to_string().into()),
         })
     }
-    fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
         Ok(match self {
-            PrimitiveValue::String(s) => string_to_internal_property_key(s),
-            PrimitiveValue::Symbol(s) => InternalPropertyKey::Symbol(s),
-            PrimitiveValue::Null => InternalPropertyKey::String("null".into()),
-            PrimitiveValue::Undefined => InternalPropertyKey::String("undefined".into()),
-            PrimitiveValue::Number(n) => {
+            Self::String(s) => string_to_internal_property_key(s),
+            Self::Symbol(s) => InternalPropertyKey::Symbol(s),
+            Self::Null => InternalPropertyKey::String("null".into()),
+            Self::Undefined => InternalPropertyKey::String("undefined".into()),
+            Self::Number(n) => {
                 if !n.is_nan()
                     && !n.is_infinite()
                     && n.fract() == 0.0
@@ -325,8 +325,8 @@ impl IntoPropertyKey for PrimitiveValue {
                     InternalPropertyKey::String(fmt_num(n))
                 }
             }
-            PrimitiveValue::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
-            PrimitiveValue::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
+            Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
+            Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
         })
     }
 }
