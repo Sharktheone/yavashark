@@ -1153,11 +1153,15 @@ impl Object {
                 self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
             },
             PropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
-                if let Some(getter) = get {
-                    self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
-                }
-                if let Some(setter) = set {
-                    self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                if get.is_none() && set.is_none() {
+                    self.define_empty_accessor(name, Attributes::from_values(false, enumerable, configurable), realm)?;
+                } else {
+                    if let Some(getter) = get {
+                        self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    }
+                    if let Some(setter) = set {
+                        self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    }
                 }
                 Ok(DefinePropertyResult::Handled)
             },
@@ -1210,13 +1214,17 @@ impl Object {
                     (enumerable.unwrap_or(false), configurable.unwrap_or(false))
                 };
 
+                if get.is_none() && set.is_none() {
+                    self.define_empty_accessor(name, Attributes::from_values(false, enumerable, configurable), realm)?;
+                } else {
+                    if let Some(getter) = get {
+                        self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    }
+                    if let Some(setter) = set {
+                        self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    }
+                }
 
-                if let Some(getter) = get {
-                    self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
-                }
-                if let Some(setter) = set {
-                    self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
-                }
                 Ok(DefinePropertyResult::Handled)
             },
         }
