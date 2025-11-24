@@ -1,7 +1,7 @@
 use crate::constructor::ObjectConstructor;
 use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
-use crate::value::{Obj, Property};
+use crate::value::{Obj, Property, PropertyDescriptor};
 use crate::{
     Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
     ValueResult,
@@ -106,7 +106,7 @@ impl Reflect {
     pub fn define_property(
         target: ObjectHandle,
         prop: InternalPropertyKey,
-        desc: &ObjectHandle,
+        desc: PropertyDescriptor,
         #[realm] realm: &mut Realm,
     ) -> bool {
         //This function performs the following steps when called:
@@ -114,7 +114,7 @@ impl Reflect {
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
         //3. Let desc be ? ToPropertyDescriptor(attributes).
         //4. Return ? target.[[DefineOwnProperty]](key, desc).
-        ObjectConstructor::define_property(target, prop, desc, realm).is_ok()
+        target.define_descriptor(prop, desc, realm).is_ok()
     }
 
     //28.1.4 Reflect.deleteProperty ( target, propertyKey ), https://tc39.es/ecma262/#sec-reflection

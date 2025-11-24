@@ -217,7 +217,7 @@ impl FromValueOutput for PropertyDescriptor {
 
 
 
-        if (get.is_some() || set.is_some()) {
+        if get.is_some() || set.is_some() {
             if value.is_some() {
                 return Err(crate::Error::ty(
                     "Property descriptor cannot be both a data and an accessor descriptor",
