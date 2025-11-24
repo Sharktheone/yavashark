@@ -154,17 +154,23 @@ impl ObjectConstructor {
     #[prop("defineProperties")]
     fn define_properties(
         obj: ObjectHandle,
-        props: &Value,
+        props: ObjectHandle,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let Ok(props) = props.as_object() else {
-            return Ok(obj.into());
-        };
+        let mut descriptors = Vec::new();
+        
+        for (key, value) in props.enumerable_properties(realm)? {
+            if value.is_undefined() {
+                continue;
+            }
+            
+            let descriptor = PropertyDescriptor::from_value_out(value, realm)?;
 
-        for (key, value) in props.properties(realm)? {
-            let descriptor = value.as_object()?;
-
-            Self::define_property(obj.clone(), key.into(), descriptor, realm)?;
+            descriptors.push((key.into(), descriptor));
+        }
+        
+        for (key, descriptor) in descriptors {
+            obj.define_descriptor(key, descriptor, realm)?;
         }
 
         Ok(obj.into())
