@@ -87,9 +87,10 @@ impl ObjectConstructor {
 
         if let Some(props) = properties {
             for (key, value) in props.properties(realm)? {
-                if let Value::Object(value) = value {
-                    Self::define_property(obj.clone(), key.into(), &value, realm)?;
+                if let Ok(descriptor) = PropertyDescriptor::from_value_out(value, realm) {
+                    Self::define_property(obj.clone(), key.into(), descriptor, realm)?;
                 }
+
             }
         }
 
