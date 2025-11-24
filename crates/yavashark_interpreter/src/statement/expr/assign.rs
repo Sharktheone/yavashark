@@ -126,7 +126,9 @@ impl Interpreter {
                         return Err(Error::ty("Cannot assign to read only property"));
                     }
                 }
-                DefinePropertyResult::Setter(_, _) => {}
+                DefinePropertyResult::Setter(setter, value) => {
+                    setter.call( vec![value], obj.clone().into(), realm)?;
+                }
             }
             Ok(())
         } else {
