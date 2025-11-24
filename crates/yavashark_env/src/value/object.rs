@@ -231,17 +231,17 @@ impl FromValueOutput for PropertyDescriptor {
             }
         }
 
-        if get.is_some() || set.is_some() {
-            Ok(PropertyDescriptor::Accessor {
-                get: get.and_then(|v| v.to_object().ok()),
-                set: set.and_then(|v| v.to_object().ok()),
+        if value.is_some() {
+            Ok(Self::Data {
+                value: value.unwrap_or(Value::Undefined),
+                writable: writable.unwrap_or(false),
                 enumerable,
                 configurable,
             })
         } else {
-            Ok(PropertyDescriptor::Data {
-                value: value.unwrap_or(Value::Undefined),
-                writable: writable.unwrap_or(false),
+            Ok(Self::Accessor {
+                get: get.and_then(|v| v.to_object().ok()),
+                set: set.and_then(|v| v.to_object().ok()),
                 enumerable,
                 configurable,
             })
@@ -314,6 +314,96 @@ impl From<Variable> for PropertyDescriptor {
             writable: var.properties.is_writable(),
             enumerable: var.properties.is_enumerable(),
             configurable: var.properties.is_configurable(),
+        }
+    }
+}
+
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DefinePropertyDescriptor {
+    Data {
+        value: Value,
+        writable: Option<bool>,
+        enumerable: Option<bool>,
+        configurable: Option<bool>,
+    },
+    Accessor {
+        get: Option<ObjectHandle>,
+        set: Option<ObjectHandle>,
+        enumerable: Option<bool>,
+        configurable: Option<bool>,
+    },
+}
+
+
+impl FromValueOutput for DefinePropertyDescriptor {
+    type Output = Self;
+
+    fn from_value_out(value: crate::Value, realm: &mut Realm) -> Res<Self::Output> {
+        let descriptor = value
+            .as_object()?;
+
+
+        let enumerable = descriptor
+            .resolve_property("enumerable", realm)?
+            .map(|v| v.is_truthy());
+        let configurable = descriptor
+            .resolve_property("configurable", realm)?
+            .map(|v| v.is_truthy());
+
+        let value = descriptor.resolve_property("value", realm)?;
+
+        let writable = descriptor
+            .resolve_property("writable", realm)?
+            .map(|v| v.is_truthy());
+
+
+
+        let get = descriptor.resolve_property("get", realm)?;
+        if let Some(get) = &get {
+            if !get.is_callable() && !get.is_undefined() {
+                return Err(crate::Error::ty("Getter must be a function or undefined"));
+            }
+        }
+
+
+        let set = descriptor.resolve_property("set", realm)?;
+        if let Some(set) = &set {
+            if !set.is_callable() && !set.is_undefined() {
+                return Err(crate::Error::ty("Setter must be a function or undefined"));
+            }
+        }
+
+
+
+        if get.is_some() || set.is_some() {
+            if value.is_some() {
+                return Err(crate::Error::ty(
+                    "Property descriptor cannot be both a data and an accessor descriptor",
+                ));
+            }
+
+            if writable.is_some() {
+                return Err(crate::Error::ty(
+                    "Property descriptor cannot be both a data and an accessor descriptor",
+                ));
+            }
+        }
+
+        if value.is_some() {
+            Ok(Self::Data {
+                value: value.unwrap_or(Value::Undefined),
+                writable,
+                enumerable,
+                configurable,
+            })
+        } else {
+            Ok(Self::Accessor {
+                get: get.and_then(|v| v.to_object().ok()),
+                set: set.and_then(|v| v.to_object().ok()),
+                enumerable,
+                configurable,
+            })
         }
     }
 }
