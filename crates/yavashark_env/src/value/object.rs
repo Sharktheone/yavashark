@@ -192,7 +192,7 @@ impl FromValueOutput for PropertyDescriptor {
             .map(|v| v.is_truthy())
             .unwrap_or(false);
 
-        let mut value = descriptor.resolve_property("value", realm)?;
+        let value = descriptor.resolve_property("value", realm)?;
 
         let writable = descriptor
             .resolve_property("writable", realm)?
@@ -1132,13 +1132,71 @@ impl Object {
 
 
 
-    pub fn define_descriptor(&self, name: InternalPropertyKey, desc: PropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    pub fn define_property_descriptor(&self, name: InternalPropertyKey, desc: PropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
         match desc {
             PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
                 let attributes = Attributes::from_values(writable, enumerable, configurable);
                 self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
             },
             PropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+                if let Some(getter) = get {
+                    self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                }
+                if let Some(setter) = set {
+                    self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                }
+                Ok(DefinePropertyResult::Handled)
+            },
+        }
+    }
+
+
+    pub fn define_descriptor(&self, name: InternalPropertyKey, desc: DefinePropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        match desc {
+            DefinePropertyDescriptor::Data { value, writable, enumerable, configurable } => {
+
+                let (writable, enumerable, configurable) = if writable.is_none() || enumerable.is_none() || configurable.is_none() {
+                    let current = self.get_own_property_no_get_set(name.clone(), realm)?;
+                    if let Some(Property::Value(_, attrs)) = current {
+                        (
+                            writable.unwrap_or(attrs.is_writable()),
+                            enumerable.unwrap_or(attrs.is_enumerable()),
+                            configurable.unwrap_or(attrs.is_configurable()),
+                        )
+                    } else {
+                        (
+                            writable.unwrap_or(false),
+                            enumerable.unwrap_or(false),
+                            configurable.unwrap_or(false),
+                        )
+                    }
+                } else {
+                    (writable.unwrap_or(false), enumerable.unwrap_or(false), configurable.unwrap_or(false))
+                };
+
+
+                let attributes = Attributes::from_values(writable, enumerable, configurable);
+                self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
+            },
+            DefinePropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+                let (enumerable, configurable) = if enumerable.is_none() || configurable.is_none() {
+                    let current = self.get_own_property_no_get_set(name.clone(), realm)?;
+                    if let Some(Property::Getter(_, attrs)) = current {
+                        (
+                            enumerable.unwrap_or(attrs.is_enumerable()),
+                            configurable.unwrap_or(attrs.is_configurable()),
+                        )
+                    } else {
+                        (
+                            enumerable.unwrap_or(false),
+                            configurable.unwrap_or(false),
+                        )
+                    }
+                } else {
+                    (enumerable.unwrap_or(false), configurable.unwrap_or(false))
+                };
+
+
                 if let Some(getter) = get {
                     self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
                 }

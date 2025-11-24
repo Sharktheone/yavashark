@@ -4,7 +4,7 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property, PropertyDescriptor};
+use crate::value::{Constructor, DefinePropertyDescriptor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -87,7 +87,7 @@ impl ObjectConstructor {
 
         if let Some(props) = properties {
             for (key, value) in props.properties(realm)? {
-                if let Ok(descriptor) = PropertyDescriptor::from_value_out(value, realm) {
+                if let Ok(descriptor) = DefinePropertyDescriptor::from_value_out(value, realm) {
                     Self::define_property(obj.clone(), key.into(), descriptor, realm)?;
                 }
 
@@ -101,7 +101,7 @@ impl ObjectConstructor {
     pub fn define_property(
         obj: ObjectHandle,
         key: InternalPropertyKey,
-        descriptor: PropertyDescriptor,
+        descriptor: DefinePropertyDescriptor,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         obj.define_descriptor(key, descriptor, realm)?;
@@ -158,17 +158,17 @@ impl ObjectConstructor {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let mut descriptors = Vec::new();
-        
+
         for (key, value) in props.enumerable_properties(realm)? {
             if value.is_undefined() {
                 continue;
             }
-            
-            let descriptor = PropertyDescriptor::from_value_out(value, realm)?;
+
+            let descriptor = DefinePropertyDescriptor::from_value_out(value, realm)?;
 
             descriptors.push((key.into(), descriptor));
         }
-        
+
         for (key, descriptor) in descriptors {
             obj.define_descriptor(key, descriptor, realm)?;
         }

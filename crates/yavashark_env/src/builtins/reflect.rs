@@ -1,7 +1,7 @@
 use crate::constructor::ObjectConstructor;
 use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
-use crate::value::{Obj, Property, PropertyDescriptor};
+use crate::value::{DefinePropertyDescriptor, Obj, Property};
 use crate::{
     Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
     ValueResult,
@@ -106,7 +106,7 @@ impl Reflect {
     pub fn define_property(
         target: ObjectHandle,
         prop: InternalPropertyKey,
-        desc: PropertyDescriptor,
+        desc: DefinePropertyDescriptor,
         #[realm] realm: &mut Realm,
     ) -> bool {
         //This function performs the following steps when called:
