@@ -279,6 +279,14 @@ impl Obj for Object {
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
         self.inner_mut()?.define_empty_accessor(name, attributes, realm)
     }
+
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner_mut()?.define_getter_attributes(name, callback, attributes, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner_mut()?.define_setter_attributes(name, callback, attributes, realm)
+    }
 }
 
 impl MutObject {
@@ -1179,6 +1187,109 @@ impl MutObj for MutObject {
 
         Ok(())
     }
+
+ fn define_getter_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        attributes: Attributes,
+        _realm: &mut Realm,
+    ) -> Res {
+        if let InternalPropertyKey::Index(n) = name {
+            self.insert_array(n, ObjectProperty::getter(value.into()));
+            return Ok(());
+        }
+
+        let key = name.into();
+
+        let val = self
+            .properties
+            .get_mut(&key)
+            .and_then(|idx| self.values.get_mut(*idx));
+
+        if let Some(prop) = val {
+            prop.get = value.into();
+            return Ok(());
+        }
+
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+                e.value = Value::Undefined;
+                e.get = value.into();
+                e.attributes = attributes;
+                return Ok(());
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                let prop = ObjectProperty {
+                    value: Value::Undefined,
+                    get: value.into(),
+                    set: Value::Undefined,
+                    attributes,
+                };
+                self.values.push(prop);
+                entry.insert(idx);
+            }
+        }
+
+        Ok(())
+    }
+
+    fn define_setter_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        attributes: Attributes,
+        _realm: &mut Realm,
+    ) -> Res {
+        if let InternalPropertyKey::Index(n) = name {
+            self.insert_array(n, ObjectProperty::setter(value.into()));
+            return Ok(());
+        }
+
+        let key = name.into();
+
+        let val = self
+            .properties
+            .get_mut(&key)
+            .and_then(|idx| self.values.get_mut(*idx));
+
+        if let Some(prop) = val {
+            prop.set = value.into();
+            return Ok(());
+        }
+
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+                e.value = Value::Undefined;
+                e.set = value.into();
+                e.attributes = attributes;
+                return Ok(());
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                let prop = ObjectProperty {
+                    value: Value::Undefined,
+                    get: Value::Undefined,
+                    set: value.into(),
+                    attributes,
+                };
+                self.values.push(prop);
+                entry.insert(idx);
+            }
+        }
+
+        Ok(())
+    }
+
 
     // fn constructor(&self) -> Result<ObjectProperty, Error> {
     //     if let Some(constructor) = self

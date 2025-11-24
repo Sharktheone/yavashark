@@ -117,6 +117,15 @@ impl Obj for Class {
         self.inner.define_getter(name, value, realm)
     }
 
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+            return Err(Error::new("Cannot set prototype property"));
+        }
+
+        self.inner.define_getter_attributes(name, callback, attributes, realm)
+
+    }
+
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -128,6 +137,15 @@ impl Obj for Class {
         }
 
         self.inner.define_setter(name, value, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+            return Err(Error::new("Cannot set prototype property"));
+        }
+
+        self.inner.define_setter_attributes(name, callback, attributes, realm)
+
     }
 
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
@@ -566,6 +584,10 @@ impl Obj for ClassInstance {
         self.inner.try_borrow()?.define_getter(name, value, realm)
     }
 
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.try_borrow()?.define_getter_attributes(name, callback, attributes, realm)
+    }
+
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -573,6 +595,10 @@ impl Obj for ClassInstance {
         realm: &mut Realm,
     ) -> Res {
         self.inner.try_borrow()?.define_setter(name, value, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.try_borrow()?.define_setter_attributes(name, callback, attributes, realm)
     }
 
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {

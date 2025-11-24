@@ -328,6 +328,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #obj_path.define_empty_accessor(name, attributes, realm)
             }
 
+            fn define_getter_attributes(&self, name: #internal_property_key, getter: #object_handle, attributes: #attributes, realm: &mut #realm) -> #res {
+                #inner_borrow_mut
+                #obj_path.define_getter_attributes(name, getter, attributes, realm)
+            }
+
+            fn define_setter_attributes(&self, name: #internal_property_key, setter: #object_handle, attributes: #attributes, realm: &mut #realm) -> #res {
+                #inner_borrow_mut
+                #obj_path.define_setter_attributes(name, setter, attributes, realm)
+            }
+
             fn delete_property(&self, name: #internal_property_key, realm: &mut #realm) -> #res<Option<#property>> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_delete

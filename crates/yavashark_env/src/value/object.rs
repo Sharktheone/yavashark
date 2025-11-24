@@ -446,10 +446,7 @@ pub trait Obj: Debug + 'static {
         callback: ObjectHandle,
         attributes: Attributes,
         realm: &mut Realm,
-    ) -> Res {
-        _ = attributes;
-        self.define_getter(name, callback, realm)
-    }
+    ) -> Res;
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -463,10 +460,7 @@ pub trait Obj: Debug + 'static {
         callback: ObjectHandle,
         attributes: Attributes,
         realm: &mut Realm,
-    ) -> Res {
-        _ = attributes;
-        self.define_setter(name, callback, realm)
-    }
+    ) -> Res;
 
     fn define_empty_accessor(
         &self,
@@ -718,10 +712,27 @@ pub trait MutObj: Debug + 'static {
         callback: ObjectHandle,
         realm: &mut Realm,
     ) -> Res;
+
+    fn define_getter_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res;
+
     fn define_setter(
         &mut self,
         name: InternalPropertyKey,
         callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res;
+
+    fn define_setter_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
         realm: &mut Realm,
     ) -> Res;
 
@@ -1214,14 +1225,16 @@ impl Object {
                     (enumerable.unwrap_or(false), configurable.unwrap_or(false))
                 };
 
+                let attributes = Attributes::from_values(false, enumerable, configurable);
+
                 if get.is_none() && set.is_none() {
-                    self.define_empty_accessor(name, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    self.define_empty_accessor(name, attributes, realm)?;
                 } else {
                     if let Some(getter) = get {
-                        self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                        self.define_getter_attributes(name.clone(), getter, attributes, realm)?;
                     }
                     if let Some(setter) = set {
-                        self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                        self.define_setter_attributes(name, setter, attributes, realm)?;
                     }
                 }
 

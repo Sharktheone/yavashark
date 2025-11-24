@@ -155,6 +155,10 @@ impl Obj for Proxy {
         self.inner.define_getter(name, value, realm)
     }
 
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.define_getter_attributes(name, callback, attributes, realm)
+    }
+
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -162,6 +166,10 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res {
         self.inner.define_setter(name, value, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.inner.define_setter_attributes(name, callback, attributes, realm)
     }
 
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {

@@ -62,6 +62,13 @@ pub trait ObjectImpl: Debug + 'static {
         self.get_wrapped_object()
             .define_getter(name, callback, realm)
     }
+
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.get_wrapped_object()
+            .define_getter_attributes(name, callback, attributes, realm)
+    }
+
+
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -70,6 +77,11 @@ pub trait ObjectImpl: Debug + 'static {
     ) -> Res {
         self.get_wrapped_object()
             .define_setter(name, callback, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        self.get_wrapped_object()
+            .define_setter_attributes(name, callback, attributes, realm)
     }
 
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
@@ -319,6 +331,11 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::define_getter(self, name, callback, realm)
     }
 
+    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        ObjectImpl::define_getter_attributes(self, name, callback, attributes, realm)
+
+    }
+
     fn define_setter(
         &self,
         name: InternalPropertyKey,
@@ -326,6 +343,10 @@ impl<T: ObjectImpl> Obj for T {
         realm: &mut Realm,
     ) -> Res {
         ObjectImpl::define_setter(self, name, callback, realm)
+    }
+
+    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+        ObjectImpl::define_setter_attributes(self, name, callback, attributes, realm)
     }
 
     fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
