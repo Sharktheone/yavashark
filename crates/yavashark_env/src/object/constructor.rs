@@ -4,7 +4,7 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
+use crate::value::{Constructor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property, PropertyDescriptor};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -13,6 +13,7 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
+use crate::conversion::FromValueOutput;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -99,67 +100,10 @@ impl ObjectConstructor {
     pub fn define_property(
         obj: ObjectHandle,
         key: InternalPropertyKey,
-        descriptor: &ObjectHandle,
+        descriptor: PropertyDescriptor,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let mut value = descriptor.resolve_property("value", realm)?;
-        let get = descriptor.resolve_property("get", realm)?;
-        let set = descriptor.resolve_property("set", realm)?;
-
-        if value.is_some() && (get.is_some() || set.is_some()) {
-            return Err(Error::ty(
-                "Property descriptor cannot be both a data and an accessor descriptor",
-            ));
-        }
-
-        if value.is_none() && get.is_none() && set.is_none() {
-            value = Some(Value::Undefined);
-        }
-
-        let writable = descriptor
-            .resolve_property("writable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
-        let enumerable = descriptor
-            .resolve_property("enumerable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
-        let configurable = descriptor
-            .resolve_property("configurable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
-
-        if let Some(value) = value {
-            let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
-
-            obj.define_property_attributes(key.clone(), var, realm)?;
-        } else {
-            if !obj.contains_own_key(key.clone(), realm)? {
-                //TODO setup the attributes, not perfect, but works for now
-                let var = Variable::new_with_attributes(
-                    Value::Undefined,
-                    writable,
-                    enumerable,
-                    configurable,
-                );
-
-                obj.define_property_attributes(key.clone(), var, realm)?;
-            }
-        }
-
-        //TODO: there should be a obj.define_property which takes a descriptor
-        if let Some(get) = descriptor.resolve_property("get", realm)? {
-            if let Ok(get) = get.to_object() {
-                obj.define_getter(key.clone(), get, realm)?;
-            }
-        }
-
-        if let Some(set) = descriptor.resolve_property("set", realm)? {
-            if let Ok(set) = set.to_object() {
-                obj.define_setter(key, set, realm)?;
-            }
-        }
-
+        obj.define_descriptor(key, descriptor, realm)?;
         Ok(obj.into())
     }
 
