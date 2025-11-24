@@ -1040,6 +1040,26 @@ impl Object {
         }
     }
 
+
+
+    pub fn define_descriptor(&self, name: InternalPropertyKey, desc: PropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        match desc {
+            PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
+                let attributes = Attributes::from_values(writable, enumerable, configurable);
+                self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
+            },
+            PropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+                if let Some(getter) = get {
+                    self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                }
+                if let Some(setter) = set {
+                    self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                }
+                Ok(DefinePropertyResult::Handled)
+            },
+        }
+    }
+
     #[must_use]
     pub fn name(&self) -> String {
         self.0.name()
