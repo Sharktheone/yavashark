@@ -231,17 +231,17 @@ impl FromValueOutput for PropertyDescriptor {
             }
         }
 
-        if value.is_some() {
-            Ok(Self::Data {
-                value: value.unwrap_or(Value::Undefined),
-                writable: writable.unwrap_or(false),
+        if get.is_some() || set.is_some() {
+            Ok(Self::Accessor {
+                get: get.and_then(|v| v.to_object().ok()),
+                set: set.and_then(|v| v.to_object().ok()),
                 enumerable,
                 configurable,
             })
         } else {
-            Ok(Self::Accessor {
-                get: get.and_then(|v| v.to_object().ok()),
-                set: set.and_then(|v| v.to_object().ok()),
+            Ok(Self::Data {
+                value: value.unwrap_or(Value::Undefined),
+                writable: writable.unwrap_or(false),
                 enumerable,
                 configurable,
             })
@@ -390,17 +390,17 @@ impl FromValueOutput for DefinePropertyDescriptor {
             }
         }
 
-        if value.is_some() {
-            Ok(Self::Data {
-                value: value.unwrap_or(Value::Undefined),
-                writable,
+        if get.is_some() || set.is_some() {
+            Ok(Self::Accessor {
+                get: get.and_then(|v| v.to_object().ok()),
+                set: set.and_then(|v| v.to_object().ok()),
                 enumerable,
                 configurable,
             })
         } else {
-            Ok(Self::Accessor {
-                get: get.and_then(|v| v.to_object().ok()),
-                set: set.and_then(|v| v.to_object().ok()),
+            Ok(Self::Data {
+                value: value.unwrap_or(Value::Undefined),
+                writable,
                 enumerable,
                 configurable,
             })
