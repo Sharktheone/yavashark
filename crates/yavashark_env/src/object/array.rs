@@ -392,7 +392,9 @@ impl Array {
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
 
-        inner.insert_array(idx, val);
+        if inner.insert_array(idx, val) == DefinePropertyResult::ReadOnly {
+            return Err(Error::ty("Cannot assign to read only property"));
+        }
         let len = self.length.get();
 
         if idx >= len {
