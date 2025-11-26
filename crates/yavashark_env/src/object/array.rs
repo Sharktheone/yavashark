@@ -76,8 +76,10 @@ impl ObjectImpl for Array {
             return Ok(DefinePropertyResult::Handled);
         }
 
-        self.get_wrapped_object()
-            .define_property_attributes(name, value, realm)?;
+        if self.get_wrapped_object()
+            .define_property_attributes(name, value, realm)? == DefinePropertyResult::ReadOnly {
+            return Ok(DefinePropertyResult::ReadOnly);
+        }
 
         let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
         self.length.set(len);
