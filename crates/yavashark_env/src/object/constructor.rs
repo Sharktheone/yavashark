@@ -4,7 +4,7 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, DefinePropertyDescriptor, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
+use crate::value::{Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -104,7 +104,9 @@ impl ObjectConstructor {
         descriptor: DefinePropertyDescriptor,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        obj.define_descriptor(key, descriptor, realm)?;
+        if obj.define_descriptor(key, descriptor, realm)? == DefinePropertyResult::ReadOnly {
+            return Err(Error::ty("Cannot define property on read-only object"));
+        }
         Ok(obj.into())
     }
 
@@ -170,7 +172,9 @@ impl ObjectConstructor {
         }
 
         for (key, descriptor) in descriptors {
-            obj.define_descriptor(key, descriptor, realm)?;
+            if obj.define_descriptor(key, descriptor, realm)? == DefinePropertyResult::ReadOnly {
+                return Err(Error::ty("Cannot define property on read-only object"));
+            }
         }
 
         Ok(obj.into())
