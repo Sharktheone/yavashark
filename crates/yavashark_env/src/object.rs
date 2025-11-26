@@ -357,19 +357,22 @@ impl MutObject {
         (self.array.len(), false)
     }
 
-    pub fn insert_array(&mut self, index: usize, value: impl Into<ObjectProperty>) {
+    pub fn insert_array(&mut self, index: usize, value: impl Into<ObjectProperty>) -> DefinePropertyResult {
         let (i, found) = self.array_position(index);
+
 
         if found {
             if let Some(vi) = self.array.get(i) {
                 let Some(v) = self.values.get_mut(vi.1) else {
-                    return;
+                    return DefinePropertyResult::Handled;
                 };
 
                 if v.attributes.is_writable() {
                     *v = value.into();
+                } else {
+                    return DefinePropertyResult::ReadOnly;
                 }
-                return;
+                return DefinePropertyResult::Handled;
             }
         }
 
@@ -391,6 +394,8 @@ impl MutObject {
 
         self.array.insert(i, (index, len));
         // self.properties.insert(property_key, len);
+
+        DefinePropertyResult::Handled
     }
 
     #[must_use]
@@ -573,8 +578,7 @@ impl MutObject {
         value: Value,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, value);
-            return Ok(DefinePropertyResult::Handled);
+            return Ok(self.insert_array(n, value));
         }
 
         if let InternalPropertyKey::String(s) = &name {
@@ -613,8 +617,7 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, value);
-            return Ok(DefinePropertyResult::Handled);
+            return Ok(self.insert_array(n, value));
         }
 
         if let InternalPropertyKey::String(s) = &name {
@@ -672,8 +675,7 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, value);
-            return Ok(DefinePropertyResult::Handled);
+            return Ok(self.insert_array(n, value));
         }
 
         if let InternalPropertyKey::String(s) = &name {
