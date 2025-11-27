@@ -176,6 +176,20 @@ impl WeakSet {
         Ok(Self::with_set(realm, set)?.into_value())
     }
 
+
+    fn union(&self, other: &Self, #[realm] realm: &mut Realm) -> ValueResult {
+        let inner = self.inner.borrow();
+        let left = &inner.set;
+        let inner = other.inner.borrow();
+        let right = &inner.set;
+
+        let union = left.union(right);
+
+        let set = union.cloned().collect::<IndexSet<_>>();
+
+        Ok(Self::with_set(realm, set)?.into_value())
+    }
+
     #[get("size")]
     fn size(&self) -> usize {
         let inner = self.inner.borrow();
