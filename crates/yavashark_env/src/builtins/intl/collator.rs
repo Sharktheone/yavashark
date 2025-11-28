@@ -1,5 +1,5 @@
 use crate::value::{IntoValue, Obj};
-use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, PropertyKey, Realm, Res, Value};
+use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
 use icu::collator::options::{AlternateHandling, CaseLevel, CollatorOptions, Strength};
 use icu::collator::preferences::{CollationCaseFirst, CollationNumericOrdering};
 use icu::collator::{Collator as IcuCollator, CollatorPreferences};
