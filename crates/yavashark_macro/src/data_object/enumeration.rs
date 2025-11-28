@@ -1,8 +1,9 @@
 use crate::config::Config;
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, Span, TokenStream};
 use syn::spanned::Spanned;
+use crate::data_object::args::DataObjectArgs;
 
-pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
+pub fn data_enum(mut e: syn::ItemEnum, args: DataObjectArgs) -> syn::Result<TokenStream> {
     let mut variants = Vec::with_capacity(e.variants.len());
 
     for variant in e.variants.iter_mut() {
@@ -51,6 +52,20 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
         }
     });
 
+    let err = match args.error.as_deref().unwrap_or("type") {
+        "type" => Ident::new("ty", Span::call_site()),
+        "range" => Ident::new("range", Span::call_site()),
+        "syntax" => Ident::new("syntax", Span::call_site()),
+        "uri" => Ident::new("uri", Span::call_site()),
+        "reference" => Ident::new("reference", Span::call_site()),
+        other => {
+            return Err(syn::Error::new_spanned(
+                e,
+                format!("Invalid error type: {}", other),
+            ));
+        }
+    };
+
     Ok(quote::quote! {
         #e
 
@@ -61,7 +76,7 @@ pub fn data_enum(mut e: syn::ItemEnum) -> syn::Result<TokenStream> {
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     #(#from_cases)*
-                    _ => Err(#error::ty("Invalid enum variant string")),
+                    _ => Err(#error::#err("Invalid enum variant string")),
                 }
             }
 

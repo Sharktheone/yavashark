@@ -1,21 +1,38 @@
 mod enumeration;
 mod structure;
+mod args;
 
+use darling::ast::NestedMeta;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
 use syn::parse::discouraged::Speculative;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
+use proc_macro::TokenStream as TokenStream1;
+use darling::FromMeta;
+use crate::data_object::args::DataObjectArgs;
 
 pub fn data_object(
-    _attrs: proc_macro::TokenStream,
+    attrs: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let input = syn::parse_macro_input!(item as StructOrEnum);
 
+    let attr_args = match NestedMeta::parse_meta_list(attrs.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream1::from(darling::Error::from(e).write_errors());
+        }
+    };
+
+    let args = match DataObjectArgs::from_list(&attr_args) {
+        Ok(args) => args,
+        Err(e) => return e.write_errors().into(),
+    };
+
     match input {
         StructOrEnum::Struct(s) => data_struct(s),
-        StructOrEnum::Enum(e) => data_enum(e),
+        StructOrEnum::Enum(e) => data_enum(e, args),
     }
     .unwrap_or_else(|e| e.to_compile_error())
     .into()
