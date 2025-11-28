@@ -171,7 +171,7 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     let mut owned_tag = YSString::new();
 
-    let mut tag = if this.is_callable() {
+    let mut tag = if this.is_callable() || this.is_constructable() {
         "Function"
     } else if this.downcast::<Array>().is_some() {
         "Array"
