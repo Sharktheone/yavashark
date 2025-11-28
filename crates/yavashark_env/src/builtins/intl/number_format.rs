@@ -4,10 +4,11 @@ use crate::value::{fmt_num, IntoValue, Obj};
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
 use icu::decimal::options::{DecimalFormatterOptions, GroupingStrategy};
 use icu::decimal::input::Decimal;
-use icu::decimal::DecimalFormatter;
+use icu::decimal::{parts as icu_parts, DecimalFormatter};
 use icu::locale::Locale;
 use std::cell::RefCell;
 use std::sync::Arc;
+use writeable::{Part, PartsWrite, Writeable};
 use yavashark_macro::{data_object, object, props};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -479,6 +480,153 @@ fn parse_use_grouping(value: &Value, default: UseGrouping, realm: &mut Realm) ->
     }
 }
 
+/// A part of a formatted number with type and value
+#[derive(Debug, Clone)]
+struct NumberPart {
+    part_type: &'static str,
+    value: String,
+}
+
+/// Writer that collects parts from ICU's write_to_parts
+struct PartsWriter {
+    string: String,
+    parts: Vec<(usize, usize, Part)>,
+}
+
+impl PartsWriter {
+    fn new() -> Self {
+        Self {
+            string: String::new(),
+            parts: Vec::new(),
+        }
+    }
+
+    fn finish(mut self) -> (String, Vec<(usize, usize, Part)>) {
+        // Sort by first open and last closed
+        self.parts.sort_unstable_by_key(|(begin, end, _)| (*begin, end.wrapping_neg()));
+        (self.string, self.parts)
+    }
+}
+
+impl std::fmt::Write for PartsWriter {
+    fn write_str(&mut self, s: &str) -> std::fmt::Result {
+        self.string.write_str(s)
+    }
+    fn write_char(&mut self, c: char) -> std::fmt::Result {
+        self.string.write_char(c)
+    }
+}
+
+impl PartsWrite for PartsWriter {
+    type SubPartsWrite = Self;
+    fn with_part(
+        &mut self,
+        part: Part,
+        mut f: impl FnMut(&mut Self::SubPartsWrite) -> std::fmt::Result,
+    ) -> std::fmt::Result {
+        let start = self.string.len();
+        f(self)?;
+        let end = self.string.len();
+        if start < end {
+            self.parts.push((start, end, part));
+        }
+        Ok(())
+    }
+}
+
+/// Convert ICU part type to JavaScript NumberFormat part type
+fn icu_part_to_js_type(part: &Part) -> &'static str {
+    if *part == icu_parts::INTEGER {
+        "integer"
+    } else if *part == icu_parts::FRACTION {
+        "fraction"
+    } else if *part == icu_parts::DECIMAL {
+        "decimal"
+    } else if *part == icu_parts::GROUP {
+        "group"
+    } else if *part == icu_parts::MINUS_SIGN {
+        "minusSign"
+    } else if *part == icu_parts::PLUS_SIGN {
+        "plusSign"
+    } else {
+        "unknown"
+    }
+}
+
+/// Extract parts from a FormattedDecimal using ICU's write_to_parts
+fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
+    let mut writer = PartsWriter::new();
+    let _ = formatted.write_to_parts(&mut writer);
+    let (string, raw_parts) = writer.finish();
+
+    // We need to convert the nested/overlapping parts into flat, non-overlapping parts
+    // ICU gives us parts like (0, 8, INTEGER) which contains (4, 5, GROUP)
+    // We need to split into: [integer: 0-4, group: 4-5, integer: 5-8]
+    
+    let mut result = Vec::new();
+    
+    if raw_parts.is_empty() {
+        // No parts, just return the whole string as integer
+        if !string.is_empty() {
+            result.push(NumberPart {
+                part_type: "integer",
+                value: string,
+            });
+        }
+        return result;
+    }
+
+    // Find the "leaf" parts (parts that don't contain other parts)
+    // and split the parent parts around them
+    let mut events: Vec<(usize, i8, &Part)> = Vec::new(); // (pos, type: 0=end, 1=start, part)
+    
+    for (start, end, part) in &raw_parts {
+        events.push((*start, 1, part));
+        events.push((*end, 0, part));
+    }
+    
+    // Sort by position, then by type (ends before starts at same position)
+    events.sort_by_key(|(pos, typ, _)| (*pos, *typ));
+    
+    // Track active parts using a stack
+    let mut active_parts: Vec<&Part> = Vec::new();
+    let mut last_pos = 0;
+    
+    for (pos, event_type, part) in events {
+        if pos > last_pos && !active_parts.is_empty() {
+            // Emit a part for the range [last_pos, pos) using the innermost active part
+            let innermost = active_parts.last().unwrap_or(&&Part::ERROR);
+            let value = string[last_pos..pos].to_string();
+            if !value.is_empty() {
+                result.push(NumberPart {
+                    part_type: icu_part_to_js_type(innermost),
+                    value,
+                });
+            }
+        }
+        
+        if event_type == 1 {
+            // Start event - push to stack
+            active_parts.push(part);
+        } else {
+            // End event - pop from stack
+            active_parts.pop();
+        }
+        
+        last_pos = pos;
+    }
+    
+    // Handle any remaining text after the last part
+    if last_pos < string.len() {
+        result.push(NumberPart {
+            part_type: "literal",
+            value: string[last_pos..].to_string(),
+        });
+    }
+    
+    result
+}
+
 // https://tc39.es/ecma402/#sec-intl-numberformat-constructor
 #[props(intrinsic_name = intl_number_format, to_string_tag = "Intl.NumberFormat")]
 impl NumberFormat {
@@ -649,6 +797,13 @@ impl NumberFormat {
                     f64::NAN
                 };
 
+                if value.is_nan() {
+                    return Ok(Value::from("NaN"));
+                }
+                if value.is_infinite() {
+                    return Ok(Value::from(if value.is_sign_negative() { "-∞" } else { "∞" }));
+                }
+
                 let locale = &config.locale;
                 let mut options = DecimalFormatterOptions::default();
                 options.grouping_strategy = Some(config.grouping_strategy);
@@ -814,26 +969,146 @@ impl NumberFormat {
     // https://tc39.es/ecma402/#sec-intl.numberformat.prototype.formattoparts
     #[prop("formatToParts")]
     #[length(1)]
-    fn format_to_parts(&self, value: Option<f64>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let val = value.unwrap_or(f64::NAN);
-        let formatted = self.format_number(val);
+    fn format_to_parts(&self, value: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let val = match value {
+            Some(v) if !v.is_undefined() => v.to_number(realm)?,
+            _ => f64::NAN,
+        };
+        let parts_array = Array::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
-        let parts = Array::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
-
-        let part = Object::new(realm);
+        // Handle special values
         if val.is_nan() {
+            let part = Object::new(realm);
             part.define_property("type".into(), "nan".into(), realm)?;
             part.define_property("value".into(), "NaN".into(), realm)?;
-        } else if val.is_infinite() {
-            part.define_property("type".into(), "infinity".into(), realm)?;
-            part.define_property("value".into(), "∞".into(), realm)?;
-        } else {
-            part.define_property("type".into(), "integer".into(), realm)?;
-            part.define_property("value".into(), formatted.into(), realm)?;
+            parts_array.push(part.into())?;
+            return Ok(parts_array.into_object());
         }
-        parts.push(part.into())?;
 
-        Ok(parts.into_object())
+        if val.is_infinite() {
+            // Handle sign for infinity
+            if val.is_sign_negative() {
+                let sign_part = Object::new(realm);
+                sign_part.define_property("type".into(), "minusSign".into(), realm)?;
+                sign_part.define_property("value".into(), "-".into(), realm)?;
+                parts_array.push(sign_part.into())?;
+            }
+            let inf_part = Object::new(realm);
+            inf_part.define_property("type".into(), "infinity".into(), realm)?;
+            inf_part.define_property("value".into(), "∞".into(), realm)?;
+            parts_array.push(inf_part.into())?;
+            return Ok(parts_array.into_object());
+        }
+
+        let inner = self.inner.borrow();
+        let config = &inner.config;
+
+        // Apply percent transformation
+        let formatted_value = if config.style == Style::Percent {
+            val * 100.0
+        } else {
+            val
+        };
+
+        // Create decimal and formatter
+        let decimal = value_to_decimal(formatted_value);
+        let mut options = DecimalFormatterOptions::default();
+        options.grouping_strategy = Some(config.grouping_strategy);
+
+        let Ok(formatter) = DecimalFormatter::try_new((&config.locale).into(), options) else {
+            // Fallback: return entire formatted string as integer
+            let part = Object::new(realm);
+            part.define_property("type".into(), "integer".into(), realm)?;
+            part.define_property("value".into(), fmt_num(val).into(), realm)?;
+            parts_array.push(part.into())?;
+            return Ok(parts_array.into_object());
+        };
+
+        // Format and extract parts
+        let formatted = formatter.format(&decimal);
+        let number_parts = extract_decimal_parts(&formatted);
+
+        // Handle currency prefix first (before number parts)
+        if config.style == Style::Currency {
+            if let Some(ref currency) = config.currency {
+                let currency_part = Object::new(realm);
+                currency_part.define_property("type".into(), "currency".into(), realm)?;
+                
+                match config.currency_display {
+                    CurrencyDisplay::Code => {
+                        currency_part.define_property("value".into(), currency.clone().into(), realm)?;
+                        parts_array.push(currency_part.into())?;
+                        
+                        // Add space literal after currency code
+                        let space_part = Object::new(realm);
+                        space_part.define_property("type".into(), "literal".into(), realm)?;
+                        space_part.define_property("value".into(), " ".into(), realm)?;
+                        parts_array.push(space_part.into())?;
+                    }
+                    CurrencyDisplay::Symbol | CurrencyDisplay::NarrowSymbol => {
+                        currency_part.define_property("value".into(), get_currency_symbol(currency).into(), realm)?;
+                        parts_array.push(currency_part.into())?;
+                    }
+                    CurrencyDisplay::Name => {
+                        // For name display, currency comes after the number
+                        // We'll handle it in the suffix section
+                    }
+                }
+            }
+        }
+
+        // Add number parts
+        for np in number_parts {
+            let part = Object::new(realm);
+            part.define_property("type".into(), np.part_type.into(), realm)?;
+            part.define_property("value".into(), np.value.into(), realm)?;
+            parts_array.push(part.into())?;
+        }
+
+        // Add style-specific suffix parts
+        match config.style {
+            Style::Percent => {
+                let part = Object::new(realm);
+                part.define_property("type".into(), "percentSign".into(), realm)?;
+                part.define_property("value".into(), "%".into(), realm)?;
+                parts_array.push(part.into())?;
+            }
+            Style::Currency => {
+                // Handle CurrencyDisplay::Name (currency name comes after number)
+                if let Some(ref currency) = config.currency {
+                    if config.currency_display == CurrencyDisplay::Name {
+                        // Add space literal before currency name
+                        let space_part = Object::new(realm);
+                        space_part.define_property("type".into(), "literal".into(), realm)?;
+                        space_part.define_property("value".into(), " ".into(), realm)?;
+                        parts_array.push(space_part.into())?;
+                        
+                        let currency_part = Object::new(realm);
+                        currency_part.define_property("type".into(), "currency".into(), realm)?;
+                        currency_part.define_property("value".into(), currency.to_lowercase().into(), realm)?;
+                        parts_array.push(currency_part.into())?;
+                    }
+                }
+            }
+            Style::Unit => {
+                if let Some(ref unit) = config.unit {
+                    // Add space literal
+                    let space_part = Object::new(realm);
+                    space_part.define_property("type".into(), "literal".into(), realm)?;
+                    space_part.define_property("value".into(), " ".into(), realm)?;
+                    parts_array.push(space_part.into())?;
+
+                    // Add unit
+                    let unit_part = Object::new(realm);
+                    unit_part.define_property("type".into(), "unit".into(), realm)?;
+                    unit_part.define_property("value".into(), get_unit_str(unit, config.unit_display).into(), realm)?;
+                    parts_array.push(unit_part.into())?;
+                }
+            }
+            Style::Decimal => {}
+        }
+
+        Ok(parts_array.into_object())
     }
 
     // https://tc39.es/ecma402/#sec-intl.numberformat.prototype.formatrange

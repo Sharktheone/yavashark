@@ -6175,6 +6175,7 @@ dependencies = [
  "temporal_rs",
  "tokio",
  "unicode-normalization",
+ "writeable 0.6.2",
  "xsum",
  "yavashark_garbage",
  "yavashark_macro",
