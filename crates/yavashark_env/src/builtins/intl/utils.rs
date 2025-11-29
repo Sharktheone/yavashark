@@ -1,7 +1,7 @@
 use yavashark_macro::data_object;
 
 #[derive(Clone, Copy, Debug)]
-#[data_object]
+#[data_object(error = "range")]
 pub enum LocaleMatcher {
     Lookup,
     #[name("best fit")]
@@ -9,7 +9,7 @@ pub enum LocaleMatcher {
 }
 
 #[derive(Clone, Copy, Debug)]
-#[data_object]
+#[data_object(error = "range")]
 pub enum HourCycle {
     H11,
     H12,
@@ -18,7 +18,7 @@ pub enum HourCycle {
 }
 
 #[derive(Clone, Copy, Debug)]
-#[data_object]
+#[data_object(error = "range")]
 pub enum Style {
     Narrow,
     Short,
