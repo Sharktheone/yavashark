@@ -690,7 +690,7 @@ impl Array {
         Ok(array.into_value())
     }
 
-    fn find(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+    fn find(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, this_arg: Option<Value>) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this
@@ -699,13 +699,15 @@ impl Array {
 
         let len = len.to_number(realm)? as usize;
 
+        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx, realm)?;
 
             if let Some(val) = val {
                 let x = func.call(
                     vec![val.clone(), idx.into(), this.clone().into()],
-                    realm.global.clone().into(),
+                    this_arg.clone(),
                     realm,
                 )?;
 
