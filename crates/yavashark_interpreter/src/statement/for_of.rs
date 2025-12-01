@@ -21,7 +21,7 @@ impl Interpreter {
             let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
                 Ok(_) => {}
-                Err(ControlFlow::Return(v)) => return Ok(v),
+                Err(ControlFlow::Return(v)) => return Err(ControlFlow::Return(v)),
                 Err(ControlFlow::Break(l)) if label.as_ref() == l.as_ref() => {
                     break;
                 }
