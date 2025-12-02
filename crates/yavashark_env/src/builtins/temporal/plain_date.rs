@@ -17,6 +17,7 @@ use temporal_rs::options::DisplayCalendar;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
+use crate::builtins::value_to_partial_date;
 
 #[object]
 #[derive(Debug)]
@@ -377,7 +378,7 @@ impl PlainDate {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let overflow = overflow_options_opt(overflow.as_ref(), realm)?;
-        let fields = value_to_calendar_fields(other, false, realm)?;
+        let fields = value_to_calendar_fields(other, false, true, realm)?;
 
         let date = self
             .date
@@ -406,44 +407,10 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
             || obj.contains_key("monthCode".into(), realm)?)
         && obj.contains_key("day".into(), realm)?
     {
-        let year = obj
-            .resolve_property("year", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
-        let month = obj
-            .resolve_property("month", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+        let partial = value_to_partial_date(&obj, realm)?;
+        let overflow = overflow_options(&obj, realm)?;
 
-        let month = if month == 0 {
-            obj.resolve_property("monthCode", realm)?
-                .and_then(|v| v.to_string(realm).ok())
-                .and_then(|s| {
-                    if s.is_empty() {
-                        None
-                    } else {
-                        s.as_str()[1..].parse::<u8>().ok()
-                    }
-                })
-                .unwrap_or(0)
-        } else {
-            month
-        };
-
-        let day = obj
-            .resolve_property("day", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-
-        let calendar = obj
-            .resolve_property("calendar", realm)?
-            .and_then(|v| v.to_string(realm).ok());
-
-        let calendar = calendar
-            .as_deref()
-            .map(Calendar::from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?
-            .unwrap_or_default();
-
-        return temporal_rs::PlainDate::new(year, month, day, calendar)
+        return temporal_rs::PlainDate::from_partial(partial, overflow)
             .map_err(Error::from_temporal);
     }
 
