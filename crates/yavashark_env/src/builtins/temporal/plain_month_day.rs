@@ -256,6 +256,16 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
         partial_date = partial_date.with_year(Some(year as i32));
     }
+    
+    if let Some(calendar) = value.get_opt("calendar", realm)? {
+        let calendar = calendar.to_string(realm)?;
+
+        let cal = Calendar::from_str(&calendar)
+            .map_err(Error::from_temporal)?;
+
+        partial_date = partial_date.with_calendar(cal);
+        
+    };
 
     Ok(partial_date)
 }
