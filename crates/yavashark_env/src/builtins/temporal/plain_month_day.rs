@@ -8,6 +8,7 @@ use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
+use icu::calendar::AnyCalendarKind;
 use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
@@ -235,28 +236,14 @@ pub fn value_to_plain_month_day(
 }
 
 pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<PartialDate> {
-    let mut partial_date = PartialDate::new();
+    let fields = value_to_calendar_fields(value, false, false, realm)?;
 
-    if let Some(era) = value.get_opt("era", realm)? {
-        let era = era.to_string(realm)?;
+    let mut partial_date = PartialDate {
+        calendar_fields: fields,
+        calendar: Calendar::new(AnyCalendarKind::Iso),
+    };
 
-        let str = FromStr::from_str(&era)?;
 
-        partial_date = partial_date.with_era(Some(str));
-    }
-
-    if let Some(era_year) = value.get_opt("eraYear", realm)? {
-        let era_year = era_year.to_number(realm)?;
-
-        partial_date = partial_date.with_era_year(Some(era_year as i32));
-    }
-
-    if let Some(year) = value.get_opt("year", realm)? {
-        let year = year.to_number(realm)?;
-
-        partial_date = partial_date.with_year(Some(year as i32));
-    }
-    
     if let Some(calendar) = value.get_opt("calendar", realm)? {
         let calendar = calendar.to_string(realm)?;
 
@@ -264,8 +251,7 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
             .map_err(Error::from_temporal)?;
 
         partial_date = partial_date.with_calendar(cal);
-        
-    };
+    }
 
     Ok(partial_date)
 }
