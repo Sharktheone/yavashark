@@ -133,7 +133,7 @@ impl PlainMonthDay {
 
     fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let overflow = overflow_options_opt(Some(other), realm)?;
-        let fields = value_to_calendar_fields(other, false, realm)?;
+        let fields = value_to_calendar_fields(other, false, true, realm)?;
 
         let month_day = self
             .month_day
