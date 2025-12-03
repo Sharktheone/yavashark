@@ -16,6 +16,16 @@ pub struct NativeObject<T: ?Sized> {
 }
 
 
+impl<T: Intrinsic> NativeObject<T> {
+    pub fn new(native: T, realm: &mut Realm) -> Res<Self> {
+        Ok(Self {
+            inner: RefCell::new(MutObject::with_proto(T::get_intrinsic(realm)?)),
+            native,
+        })
+    }
+
+}
+
 impl<T: ?Sized + Intrinsic> Intrinsic for NativeObject<T> {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         T::initialize(realm)
