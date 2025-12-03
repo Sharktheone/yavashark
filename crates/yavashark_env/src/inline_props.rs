@@ -24,7 +24,9 @@ pub trait PropertiesHook {
         key: &InternalPropertyKey,
         value: Value,
         realm: &mut Realm,
-    ) -> Res<UpdatePropertyResult>;
+    ) -> Res<UpdatePropertyResult> {
+        Ok(UpdatePropertyResult::NotHandled(value))
+    }
     fn get_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
         Ok(None)
     }
