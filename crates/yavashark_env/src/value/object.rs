@@ -1374,6 +1374,17 @@ impl Object {
     pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
         Some(self.get_ref())
     }
+
+
+    pub fn extract<T: FromValueOutput>(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<T::Output> {
+        let value = self.get(name, realm)?;
+        T::from_value_out(value, realm)
+    }
+
 }
 
 impl From<Box<dyn Obj>> for Object {
