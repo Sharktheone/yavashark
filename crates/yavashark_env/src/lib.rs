@@ -22,7 +22,6 @@ pub mod experiments;
 mod function_conversion;
 mod global;
 mod native_obj;
-mod native_object;
 pub mod optimizer;
 pub mod realm;
 pub mod task_queue;
