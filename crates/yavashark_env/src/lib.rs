@@ -2,7 +2,6 @@
 
 pub use console::*;
 pub use function::*;
-pub use native_object::*;
 pub use object::*;
 use std::ops::Deref;
 use yavashark_garbage::OwningGcGuard;
