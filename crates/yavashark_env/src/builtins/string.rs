@@ -1,4 +1,5 @@
 use crate::array::Array;
+use crate::builtins::RegExp;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
@@ -12,7 +13,6 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::{ToYSString, YSString};
-use crate::builtins::RegExp;
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -497,12 +497,20 @@ impl StringObj {
     // }
 
     #[prop("match")]
-    pub fn match_(#[this] str: &Stringable, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn match_(
+        #[this] str: &Stringable,
+        pattern: &RegExp,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
     }
 
     #[prop("matchAll")]
-    pub fn match_all(#[this] str: &Stringable, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn match_all(
+        #[this] str: &Stringable,
+        pattern: &RegExp,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
     }
 
@@ -675,7 +683,6 @@ impl StringObj {
     pub fn sup(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<sup>{str}</sup>").into())
     }
-
 
     #[prop("toLocaleLowerCase")]
     pub fn _to_locale_lower_case(#[this] str: &Stringable) -> ValueResult {

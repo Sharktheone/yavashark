@@ -1,3 +1,4 @@
+use crate::builtins::intl::utils::LocaleMatcherOptions;
 use crate::value::{IntoValue, Obj};
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
 use icu::collator::options::{AlternateHandling, CaseLevel, CollatorOptions, Strength};
@@ -8,7 +9,6 @@ use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::sync::Arc;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::LocaleMatcherOptions;
 
 #[derive(Debug, Clone, Copy, Default)]
 #[data_object(error = "range")]
@@ -36,14 +36,12 @@ pub enum CaseFirst {
     False,
 }
 
-
 #[derive(Debug, Clone, Copy)]
 #[data_object(error = "range")]
 pub enum LocaleMatcher {
     Lookup,
     BestFit,
 }
-
 
 /// Parsed Collator options with proper RangeError handling
 #[data_object]
@@ -57,7 +55,6 @@ struct CollatorOptionsJs {
     collation: Option<String>,
     ignore_punctuation: Option<bool>,
 }
-
 
 /// Internal configuration for creating ICU collators
 #[derive(Clone, Debug)]
@@ -142,12 +139,16 @@ impl Collator {
 
         let usage = opts.usage.unwrap_or_default();
         let sensitivity = opts.sensitivity.unwrap_or_default();
-        
+
         // Thai locale defaults ignorePunctuation to true
-        let is_thai = locale_str.starts_with("th") && 
-            (locale_str.len() == 2 || locale_str.chars().nth(2).is_some_and(|c| c == '-' || c == '_'));
+        let is_thai = locale_str.starts_with("th")
+            && (locale_str.len() == 2
+                || locale_str
+                    .chars()
+                    .nth(2)
+                    .is_some_and(|c| c == '-' || c == '_'));
         let ignore_punctuation = opts.ignore_punctuation.unwrap_or(is_thai);
-        
+
         let numeric = opts.numeric.unwrap_or(false);
         let case_first = opts.case_first;
         let collation = opts.collation.unwrap_or_else(|| "default".to_string());
@@ -217,37 +218,36 @@ impl Collator {
 
         let config = inner.config.clone();
 
-        let compare_fn =
-            NativeFunction::with_proto_and_len(
-                "",  // Anonymous function - name should be empty string per spec
-                move |args, _this, realm| {
-                    let x = args
-                        .first()
-                        .map(|v| v.to_string(realm))
-                        .transpose()?
-                        .unwrap_or_else(|| "undefined".into());
-                    let y = args
-                        .get(1)
-                        .map(|v| v.to_string(realm))
-                        .transpose()?
-                        .unwrap_or_else(|| "undefined".into());
+        let compare_fn = NativeFunction::with_proto_and_len(
+            "", // Anonymous function - name should be empty string per spec
+            move |args, _this, realm| {
+                let x = args
+                    .first()
+                    .map(|v| v.to_string(realm))
+                    .transpose()?
+                    .unwrap_or_else(|| "undefined".into());
+                let y = args
+                    .get(1)
+                    .map(|v| v.to_string(realm))
+                    .transpose()?
+                    .unwrap_or_else(|| "undefined".into());
 
-                    // Create a collator from the stored config
-                    let collator = IcuCollator::try_new(config.prefs, config.opts)
-                        .map_err(|e| Error::ty_error(format!("Failed to create Collator: {e}")))?;
+                // Create a collator from the stored config
+                let collator = IcuCollator::try_new(config.prefs, config.opts)
+                    .map_err(|e| Error::ty_error(format!("Failed to create Collator: {e}")))?;
 
-                    let result = match collator.compare(x.as_str(), y.as_str()) {
-                        Ordering::Less => -1,
-                        Ordering::Equal => 0,
-                        Ordering::Greater => 1,
-                    };
+                let result = match collator.compare(x.as_str(), y.as_str()) {
+                    Ordering::Less => -1,
+                    Ordering::Equal => 0,
+                    Ordering::Greater => 1,
+                };
 
-                    Ok(Value::Number(f64::from(result)))
-                },
-                realm.intrinsics.func.clone(),
-                2,
-                realm,
-            );
+                Ok(Value::Number(f64::from(result)))
+            },
+            realm.intrinsics.func.clone(),
+            2,
+            realm,
+        );
 
         inner.bound_compare = Some(compare_fn.clone());
 
@@ -292,7 +292,7 @@ impl Collator {
         #[realm] realm: &mut Realm,
     ) -> Res<Vec<String>> {
         let locale_list = canonicalize_locale_list(locales, realm)?;
-        
+
         let mut supported = Vec::new();
         for locale_str in locale_list {
             if let Ok(locale) = locale_str.parse::<Locale>() {
@@ -319,10 +319,7 @@ fn canonicalize_locale_list(locales: &Value, realm: &mut Realm) -> Res<Vec<Strin
         // Single string locale
         result.push(locales.to_string(realm)?.to_string());
     } else if let Value::Object(obj) = &locales {
-        let length = obj
-            .get("length", realm)?
-            .to_number(realm)?
-            as usize;
+        let length = obj.get("length", realm)?.to_number(realm)? as usize;
 
         for i in 0..length {
             let locale_value = obj.get(i, realm)?;

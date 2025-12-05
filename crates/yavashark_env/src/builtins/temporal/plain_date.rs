@@ -8,6 +8,7 @@ use crate::builtins::temporal::utils::{
     value_to_calendar_fields,
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+use crate::builtins::value_to_partial_date;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -17,7 +18,6 @@ use temporal_rs::options::DisplayCalendar;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use crate::builtins::value_to_partial_date;
 
 #[object]
 #[derive(Debug)]

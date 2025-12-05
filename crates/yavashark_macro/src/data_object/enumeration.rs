@@ -1,7 +1,7 @@
 use crate::config::Config;
+use crate::data_object::args::DataObjectArgs;
 use proc_macro2::{Ident, Span, TokenStream};
 use syn::spanned::Spanned;
-use crate::data_object::args::DataObjectArgs;
 
 pub fn data_enum(mut e: syn::ItemEnum, args: DataObjectArgs) -> syn::Result<TokenStream> {
     let mut variants = Vec::with_capacity(e.variants.len());

@@ -6,9 +6,9 @@ use crate::builtins::temporal::utils::{
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use icu::calendar::AnyCalendarKind;
 use std::cell::RefCell;
 use std::str::FromStr;
-use icu::calendar::AnyCalendarKind;
 use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
@@ -243,12 +243,10 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
         calendar: Calendar::new(AnyCalendarKind::Iso),
     };
 
-
     if let Some(calendar) = value.get_opt("calendar", realm)? {
         let calendar = calendar.to_string(realm)?;
 
-        let cal = Calendar::from_str(&calendar)
-            .map_err(Error::from_temporal)?;
+        let cal = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
 
         partial_date = partial_date.with_calendar(cal);
     }

@@ -1,5 +1,6 @@
 pub use super::object_impl::*;
 use super::{Attributes, IntoValue, ObjectOrNull, PrimitiveValue, Value, Variable};
+use crate::conversion::FromValueOutput;
 use crate::error::Error;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{
@@ -16,7 +17,6 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicIsize;
 use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
 use yavashark_string::{ToYSString, YSString};
-use crate::conversion::FromValueOutput;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DefinePropertyResult {
@@ -179,9 +179,7 @@ impl FromValueOutput for PropertyDescriptor {
     type Output = Self;
 
     fn from_value_out(value: crate::Value, realm: &mut Realm) -> Res<Self::Output> {
-        let descriptor = value
-            .as_object()?;
-
+        let descriptor = value.as_object()?;
 
         let enumerable = descriptor
             .resolve_property("enumerable", realm)?
@@ -198,8 +196,6 @@ impl FromValueOutput for PropertyDescriptor {
             .resolve_property("writable", realm)?
             .map(|v| v.is_truthy());
 
-
-
         let get = descriptor.resolve_property("get", realm)?;
         if let Some(get) = &get {
             if !get.is_callable() && !get.is_undefined() {
@@ -207,15 +203,12 @@ impl FromValueOutput for PropertyDescriptor {
             }
         }
 
-
         let set = descriptor.resolve_property("set", realm)?;
         if let Some(set) = &set {
             if !set.is_callable() && !set.is_undefined() {
                 return Err(crate::Error::ty("Setter must be a function or undefined"));
             }
         }
-
-
 
         if get.is_some() || set.is_some() {
             if value.is_some() {
@@ -318,7 +311,6 @@ impl From<Variable> for PropertyDescriptor {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DefinePropertyDescriptor {
     Data {
@@ -335,14 +327,11 @@ pub enum DefinePropertyDescriptor {
     },
 }
 
-
 impl FromValueOutput for DefinePropertyDescriptor {
     type Output = Self;
 
     fn from_value_out(value: crate::Value, realm: &mut Realm) -> Res<Self::Output> {
-        let descriptor = value
-            .as_object()?;
-
+        let descriptor = value.as_object()?;
 
         let enumerable = descriptor
             .resolve_property("enumerable", realm)?
@@ -357,8 +346,6 @@ impl FromValueOutput for DefinePropertyDescriptor {
             .resolve_property("writable", realm)?
             .map(|v| v.is_truthy());
 
-
-
         let get = descriptor.resolve_property("get", realm)?;
         if let Some(get) = &get {
             if !get.is_callable() && !get.is_undefined() {
@@ -366,15 +353,12 @@ impl FromValueOutput for DefinePropertyDescriptor {
             }
         }
 
-
         let set = descriptor.resolve_property("set", realm)?;
         if let Some(set) = &set {
             if !set.is_callable() && !set.is_undefined() {
                 return Err(crate::Error::ty("Setter must be a function or undefined"));
             }
         }
-
-
 
         if get.is_some() || set.is_some() {
             if value.is_some() {
@@ -1155,59 +1139,111 @@ impl Object {
         }
     }
 
-
-
-    pub fn define_property_descriptor(&self, name: InternalPropertyKey, desc: PropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    pub fn define_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        desc: PropertyDescriptor,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         match desc {
-            PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
+            PropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable,
+                configurable,
+            } => {
                 let attributes = Attributes::from_values(writable, enumerable, configurable);
-                self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
-            },
-            PropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+                self.define_property_attributes(
+                    name,
+                    Variable::with_attributes(value, attributes),
+                    realm,
+                )
+            }
+            PropertyDescriptor::Accessor {
+                get,
+                set,
+                enumerable,
+                configurable,
+            } => {
                 if get.is_none() && set.is_none() {
-                    self.define_empty_accessor(name, Attributes::from_values(false, enumerable, configurable), realm)?;
+                    self.define_empty_accessor(
+                        name,
+                        Attributes::from_values(false, enumerable, configurable),
+                        realm,
+                    )?;
                 } else {
                     if let Some(getter) = get {
-                        self.define_getter_attributes(name.clone(), getter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                        self.define_getter_attributes(
+                            name.clone(),
+                            getter,
+                            Attributes::from_values(false, enumerable, configurable),
+                            realm,
+                        )?;
                     }
                     if let Some(setter) = set {
-                        self.define_setter_attributes(name, setter, Attributes::from_values(false, enumerable, configurable), realm)?;
+                        self.define_setter_attributes(
+                            name,
+                            setter,
+                            Attributes::from_values(false, enumerable, configurable),
+                            realm,
+                        )?;
                     }
                 }
                 Ok(DefinePropertyResult::Handled)
-            },
+            }
         }
     }
 
-
-    pub fn define_descriptor(&self, name: InternalPropertyKey, desc: DefinePropertyDescriptor, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    pub fn define_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        desc: DefinePropertyDescriptor,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         match desc {
-            DefinePropertyDescriptor::Data { value, writable, enumerable, configurable } => {
-
-                let (writable, enumerable, configurable) = if writable.is_none() || enumerable.is_none() || configurable.is_none() {
-                    let current = self.get_own_property_no_get_set(name.clone(), realm)?;
-                    if let Some(Property::Value(_, attrs)) = current {
-                        (
-                            writable.unwrap_or(attrs.is_writable()),
-                            enumerable.unwrap_or(attrs.is_enumerable()),
-                            configurable.unwrap_or(attrs.is_configurable()),
-                        )
+            DefinePropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable,
+                configurable,
+            } => {
+                let (writable, enumerable, configurable) =
+                    if writable.is_none() || enumerable.is_none() || configurable.is_none() {
+                        let current = self.get_own_property_no_get_set(name.clone(), realm)?;
+                        if let Some(Property::Value(_, attrs)) = current {
+                            (
+                                writable.unwrap_or(attrs.is_writable()),
+                                enumerable.unwrap_or(attrs.is_enumerable()),
+                                configurable.unwrap_or(attrs.is_configurable()),
+                            )
+                        } else {
+                            (
+                                writable.unwrap_or(false),
+                                enumerable.unwrap_or(false),
+                                configurable.unwrap_or(false),
+                            )
+                        }
                     } else {
                         (
                             writable.unwrap_or(false),
                             enumerable.unwrap_or(false),
                             configurable.unwrap_or(false),
                         )
-                    }
-                } else {
-                    (writable.unwrap_or(false), enumerable.unwrap_or(false), configurable.unwrap_or(false))
-                };
-
+                    };
 
                 let attributes = Attributes::from_values(writable, enumerable, configurable);
-                self.define_property_attributes(name, Variable::with_attributes(value, attributes), realm)
-            },
-            DefinePropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+                self.define_property_attributes(
+                    name,
+                    Variable::with_attributes(value, attributes),
+                    realm,
+                )
+            }
+            DefinePropertyDescriptor::Accessor {
+                get,
+                set,
+                enumerable,
+                configurable,
+            } => {
                 let (enumerable, configurable) = if enumerable.is_none() || configurable.is_none() {
                     let current = self.get_own_property_no_get_set(name.clone(), realm)?;
                     if let Some(Property::Getter(_, attrs)) = current {
@@ -1216,10 +1252,7 @@ impl Object {
                             configurable.unwrap_or(attrs.is_configurable()),
                         )
                     } else {
-                        (
-                            enumerable.unwrap_or(false),
-                            configurable.unwrap_or(false),
-                        )
+                        (enumerable.unwrap_or(false), configurable.unwrap_or(false))
                     }
                 } else {
                     (enumerable.unwrap_or(false), configurable.unwrap_or(false))
@@ -1239,7 +1272,7 @@ impl Object {
                 }
 
                 Ok(DefinePropertyResult::Handled)
-            },
+            }
         }
     }
 
@@ -1375,7 +1408,6 @@ impl Object {
         Some(self.get_ref())
     }
 
-
     pub fn extract<T: FromValueOutput>(
         &self,
         name: impl IntoPropertyKey,
@@ -1384,7 +1416,6 @@ impl Object {
         let value = self.get(name, realm)?;
         T::from_value_out(value, realm)
     }
-
 }
 
 impl From<Box<dyn Obj>> for Object {

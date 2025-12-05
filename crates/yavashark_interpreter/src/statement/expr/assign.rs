@@ -127,7 +127,7 @@ impl Interpreter {
                     }
                 }
                 DefinePropertyResult::Setter(setter, value) => {
-                    setter.call( vec![value], obj.clone().into(), realm)?;
+                    setter.call(vec![value], obj.clone().into(), realm)?;
                 }
             }
             Ok(())

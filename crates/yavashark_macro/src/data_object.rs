@@ -1,16 +1,16 @@
+mod args;
 mod enumeration;
 mod structure;
-mod args;
 
-use darling::ast::NestedMeta;
+use crate::data_object::args::DataObjectArgs;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
+use darling::ast::NestedMeta;
+use darling::FromMeta;
+use proc_macro::TokenStream as TokenStream1;
 use syn::parse::discouraged::Speculative;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
-use proc_macro::TokenStream as TokenStream1;
-use darling::FromMeta;
-use crate::data_object::args::DataObjectArgs;
 
 pub fn data_object(
     attrs: proc_macro::TokenStream,

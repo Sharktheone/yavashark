@@ -76,8 +76,11 @@ impl ObjectImpl for Array {
             return Ok(DefinePropertyResult::Handled);
         }
 
-        if self.get_wrapped_object()
-            .define_property_attributes(name, value, realm)? == DefinePropertyResult::ReadOnly {
+        if self
+            .get_wrapped_object()
+            .define_property_attributes(name, value, realm)?
+            == DefinePropertyResult::ReadOnly
+        {
             return Ok(DefinePropertyResult::ReadOnly);
         }
 
@@ -690,7 +693,12 @@ impl Array {
         Ok(array.into_value())
     }
 
-    fn find(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, this_arg: Option<Value>) -> ValueResult {
+    fn find(
+        #[this] this: Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+        this_arg: Option<Value>,
+    ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this

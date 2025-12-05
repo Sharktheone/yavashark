@@ -2,8 +2,8 @@ use crate::array::Array;
 use crate::builtins::intl::utils::{LocaleMatcher, LocaleMatcherOptions};
 use crate::value::{fmt_num, IntoValue, Obj};
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
-use icu::decimal::options::{DecimalFormatterOptions, GroupingStrategy};
 use icu::decimal::input::Decimal;
+use icu::decimal::options::{DecimalFormatterOptions, GroupingStrategy};
 use icu::decimal::{parts as icu_parts, DecimalFormatter};
 use icu::locale::Locale;
 use std::cell::RefCell;
@@ -223,7 +223,9 @@ impl NumberFormat {
         let mut options = DecimalFormatterOptions::default();
         options.grouping_strategy = Some(config.grouping_strategy);
 
-        let Ok(formatter) = DecimalFormatter::try_new(locale.into(), options) else { return value.to_string() };
+        let Ok(formatter) = DecimalFormatter::try_new(locale.into(), options) else {
+            return value.to_string();
+        };
 
         let mut formatted_value = value;
 
@@ -503,7 +505,8 @@ impl PartsWriter {
 
     fn finish(mut self) -> (String, Vec<(usize, usize, Part)>) {
         // Sort by first open and last closed
-        self.parts.sort_unstable_by_key(|(begin, end, _)| (*begin, end.wrapping_neg()));
+        self.parts
+            .sort_unstable_by_key(|(begin, end, _)| (*begin, end.wrapping_neg()));
         (self.string, self.parts)
     }
 }
@@ -562,9 +565,9 @@ fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
     // We need to convert the nested/overlapping parts into flat, non-overlapping parts
     // ICU gives us parts like (0, 8, INTEGER) which contains (4, 5, GROUP)
     // We need to split into: [integer: 0-4, group: 4-5, integer: 5-8]
-    
+
     let mut result = Vec::new();
-    
+
     if raw_parts.is_empty() {
         // No parts, just return the whole string as integer
         if !string.is_empty() {
@@ -579,19 +582,19 @@ fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
     // Find the "leaf" parts (parts that don't contain other parts)
     // and split the parent parts around them
     let mut events: Vec<(usize, i8, &Part)> = Vec::new(); // (pos, type: 0=end, 1=start, part)
-    
+
     for (start, end, part) in &raw_parts {
         events.push((*start, 1, part));
         events.push((*end, 0, part));
     }
-    
+
     // Sort by position, then by type (ends before starts at same position)
     events.sort_by_key(|(pos, typ, _)| (*pos, *typ));
-    
+
     // Track active parts using a stack
     let mut active_parts: Vec<&Part> = Vec::new();
     let mut last_pos = 0;
-    
+
     for (pos, event_type, part) in events {
         if pos > last_pos && !active_parts.is_empty() {
             // Emit a part for the range [last_pos, pos) using the innermost active part
@@ -604,7 +607,7 @@ fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
                 });
             }
         }
-        
+
         if event_type == 1 {
             // Start event - push to stack
             active_parts.push(part);
@@ -612,10 +615,10 @@ fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
             // End event - pop from stack
             active_parts.pop();
         }
-        
+
         last_pos = pos;
     }
-    
+
     // Handle any remaining text after the last part
     if last_pos < string.len() {
         result.push(NumberPart {
@@ -623,7 +626,7 @@ fn extract_decimal_parts(formatted: &impl Writeable) -> Vec<NumberPart> {
             value: string[last_pos..].to_string(),
         });
     }
-    
+
     result
 }
 
@@ -670,13 +673,14 @@ impl NumberFormat {
 
         let notation = opts.notation.unwrap_or_default();
 
-        let (mnfd_default, mxfd_default) = if style == Style::Currency && notation == Notation::Standard {
-            (2u8, 2u8)
-        } else if style == Style::Percent {
-            (0u8, 0u8)
-        } else {
-            (0u8, 3u8)
-        };
+        let (mnfd_default, mxfd_default) =
+            if style == Style::Currency && notation == Notation::Standard {
+                (2u8, 2u8)
+            } else if style == Style::Percent {
+                (0u8, 0u8)
+            } else {
+                (0u8, 3u8)
+            };
 
         let minimum_integer_digits = opts.minimum_integer_digits.unwrap_or(1);
         if !(1..=21).contains(&minimum_integer_digits) {
@@ -685,21 +689,24 @@ impl NumberFormat {
             ));
         }
 
-        let has_sd = opts.minimum_significant_digits.is_some() || opts.maximum_significant_digits.is_some();
-        let has_fd = opts.minimum_fraction_digits.is_some() || opts.maximum_fraction_digits.is_some();
+        let has_sd =
+            opts.minimum_significant_digits.is_some() || opts.maximum_significant_digits.is_some();
+        let has_fd =
+            opts.minimum_fraction_digits.is_some() || opts.maximum_fraction_digits.is_some();
 
         let rounding_priority = opts.rounding_priority.unwrap_or_default();
 
         let (minimum_fraction_digits, maximum_fraction_digits) = if has_fd {
             let min = opts.minimum_fraction_digits;
             let max = opts.maximum_fraction_digits;
-            
+
             let min_val = min.unwrap_or(mnfd_default);
             let max_val = max.unwrap_or_else(|| u8::max(mxfd_default, min_val));
-            
+
             if min_val > max_val {
                 return Err(Error::range_error(
-                    "minimumFractionDigits cannot be greater than maximumFractionDigits".to_string(),
+                    "minimumFractionDigits cannot be greater than maximumFractionDigits"
+                        .to_string(),
                 ));
             }
             (Some(min_val), Some(max_val))
@@ -729,7 +736,7 @@ impl NumberFormat {
         } else {
             UseGrouping::Auto
         };
-        
+
         let use_grouping_value = opts.use_grouping.unwrap_or(Value::Undefined);
         let use_grouping = parse_use_grouping(&use_grouping_value, default_use_grouping, realm)?;
 
@@ -741,7 +748,9 @@ impl NumberFormat {
         };
 
         let rounding_increment = opts.rounding_increment.unwrap_or(1);
-        let valid_increments = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
+        let valid_increments = [
+            1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000,
+        ];
         if !valid_increments.contains(&rounding_increment) {
             return Err(Error::range_error(format!(
                 "Invalid rounding increment: {}",
@@ -801,7 +810,11 @@ impl NumberFormat {
                     return Ok(Value::from("NaN"));
                 }
                 if value.is_infinite() {
-                    return Ok(Value::from(if value.is_sign_negative() { "-∞" } else { "∞" }));
+                    return Ok(Value::from(if value.is_sign_negative() {
+                        "-∞"
+                    } else {
+                        "∞"
+                    }));
                 }
 
                 let locale = &config.locale;
@@ -881,16 +894,28 @@ impl NumberFormat {
             if let Some(ref currency) = config.currency {
                 options.define_property("currency".into(), currency.clone().into(), realm)?;
             }
-            options.define_property("currencyDisplay".into(), config.currency_display.into_value(), realm)?;
+            options.define_property(
+                "currencyDisplay".into(),
+                config.currency_display.into_value(),
+                realm,
+            )?;
 
-            options.define_property("currencySign".into(), config.currency_sign.into_value(), realm)?;
+            options.define_property(
+                "currencySign".into(),
+                config.currency_sign.into_value(),
+                realm,
+            )?;
         }
 
         if config.style == Style::Unit {
             if let Some(ref unit) = config.unit {
                 options.define_property("unit".into(), unit.clone().into(), realm)?;
             }
-            options.define_property("unitDisplay".into(), config.unit_display.into_value(), realm)?;
+            options.define_property(
+                "unitDisplay".into(),
+                config.unit_display.into_value(),
+                realm,
+            )?;
         }
 
         options.define_property(
@@ -913,22 +938,30 @@ impl NumberFormat {
             )?;
         }
         if let Some(max) = config.maximum_significant_digits {
-            options.define_property(
-                "maximumSignificantDigits".into(),
-                max.into(),
-                realm,
-            )?;
+            options.define_property("maximumSignificantDigits".into(), max.into(), realm)?;
         }
 
-        options.define_property("useGrouping".into(), config.use_grouping.into_value(), realm)?;
+        options.define_property(
+            "useGrouping".into(),
+            config.use_grouping.into_value(),
+            realm,
+        )?;
 
         options.define_property("notation".into(), config.notation.into_value(), realm)?;
 
         if config.notation == Notation::Compact {
-            options.define_property("compactDisplay".into(), config.compact_display.into_value(), realm)?;
+            options.define_property(
+                "compactDisplay".into(),
+                config.compact_display.into_value(),
+                realm,
+            )?;
         }
 
-        options.define_property("signDisplay".into(), config.sign_display.into_value(), realm)?;
+        options.define_property(
+            "signDisplay".into(),
+            config.sign_display.into_value(),
+            realm,
+        )?;
 
         options.define_property(
             "roundingIncrement".into(),
@@ -936,11 +969,23 @@ impl NumberFormat {
             realm,
         )?;
 
-        options.define_property("roundingMode".into(), config.rounding_mode.into_value(), realm)?;
+        options.define_property(
+            "roundingMode".into(),
+            config.rounding_mode.into_value(),
+            realm,
+        )?;
 
-        options.define_property("roundingPriority".into(), config.rounding_priority.into_value(), realm)?;
+        options.define_property(
+            "roundingPriority".into(),
+            config.rounding_priority.into_value(),
+            realm,
+        )?;
 
-        options.define_property("trailingZeroDisplay".into(), config.trailing_zero_display.into_value(), realm)?;
+        options.define_property(
+            "trailingZeroDisplay".into(),
+            config.trailing_zero_display.into_value(),
+            realm,
+        )?;
 
         Ok(options)
     }
@@ -969,7 +1014,11 @@ impl NumberFormat {
     // https://tc39.es/ecma402/#sec-intl.numberformat.prototype.formattoparts
     #[prop("formatToParts")]
     #[length(1)]
-    fn format_to_parts(&self, value: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn format_to_parts(
+        &self,
+        value: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let val = match value {
             Some(v) if !v.is_undefined() => v.to_number(realm)?,
             _ => f64::NAN,
@@ -1033,12 +1082,16 @@ impl NumberFormat {
             if let Some(ref currency) = config.currency {
                 let currency_part = Object::new(realm);
                 currency_part.define_property("type".into(), "currency".into(), realm)?;
-                
+
                 match config.currency_display {
                     CurrencyDisplay::Code => {
-                        currency_part.define_property("value".into(), currency.clone().into(), realm)?;
+                        currency_part.define_property(
+                            "value".into(),
+                            currency.clone().into(),
+                            realm,
+                        )?;
                         parts_array.push(currency_part.into())?;
-                        
+
                         // Add space literal after currency code
                         let space_part = Object::new(realm);
                         space_part.define_property("type".into(), "literal".into(), realm)?;
@@ -1046,7 +1099,11 @@ impl NumberFormat {
                         parts_array.push(space_part.into())?;
                     }
                     CurrencyDisplay::Symbol | CurrencyDisplay::NarrowSymbol => {
-                        currency_part.define_property("value".into(), get_currency_symbol(currency).into(), realm)?;
+                        currency_part.define_property(
+                            "value".into(),
+                            get_currency_symbol(currency).into(),
+                            realm,
+                        )?;
                         parts_array.push(currency_part.into())?;
                     }
                     CurrencyDisplay::Name => {
@@ -1082,10 +1139,14 @@ impl NumberFormat {
                         space_part.define_property("type".into(), "literal".into(), realm)?;
                         space_part.define_property("value".into(), " ".into(), realm)?;
                         parts_array.push(space_part.into())?;
-                        
+
                         let currency_part = Object::new(realm);
                         currency_part.define_property("type".into(), "currency".into(), realm)?;
-                        currency_part.define_property("value".into(), currency.to_lowercase().into(), realm)?;
+                        currency_part.define_property(
+                            "value".into(),
+                            currency.to_lowercase().into(),
+                            realm,
+                        )?;
                         parts_array.push(currency_part.into())?;
                     }
                 }
@@ -1101,7 +1162,11 @@ impl NumberFormat {
                     // Add unit
                     let unit_part = Object::new(realm);
                     unit_part.define_property("type".into(), "unit".into(), realm)?;
-                    unit_part.define_property("value".into(), get_unit_str(unit, config.unit_display).into(), realm)?;
+                    unit_part.define_property(
+                        "value".into(),
+                        get_unit_str(unit, config.unit_display).into(),
+                        realm,
+                    )?;
                     parts_array.push(unit_part.into())?;
                 }
             }

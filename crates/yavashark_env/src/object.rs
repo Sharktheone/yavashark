@@ -1,6 +1,9 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor};
+use crate::value::{
+    Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property,
+    PropertyDescriptor,
+};
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -276,16 +279,36 @@ impl Obj for Object {
         self.inner()?.get_property_descriptor(name, realm)
     }
 
-    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner_mut()?.define_empty_accessor(name, attributes, realm)
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner_mut()?
+            .define_empty_accessor(name, attributes, realm)
     }
 
-    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner_mut()?.define_getter_attributes(name, callback, attributes, realm)
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner_mut()?
+            .define_getter_attributes(name, callback, attributes, realm)
     }
 
-    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner_mut()?.define_setter_attributes(name, callback, attributes, realm)
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner_mut()?
+            .define_setter_attributes(name, callback, attributes, realm)
     }
 }
 
@@ -357,9 +380,12 @@ impl MutObject {
         (self.array.len(), false)
     }
 
-    pub fn insert_array(&mut self, index: usize, value: impl Into<ObjectProperty>) -> DefinePropertyResult {
+    pub fn insert_array(
+        &mut self,
+        index: usize,
+        value: impl Into<ObjectProperty>,
+    ) -> DefinePropertyResult {
         let (i, found) = self.array_position(index);
-
 
         if found {
             if let Some(vi) = self.array.get(i) {
@@ -1161,7 +1187,12 @@ impl MutObj for MutObject {
         Ok(())
     }
 
-    fn define_empty_accessor(&mut self, name: InternalPropertyKey, attributes: Attributes, _realm: &mut Realm) -> Res {
+    fn define_empty_accessor(
+        &mut self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        _realm: &mut Realm,
+    ) -> Res {
         let key = name.into();
 
         match self.properties.entry(key) {
@@ -1190,7 +1221,7 @@ impl MutObj for MutObject {
         Ok(())
     }
 
- fn define_getter_attributes(
+    fn define_getter_attributes(
         &mut self,
         name: InternalPropertyKey,
         value: ObjectHandle,
@@ -1291,7 +1322,6 @@ impl MutObj for MutObject {
 
         Ok(())
     }
-
 
     // fn constructor(&self) -> Result<ObjectProperty, Error> {
     //     if let Some(constructor) = self

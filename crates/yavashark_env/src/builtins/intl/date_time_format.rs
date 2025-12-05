@@ -3,9 +3,9 @@ use crate::builtins::intl::utils::{HourCycle, LocaleMatcher, LocaleMatcherOption
 use crate::value::{IntoValue, Obj};
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
 use icu::datetime::fieldsets;
+use icu::datetime::input::{Date, DateTime, Time};
 use icu::datetime::options::Length;
 use icu::datetime::{DateTimeFormatter, DateTimeFormatterPreferences};
-use icu::datetime::input::{Date, DateTime, Time};
 use icu::locale::Locale;
 use std::cell::RefCell;
 use std::sync::Arc;
@@ -85,7 +85,9 @@ impl std::str::FromStr for FractionalSecondDigits {
             "1" => Ok(FractionalSecondDigits::One),
             "2" => Ok(FractionalSecondDigits::Two),
             "3" => Ok(FractionalSecondDigits::Three),
-            _ => Err(Error::range_error("fractionalSecondDigits must be 1, 2, or 3".to_string())),
+            _ => Err(Error::range_error(
+                "fractionalSecondDigits must be 1, 2, or 3".to_string(),
+            )),
         }
     }
 }
@@ -95,23 +97,29 @@ impl crate::conversion::FromValueOutput for FractionalSecondDigits {
 
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         let n = value.to_number(realm)?;
-        
+
         // Check if it's NaN or not an integer
         if n.is_nan() || n.is_infinite() {
-            return Err(Error::range_error("fractionalSecondDigits must be 1, 2, or 3".to_string()));
+            return Err(Error::range_error(
+                "fractionalSecondDigits must be 1, 2, or 3".to_string(),
+            ));
         }
-        
+
         // Check if it's an integer
         if n.fract() != 0.0 {
-            return Err(Error::range_error("fractionalSecondDigits must be 1, 2, or 3".to_string()));
+            return Err(Error::range_error(
+                "fractionalSecondDigits must be 1, 2, or 3".to_string(),
+            ));
         }
-        
+
         let n = n as i64;
         match n {
             1 => Ok(Self::One),
             2 => Ok(Self::Two),
             3 => Ok(Self::Three),
-            _ => Err(Error::range_error("fractionalSecondDigits must be 1, 2, or 3".to_string())),
+            _ => Err(Error::range_error(
+                "fractionalSecondDigits must be 1, 2, or 3".to_string(),
+            )),
         }
     }
 }
@@ -222,69 +230,87 @@ impl DateTimeFormatConfig {
         if let (Some(date_style), Some(time_style)) = (&self.date_style, &self.time_style) {
             return match (date_style.to_length(), time_style.to_length()) {
                 (Length::Long, Length::Long) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Long, Length::Medium) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Long, Length::Short) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hm()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMDE::long().with_time_hm())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Medium, Length::Long) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Medium, Length::Medium) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Medium, Length::Short) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hm()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hm())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Short, Length::Long) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Short, Length::Medium) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hms()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hms())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
                 (Length::Short, Length::Short) => {
-                    if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hm()) {
+                    if let Ok(dtf) =
+                        DateTimeFormatter::try_new(prefs, fieldsets::YMD::short().with_time_hm())
+                    {
                         dtf.format(&datetime).to_string()
                     } else {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
-                _ => self.fallback_format(year, month, day, hour, minute, second)
+                _ => self.fallback_format(year, month, day, hour, minute, second),
             };
         } else if let Some(date_style) = &self.date_style {
             return match date_style.to_length() {
@@ -309,7 +335,7 @@ impl DateTimeFormatConfig {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
-                _ => self.fallback_format(year, month, day, hour, minute, second)
+                _ => self.fallback_format(year, month, day, hour, minute, second),
             };
         } else if let Some(time_style) = &self.time_style {
             return match time_style.to_length() {
@@ -327,15 +353,20 @@ impl DateTimeFormatConfig {
                         self.fallback_format(year, month, day, hour, minute, second)
                     }
                 }
-                _ => self.fallback_format(year, month, day, hour, minute, second)
+                _ => self.fallback_format(year, month, day, hour, minute, second),
             };
         }
 
-        let has_date = self.year.is_some() || self.month.is_some() || self.day.is_some() || self.weekday.is_some();
+        let has_date = self.year.is_some()
+            || self.month.is_some()
+            || self.day.is_some()
+            || self.weekday.is_some();
         let has_time = self.hour.is_some() || self.minute.is_some() || self.second.is_some();
 
         if has_date && has_time {
-            if let Ok(dtf) = DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms()) {
+            if let Ok(dtf) =
+                DateTimeFormatter::try_new(prefs, fieldsets::YMD::medium().with_time_hms())
+            {
                 return dtf.format(&datetime).to_string();
             }
         } else if has_date {
@@ -355,7 +386,15 @@ impl DateTimeFormatConfig {
         self.fallback_format(year, month, day, hour, minute, second)
     }
 
-    fn fallback_format(&self, year: i32, month: u32, day: u32, hour: u32, minute: u32, second: u32) -> String {
+    fn fallback_format(
+        &self,
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: u32,
+        minute: u32,
+        second: u32,
+    ) -> String {
         format!(
             "{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
             year, month, day, hour, minute, second
@@ -450,7 +489,10 @@ impl DateTimeFormat {
             iana_time_zone::get_timezone().unwrap_or_else(|_| "UTC".to_string())
         });
 
-        let calendar = opts.calendar.clone().unwrap_or_else(|| "gregory".to_string());
+        let calendar = opts
+            .calendar
+            .clone()
+            .unwrap_or_else(|| "gregory".to_string());
 
         let hour_cycle = if let Some(h12) = opts.hour12 {
             if h12 {
@@ -537,22 +579,27 @@ impl DateTimeFormat {
 
     // https://tc39.es/ecma402/#sec-intl.datetimeformat.prototype.formatRange
     #[prop("formatRange")]
-    fn format_range(&self, start: Option<Value>, end: Option<Value>, #[realm] realm: &mut Realm) -> Res<String> {
+    fn format_range(
+        &self,
+        start: Option<Value>,
+        end: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<String> {
         // Step 4: If startDate is undefined or endDate is undefined, throw a TypeError
         let start = start.ok_or_else(|| Error::ty_error("startDate is undefined".to_string()))?;
         let end = end.ok_or_else(|| Error::ty_error("endDate is undefined".to_string()))?;
-        
+
         if start.is_undefined() {
             return Err(Error::ty_error("startDate is undefined".to_string()));
         }
         if end.is_undefined() {
             return Err(Error::ty_error("endDate is undefined".to_string()));
         }
-        
+
         // Step 5-6: Let x be ? ToNumber(startDate), let y be ? ToNumber(endDate)
         let start = start.to_number(realm)?;
         let end = end.to_number(realm)?;
-        
+
         // Step 7-8: If x is NaN or y is NaN, throw a RangeError
         if start.is_nan() || start.is_infinite() {
             return Err(Error::range_error("Invalid time value".to_string()));

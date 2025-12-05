@@ -261,7 +261,7 @@ impl IntoPropertyKey for Value {
                 }
 
                 PropertyKey::String(obj.to_string(realm)?)
-            },
+            }
         })
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {

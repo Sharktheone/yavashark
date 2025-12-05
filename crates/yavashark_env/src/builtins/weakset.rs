@@ -176,7 +176,6 @@ impl WeakSet {
         Ok(Self::with_set(realm, set)?.into_value())
     }
 
-
     fn union(&self, other: &Self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;

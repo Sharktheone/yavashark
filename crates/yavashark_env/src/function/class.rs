@@ -1,5 +1,7 @@
 use crate::realm::Realm;
-use crate::value::{Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable};
+use crate::value::{
+    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable,
+};
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
     ValueResult,
@@ -117,13 +119,19 @@ impl Obj for Class {
         self.inner.define_getter(name, value, realm)
     }
 
-    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             return Err(Error::new("Cannot set prototype property"));
         }
 
-        self.inner.define_getter_attributes(name, callback, attributes, realm)
-
+        self.inner
+            .define_getter_attributes(name, callback, attributes, realm)
     }
 
     fn define_setter(
@@ -139,16 +147,27 @@ impl Obj for Class {
         self.inner.define_setter(name, value, realm)
     }
 
-    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             return Err(Error::new("Cannot set prototype property"));
         }
 
-        self.inner.define_setter_attributes(name, callback, attributes, realm)
-
+        self.inner
+            .define_setter_attributes(name, callback, attributes, realm)
     }
 
-    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             return Err(Error::new("Cannot set prototype property"));
         }
@@ -584,8 +603,16 @@ impl Obj for ClassInstance {
         self.inner.try_borrow()?.define_getter(name, value, realm)
     }
 
-    fn define_getter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner.try_borrow()?.define_getter_attributes(name, callback, attributes, realm)
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner
+            .try_borrow()?
+            .define_getter_attributes(name, callback, attributes, realm)
     }
 
     fn define_setter(
@@ -597,12 +624,27 @@ impl Obj for ClassInstance {
         self.inner.try_borrow()?.define_setter(name, value, realm)
     }
 
-    fn define_setter_attributes(&self, name: InternalPropertyKey, callback: ObjectHandle, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner.try_borrow()?.define_setter_attributes(name, callback, attributes, realm)
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner
+            .try_borrow()?
+            .define_setter_attributes(name, callback, attributes, realm)
     }
 
-    fn define_empty_accessor(&self, name: InternalPropertyKey, attributes: Attributes, realm: &mut Realm) -> Res {
-        self.inner.try_borrow()?.define_empty_accessor(name, attributes, realm)
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.inner
+            .try_borrow()?
+            .define_empty_accessor(name, attributes, realm)
     }
 
     fn delete_property(

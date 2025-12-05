@@ -1,3 +1,4 @@
+use crate::builtins::intl::utils::HourCycle;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use icu::locale::extensions::unicode::{Key, Value as UnicodeValue};
@@ -5,7 +6,6 @@ use icu::locale::subtags::{Variant, Variants};
 use icu::locale::{Locale as IcuLocale, LocaleCanonicalizer, LocaleExpander};
 use std::cell::RefCell;
 use yavashark_macro::{data_object, object, props};
-use crate::builtins::intl::utils::HourCycle;
 
 #[data_object(error = "range")]
 pub enum CaseFirst {
@@ -58,7 +58,6 @@ impl Locale {
         })
     }
 }
-
 
 fn get_extension_value(locale: &IcuLocale, key_str: &str) -> Option<String> {
     let key = Key::try_from_str(key_str).ok()?;
@@ -121,17 +120,17 @@ impl Locale {
             ));
         }
 
-        let mut locale: IcuLocale = tag_str.parse().map_err(|_| {
-            Error::range_error(format!("Invalid language tag: {tag_str}"))
-        })?;
+        let mut locale: IcuLocale = tag_str
+            .parse()
+            .map_err(|_| Error::range_error(format!("Invalid language tag: {tag_str}")))?;
 
         // Step 12: Canonicalize the locale
         let canonicalizer = LocaleCanonicalizer::new_extended();
         canonicalizer.canonicalize(&mut locale);
 
         // Get initial numeric value from locale extension
-        let mut numeric = get_extension_value(&locale, "kn")
-            .is_some_and(|v| v.is_empty() || v == "true");
+        let mut numeric =
+            get_extension_value(&locale, "kn").is_some_and(|v| v.is_empty() || v == "true");
 
         // Step 13: UpdateLanguageId - process language, script, region, variants in ORDER
         if let Some(opts) = options {
@@ -151,9 +150,7 @@ impl Locale {
                 if let Ok(script) = scr.parse() {
                     locale.id.script = Some(script);
                 } else {
-                    return Err(Error::range_error(format!(
-                        "Invalid script subtag: {scr}"
-                    )));
+                    return Err(Error::range_error(format!("Invalid script subtag: {scr}")));
                 }
             }
 
@@ -162,9 +159,7 @@ impl Locale {
                 if let Ok(region) = reg.parse() {
                     locale.id.region = Some(region);
                 } else {
-                    return Err(Error::range_error(format!(
-                        "Invalid region subtag: {reg}"
-                    )));
+                    return Err(Error::range_error(format!("Invalid region subtag: {reg}")));
                 }
             }
 
@@ -199,7 +194,7 @@ impl Locale {
                         )));
                     }
                 }
-                
+
                 // Sort and set variants
                 parsed_variants.sort();
                 parsed_variants.dedup();
@@ -308,12 +303,7 @@ impl Locale {
     // https://tc39.es/ecma402/#sec-Intl.Locale.prototype.region
     #[get("region")]
     fn region(&self) -> Option<String> {
-        self.inner
-            .borrow()
-            .locale
-            .id
-            .region
-            .map(|r| r.to_string())
+        self.inner.borrow().locale.id.region.map(|r| r.to_string())
     }
 
     // https://tc39.es/ecma402/#sec-Intl.Locale.prototype.script

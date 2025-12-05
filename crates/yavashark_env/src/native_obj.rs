@@ -2,19 +2,18 @@
 
 use crate::conversion::TryIntoValue;
 use crate::inline_props::{InlineObject, PropertiesHook};
+use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
 use crate::value::{IntoValue, ObjectImpl};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::fmt::Debug;
-use crate::partial_init::Initializer;
 
 #[derive(Debug)]
 pub struct NativeObject<T: ?Sized> {
     pub inner: RefCell<MutObject>,
     pub native: T,
 }
-
 
 impl<T: Intrinsic> NativeObject<T> {
     pub fn new(native: T, realm: &mut Realm) -> Res<Self> {
@@ -23,7 +22,6 @@ impl<T: Intrinsic> NativeObject<T> {
             native,
         })
     }
-
 }
 
 impl<T: ?Sized + Intrinsic> Intrinsic for NativeObject<T> {

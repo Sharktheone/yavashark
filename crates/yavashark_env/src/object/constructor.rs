@@ -1,10 +1,14 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
+use crate::conversion::FromValueOutput;
 use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj, ObjectOrNull, Property};
+use crate::value::{
+    Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj,
+    ObjectOrNull, Property,
+};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -13,7 +17,6 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use crate::conversion::FromValueOutput;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -90,7 +93,6 @@ impl ObjectConstructor {
                 if let Ok(descriptor) = DefinePropertyDescriptor::from_value_out(value, realm) {
                     Self::define_property(obj.clone(), key.into(), descriptor, realm)?;
                 }
-
             }
         }
 
