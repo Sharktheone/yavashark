@@ -67,7 +67,7 @@ impl ObjectConstructor {
     pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableObjectConstructor {
-                object: MutObject::with_proto(realm.intrinsics.obj.clone()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
             }),
         };
 
