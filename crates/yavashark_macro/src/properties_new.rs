@@ -362,7 +362,7 @@ fn init_constructor(
 
     let mut constructor_length = 0;
 
-    if let Some(constructor) = constructor {
+    if let Some(ref constructor) = constructor {
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
@@ -379,7 +379,7 @@ fn init_constructor(
         constructor_length = constructor.calculate_length().0;
     }
 
-    if let Some(call_constructor) = call_constructor {
+    if let Some(ref call_constructor) = call_constructor {
         let fn_tok = call_constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
@@ -393,7 +393,9 @@ fn init_constructor(
             }
         });
 
-        constructor_length = call_constructor.calculate_length().0;
+        if constructor.is_none() || constructor.as_ref().is_some_and(|c| c.length.is_none()) {
+            constructor_length = call_constructor.calculate_length().0.max(constructor_length);
+        }
     }
 
     {
