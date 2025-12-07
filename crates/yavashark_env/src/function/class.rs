@@ -1,6 +1,7 @@
 use crate::realm::Realm;
 use crate::value::{
-    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable,
+    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue,
+    Obj, Property, Variable,
 };
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
@@ -48,6 +49,9 @@ pub struct Class {
     pub prototype: RefCell<ObjectHandle>,
     // #[gc(untyped)]
     pub constructor: Option<Box<dyn ConstructorFn>>,
+    /// Instance field initializers that are called when constructing a new instance.
+    /// These are non-static fields that should be defined on the instance, not the prototype.
+    pub instance_fields: RefCell<Vec<Box<dyn InstanceFieldInitializer>>>,
 }
 
 impl Obj for Class {
@@ -321,12 +325,16 @@ impl Obj for Class {
     }
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        Ok(if let Some(constructor) = &self.constructor {
+        let instance = if let Some(constructor) = &self.constructor {
             let this = ClassInstance::new_with_proto(
                 self.prototype.try_borrow()?.clone(),
                 self.name.borrow().clone(),
             )
             .into_value();
+
+            for field in self.instance_fields.try_borrow()?.iter() {
+                field.initialize(this.copy(), realm)?;
+            }
 
             constructor.construct(args, this.copy(), realm)?;
 
@@ -336,19 +344,42 @@ impl Obj for Class {
 
             c.set_prototype(self.prototype.try_borrow()?.clone().into(), realm)?;
 
-            ClassInstance {
+            let parent_private_props = if let Some(parent_instance) = c.downcast::<ClassInstance>()
+            {
+                parent_instance.private_props.borrow().clone()
+            } else {
+                HashMap::new()
+            };
+
+            let instance = ClassInstance {
                 inner: RefCell::new(c),
-                private_props: RefCell::new(HashMap::new()),
+                private_props: RefCell::new(parent_private_props),
                 name: self.name.borrow().clone(),
             }
-            .into_object()
+            .into_object();
+
+            let this: Value = instance.clone().into();
+            for field in self.instance_fields.try_borrow()?.iter() {
+                field.initialize(this.copy(), realm)?;
+            }
+
+            instance
         } else {
-            ClassInstance::new_with_proto(
+            let instance = ClassInstance::new_with_proto(
                 self.prototype.try_borrow()?.clone(),
                 self.name.borrow().clone(),
             )
-            .into_object()
-        })
+            .into_object();
+
+            let this: Value = instance.clone().into();
+            for field in self.instance_fields.try_borrow()?.iter() {
+                field.initialize(this.copy(), realm)?;
+            }
+
+            instance
+        };
+
+        Ok(instance)
     }
 
     fn is_constructable(&self) -> bool {
@@ -393,6 +424,7 @@ impl Class {
             constructor: None,
             name: RefCell::new(name),
             prototype: RefCell::new(Object::null()),
+            instance_fields: RefCell::new(Vec::new()),
         })
     }
 
@@ -412,6 +444,7 @@ impl Class {
             constructor: None,
             name: RefCell::new(name),
             prototype: RefCell::new(Object::null()),
+            instance_fields: RefCell::new(Vec::new()),
         })
     }
 
@@ -488,6 +521,13 @@ impl Class {
 
     pub fn set_constructor(&mut self, constructor: impl ConstructorFn + 'static) {
         self.constructor = Some(Box::new(constructor));
+    }
+
+    pub fn add_instance_field(&self, initializer: impl InstanceFieldInitializer + 'static) -> Res {
+        self.instance_fields
+            .try_borrow_mut()?
+            .push(Box::new(initializer));
+        Ok(())
     }
 
     pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {

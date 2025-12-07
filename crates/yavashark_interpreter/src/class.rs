@@ -2,17 +2,54 @@ use crate::function::{JSFunction, RawJSFunction};
 use std::cell::RefCell;
 use swc_common::Span;
 use swc_ecma_ast::{
-    BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
+    BlockStmt, Class, ClassMember, Expr, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
 };
 use yavashark_env::value::property_key::{BorrowedInternalPropertyKey, IntoPropertyKey};
-use yavashark_env::value::Obj;
+use yavashark_env::value::{BoxedObj, CustomGcRefUntyped, InstanceFieldInitializer, Obj};
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey,
     Realm, Res, Value, ValueResult, Variable,
 };
+use yavashark_garbage::GcRef;
 use yavashark_string::{ToYSString, YSString};
 
 use crate::Interpreter;
+
+#[derive(Debug)]
+pub struct ExprFieldInitializer {
+    pub key: InternalPropertyKey,
+    pub value_expr: Option<Box<Expr>>,
+    pub span: Span,
+    pub scope: Scope,
+    pub is_private: bool,
+}
+
+impl InstanceFieldInitializer for ExprFieldInitializer {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
+        self.scope.gc_untyped_ref()
+    }
+
+    fn initialize(&self, this: Value, realm: &mut Realm) -> Result<(), Error> {
+        let value = if let Some(expr) = &self.value_expr {
+            let mut scope = self.scope.child_object(this.copy().to_object()?)?;
+            Interpreter::run_expr(realm, expr, self.span, &mut scope)?
+        } else {
+            Value::Undefined
+        };
+
+        if self.is_private {
+            if let Some(instance) = this.copy().to_object()?.downcast::<ClassInstance>() {
+                let PropertyKey::String(name) = self.key.clone().into() else {
+                    return Err(Error::new("Private field name must be a string"));
+                };
+                instance.define_private_field(name.to_string(), value);
+            }
+        } else {
+            this.define_property(self.key.clone(), value, realm)?;
+        }
+        Ok(())
+    }
+}
 
 pub fn create_class(
     realm: &mut Realm,
@@ -108,21 +145,33 @@ pub fn create_class(
 
             ClassMember::PrivateProp(o) => {
                 let key = o.key.name.as_str();
-                let value = if let Some(value) = &o.value {
-                    Interpreter::run_expr(realm, value, stmt.span, scope)?
-                } else {
-                    Value::Undefined
-                };
 
-                define_on_class(
-                    YSString::from_ref(key).into(),
-                    value,
-                    &mut class,
-                    &mut proto,
-                    o.is_static,
-                    true,
-                    realm,
-                );
+                if o.is_static {
+                    let value = if let Some(value) = &o.value {
+                        Interpreter::run_expr(realm, value, stmt.span, scope)?
+                    } else {
+                        Value::Undefined
+                    };
+
+                    define_on_class(
+                        YSString::from_ref(key).into(),
+                        value,
+                        &mut class,
+                        &mut proto,
+                        true,
+                        true,
+                        realm,
+                    )?;
+                } else {
+                    let initializer = ExprFieldInitializer {
+                        key: YSString::from_ref(key).into(),
+                        value_expr: o.value.clone(),
+                        span: stmt.span,
+                        scope: scope.clone(),
+                        is_private: true,
+                    };
+                    class.add_instance_field(initializer)?;
+                }
             }
             ClassMember::Empty(_) => {}
             ClassMember::TsIndexSignature(_) => {
@@ -131,20 +180,31 @@ pub fn create_class(
             ClassMember::ClassProp(p) => {
                 let name = prop_name_to_value(&p.key, realm, p.span, scope)?;
 
-                let value = p.value.as_ref().map_or(
-                    Ok(Value::Undefined),
-                    (|val| Interpreter::run_expr(realm, val, p.span, scope)),
-                )?;
+                if p.is_static {
+                    let value = p.value.as_ref().map_or(
+                        Ok(Value::Undefined),
+                        |val| Interpreter::run_expr(realm, val, p.span, scope),
+                    )?;
 
-                define_on_class(
-                    name.into_internal_property_key(realm)?,
-                    value,
-                    &mut class,
-                    &mut proto,
-                    p.is_static,
-                    false,
-                    realm,
-                )?;
+                    define_on_class(
+                        name.into_internal_property_key(realm)?,
+                        value,
+                        &mut class,
+                        &mut proto,
+                        true,
+                        false,
+                        realm,
+                    )?;
+                } else {
+                    let initializer = ExprFieldInitializer {
+                        key: name.into_internal_property_key(realm)?,
+                        value_expr: p.value.clone(),
+                        span: p.span,
+                        scope: scope.clone(),
+                        is_private: false,
+                    };
+                    class.add_instance_field(initializer)?;
+                }
             }
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
