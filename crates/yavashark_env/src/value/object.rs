@@ -1514,7 +1514,7 @@ impl IntoValue for Hint {
         match self {
             Self::Number => "number".into(),
             Self::String => "string".into(),
-            Self::None => Value::Undefined,
+            Self::None => "default".into(),
         }
     }
 }
