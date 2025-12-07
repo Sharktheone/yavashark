@@ -341,6 +341,11 @@ impl NumberObj {
 
         inner.number
     }
+
+    #[prop("toLocaleString")]
+    fn to_locale_string(&self) -> Res<YSString> {
+        self.to_string(None)
+    }
 }
 
 pub fn check_radix_opt(radix: Option<u32>) -> Res {
