@@ -1,5 +1,5 @@
 use crate::Validator;
-use crate::utils::single_stmt_contains_decl;
+use crate::utils::{single_stmt_contains_decl, check_async_generator_fn_decl};
 use swc_ecma_ast::DoWhileStmt;
 
 impl<'a> Validator<'a> {
@@ -11,6 +11,8 @@ impl<'a> Validator<'a> {
                 "Lexical declaration cannot appear in a single-statement context".to_string(),
             );
         }
+
+        check_async_generator_fn_decl(&do_while.body, "a 'do-while' statement")?;
 
         self.validate_statement(&do_while.body)
     }

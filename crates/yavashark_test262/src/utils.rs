@@ -4,7 +4,7 @@ use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCo
 use swc_common::input::StringInput;
 use swc_common::util::take::Take;
 use swc_common::BytePos;
-use swc_ecma_ast::{Program, Script};
+use swc_ecma_ast::{Program, Script, ModuleItem};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yaml_rust2::yaml::YamlDecoder;
 use yaml_rust2::Yaml;
@@ -106,17 +106,29 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                 }
             }
 
+            if let Program::Module(module) = &s {
+                if !metadata.flags.contains(Flags::MODULE) {
+                    let has_module_decl = module.body.iter().any(|item| matches!(item, ModuleItem::ModuleDecl(_)));
+                    
+                    if has_module_decl {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("PARSE_ERROR: Expected script but found module declarations (import/export in script code)");
+                        panic!()
+                    }
+                }
+            }
+
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
                     println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
                     panic!()
                 }
             }
-
-            // if s.is_module() && !metadata.flags.contains(Flags::MODULE) {
-            //     println!("PARSE_ERROR: Expected script but parsed module");
-            //     panic!()
-            // }
 
             s
         }

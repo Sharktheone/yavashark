@@ -1,11 +1,26 @@
 use crate::Validator;
-use swc_ecma_ast::{ObjectLit, Prop, PropOrSpread};
+use swc_ecma_ast::{ObjectLit, Prop, PropName, PropOrSpread};
 
 impl<'a> Validator<'a> {
     pub fn validate_object_expr(&mut self, object: &'a ObjectLit) -> Result<(), String> {
+        // Track if we've seen a __proto__ property definition (key: value form)
+        let mut has_proto = false;
+
         for prop in &object.props {
             match prop {
                 PropOrSpread::Prop(p) => {
+                    if let Prop::KeyValue(kv) = &**p {
+                        if is_proto_property_name(&kv.key) {
+                            if has_proto {
+                                return Err(
+                                    "Duplicate __proto__ fields are not allowed in object literals"
+                                        .to_string(),
+                                );
+                            }
+                            has_proto = true;
+                        }
+                    }
+
                     self.validate_prop(p)?;
                 }
                 PropOrSpread::Spread(spread) => {
@@ -85,5 +100,14 @@ impl<'a> Validator<'a> {
         }
 
         Ok(())
+    }
+}
+
+/// Check if a property name is __proto__ (as identifier or string literal)
+fn is_proto_property_name(name: &PropName) -> bool {
+    match name {
+        PropName::Ident(ident) => ident.sym == "__proto__",
+        PropName::Str(s) => s.value == "__proto__",
+        _ => false,
     }
 }
