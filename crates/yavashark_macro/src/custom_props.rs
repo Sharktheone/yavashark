@@ -295,10 +295,10 @@ pub fn match_list(properties: &[DirectItem], r: List, config: &Config) -> TokenS
 
         let act = match r {
             List::Properties => {
-                quote! {props.push((#name, inner.#field.value.copy()));}
+                quote! {props.push((#name, inner.#field.value.copy().into()));}
             }
             List::Keys => quote! {keys.push(#name);},
-            List::Values => quote! {values.push(inner.#field.value.copy());},
+            List::Values => quote! {values.push(inner.#field.value.copy().into());},
             List::Clear => quote! {inner.#field.value = #value::Undefined;},
         };
 

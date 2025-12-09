@@ -236,15 +236,15 @@ impl ObjectImpl for Arguments {
         self.get_wrapped_object().contains_key(name, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         let mut props = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {
-            props.push((PropertyKey::from(i), args[i].clone()));
+            props.push((PropertyKey::from(i), args[i].clone().into()));
         }
-        props.push((PropertyKey::from("length"), self.length.borrow().clone()));
+        props.push((PropertyKey::from("length"), self.length.borrow().clone().into()));
         if let Some(callee) = &self.callee {
-            props.push((PropertyKey::from("callee"), callee.clone()));
+            props.push((PropertyKey::from("callee"), callee.clone().into()));
         }
         let mut parent_props = self.get_wrapped_object().properties(realm)?;
         props.append(&mut parent_props);
@@ -266,15 +266,15 @@ impl ObjectImpl for Arguments {
         Ok(keys)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut values = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {
-            values.push(args[i].clone());
+            values.push(args[i].clone().into());
         }
-        values.push(self.length.borrow().clone());
+        values.push(self.length.borrow().clone().into());
         if let Some(callee) = &self.callee {
-            values.push(callee.clone());
+            values.push(callee.clone().into());
         }
         let mut parent_values = self.get_wrapped_object().values(realm)?;
         values.append(&mut parent_values);
@@ -284,14 +284,14 @@ impl ObjectImpl for Arguments {
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         let mut props = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {
-            props.push((PropertyKey::from(i), args[i].clone()));
+            props.push((PropertyKey::from(i), args[i].clone().into()));
         }
         if let Some(callee) = &self.callee {
-            props.push((PropertyKey::from("callee"), callee.clone()));
+            props.push((PropertyKey::from("callee"), callee.clone().into()));
         }
         let mut parent_props = self.get_wrapped_object().enumerable_properties(realm)?;
         props.append(&mut parent_props);
@@ -312,14 +312,14 @@ impl ObjectImpl for Arguments {
         Ok(keys)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut values = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {
-            values.push(args[i].clone());
+            values.push(args[i].clone().into());
         }
         if let Some(callee) = &self.callee {
-            values.push(callee.clone());
+            values.push(callee.clone().into());
         }
         let mut parent_values = self.get_wrapped_object().enumerable_values(realm)?;
         values.append(&mut parent_values);

@@ -1,8 +1,5 @@
 use crate::realm::Realm;
-use crate::value::{
-    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue,
-    Obj, Property, Variable,
-};
+use crate::value::{Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue, Obj, Property, Variable};
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
     ValueResult,
@@ -33,6 +30,18 @@ impl PrivateMember {
         match self {
             Self::Field(v) | Self::Method(v) => v.clone(),
             Self::Accessor { get, .. } => get.clone().unwrap_or(Value::Undefined),
+        }
+    }
+
+    fn as_property(&self) -> Property {
+        match self {
+            Self::Field(v) | Self::Method(v) => v.clone().into(),
+            Self::Accessor { get, .. } => {
+                let get = get.as_ref().and_then(|v| v.as_object().ok().cloned())
+                    .unwrap_or_else(Object::null);
+
+                Property::Getter(get, Attributes::default())
+            }
         }
     }
 }
@@ -207,16 +216,16 @@ impl Obj for Class {
         }
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        let mut props = self.inner.properties(realm)?;
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
+        let mut props = self.inner.deref().properties(realm)?;
 
         props.push((
             PropertyKey::String("prototype".into()),
-            self.prototype.borrow().clone().into(),
+            self.prototype.borrow().clone().into_value().into(),
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value()));
+            props.push((PropertyKey::String(key.clone().into()), value.as_property()));
             //TODO: is this correct?
         }
 
@@ -243,13 +252,13 @@ impl Obj for Class {
         Ok(keys)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
-        let mut values = self.inner.values(realm)?;
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
+        let mut values = self.inner.deref().values(realm)?;
 
-        values.push(self.prototype.borrow().clone().into());
+        values.push(self.prototype.borrow().clone().into_value().into());
 
         for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_value()); //TODO: is this correct?
+            values.push(value.as_property()); //TODO: is this correct?
         }
 
         Ok(values)
@@ -258,16 +267,16 @@ impl Obj for Class {
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         let mut props = self.inner.enumerable_properties(realm)?;
 
         props.push((
             PropertyKey::String("prototype".into()),
-            self.prototype.borrow().clone().into(),
+            self.prototype.borrow().clone().into_value().into(),
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value()));
+            props.push((PropertyKey::String(key.clone().into()), value.as_property()));
             //TODO: is this correct?
         }
 
@@ -286,13 +295,13 @@ impl Obj for Class {
         Ok(keys)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut values = self.inner.enumerable_values(realm)?;
 
-        values.push(self.prototype.borrow().clone().into());
+        values.push(self.prototype.borrow().clone().into_value().into());
 
         for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_value()); //TODO: is this correct?
+            values.push(value.as_property()); //TODO: is this correct?
         }
 
         Ok(values)
@@ -711,11 +720,11 @@ impl Obj for ClassInstance {
     //     self.inner.try_borrow()?.to_string_internal()
     // }
     //
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        let mut props = self.inner.try_borrow()?.properties(realm)?;
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
+        let mut props = self.inner.try_borrow()?.deref().deref().properties(realm)?;
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value()));
+            props.push((PropertyKey::String(key.clone().into()), value.as_property()));
         }
 
         Ok(props)
@@ -731,11 +740,11 @@ impl Obj for ClassInstance {
         Ok(keys)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
-        let mut values = self.inner.try_borrow()?.values(realm)?;
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
+        let mut values = self.inner.try_borrow()?.deref().deref().values(realm)?;
 
         for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_value());
+            values.push(value.as_property());
         }
 
         Ok(values)
@@ -744,7 +753,7 @@ impl Obj for ClassInstance {
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner.try_borrow()?.enumerable_properties(realm)
     }
 
@@ -752,7 +761,7 @@ impl Obj for ClassInstance {
         self.inner.try_borrow()?.enumerable_keys(realm)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.inner.try_borrow()?.enumerable_values(realm)
     }
 

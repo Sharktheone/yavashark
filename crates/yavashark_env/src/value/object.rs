@@ -114,6 +114,13 @@ impl Property {
             Property::Getter(g, _) => g.call(Vec::new(), Value::Undefined, realm),
         }
     }
+
+    pub fn get(self, this: Value, realm: &mut Realm) -> Res<Value> {
+        match self {
+            Property::Value(v, _) => Ok(v),
+            Property::Getter(g, _) => g.call(Vec::new(), this, realm),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -532,13 +539,13 @@ pub trait Obj: Debug + 'static {
         self.contains_key(name.0, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>>;
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>>;
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>>;
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>>;
 
     fn clear_properties(&self, realm: &mut Realm) -> Res;
 
@@ -810,13 +817,13 @@ pub trait MutObj: Debug + 'static {
         self.contains_key(name.0, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>>;
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>>;
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>>;
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>>;
 
     fn clear_properties(&mut self, realm: &mut Realm) -> Res;
 
@@ -1394,8 +1401,38 @@ impl Object {
         Err(Error::ty("Cannot convert object to primitive"))
     }
 
+    pub fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+        self.0.properties(realm)?.into_iter().map(
+            |(key, prop)| {
+                prop.get(self.clone().into(), realm)
+                    .map(|value| (key, value))
+            },
+        )
+            .collect()
+    }
+
     pub fn enum_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        self.0.enumerable_properties(realm)
+        self.0.enumerable_properties(realm)?.into_iter().map(
+            |(key, prop)| {
+                prop.get(self.clone().into(), realm)
+                    .map(|value| (key, value))
+            },
+        )
+            .collect()
+    }
+
+    pub fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+        self.0.values(realm)?.into_iter().map(
+            |prop| prop.get(self.clone().into(), realm)
+        )
+            .collect()
+    }
+
+    pub fn enum_values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+        self.0.enumerable_values(realm)?.into_iter().map(
+            |prop| prop.get(self.clone().into(), realm)
+        )
+            .collect()
     }
 
     #[must_use]

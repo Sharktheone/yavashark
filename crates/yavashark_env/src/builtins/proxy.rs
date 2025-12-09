@@ -12,6 +12,7 @@ use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::ops::Deref;
 use std::ptr::NonNull;
+use swc_ecma_ast::Prop;
 use yavashark_garbage::GcRef;
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -274,22 +275,30 @@ impl Obj for Proxy {
     //     self.inner.to_string_internal()
     // }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        self.inner.properties(realm)
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
+        Ok(self.inner.properties(realm)?
+            .into_iter()
+            .map(|(k, v)| (k, v.into()))
+            .collect()
+        )
     }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         self.inner.keys(realm)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
-        self.inner.values(realm)
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
+        Ok(self.inner.values(realm)?
+            .into_iter()
+            .map(|v| v.into())
+            .collect()
+        )
     }
 
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner.enumerable_properties(realm)
     }
 
@@ -297,7 +306,7 @@ impl Obj for Proxy {
         self.inner.enumerable_keys(realm)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.inner.enumerable_values(realm)
     }
 

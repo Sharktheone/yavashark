@@ -60,10 +60,13 @@ gui = ["yavashark_env/gui"]
 
 
 [profile.release]
-#lto = "fat"
+lto = "fat"
 opt-level = 3
 codegen-units = 1
-debug = true
+panic = "abort"
+incremental = false
+debug = false
+strip = true
 
 [lints]
 workspace = true

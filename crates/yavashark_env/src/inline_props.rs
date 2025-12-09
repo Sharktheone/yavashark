@@ -200,13 +200,13 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
             || self.get_wrapped_object().contains_key(name, realm)?)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         let mut result = self.get_wrapped_object().properties(realm)?;
 
         let inline = self.props.properties(realm)?.collect::<Vec<_>>();
 
         for (key, prop) in inline {
-            result.push((key, prop.into_value(realm)?));
+            result.push((key, prop));
         }
 
         Ok(result)
@@ -222,13 +222,13 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         Ok(result)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut result = self.get_wrapped_object().values(realm)?;
 
         let inline = self.props.values(realm)?.collect::<Vec<_>>();
 
         for prop in inline {
-            result.push(prop.into_value(realm)?);
+            result.push(prop);
         }
 
         Ok(result)
@@ -237,13 +237,13 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         let mut result = self.get_wrapped_object().enumerable_properties(realm)?;
 
         let inline = self.props.enumerable_properties(realm)?.collect::<Vec<_>>();
 
         for (key, prop) in inline {
-            result.push((key, prop.into_value(realm)?));
+            result.push((key, prop));
         }
 
         Ok(result)
@@ -259,13 +259,13 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         Ok(result)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut result = self.get_wrapped_object().enumerable_values(realm)?;
 
         let inline = self.props.enumerable_values(realm)?.collect::<Vec<_>>();
 
         for prop in inline {
-            result.push(prop.into_value(realm)?);
+            result.push(prop);
         }
 
         Ok(result)

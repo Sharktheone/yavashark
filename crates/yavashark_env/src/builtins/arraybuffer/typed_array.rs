@@ -280,7 +280,7 @@ impl crate::value::ObjectImpl for TypedArray {
         self.get_wrapped_object().contains_key(name, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         if self.is_detached() {
             return self.get_wrapped_object().properties(realm);
         }
@@ -289,7 +289,7 @@ impl crate::value::ObjectImpl for TypedArray {
             slice
                 .iter()
                 .enumerate()
-                .map(|(i, x)| (i.into(), to_value(x.0)))
+                .map(|(i, x)| (i.into(), to_value(x.0).into()))
                 .collect::<Vec<_>>()
         });
 
@@ -316,12 +316,12 @@ impl crate::value::ObjectImpl for TypedArray {
         Ok(keys)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         if self.is_detached() {
             return self.get_wrapped_object().values(realm);
         }
 
-        let mut values = typed_array_run!(slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>());
+        let mut values = typed_array_run!(slice.iter().map(|x| to_value(x.0).into()).collect::<Vec<_>>());
 
         values.append(&mut self.get_wrapped_object().values(realm)?);
 

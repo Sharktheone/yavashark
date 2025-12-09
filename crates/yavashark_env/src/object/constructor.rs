@@ -164,6 +164,7 @@ impl ObjectConstructor {
         let mut descriptors = Vec::new();
 
         for (key, value) in props.enumerable_properties(realm)? {
+            let value = value.get(props.clone().into(), realm)?;
             if value.is_undefined() {
                 continue;
             }

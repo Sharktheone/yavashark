@@ -200,7 +200,7 @@ impl Obj for Object {
         self.inner_mut()?.contains_key(name, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner()?.properties(realm)
     }
 
@@ -208,14 +208,14 @@ impl Obj for Object {
         self.inner()?.keys(realm)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.inner()?.values(realm)
     }
 
     fn enumerable_properties(
         &self,
         realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner()?.enumerable_properties(realm)
     }
 
@@ -223,7 +223,7 @@ impl Obj for Object {
         self.inner()?.enumerable_keys(realm)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.inner()?.enumerable_values(realm)
     }
 
@@ -969,19 +969,19 @@ impl MutObj for MutObject {
     //     Ok("[object Object]".into())
     // }
 
-    fn properties(&self, _realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn properties(&self, _realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         Ok(self
             .array
             .iter()
             .filter_map(|(i, v)| {
                 let v = self.values.get(*v)?;
 
-                Some((InternalPropertyKey::Index(*i).into(), v.value.copy()))
+                Some((InternalPropertyKey::Index(*i).into(), v.property()))
             })
             .chain(self.properties.iter().filter_map(|(k, v)| {
                 let v = self.values.get(*v)?;
 
-                Some((k.clone(), v.value.copy()))
+                Some((k.clone(), v.property()))
             }))
             .collect())
     }
@@ -995,15 +995,15 @@ impl MutObj for MutObject {
             .collect::<Vec<_>>())
     }
 
-    fn values(&self, _realm: &mut Realm) -> Res<Vec<Value>, Error> {
-        Ok(self.values.iter().map(|v| v.value.copy()).collect())
+    fn values(&self, _realm: &mut Realm) -> Res<Vec<Property>, Error> {
+        Ok(self.values.iter().map(|v| v.property()).collect())
         //TODO: getter (and setter) values
     }
 
     fn enumerable_properties(
         &self,
         _realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    ) -> Res<Vec<(PropertyKey, Property)>> {
         Ok(self
             .array
             .iter()
@@ -1011,7 +1011,7 @@ impl MutObj for MutObject {
                 let v = self.values.get(*v)?;
 
                 if v.attributes.is_enumerable() {
-                    Some((InternalPropertyKey::Index(*i).into(), v.value.copy()))
+                    Some((InternalPropertyKey::Index(*i).into(), v.property()))
                 } else {
                     None
                 }
@@ -1020,7 +1020,7 @@ impl MutObj for MutObject {
                 let v = self.values.get(*v)?;
 
                 if v.attributes.is_enumerable() {
-                    Some((k.clone().into(), v.value.copy()))
+                    Some((k.clone().into(), v.property()))
                 } else {
                     None
                 }
@@ -1045,13 +1045,13 @@ impl MutObj for MutObject {
             .collect::<Vec<_>>())
     }
 
-    fn enumerable_values(&self, _realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+    fn enumerable_values(&self, _realm: &mut Realm) -> Res<Vec<Property>> {
         Ok(self
             .values
             .iter()
             .filter_map(|v| {
                 if v.attributes.is_enumerable() {
-                    Some(v.value.copy())
+                    Some(v.property())
                 } else {
                     None
                 }

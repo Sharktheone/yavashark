@@ -193,23 +193,23 @@ pub trait ObjectImpl: Debug + 'static {
         self.contains_key(name.0, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.get_wrapped_object().properties(realm)
     }
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         self.get_wrapped_object().keys(realm)
     }
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.get_wrapped_object().values(realm)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.get_wrapped_object().enumerable_properties(realm)
     }
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         self.get_wrapped_object().enumerable_keys(realm)
     }
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         self.get_wrapped_object().enumerable_values(realm)
     }
 
@@ -476,7 +476,7 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::contains_key_pre_hash(self, name, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         ObjectImpl::properties(self, realm)
     }
 
@@ -484,11 +484,11 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::keys(self, realm)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         ObjectImpl::values(self, realm)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         ObjectImpl::enumerable_properties(self, realm)
     }
 
@@ -496,7 +496,7 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::enumerable_keys(self, realm)
     }
 
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         ObjectImpl::enumerable_values(self, realm)
     }
 
