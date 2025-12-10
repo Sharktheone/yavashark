@@ -66,19 +66,20 @@ impl Interpreter {
             }
 
             Callee::Import(import) => {
-                if stmt.args.is_empty() {
-                    return Err(Error::ty("import() requires at least one argument"));
-                }
+                let prom = DynamicImport::new_with_expr_callback(
+                    |realm| {
+                        if stmt.args.is_empty() {
+                            return Err(Error::ty("import() requires at least one argument"));
+                        }
 
-                let module_name =
-                    Self::run_expr(realm, &stmt.args[0].expr, stmt.args[0].span(), scope)?;
+                        let module_name =
+                            Self::run_expr(realm, &stmt.args[0].expr, stmt.args[0].span(), scope)?;
 
-                let name = module_name.to_string(realm)?;
-                let path = scope.get_current_path()?;
+                        let name = module_name.to_string(realm)?;
+                        let path = scope.get_current_path()?;
 
-                let prom = DynamicImport::new(
-                    &name,
-                    &path,
+                        Ok((name, path))
+                    },
                     |source, path, realm| Self::run_module_source(&source, path, realm),
                     realm,
                 )?;

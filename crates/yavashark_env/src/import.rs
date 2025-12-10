@@ -8,6 +8,7 @@ use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use yavashark_string::YSString;
 
 pub struct DynamicImport {
     module: Pin<Box<dyn std::future::Future<Output = Res<ModuleFinalizer>>>>,
@@ -24,15 +25,28 @@ impl DynamicImport {
     ) -> Res<ObjectHandle> {
         match Self::new_throws(specifier, cur_path, cb, realm) {
             Ok(promise) => Ok(promise),
-            Err(e) => { 
+            Err(e) => {
                 Promise::from_error(e, realm)
             }
         }
-        
     }
-    
-    
-    
+
+    pub fn new_with_expr_callback(
+        expr_cb: impl FnOnce(&mut Realm) -> Res<(YSString, PathBuf)>,
+        cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let (specifier, path) = match expr_cb(realm) {
+            Ok(res) => res,
+            Err(e) => {
+                return Promise::from_error(e, realm);
+            }
+        };
+
+        Self::new(&specifier, &path, cb, realm)
+    }
+
+
     pub fn new_throws(
         specifier: &str,
         cur_path: &Path,
