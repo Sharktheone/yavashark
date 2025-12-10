@@ -22,6 +22,23 @@ impl DynamicImport {
         cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
+        match Self::new_throws(specifier, cur_path, cb, realm) {
+            Ok(promise) => Ok(promise),
+            Err(e) => { 
+                Promise::from_error(e, realm)
+            }
+        }
+        
+    }
+    
+    
+    
+    pub fn new_throws(
+        specifier: &str,
+        cur_path: &Path,
+        cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let promise = Promise::new(realm)?;
 
         let module = realm.get_module_async(specifier, cur_path, cb)?;
