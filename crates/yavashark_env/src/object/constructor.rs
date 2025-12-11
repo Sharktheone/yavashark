@@ -373,17 +373,8 @@ impl ObjectConstructor {
         let keys = obj
             .enumerable_keys(realm)?
             .iter()
-            .filter_map(|k| {
-                let v = obj.resolve_property_no_get_set(k.clone(), realm).ok()??; //TODO: This is absolutely not how this should be done (performance wise)
-
-                let v = v.assert_value();
-
-                if v.is_enumerable() {
-                    Some(k.clone().into())
-                } else {
-                    None
-                }
-            })
+            .cloned()
+            .map(Into::into)
             .collect();
 
         Ok(Array::with_elements(realm, keys)?.into_value())
