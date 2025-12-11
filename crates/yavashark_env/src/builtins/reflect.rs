@@ -216,6 +216,10 @@ impl Reflect {
         let proto = if proto.is_null() {
             ObjectOrNull::Null
         } else {
+            if Value::Object(target.clone()).is_proto_cycle(&proto, realm)? {
+                return Ok(false);
+            }
+
             ObjectOrNull::Object(proto.to_object()?)
         };
 

@@ -937,6 +937,32 @@ impl Value {
 
         Ok(false)
     }
+
+    pub fn is_proto_cycle(&self, rhs: &Self, realm: &mut Realm) -> Result<bool, Error> {
+        let Self::Object(obj) = self else {
+            return Ok(false);
+        };
+
+        let Self::Object(proto_obj) = rhs else {
+            return Ok(false);
+        };
+
+        let mut proto = Some(obj.prototype(realm)?);
+
+        while let Some(p) = proto {
+            if p == ObjectOrNull::Object(proto_obj.clone()) {
+                return Ok(true);
+            }
+
+            if let ObjectOrNull::Object(o) = p {
+                proto = Some(o.prototype(realm)?);
+            } else {
+                break;
+            }
+        }
+
+        Ok(false)
+    }
 }
 
 // impl AddAssign for Value {
