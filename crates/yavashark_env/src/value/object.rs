@@ -1579,7 +1579,7 @@ impl ObjectProperty {
     pub const fn getter(value: Value) -> Self {
         Self {
             value: Value::Undefined,
-            attributes: Attributes::config(),
+            attributes: Attributes::from_values(false, true, true),
             get: value,
             set: Value::Undefined,
         }
@@ -1589,7 +1589,7 @@ impl ObjectProperty {
     pub const fn setter(value: Value) -> Self {
         Self {
             value: Value::Undefined,
-            attributes: Attributes::config(),
+            attributes: Attributes::from_values(false, true, true),
             get: Value::Undefined,
             set: value,
         }
