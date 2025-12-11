@@ -216,7 +216,7 @@ impl Reflect {
         let proto = if proto.is_null() {
             ObjectOrNull::Null
         } else {
-            if Value::Object(target.clone()).is_proto_cycle(&proto, realm)? {
+            if proto.is_proto_cycle(target.clone().into(), realm)? {
                 return Ok(false);
             }
 

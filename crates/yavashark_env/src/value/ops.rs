@@ -938,7 +938,7 @@ impl Value {
         Ok(false)
     }
 
-    pub fn is_proto_cycle(&self, rhs: &Self, realm: &mut Realm) -> Result<bool, Error> {
+    pub fn is_proto_cycle(&self, rhs: Self, realm: &mut Realm) -> Result<bool, Error> {
         let Self::Object(obj) = self else {
             return Ok(false);
         };
@@ -948,9 +948,10 @@ impl Value {
         };
 
         let mut proto = Some(obj.prototype(realm)?);
+        let proto_obj = ObjectOrNull::Object(proto_obj);
 
         while let Some(p) = proto {
-            if p == ObjectOrNull::Object(proto_obj.clone()) {
+            if p == proto_obj {
                 return Ok(true);
             }
 
