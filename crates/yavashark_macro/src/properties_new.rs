@@ -259,6 +259,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
     let mut init = TokenStream::new();
     let self_ty = self_ty.unwrap_or_else(|| quote! { Self });
     let variable = &config.variable;
+    let attributes = &config.attributes;
 
     for prop in props {
         let (prop_tokens, name, js_name, prop_type, var_create) = match prop {
@@ -304,7 +305,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_getter(#name.into(), prop.into(), realm)?;
+                        obj.define_getter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
                     }
                 }
             }
@@ -312,7 +313,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_setter(#name.into(), prop.into(), realm)?;
+                        obj.define_setter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
                     }
                 }
             }
