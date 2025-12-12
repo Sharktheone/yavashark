@@ -1402,36 +1402,40 @@ impl Object {
     }
 
     pub fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        self.0.properties(realm)?.into_iter().map(
-            |(key, prop)| {
+        self.0
+            .properties(realm)?
+            .into_iter()
+            .map(|(key, prop)| {
                 prop.get(self.clone().into(), realm)
                     .map(|value| (key, value))
-            },
-        )
+            })
             .collect()
     }
 
     pub fn enum_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
-        self.0.enumerable_properties(realm)?.into_iter().map(
-            |(key, prop)| {
+        self.0
+            .enumerable_properties(realm)?
+            .into_iter()
+            .map(|(key, prop)| {
                 prop.get(self.clone().into(), realm)
                     .map(|value| (key, value))
-            },
-        )
+            })
             .collect()
     }
 
     pub fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
-        self.0.values(realm)?.into_iter().map(
-            |prop| prop.get(self.clone().into(), realm)
-        )
+        self.0
+            .values(realm)?
+            .into_iter()
+            .map(|prop| prop.get(self.clone().into(), realm))
             .collect()
     }
 
     pub fn enum_values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
-        self.0.enumerable_values(realm)?.into_iter().map(
-            |prop| prop.get(self.clone().into(), realm)
-        )
+        self.0
+            .enumerable_values(realm)?
+            .into_iter()
+            .map(|prop| prop.get(self.clone().into(), realm))
             .collect()
     }
 

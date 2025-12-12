@@ -234,10 +234,7 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
         Ok(result)
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         let mut result = self.get_wrapped_object().enumerable_properties(realm)?;
 
         let inline = self.props.enumerable_properties(realm)?.collect::<Vec<_>>();

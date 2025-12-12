@@ -242,7 +242,10 @@ impl ObjectImpl for Arguments {
         for i in 0..args.len() {
             props.push((PropertyKey::from(i), args[i].clone().into()));
         }
-        props.push((PropertyKey::from("length"), self.length.borrow().clone().into()));
+        props.push((
+            PropertyKey::from("length"),
+            self.length.borrow().clone().into(),
+        ));
         if let Some(callee) = &self.callee {
             props.push((PropertyKey::from("callee"), callee.clone().into()));
         }
@@ -281,10 +284,7 @@ impl ObjectImpl for Arguments {
         Ok(values)
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         let mut props = Vec::new();
         let args = self.args.borrow();
         for i in 0..args.len() {

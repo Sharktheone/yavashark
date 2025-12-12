@@ -338,7 +338,7 @@ pub fn single_stmt_contains_decl(stmt: &Stmt) -> bool {
 
 pub fn check_async_generator_fn_decl(stmt: &Stmt, context: &str) -> Result<(), String> {
     use swc_ecma_ast::Decl;
-    
+
     if let Stmt::Decl(Decl::Fn(fn_decl)) = stmt {
         if fn_decl.function.is_async {
             return Err(format!(
@@ -358,14 +358,12 @@ pub fn check_async_generator_fn_decl(stmt: &Stmt, context: &str) -> Result<(), S
 
 pub fn is_labelled_function(stmt: &Stmt) -> bool {
     use swc_ecma_ast::Decl;
-    
+
     match stmt {
-        Stmt::Labeled(labeled) => {
-            match &*labeled.body {
-                Stmt::Decl(Decl::Fn(_)) => true,
-                other => is_labelled_function(other),
-            }
-        }
+        Stmt::Labeled(labeled) => match &*labeled.body {
+            Stmt::Decl(Decl::Fn(_)) => true,
+            other => is_labelled_function(other),
+        },
         _ => false,
     }
 }

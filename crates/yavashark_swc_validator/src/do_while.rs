@@ -1,5 +1,5 @@
 use crate::Validator;
-use crate::utils::{single_stmt_contains_decl, check_async_generator_fn_decl};
+use crate::utils::{check_async_generator_fn_decl, single_stmt_contains_decl};
 use swc_ecma_ast::DoWhileStmt;
 
 impl<'a> Validator<'a> {

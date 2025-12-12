@@ -422,7 +422,11 @@ impl ObjectConstructor {
         proto: ObjectHandle,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        if proto.clone().into_value().is_proto_cycle(obj.clone(), realm)? {
+        if proto
+            .clone()
+            .into_value()
+            .is_proto_cycle(obj.clone(), realm)?
+        {
             return Err(Error::ty("Cannot set prototype to itself"));
         }
 

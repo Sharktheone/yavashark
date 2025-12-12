@@ -17,7 +17,6 @@ pub trait ConstructorFn: Debug {
     fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<(), Error>;
 }
 
-
 pub trait InstanceFieldInitializer: Debug {
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>>;
     fn initialize(&self, this: Value, realm: &mut Realm) -> Result<(), Error>;

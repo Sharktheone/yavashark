@@ -4,7 +4,7 @@ use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCo
 use swc_common::input::StringInput;
 use swc_common::util::take::Take;
 use swc_common::BytePos;
-use swc_ecma_ast::{Program, Script, ModuleItem};
+use swc_ecma_ast::{ModuleItem, Program, Script};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yaml_rust2::yaml::YamlDecoder;
 use yaml_rust2::Yaml;
@@ -108,8 +108,11 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
             if let Program::Module(module) = &s {
                 if !metadata.flags.contains(Flags::MODULE) {
-                    let has_module_decl = module.body.iter().any(|item| matches!(item, ModuleItem::ModuleDecl(_)));
-                    
+                    let has_module_decl = module
+                        .body
+                        .iter()
+                        .any(|item| matches!(item, ModuleItem::ModuleDecl(_)));
+
                     if has_module_decl {
                         if let Some(neg) = &metadata.negative {
                             if neg.phase == NegativePhase::Parse {

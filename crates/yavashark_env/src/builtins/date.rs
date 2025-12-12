@@ -63,7 +63,7 @@ impl Date {
             Some(n) => n,
             None => return Ok(f64::NAN.into()),
         };
-        
+
         let month = match args.get(1) {
             Some(v) => {
                 let n = v.to_number(realm)?;
@@ -196,7 +196,8 @@ impl Date {
 
     #[prop("getTime")]
     pub fn get_time(&self) -> f64 {
-        self.date().map_or(f64::NAN, |d| d.timestamp_millis() as f64)
+        self.date()
+            .map_or(f64::NAN, |d| d.timestamp_millis() as f64)
     }
 
     #[prop("getTimezoneOffset")]
@@ -214,8 +215,9 @@ impl Date {
 
     #[prop("getUTCDay")]
     pub fn get_utc_day(&self) -> f64 {
-        self.date()
-            .map_or(f64::NAN, |d| d.to_utc().weekday().num_days_from_sunday() as f64)
+        self.date().map_or(f64::NAN, |d| {
+            d.to_utc().weekday().num_days_from_sunday() as f64
+        })
     }
 
     #[prop("getUTCFullYear")]
@@ -230,8 +232,9 @@ impl Date {
 
     #[prop("getUTCMilliseconds")]
     pub fn get_utc_milliseconds(&self) -> f64 {
-        self.date()
-            .map_or(f64::NAN, |d| f64::from(d.to_utc().nanosecond()) / 1_000_000.0)
+        self.date().map_or(f64::NAN, |d| {
+            f64::from(d.to_utc().nanosecond()) / 1_000_000.0
+        })
     }
 
     #[prop("getUTCMinutes")]
@@ -241,7 +244,8 @@ impl Date {
 
     #[prop("getUTCMonth")]
     pub fn get_utc_month(&self) -> f64 {
-        self.date().map_or(f64::NAN, |d| (d.to_utc().month() - 1) as f64)
+        self.date()
+            .map_or(f64::NAN, |d| (d.to_utc().month() - 1) as f64)
     }
 
     #[prop("getUTCSeconds")]
@@ -257,7 +261,11 @@ impl Date {
     #[prop("setDate")]
     pub fn set_date(&self, dt: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4: Let dt be ? ToNumber(date)
         let dt = dt.to_number(realm)?;
@@ -293,9 +301,19 @@ impl Date {
 
     #[prop("setFullYear")]
     #[length(3)]
-    pub fn set_full_year(&self, year: Value, month: Option<Value>, date: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_full_year(
+        &self,
+        year: Value,
+        month: Option<Value>,
+        date: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4: Let y be ? ToNumber(year)
         let y = year.to_number(realm)?;
@@ -324,10 +342,7 @@ impl Date {
             return Ok(f64::NAN.into());
         }
 
-        let new_date = make_date(
-            make_day(y, m, dt),
-            time_within_day(local_t),
-        );
+        let new_date = make_date(make_day(y, m, dt), time_within_day(local_t));
 
         let result = new_date.and_then(|d| time_clip(local_to_utc(d)));
 
@@ -347,7 +362,11 @@ impl Date {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-7: ToNumber on arguments
         let h = hour.to_number(realm)?;
@@ -401,7 +420,11 @@ impl Date {
     #[prop("setMilliseconds")]
     pub fn set_milliseconds(&self, ms: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4: Let ms be ? ToNumber(ms)
         let ms = ms.to_number(realm)?;
@@ -438,9 +461,19 @@ impl Date {
 
     #[prop("setMinutes")]
     #[length(3)]
-    pub fn set_minutes(&self, min: Value, sec: Option<Value>, ms: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_minutes(
+        &self,
+        min: Value,
+        sec: Option<Value>,
+        ms: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-6: ToNumber on arguments
         let min = min.to_number(realm)?;
@@ -487,9 +520,18 @@ impl Date {
 
     #[prop("setMonth")]
     #[length(2)]
-    pub fn set_month(&self, month: Value, date: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_month(
+        &self,
+        month: Value,
+        date: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-5: ToNumber on arguments
         let month = month.to_number(realm)?;
@@ -529,9 +571,18 @@ impl Date {
 
     #[prop("setSeconds")]
     #[length(2)]
-    pub fn set_seconds(&self, sec: Value, ms: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_seconds(
+        &self,
+        sec: Value,
+        ms: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-5: ToNumber on arguments
         let sec = sec.to_number(realm)?;
@@ -598,7 +649,11 @@ impl Date {
     #[prop("setUTCDate")]
     pub fn set_utc_date(&self, dt: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4: Let dt be ? ToNumber(date)
         let dt = dt.to_number(realm)?;
@@ -631,9 +686,19 @@ impl Date {
 
     #[prop("setUTCFullYear")]
     #[length(3)]
-    pub fn set_utc_full_year(&self, year: Value, month: Option<Value>, date: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_utc_full_year(
+        &self,
+        year: Value,
+        month: Option<Value>,
+        date: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]. If t is NaN, set t to +0
-        let t = self.inner.borrow().date.map_or(0.0, |d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map_or(0.0, |d| d.timestamp_millis() as f64);
 
         // Step 4: Let y be ? ToNumber(year)
         let y = year.to_number(realm)?;
@@ -656,10 +721,7 @@ impl Date {
             return Ok(f64::NAN.into());
         }
 
-        let new_date = make_date(
-            make_day(y, m, dt),
-            time_within_day(t),
-        );
+        let new_date = make_date(make_day(y, m, dt), time_within_day(t));
 
         let result = new_date.and_then(time_clip);
 
@@ -679,7 +741,11 @@ impl Date {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-7: ToNumber on arguments
         let h = hour.to_number(realm)?;
@@ -730,7 +796,11 @@ impl Date {
     #[prop("setUTCMilliseconds")]
     pub fn set_utc_milliseconds(&self, ms: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4: Let milli be ? ToNumber(ms)
         let ms = ms.to_number(realm)?;
@@ -764,9 +834,19 @@ impl Date {
 
     #[prop("setUTCMinutes")]
     #[length(3)]
-    pub fn set_utc_minutes(&self, min: Value, sec: Option<Value>, ms: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_utc_minutes(
+        &self,
+        min: Value,
+        sec: Option<Value>,
+        ms: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-6: ToNumber on arguments
         let min = min.to_number(realm)?;
@@ -810,9 +890,18 @@ impl Date {
 
     #[prop("setUTCMonth")]
     #[length(2)]
-    pub fn set_utc_month(&self, month: Value, date: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_utc_month(
+        &self,
+        month: Value,
+        date: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-5: ToNumber on arguments
         let month = month.to_number(realm)?;
@@ -849,9 +938,18 @@ impl Date {
 
     #[prop("setUTCSeconds")]
     #[length(2)]
-    pub fn set_utc_seconds(&self, sec: Value, ms: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn set_utc_seconds(
+        &self,
+        sec: Value,
+        ms: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         // Step 3: Let t be dateObject.[[DateValue]]
-        let t = self.inner.borrow().date.map(|d| d.timestamp_millis() as f64);
+        let t = self
+            .inner
+            .borrow()
+            .date
+            .map(|d| d.timestamp_millis() as f64);
 
         // Step 4-5: ToNumber on arguments
         let sec = sec.to_number(realm)?;
@@ -918,7 +1016,11 @@ impl Date {
         };
 
         let new_date = make_date(
-            make_day(year, month_from_time(local_t) as f64, date_from_time(local_t) as f64),
+            make_day(
+                year,
+                month_from_time(local_t) as f64,
+                date_from_time(local_t) as f64,
+            ),
             time_within_day(local_t),
         );
 
@@ -931,16 +1033,19 @@ impl Date {
 
     #[prop("toDateString")]
     pub fn to_date_string(&self) -> String {
-        self.date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%a %b %d %Y").to_string()
-            })
+        self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%a %b %d %Y").to_string()
+        })
     }
 
     #[prop("toISOString")]
     pub fn to_iso_string(&self) -> ValueResult {
         match self.date() {
-            Some(d) => Ok(d.to_utc().format("%Y-%m-%dT%H:%M:%S.%3fZ").to_string().into()),
+            Some(d) => Ok(d
+                .to_utc()
+                .format("%Y-%m-%dT%H:%M:%S.%3fZ")
+                .to_string()
+                .into()),
             None => Err(crate::Error::range("Invalid time value")),
         }
     }
@@ -948,33 +1053,34 @@ impl Date {
     #[prop("toJSON")]
     pub fn to_json(&self) -> ValueResult {
         match self.date() {
-            Some(d) => Ok(d.to_utc().format("%Y-%m-%dT%H:%M:%S.%3fZ").to_string().into()),
+            Some(d) => Ok(d
+                .to_utc()
+                .format("%Y-%m-%dT%H:%M:%S.%3fZ")
+                .to_string()
+                .into()),
             None => Ok(Value::Null),
         }
     }
 
     #[prop("toLocaleDateString")]
     pub fn to_locale_date_string(&self) -> String {
-        self.date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%m/%d/%Y").to_string()
-            })
+        self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%m/%d/%Y").to_string()
+        })
     }
 
     #[prop("toLocaleString")]
     pub fn to_locale_string(&self) -> String {
-        self.date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%m/%d/%Y, %I:%M:%S %p").to_string()
-            })
+        self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%m/%d/%Y, %I:%M:%S %p").to_string()
+        })
     }
 
     #[prop("toLocaleTimeString")]
     pub fn to_locale_time_string(&self) -> String {
-        self.date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%I:%M:%S %p").to_string()
-            })
+        self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%I:%M:%S %p").to_string()
+        })
     }
 
     #[prop("toString")]
@@ -985,10 +1091,9 @@ impl Date {
 
     #[prop("toTimeString")]
     pub fn to_time_string(&self) -> String {
-        self.date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%H:%M:%S").to_string()
-            })
+        self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%H:%M:%S").to_string()
+        })
     }
 
     #[prop("toUTCString")]
@@ -999,7 +1104,8 @@ impl Date {
 
     #[prop("valueOf")]
     pub fn value_of(&self) -> f64 {
-        self.date().map_or(f64::NAN, |d| d.timestamp_millis() as f64)
+        self.date()
+            .map_or(f64::NAN, |d| d.timestamp_millis() as f64)
     }
 
     #[prop(Symbol::TO_PRIMITIVE)]
@@ -1197,12 +1303,18 @@ fn fixup(val: i32, max: i32, larger: i32) -> (u32, i32) {
         let borrow = (abs_val + max_64 - 1) / max_64;
         let new_larger = (larger as i64).saturating_sub(borrow);
         let val = ((max_64 - (abs_val % max_64)) % max_64) as u32;
-        (val, new_larger.clamp(i32::MIN as i64, i32::MAX as i64) as i32)
+        (
+            val,
+            new_larger.clamp(i32::MIN as i64, i32::MAX as i64) as i32,
+        )
     } else if val >= max {
         let carry = (val / max) as i64;
         let new_larger = (larger as i64).saturating_add(carry);
         let val = val % max;
-        (val as u32, new_larger.clamp(i32::MIN as i64, i32::MAX as i64) as i32)
+        (
+            val as u32,
+            new_larger.clamp(i32::MIN as i64, i32::MAX as i64) as i32,
+        )
     } else {
         (val as u32, larger)
     }
@@ -1217,7 +1329,6 @@ const MS_PER_DAY: i64 = 24 * MS_PER_HOUR;
 const fn is_leap_year(year: i32) -> bool {
     (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
 }
-
 
 fn make_day(year: f64, month: f64, date: f64) -> Option<f64> {
     if !year.is_finite() || !month.is_finite() || !date.is_finite() {
@@ -1389,11 +1500,9 @@ impl PrettyObjectOverride for Date {
         not: &mut Vec<usize>,
         realm: &mut Realm,
     ) -> Option<String> {
-        let mut s = self
-            .date()
-            .map_or("Invalid Date".to_string(), |d| {
-                d.format("%Y-%m-%d %H:%M:%S").to_string()
-            });
+        let mut s = self.date().map_or("Invalid Date".to_string(), |d| {
+            d.format("%Y-%m-%d %H:%M:%S").to_string()
+        });
 
         fmt_properties_to(obj, &mut s, not, realm);
 
@@ -1430,7 +1539,7 @@ enum ParseResult {
 /// - Expanded years: +YYYYYY or -YYYYYY (6 digits with sign)
 fn parse_date_string(s: &str) -> ParseResult {
     let s = s.trim();
-    
+
     // Check for expanded year format (starts with + or -)
     let (year_str, rest, is_expanded) = if s.starts_with('+') || s.starts_with('-') {
         // Expanded year format: +YYYYYY or -YYYYYY
@@ -1439,17 +1548,17 @@ fn parse_date_string(s: &str) -> ParseResult {
         }
         let sign = &s[0..1];
         let year_part = &s[1..7];
-        
+
         // All 6 chars must be digits
         if !year_part.chars().all(|c| c.is_ascii_digit()) {
             return ParseResult::NotMatched;
         }
-        
+
         // Check for invalid -000000 (negative zero)
         if sign == "-" && year_part == "000000" {
             return ParseResult::Invalid;
         }
-        
+
         (&s[0..7], &s[7..], true)
     } else {
         // Regular 4-digit year
@@ -1462,7 +1571,7 @@ fn parse_date_string(s: &str) -> ParseResult {
         }
         (year_part, &s[4..], false)
     };
-    
+
     // Parse year
     let year: i32 = if is_expanded {
         let sign = if year_str.starts_with('-') { -1 } else { 1 };
@@ -1477,7 +1586,7 @@ fn parse_date_string(s: &str) -> ParseResult {
             Err(_) => return ParseResult::Invalid,
         }
     };
-    
+
     // Default values
     let mut month: u32 = 1;
     let mut day: u32 = 1;
@@ -1487,9 +1596,9 @@ fn parse_date_string(s: &str) -> ParseResult {
     let mut millisecond: u32 = 0;
     let mut has_timezone = false;
     let mut tz_offset_minutes: i32 = 0;
-    
+
     let mut rest = rest;
-    
+
     // Parse month if present: -MM
     if rest.starts_with('-') {
         if rest.len() < 3 {
@@ -1507,7 +1616,7 @@ fn parse_date_string(s: &str) -> ParseResult {
             return ParseResult::Invalid;
         }
         rest = &rest[3..];
-        
+
         // Parse day if present: -DD
         if rest.starts_with('-') {
             if rest.len() < 3 {
@@ -1527,11 +1636,11 @@ fn parse_date_string(s: &str) -> ParseResult {
             rest = &rest[3..];
         }
     }
-    
+
     // Parse time if present: THH:mm or THH:mm:ss or THH:mm:ss.sss
     if rest.starts_with('T') {
         rest = &rest[1..];
-        
+
         // HH:mm is required
         if rest.len() < 5 {
             return ParseResult::Invalid;
@@ -1547,11 +1656,11 @@ fn parse_date_string(s: &str) -> ParseResult {
         if hour > 24 {
             return ParseResult::Invalid;
         }
-        
+
         if &rest[2..3] != ":" {
             return ParseResult::Invalid;
         }
-        
+
         let min_str = &rest[3..5];
         if !min_str.chars().all(|c| c.is_ascii_digit()) {
             return ParseResult::Invalid;
@@ -1563,9 +1672,9 @@ fn parse_date_string(s: &str) -> ParseResult {
         if minute > 59 {
             return ParseResult::Invalid;
         }
-        
+
         rest = &rest[5..];
-        
+
         // Parse seconds if present: :ss
         if rest.starts_with(':') {
             if rest.len() < 3 {
@@ -1583,7 +1692,7 @@ fn parse_date_string(s: &str) -> ParseResult {
                 return ParseResult::Invalid;
             }
             rest = &rest[3..];
-            
+
             // Parse milliseconds if present: .sss
             if rest.starts_with('.') {
                 if rest.len() < 4 {
@@ -1601,7 +1710,7 @@ fn parse_date_string(s: &str) -> ParseResult {
             }
         }
     }
-    
+
     // Parse timezone if present: Z or +HH:mm or -HH:mm
     if rest.starts_with('Z') {
         has_timezone = true;
@@ -1611,7 +1720,7 @@ fn parse_date_string(s: &str) -> ParseResult {
         has_timezone = true;
         let sign = if rest.starts_with('-') { -1 } else { 1 };
         rest = &rest[1..];
-        
+
         if rest.len() < 5 {
             return ParseResult::Invalid;
         }
@@ -1623,11 +1732,11 @@ fn parse_date_string(s: &str) -> ParseResult {
             Ok(h) => h,
             Err(_) => return ParseResult::Invalid,
         };
-        
+
         if &rest[2..3] != ":" {
             return ParseResult::Invalid;
         }
-        
+
         let tz_min_str = &rest[3..5];
         if !tz_min_str.chars().all(|c| c.is_ascii_digit()) {
             return ParseResult::Invalid;
@@ -1636,16 +1745,16 @@ fn parse_date_string(s: &str) -> ParseResult {
             Ok(m) => m,
             Err(_) => return ParseResult::Invalid,
         };
-        
+
         tz_offset_minutes = sign * (tz_hour * 60 + tz_min);
         rest = &rest[5..];
     }
-    
+
     // Remaining string should be empty
     if !rest.is_empty() {
         return ParseResult::Invalid;
     }
-    
+
     // Handle hour 24 special case (means midnight of next day)
     if hour == 24 {
         if minute != 0 || second != 0 || millisecond != 0 {
@@ -1653,61 +1762,63 @@ fn parse_date_string(s: &str) -> ParseResult {
         }
         // We'll handle this by adding a day after construction
     }
-    
+
     // Construct the datetime
     let hour_for_construction = if hour == 24 { 0 } else { hour };
-    
+
     // Date-only forms (no T) are interpreted as UTC
     // Date-time forms without timezone are interpreted as local time
     let has_time = s.contains('T');
     let treat_as_utc = !has_time || has_timezone;
-    
+
     if treat_as_utc {
         // Build in UTC
-        let utc_result = Utc.with_ymd_and_hms(year, month, day, hour_for_construction, minute, second);
+        let utc_result =
+            Utc.with_ymd_and_hms(year, month, day, hour_for_construction, minute, second);
         let utc_dt = match utc_result {
             LocalResult::Single(dt) => dt,
             LocalResult::Ambiguous(dt, _) => dt,
             LocalResult::None => return ParseResult::Invalid,
         };
-        
+
         let utc_dt = match utc_dt.with_nanosecond(millisecond * 1_000_000) {
             Some(dt) => dt,
             None => return ParseResult::Invalid,
         };
-        
+
         // Handle hour 24 by adding a day
         let utc_dt = if hour == 24 {
             utc_dt + chrono::Duration::days(1)
         } else {
             utc_dt
         };
-        
+
         // Apply timezone offset (subtract it since offset is "local - UTC")
         let utc_dt = utc_dt - chrono::Duration::minutes(tz_offset_minutes as i64);
-        
+
         ParseResult::Parsed(utc_dt.with_timezone(&Local))
     } else {
         // Build in local time
-        let local_result = Local.with_ymd_and_hms(year, month, day, hour_for_construction, minute, second);
+        let local_result =
+            Local.with_ymd_and_hms(year, month, day, hour_for_construction, minute, second);
         let local_dt = match local_result {
             LocalResult::Single(dt) => dt,
             LocalResult::Ambiguous(dt, _) => dt,
             LocalResult::None => return ParseResult::Invalid,
         };
-        
+
         let local_dt = match local_dt.with_nanosecond(millisecond * 1_000_000) {
             Some(dt) => dt,
             None => return ParseResult::Invalid,
         };
-        
+
         // Handle hour 24 by adding a day
         let local_dt = if hour == 24 {
             local_dt + chrono::Duration::days(1)
         } else {
             local_dt
         };
-        
+
         ParseResult::Parsed(local_dt)
     }
 }

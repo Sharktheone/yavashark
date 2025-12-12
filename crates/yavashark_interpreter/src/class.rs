@@ -181,10 +181,9 @@ pub fn create_class(
                 let name = prop_name_to_value(&p.key, realm, p.span, scope)?;
 
                 if p.is_static {
-                    let value = p.value.as_ref().map_or(
-                        Ok(Value::Undefined),
-                        |val| Interpreter::run_expr(realm, val, p.span, scope),
-                    )?;
+                    let value = p.value.as_ref().map_or(Ok(Value::Undefined), |val| {
+                        Interpreter::run_expr(realm, val, p.span, scope)
+                    })?;
 
                     define_on_class(
                         name.into_internal_property_key(realm)?,

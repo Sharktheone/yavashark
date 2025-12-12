@@ -283,9 +283,10 @@ impl Promise {
     pub fn from_error(err: Error, realm: &mut Realm) -> Res<ObjectHandle> {
         let val = match ErrorObj::error_to_value(err, realm) {
             Ok(v) => v,
-            Err(e) => {
-                ErrorObj::error_to_value(Error::new_error(format!("Failed to create promise: {e}")), realm)?
-            }
+            Err(e) => ErrorObj::error_to_value(
+                Error::new_error(format!("Failed to create promise: {e}")),
+                realm,
+            )?,
         };
         Self::rejected(&val, realm)
     }

@@ -7,7 +7,7 @@ impl<'a> Validator<'a> {
         self.validate_ident(&labeled.label)?;
 
         check_async_generator_fn_decl(&labeled.body, "a labeled statement")?;
-        
+
         if self.in_strict_mode() {
             if let Stmt::Decl(Decl::Fn(_)) = &*labeled.body {
                 return Err(

@@ -212,10 +212,7 @@ impl Obj for Object {
         self.inner()?.values(realm)
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner()?.enumerable_properties(realm)
     }
 
@@ -1000,10 +997,7 @@ impl MutObj for MutObject {
         //TODO: getter (and setter) values
     }
 
-    fn enumerable_properties(
-        &self,
-        _realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, _realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         Ok(self
             .array
             .iter()

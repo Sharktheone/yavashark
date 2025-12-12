@@ -276,11 +276,12 @@ impl Obj for Proxy {
     // }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
-        Ok(self.inner.properties(realm)?
+        Ok(self
+            .inner
+            .properties(realm)?
             .into_iter()
             .map(|(k, v)| (k, v.into()))
-            .collect()
-        )
+            .collect())
     }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -288,17 +289,15 @@ impl Obj for Proxy {
     }
 
     fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
-        Ok(self.inner.values(realm)?
+        Ok(self
+            .inner
+            .values(realm)?
             .into_iter()
             .map(|v| v.into())
-            .collect()
-        )
+            .collect())
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner.enumerable_properties(realm)
     }
 

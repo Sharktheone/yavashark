@@ -1,5 +1,8 @@
 use crate::realm::Realm;
-use crate::value::{Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue, Obj, Property, Variable};
+use crate::value::{
+    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue,
+    Obj, Property, Variable,
+};
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
     ValueResult,
@@ -37,7 +40,9 @@ impl PrivateMember {
         match self {
             Self::Field(v) | Self::Method(v) => v.clone().into(),
             Self::Accessor { get, .. } => {
-                let get = get.as_ref().and_then(|v| v.as_object().ok().cloned())
+                let get = get
+                    .as_ref()
+                    .and_then(|v| v.as_object().ok().cloned())
                     .unwrap_or_else(Object::null);
 
                 Property::Getter(get, Attributes::default())
@@ -264,10 +269,7 @@ impl Obj for Class {
         Ok(values)
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         let mut props = self.inner.enumerable_properties(realm)?;
 
         props.push((
@@ -750,10 +752,7 @@ impl Obj for ClassInstance {
         Ok(values)
     }
 
-    fn enumerable_properties(
-        &self,
-        realm: &mut Realm,
-    ) -> Res<Vec<(PropertyKey, Property)>> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
         self.inner.try_borrow()?.enumerable_properties(realm)
     }
 

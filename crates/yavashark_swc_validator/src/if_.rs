@@ -7,7 +7,7 @@ impl<'a> Validator<'a> {
         self.validate_expr(&if_.test)?;
 
         check_async_generator_fn_decl(&if_.cons, "an 'if' statement")?;
-        
+
         if is_labelled_function(&if_.cons) {
             return Err(
                 "Labelled function declaration is not allowed as the body of an 'if' statement"
@@ -19,14 +19,14 @@ impl<'a> Validator<'a> {
 
         if let Some(alt) = &if_.alt {
             check_async_generator_fn_decl(alt, "an 'else' statement")?;
-            
+
             if is_labelled_function(alt) {
                 return Err(
                     "Labelled function declaration is not allowed as the body of an 'else' statement"
                         .to_string(),
                 );
             }
-            
+
             self.validate_statement(alt)?;
         }
 

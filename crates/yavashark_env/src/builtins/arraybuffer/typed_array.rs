@@ -321,7 +321,10 @@ impl crate::value::ObjectImpl for TypedArray {
             return self.get_wrapped_object().values(realm);
         }
 
-        let mut values = typed_array_run!(slice.iter().map(|x| to_value(x.0).into()).collect::<Vec<_>>());
+        let mut values = typed_array_run!(slice
+            .iter()
+            .map(|x| to_value(x.0).into())
+            .collect::<Vec<_>>());
 
         values.append(&mut self.get_wrapped_object().values(realm)?);
 

@@ -395,7 +395,10 @@ fn init_constructor(
         });
 
         if constructor.is_none() || constructor.as_ref().is_some_and(|c| c.length.is_none()) {
-            constructor_length = call_constructor.calculate_length().0.max(constructor_length);
+            constructor_length = call_constructor
+                .calculate_length()
+                .0
+                .max(constructor_length);
         }
     }
 

@@ -25,9 +25,7 @@ impl DynamicImport {
     ) -> Res<ObjectHandle> {
         match Self::new_throws(specifier, cur_path, cb, realm) {
             Ok(promise) => Ok(promise),
-            Err(e) => {
-                Promise::from_error(e, realm)
-            }
+            Err(e) => Promise::from_error(e, realm),
         }
     }
 
@@ -45,7 +43,6 @@ impl DynamicImport {
 
         Self::new(&specifier, &path, cb, realm)
     }
-
 
     pub fn new_throws(
         specifier: &str,
