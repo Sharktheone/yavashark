@@ -1,4 +1,4 @@
-use crate::builtins::{Map, Set};
+use crate::builtins::{Map, Proxy, Set};
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::conversion::TryIntoValue;
 use crate::object::Object;
@@ -1830,6 +1830,12 @@ impl ArrayConstructor {
 
         if is_proto {
             return Ok(true);
+        }
+
+        if let Some(proxy) = test.downcast::<Proxy>()? {
+            if proxy.revoke.get() {
+                return Err(Error::ty("Cannot perform 'isArray' on a revoked proxy"));
+            }
         }
 
         let this: Res<OwningGcGuard<BoxedObj, Array>, _> =
