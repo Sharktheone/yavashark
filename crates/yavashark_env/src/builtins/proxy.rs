@@ -19,10 +19,10 @@ use yavashark_string::YSString;
 
 #[derive(Debug)]
 pub struct Proxy {
-    inner: ObjectHandle,
-    handler: ObjectHandle,
-    this: RefCell<Option<ObjectHandle>>,
-    revoke: Cell<bool>,
+    pub inner: ObjectHandle,
+    pub handler: ObjectHandle,
+    pub this: RefCell<Option<ObjectHandle>>,
+    pub revoke: Cell<bool>,
 }
 
 impl Obj for Proxy {
