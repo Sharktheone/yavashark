@@ -4,6 +4,7 @@ import (
 	"log"
 	"path/filepath"
 	"yavashark_test262_runner/ci"
+	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
 	"yavashark_test262_runner/timing"
@@ -27,10 +28,14 @@ func main() {
 		Interactive: config.Interactive,
 	}
 
-	testResults := run.TestsInDir(testRoot, runConfig)
+	testResults, summary := run.TestsInDir(testRoot, runConfig)
 
 	if config.Diff && !config.CI {
 		printDiff(testResults, config.DiffFilter)
+	}
+
+	if !config.CI {
+		progress.PrintSummary(summary)
 	}
 
 	if config.CI {

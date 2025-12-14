@@ -29,7 +29,7 @@ type RunConfig struct {
 	Interactive bool
 }
 
-func TestsInDir(testRoot string, config RunConfig) *results.TestResults {
+func TestsInDir(testRoot string, config RunConfig) (*results.TestResults, progress.Summary) {
 	// Set the timeout for tests
 	test.SetTimeout(config.Timeout)
 
@@ -150,13 +150,13 @@ func TestsInDir(testRoot string, config RunConfig) *results.TestResults {
 
 	<-resultsDone
 
-	progressTracker.Finish()
+	summary := progressTracker.Finish()
 
 	fmt.Printf("\n")
 
 	log.Printf("Finished running %d tests in %s", num, time.Since(now).String())
 
-	return testResults
+	return testResults, summary
 }
 
 func countTests(path string) uint32 {

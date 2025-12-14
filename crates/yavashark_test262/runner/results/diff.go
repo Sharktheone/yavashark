@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/status"
 )
 
@@ -20,6 +21,8 @@ type DiffItem struct {
 
 type Diff map[TestDiff][]DiffItem
 type AggregatedDiff map[string]DiffItem
+
+const arrowRight = "→"
 
 func ParseFilter(filter string) ([]TestDiff, error) {
 	var result []TestDiff
@@ -122,7 +125,7 @@ func (d *Diff) Sort() {
 func (d *Diff) PrintDiff() {
 	for k, v := range *d {
 		for _, item := range v {
-			fmt.Printf("Diff: %s -> %s: %s\n", k.From, k.To, item.own.Path)
+			fmt.Printf("Diff: %s %s %s: %s\n", progress.FormatStatusPill(k.From), arrowRight, progress.FormatStatusPill(k.To), item.own.Path)
 		}
 	}
 
@@ -131,7 +134,7 @@ func (d *Diff) PrintDiff() {
 
 func (d *Diff) PrintGrouped() {
 	for k, v := range *d {
-		fmt.Printf("Diff: %s -> %s\n", k.From, k.To)
+		fmt.Printf("Diff: %s %s %s\n", progress.FormatStatusPill(k.From), arrowRight, progress.FormatStatusPill(k.To))
 		for _, item := range v {
 			fmt.Printf("  - %s\n", item.own.Path)
 		}
@@ -154,7 +157,7 @@ func (d *Diff) PrintDiffFilter(filter []TestDiff) {
 	for _, f := range filter {
 		if v, ok := (*d)[f]; ok {
 			for _, item := range v {
-				fmt.Printf("Diff: %s -> %s: %s\n", f.From, f.To, item.own.Path)
+				fmt.Printf("Diff: %s %s %s: %s\n", progress.FormatStatusPill(f.From), arrowRight, progress.FormatStatusPill(f.To), item.own.Path)
 			}
 		}
 	}
@@ -165,7 +168,7 @@ func (d *Diff) PrintDiffFilter(filter []TestDiff) {
 func (d *Diff) PrintGroupedFilter(filter []TestDiff) {
 	for _, f := range filter {
 		if v, ok := (*d)[f]; ok {
-			fmt.Printf("Diff: %s -> %s\n", f.From, f.To)
+			fmt.Printf("Diff: %s %s %s\n", progress.FormatStatusPill(f.From), arrowRight, progress.FormatStatusPill(f.To))
 			for _, item := range v {
 				fmt.Printf("  - %s\n", item.own.Path)
 			}

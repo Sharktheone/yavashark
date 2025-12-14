@@ -2,6 +2,7 @@ package progress
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strings"
 	"sync"
@@ -44,6 +45,119 @@ type RGB struct {
 	R, G, B int
 }
 
+type HSV struct {
+	H, S, V float64
+}
+
+func rgbToHSV(c RGB) HSV {
+	r := float64(c.R) / 255.0
+	g := float64(c.G) / 255.0
+	b := float64(c.B) / 255.0
+
+	max := math.Max(r, math.Max(g, b))
+	min := math.Min(r, math.Min(g, b))
+	delta := max - min
+
+	var h float64
+	s := 0.0
+	v := max
+
+	if max > 0 {
+		s = delta / max
+	}
+
+	if delta != 0 {
+		switch max {
+		case r:
+			h = (g - b) / delta
+			if g < b {
+				h += 6
+			}
+		case g:
+			h = (b-r)/delta + 2
+		case b:
+			h = (r-g)/delta + 4
+		}
+		h *= 60
+	}
+
+	return HSV{H: h, S: s, V: v}
+}
+
+func hsvToRGB(hsv HSV) RGB {
+	h := hsv.H
+	s := hsv.S
+	v := hsv.V
+
+	c := v * s
+	x := c * (1 - math.Abs(math.Mod(h/60.0, 2)-1))
+	m := v - c
+
+	var r1, g1, b1 float64
+	switch {
+	case h >= 0 && h < 60:
+		r1, g1, b1 = c, x, 0
+	case h >= 60 && h < 120:
+		r1, g1, b1 = x, c, 0
+	case h >= 120 && h < 180:
+		r1, g1, b1 = 0, c, x
+	case h >= 180 && h < 240:
+		r1, g1, b1 = 0, x, c
+	case h >= 240 && h < 300:
+		r1, g1, b1 = x, 0, c
+	default:
+		r1, g1, b1 = c, 0, x
+	}
+
+	return RGB{
+		R: int(math.Round((r1 + m) * 255)),
+		G: int(math.Round((g1 + m) * 255)),
+		B: int(math.Round((b1 + m) * 255)),
+	}
+}
+
+func clamp(x, lo, hi float64) float64 {
+	if x < lo {
+		return lo
+	}
+	if x > hi {
+		return hi
+	}
+	return x
+}
+
+func blendHSV(a, b HSV, t float64) HSV {
+	t = clamp(t, 0, 1)
+
+	ha := a.H
+	hb := b.H
+	d := hb - ha
+	if d > 180 {
+		d -= 360
+	} else if d < -180 {
+		d += 360
+	}
+
+	h := ha + d*t
+	if h < 0 {
+		h += 360
+	} else if h >= 360 {
+		h -= 360
+	}
+
+	return HSV{
+		H: h,
+		S: a.S + (b.S-a.S)*t,
+		V: a.V + (b.V-a.V)*t,
+	}
+}
+
+func shadeRGB(c RGB, vScale float64) RGB {
+	hsv := rgbToHSV(c)
+	hsv.V = clamp(hsv.V*vScale, 0, 1)
+	return hsvToRGB(hsv)
+}
+
 // Status colors for progress bar
 var (
 	colorPass    = RGB{76, 175, 80}  // Green
@@ -64,43 +178,43 @@ type PillStyle struct {
 var (
 	pillStylePass = PillStyle{
 		Left:  RGB{67, 160, 71},
-		Right: RGB{129, 199, 132},
-		Text:  RGB{27, 94, 32},
+		Right: RGB{46, 125, 50},
+		Text:  RGB{255, 255, 255},
 	}
 	pillStyleFail = PillStyle{
 		Left:  RGB{229, 57, 53},
-		Right: RGB{239, 154, 154},
+		Right: RGB{198, 40, 40},
 		Text:  RGB{255, 255, 255},
 	}
 	pillStyleSkip = PillStyle{
 		Left:  RGB{0, 172, 193},
-		Right: RGB{128, 222, 234},
-		Text:  RGB{0, 77, 64},
+		Right: RGB{0, 131, 143},
+		Text:  RGB{255, 255, 255},
 	}
 	pillStyleTimeout = PillStyle{
 		Left:  RGB{255, 179, 0},
-		Right: RGB{255, 224, 130},
-		Text:  RGB{62, 39, 35},
+		Right: RGB{255, 143, 0},
+		Text:  RGB{33, 33, 33},
 	}
 	pillStyleCrash = PillStyle{
 		Left:  RGB{142, 36, 170},
-		Right: RGB{206, 147, 216},
+		Right: RGB{106, 27, 154},
 		Text:  RGB{255, 255, 255},
 	}
 	pillStyleParseError = PillStyle{
 		Left:  RGB{30, 136, 229},
-		Right: RGB{144, 202, 249},
-		Text:  RGB{13, 71, 161},
+		Right: RGB{21, 101, 192},
+		Text:  RGB{255, 255, 255},
 	}
 	pillStyleNotImpl = PillStyle{
 		Left:  RGB{117, 117, 117},
-		Right: RGB{189, 189, 189},
-		Text:  RGB{33, 33, 33},
+		Right: RGB{66, 66, 66},
+		Text:  RGB{255, 255, 255},
 	}
 	pillStyleRunnerError = PillStyle{
 		Left:  RGB{97, 97, 97},
-		Right: RGB{158, 158, 158},
-		Text:  RGB{250, 250, 250},
+		Right: RGB{55, 71, 79},
+		Text:  RGB{255, 255, 255},
 	}
 )
 
@@ -109,6 +223,39 @@ type RecentChange struct {
 	Status     status.Status
 	PrevStatus status.Status
 	IsNew      bool
+}
+
+type Summary struct {
+	Passed            uint32
+	Failed            uint32
+	Skipped           uint32
+	Timeout           uint32
+	Crashed           uint32
+	ParseError        uint32
+	ParseSuccessError uint32
+	NotImplemented    uint32
+	RunnerError       uint32
+	Total             uint32
+
+	PassGained int32
+	PassLost   int32
+	FailGained int32
+	FailLost   int32
+
+	SkipGained     int32
+	SkipLost       int32
+	TimeoutGained  int32
+	TimeoutLost    int32
+	CrashGained    int32
+	CrashLost      int32
+	ParseErrGained int32
+	ParseErrLost   int32
+	ParseSucGained int32
+	ParseSucLost   int32
+	NotImplGained  int32
+	NotImplLost    int32
+	RunErrGained   int32
+	RunErrLost     int32
 }
 
 type ProgressTracker struct {
@@ -126,6 +273,21 @@ type ProgressTracker struct {
 	total               atomic.Uint32
 	lastPrintedProgress atomic.Uint32
 
+	skippedGained           atomic.Int32
+	skippedLost             atomic.Int32
+	timeoutGained           atomic.Int32
+	timeoutLost             atomic.Int32
+	crashedGained           atomic.Int32
+	crashedLost             atomic.Int32
+	parseErrorGained        atomic.Int32
+	parseErrorLost          atomic.Int32
+	parseSuccessErrorGained atomic.Int32
+	parseSuccessErrorLost   atomic.Int32
+	notImplementedGained    atomic.Int32
+	notImplementedLost      atomic.Int32
+	runnerErrorGained       atomic.Int32
+	runnerErrorLost         atomic.Int32
+
 	totalTests  uint32
 	interactive bool
 
@@ -135,6 +297,9 @@ type ProgressTracker struct {
 	passLost   atomic.Int32
 	failGained atomic.Int32
 	failLost   atomic.Int32
+
+	gainedByStatus map[status.Status]*atomic.Int32
+	lostByStatus   map[status.Status]*atomic.Int32
 
 	recentChanges []RecentChange
 	changesMu     sync.Mutex
@@ -148,6 +313,25 @@ func NewProgressTracker(totalTests uint32, interactive bool, prevResults map[str
 		recentChanges: make([]RecentChange, 0),
 	}
 
+	pt.gainedByStatus = map[status.Status]*atomic.Int32{
+		status.SKIP:                &pt.skippedGained,
+		status.TIMEOUT:             &pt.timeoutGained,
+		status.CRASH:               &pt.crashedGained,
+		status.PARSE_ERROR:         &pt.parseErrorGained,
+		status.PARSE_SUCCESS_ERROR: &pt.parseSuccessErrorGained,
+		status.NOT_IMPLEMENTED:     &pt.notImplementedGained,
+		status.RUNNER_ERROR:        &pt.runnerErrorGained,
+	}
+	pt.lostByStatus = map[status.Status]*atomic.Int32{
+		status.SKIP:                &pt.skippedLost,
+		status.TIMEOUT:             &pt.timeoutLost,
+		status.CRASH:               &pt.crashedLost,
+		status.PARSE_ERROR:         &pt.parseErrorLost,
+		status.PARSE_SUCCESS_ERROR: &pt.parseSuccessErrorLost,
+		status.NOT_IMPLEMENTED:     &pt.notImplementedLost,
+		status.RUNNER_ERROR:        &pt.runnerErrorLost,
+	}
+
 	if interactive {
 		pt.enterInteractiveMode()
 	}
@@ -156,13 +340,17 @@ func NewProgressTracker(totalTests uint32, interactive bool, prevResults map[str
 }
 
 func (pt *ProgressTracker) enterInteractiveMode() {
-	fmt.Print("\033[?1049h")
-	fmt.Print("\033[?25l")
-	fmt.Print("\033[2J")
+	fmt.Print("\033[?1049h") // alternate screen
+	fmt.Print("\033[?25l")   // hide cursor
+	fmt.Print("\033[?7l")    // disable line wrap
+	fmt.Print("\033[2J\033[H")
+
+	pt.renderInteractive(0)
 }
 
 func (pt *ProgressTracker) exitInteractiveMode() {
-	fmt.Print("\033[?25h")
+	fmt.Print("\033[?7h")  // enable line wrap
+	fmt.Print("\033[?25h") // show cursor
 	fmt.Print("\033[?1049l")
 }
 
@@ -205,7 +393,14 @@ func (pt *ProgressTracker) Add(s status.Status, path string) {
 				pt.failGained.Add(1)
 			}
 
-			if pt.interactive && (s == status.PASS || s == status.FAIL || prevStatus == status.PASS || prevStatus == status.FAIL) {
+			if gained, ok := pt.gainedByStatus[s]; ok {
+				gained.Add(1)
+			}
+			if lost, ok := pt.lostByStatus[prevStatus]; ok {
+				lost.Add(1)
+			}
+
+			if pt.interactive {
 				change := RecentChange{
 					Path:       path,
 					Status:     s,
@@ -232,10 +427,7 @@ func (pt *ProgressTracker) updateProgress(current uint32) {
 	threshold := uint32(100)
 	if pt.totalTests > 0 {
 		if pt.interactive {
-			percentThreshold := pt.totalTests / 200
-			if percentThreshold > threshold {
-				threshold = percentThreshold
-			}
+			threshold = 1
 		} else {
 			percentThreshold := pt.totalTests / 50
 			if percentThreshold > threshold {
@@ -255,7 +447,7 @@ func (pt *ProgressTracker) updateProgress(current uint32) {
 	}
 }
 
-func (pt *ProgressTracker) Finish() {
+func (pt *ProgressTracker) Finish() Summary {
 	if !pt.interactive {
 		pt.printProgressBar(pt.total.Load())
 		fmt.Println()
@@ -266,7 +458,41 @@ func (pt *ProgressTracker) Finish() {
 		pt.exitInteractiveMode()
 	}
 
-	pt.printFinalSummary()
+	s := pt.Summary()
+	return s
+}
+
+func (pt *ProgressTracker) Summary() Summary {
+	return Summary{
+		Passed:            pt.passed.Load(),
+		Failed:            pt.failed.Load(),
+		Skipped:           pt.skipped.Load(),
+		Timeout:           pt.timeout.Load(),
+		Crashed:           pt.crashed.Load(),
+		ParseError:        pt.parseError.Load(),
+		ParseSuccessError: pt.parseSuccessError.Load(),
+		NotImplemented:    pt.notImplemented.Load(),
+		RunnerError:       pt.runnerError.Load(),
+		Total:             pt.total.Load(),
+		PassGained:        pt.passGained.Load(),
+		PassLost:          pt.passLost.Load(),
+		FailGained:        pt.failGained.Load(),
+		FailLost:          pt.failLost.Load(),
+		SkipGained:        pt.skippedGained.Load(),
+		SkipLost:          pt.skippedLost.Load(),
+		TimeoutGained:     pt.timeoutGained.Load(),
+		TimeoutLost:       pt.timeoutLost.Load(),
+		CrashGained:       pt.crashedGained.Load(),
+		CrashLost:         pt.crashedLost.Load(),
+		ParseErrGained:    pt.parseErrorGained.Load(),
+		ParseErrLost:      pt.parseErrorLost.Load(),
+		ParseSucGained:    pt.parseSuccessErrorGained.Load(),
+		ParseSucLost:      pt.parseSuccessErrorLost.Load(),
+		NotImplGained:     pt.notImplementedGained.Load(),
+		NotImplLost:       pt.notImplementedLost.Load(),
+		RunErrGained:      pt.runnerErrorGained.Load(),
+		RunErrLost:        pt.runnerErrorLost.Load(),
+	}
 }
 
 func (pt *ProgressTracker) getTerminalWidth() int {
@@ -286,19 +512,19 @@ func (pt *ProgressTracker) getTerminalHeight() int {
 }
 
 func formatPill(label string, style PillStyle) string {
-	paddedLabel := fmt.Sprintf("  %s  ", label)
-	halfLen := len(paddedLabel) / 2
-	leftPart := paddedLabel[:halfLen]
-	rightPart := paddedLabel[halfLen:]
+	// Rounded Powerline pill:  <label> 
+	// Keep it narrow: exactly one space padding.
+	bg := fmt.Sprintf("\033[48;2;%d;%d;%dm", style.Left.R, style.Left.G, style.Left.B)
+	fg := fmt.Sprintf("\033[38;2;%d;%d;%dm", style.Text.R, style.Text.G, style.Text.B)
 
-	leftBg := fmt.Sprintf("\033[48;2;%d;%d;%dm", style.Left.R, style.Left.G, style.Left.B)
-	rightBg := fmt.Sprintf("\033[48;2;%d;%d;%dm", style.Right.R, style.Right.G, style.Right.B)
-	textColor := fmt.Sprintf("\033[38;2;%d;%d;%dm", style.Text.R, style.Text.G, style.Text.B)
+	capFg := fmt.Sprintf("\033[38;2;%d;%d;%dm", style.Left.R, style.Left.G, style.Left.B)
 
-	return fmt.Sprintf("%s%s%s%s%s%s%s", leftBg, textColor, leftPart, rightBg, rightPart, ColorReset, "")
+	// Only color the glyph foreground; keep glyph background default.
+	// Also reset before the right cap to avoid bleeding the pill background.
+	return fmt.Sprintf("%s%s%s %s %s%s%s", capFg, bg, fg, label, ColorReset, capFg, ColorReset)
 }
 
-func formatStatusPill(s status.Status) string {
+func FormatStatusPill(s status.Status) string {
 	switch s {
 	case status.PASS:
 		return formatPill("PASS", pillStylePass)
@@ -349,7 +575,7 @@ func (pt *ProgressTracker) renderInteractive(current uint32) {
 	width := pt.getTerminalWidth()
 	height := pt.getTerminalHeight()
 
-	fmt.Print("\033[H")
+	fmt.Print("\033[H\033[2J")
 
 	passed := pt.passed.Load()
 	failed := pt.failed.Load()
@@ -365,16 +591,17 @@ func (pt *ProgressTracker) renderInteractive(current uint32) {
 
 	pt.renderFullWidthProgressBar(current, width)
 	fmt.Println()
+	fmt.Println()
 
 	pt.renderStatusLine("PASS", passed, pt.totalTests, pt.passGained.Load(), pt.passLost.Load(), pillStylePass)
 	pt.renderStatusLine("FAIL", failed, pt.totalTests, pt.failGained.Load(), pt.failLost.Load(), pillStyleFail)
-	pt.renderStatusLineSimple("SKIP", skipped, pt.totalTests, pillStyleSkip)
-	pt.renderStatusLineSimple("TIMEOUT", timeout, pt.totalTests, pillStyleTimeout)
-	pt.renderStatusLineSimple("CRASH", crashed, pt.totalTests, pillStyleCrash)
-	pt.renderStatusLineSimple("PARSE_ERR", parseError, pt.totalTests, pillStyleParseError)
-	pt.renderStatusLineSimple("PARSE_SUC", parseSuccessError, pt.totalTests, pillStyleParseError)
-	pt.renderStatusLineSimple("NOT_IMPL", notImplemented, pt.totalTests, pillStyleNotImpl)
-	pt.renderStatusLineSimple("RUN_ERR", runnerError, pt.totalTests, pillStyleRunnerError)
+	pt.renderStatusLine("SKIP", skipped, pt.totalTests, pt.skippedGained.Load(), pt.skippedLost.Load(), pillStyleSkip)
+	pt.renderStatusLine("TIMEOUT", timeout, pt.totalTests, pt.timeoutGained.Load(), pt.timeoutLost.Load(), pillStyleTimeout)
+	pt.renderStatusLine("CRASH", crashed, pt.totalTests, pt.crashedGained.Load(), pt.crashedLost.Load(), pillStyleCrash)
+	pt.renderStatusLine("PARSE_ERR", parseError, pt.totalTests, pt.parseErrorGained.Load(), pt.parseErrorLost.Load(), pillStyleParseError)
+	pt.renderStatusLine("PARSE_SUC", parseSuccessError, pt.totalTests, pt.parseSuccessErrorGained.Load(), pt.parseSuccessErrorLost.Load(), pillStyleParseError)
+	pt.renderStatusLine("NOT_IMPL", notImplemented, pt.totalTests, pt.notImplementedGained.Load(), pt.notImplementedLost.Load(), pillStyleNotImpl)
+	pt.renderStatusLine("RUN_ERR", runnerError, pt.totalTests, pt.runnerErrorGained.Load(), pt.runnerErrorLost.Load(), pillStyleRunnerError)
 
 	fmt.Println()
 
@@ -414,10 +641,10 @@ func (pt *ProgressTracker) renderInteractive(current uint32) {
 			arrow = fmt.Sprintf("%s%s%s", FgBrightRed, ArrowDown, ColorReset)
 		}
 
-		fmt.Printf("  %s %s %s %s\033[K\n",
-			formatStatusPill(change.PrevStatus),
+		fmt.Printf(" %s %s %s %s\033[K\n",
+			FormatStatusPill(change.PrevStatus),
 			arrow,
-			formatStatusPill(change.Status),
+			FormatStatusPill(change.Status),
 			shortPath)
 	}
 
@@ -478,11 +705,17 @@ func renderSegmentedBar(segments []Segment) string {
 		fullBlocks := int(seg.Width)
 		fractional := seg.Width - float64(fullBlocks)
 
-		fg := fmt.Sprintf("\033[38;2;%d;%d;%dm", seg.Color.R, seg.Color.G, seg.Color.B)
+		for b := 0; b < fullBlocks; b++ {
+			// mild gradient inside each segment
+			var t float64
+			if fullBlocks > 1 {
+				t = float64(b) / float64(fullBlocks-1)
+			}
 
-		if fullBlocks > 0 {
+			c := shadeRGB(seg.Color, 0.92+0.14*t)
+			fg := fmt.Sprintf("\033[38;2;%d;%d;%dm", c.R, c.G, c.B)
 			result.WriteString(fg)
-			result.WriteString(strings.Repeat(BlockFull, fullBlocks))
+			result.WriteString(BlockFull)
 			result.WriteString(ColorReset)
 		}
 
@@ -495,7 +728,12 @@ func renderSegmentedBar(segments []Segment) string {
 				}
 			}
 
-			fgColor := fmt.Sprintf("\033[38;2;%d;%d;%dm", seg.Color.R, seg.Color.G, seg.Color.B)
+			// Blend the edge block between segment colors
+			a := rgbToHSV(seg.Color)
+			b := rgbToHSV(nextColor)
+			edge := hsvToRGB(blendHSV(a, b, 0.5))
+
+			fgColor := fmt.Sprintf("\033[38;2;%d;%d;%dm", edge.R, edge.G, edge.B)
 			bgColor := fmt.Sprintf("\033[48;2;%d;%d;%dm", nextColor.R, nextColor.G, nextColor.B)
 
 			result.WriteString(fgColor)
@@ -534,14 +772,14 @@ func (pt *ProgressTracker) renderStatusLine(label string, count uint32, total ui
 	pill := formatPill(label, style)
 	delta := formatDelta(gained, lost)
 
-	fmt.Printf("%s %6d (%5.2f%%) %s\033[K\n", pill, count, percentage, delta)
+	fmt.Printf(" %s %6d (%5.2f%%) %s\033[K\n", pill, count, percentage, delta)
 }
 
 func (pt *ProgressTracker) renderStatusLineSimple(label string, count uint32, total uint32, style PillStyle) {
 	percentage := float64(count) / float64(total) * 100
 	pill := formatPill(label, style)
 
-	fmt.Printf("%s %6d (%5.2f%%)\033[K\n", pill, count, percentage)
+	fmt.Printf(" %s %6d (%5.2f%%)\033[K\n", pill, count, percentage)
 }
 
 func (pt *ProgressTracker) printProgressBar(current uint32) {
@@ -574,34 +812,23 @@ func (pt *ProgressTracker) printProgressBar(current uint32) {
 	fmt.Printf("\r[%s] %3d%% (%d/%d)", bar, int(percentage), current, pt.totalTests)
 }
 
-func (pt *ProgressTracker) printFinalSummary() {
-	passed := pt.passed.Load()
-	failed := pt.failed.Load()
-	skipped := pt.skipped.Load()
-	timeout := pt.timeout.Load()
-	crashed := pt.crashed.Load()
-	parseError := pt.parseError.Load()
-	parseSuccessError := pt.parseSuccessError.Load()
-	notImplemented := pt.notImplemented.Load()
-	runnerError := pt.runnerError.Load()
-	total := pt.total.Load()
-
+func PrintSummary(s Summary) {
 	fmt.Printf("\n%s=== Final Results ===%s\n\n", ColorBold, ColorReset)
 
-	pt.printFinalStatusLine("PASS", passed, total, pt.passGained.Load(), pt.passLost.Load(), pillStylePass)
-	pt.printFinalStatusLine("FAIL", failed, total, pt.failGained.Load(), pt.failLost.Load(), pillStyleFail)
-	pt.printFinalStatusLineSimple("SKIP", skipped, total, pillStyleSkip)
-	pt.printFinalStatusLineSimple("TIMEOUT", timeout, total, pillStyleTimeout)
-	pt.printFinalStatusLineSimple("CRASH", crashed, total, pillStyleCrash)
-	pt.printFinalStatusLineSimple("PARSE_ERR", parseError, total, pillStyleParseError)
-	pt.printFinalStatusLineSimple("PARSE_SUC", parseSuccessError, total, pillStyleParseError)
-	pt.printFinalStatusLineSimple("NOT_IMPL", notImplemented, total, pillStyleNotImpl)
-	pt.printFinalStatusLineSimple("RUN_ERR", runnerError, total, pillStyleRunnerError)
+	printFinalStatusLine("PASS", s.Passed, s.Total, s.PassGained, s.PassLost, pillStylePass)
+	printFinalStatusLine("FAIL", s.Failed, s.Total, s.FailGained, s.FailLost, pillStyleFail)
+	printFinalStatusLine("SKIP", s.Skipped, s.Total, s.SkipGained, s.SkipLost, pillStyleSkip)
+	printFinalStatusLine("TIMEOUT", s.Timeout, s.Total, s.TimeoutGained, s.TimeoutLost, pillStyleTimeout)
+	printFinalStatusLine("CRASH", s.Crashed, s.Total, s.CrashGained, s.CrashLost, pillStyleCrash)
+	printFinalStatusLine("PARSE_ERR", s.ParseError, s.Total, s.ParseErrGained, s.ParseErrLost, pillStyleParseError)
+	printFinalStatusLine("PARSE_SUC", s.ParseSuccessError, s.Total, s.ParseSucGained, s.ParseSucLost, pillStyleParseError)
+	printFinalStatusLine("NOT_IMPL", s.NotImplemented, s.Total, s.NotImplGained, s.NotImplLost, pillStyleNotImpl)
+	printFinalStatusLine("RUN_ERR", s.RunnerError, s.Total, s.RunErrGained, s.RunErrLost, pillStyleRunnerError)
 
-	fmt.Printf("\n%sTotal: %d%s\n", ColorBold, total, ColorReset)
+	fmt.Printf("\n%sTotal: %d%s\n", ColorBold, s.Total, ColorReset)
 }
 
-func (pt *ProgressTracker) printFinalStatusLine(label string, count uint32, total uint32, gained, lost int32, style PillStyle) {
+func printFinalStatusLine(label string, count uint32, total uint32, gained, lost int32, style PillStyle) {
 	percentage := float64(count) / float64(total) * 100
 	pill := formatPill(label, style)
 	delta := formatDelta(gained, lost)
@@ -609,11 +836,8 @@ func (pt *ProgressTracker) printFinalStatusLine(label string, count uint32, tota
 	fmt.Printf("%s %6d (%5.2f%%) %s\n", pill, count, percentage, delta)
 }
 
-func (pt *ProgressTracker) printFinalStatusLineSimple(label string, count uint32, total uint32, style PillStyle) {
-	percentage := float64(count) / float64(total) * 100
-	pill := formatPill(label, style)
-
-	fmt.Printf("%s %6d (%5.2f%%)\n", pill, count, percentage)
+func printFinalStatusLineSimple(label string, count uint32, total uint32, style PillStyle) {
+	printFinalStatusLine(label, count, total, 0, 0, style)
 }
 
 func (pt *ProgressTracker) GetStats() (passed, failed, skipped, timeout, crashed, parseError, parseSuccessError, notImplemented, runnerError, total uint32) {
