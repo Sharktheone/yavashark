@@ -131,6 +131,21 @@ func EstimateTimingFromFileSize(path string) time.Duration {
 	return 50 * time.Millisecond
 }
 
+func FilterTimingsForTests(timings map[string]time.Duration, testPaths []string) map[string]time.Duration {
+	testSet := make(map[string]struct{}, len(testPaths))
+	for _, path := range testPaths {
+		testSet[path] = struct{}{}
+	}
+
+	filtered := make(map[string]time.Duration, len(testPaths))
+	for path, duration := range timings {
+		if _, exists := testSet[path]; exists {
+			filtered[path] = duration
+		}
+	}
+	return filtered
+}
+
 func EnrichTimingsWithFallback(timings map[string]time.Duration, testPaths []string) {
 	for _, path := range testPaths {
 		if _, exists := timings[path]; !exists {
@@ -139,14 +154,21 @@ func EnrichTimingsWithFallback(timings map[string]time.Duration, testPaths []str
 	}
 }
 
-func GetStatistics(timings map[string]time.Duration) (min, max, avg time.Duration, fastCount, mediumCount, slowCount, riskCount int) {
-	if len(timings) == 0 {
+func GetStatisticsForTests(timings map[string]time.Duration, testPaths []string) (min, max, avg time.Duration, fastCount, mediumCount, slowCount, riskCount int) {
+	if len(testPaths) == 0 {
 		return
 	}
 
 	var total time.Duration
+	count := 0
 
-	for _, duration := range timings {
+	for _, path := range testPaths {
+		duration, exists := timings[path]
+		if !exists {
+			duration = 500 * time.Millisecond
+		}
+
+		count++
 		total += duration
 
 		priority := calculatePriorityFromTiming(duration)
@@ -169,6 +191,8 @@ func GetStatistics(timings map[string]time.Duration) (min, max, avg time.Duratio
 		}
 	}
 
-	avg = total / time.Duration(len(timings))
+	if count > 0 {
+		avg = total / time.Duration(count)
+	}
 	return
 }

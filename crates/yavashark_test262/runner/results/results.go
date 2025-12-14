@@ -102,7 +102,7 @@ func (tr *TestResults) Add(res Result) {
 	tr.TestResults = append(tr.TestResults, res)
 }
 
-func (tr *TestResults) PrintResults() {
+func (tr *TestResults) PrintResults(showStats bool) {
 	printRes("Passed", tr.Passed, tr.Total)
 	printRes("Failed", tr.Failed, tr.Total)
 	printRes("Skipped", tr.Skipped, tr.Total)
@@ -123,8 +123,9 @@ func (tr *TestResults) PrintResults() {
 	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
 	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
 
-	// Print memory usage statistics
-	tr.PrintMemoryStats()
+	if showStats {
+		tr.PrintMemoryStats()
+	}
 }
 
 func formatMemory(kb uint64) string {

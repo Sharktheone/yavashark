@@ -12,6 +12,7 @@ import (
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/scheduler"
 	"yavashark_test262_runner/status"
+	"yavashark_test262_runner/test"
 	"yavashark_test262_runner/worker"
 )
 
@@ -20,30 +21,56 @@ var SKIP = []string{
 	"staging",
 }
 
-func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results.TestResults {
-	jobs := make(chan string, workers*8)
+type RunConfig struct {
+	Workers     int
+	Skips       bool
+	Timings     bool
+	Timeout     time.Duration
+	Interactive bool
+}
 
-	resultsChan := make(chan results.Result, workers*8)
+func TestsInDir(testRoot string, config RunConfig) *results.TestResults {
+	// Set the timeout for tests
+	test.SetTimeout(config.Timeout)
+
+	jobs := make(chan string, config.Workers*8)
+
+	resultsChan := make(chan results.Result, config.Workers*8)
 
 	wg := &sync.WaitGroup{}
 
-	wg.Add(workers)
+	wg.Add(config.Workers)
 
 	num := countTests(testRoot)
-	progressTracker := progress.NewProgressTracker(num)
 
-	for i := range workers {
-		go worker.Worker(i, jobs, resultsChan, wg, timings)
+	// Load previous results for delta calculation
+	prevResults, _ := results.LoadResults()
+	var prevResultsMap map[string]status.Status
+	if prevResults != nil {
+		prevResultsMap = make(map[string]status.Status)
+		for _, r := range prevResults {
+			prevResultsMap[r.Path] = r.Status
+		}
+	}
+
+	progressTracker := progress.NewProgressTracker(num, config.Interactive, prevResultsMap)
+
+	for i := range config.Workers {
+		go worker.Worker(i, jobs, resultsChan, wg, config.Timings)
 	}
 
 	testResults := results.New(num)
+
+	// WaitGroup for result processing
+	resultsDone := make(chan struct{})
 
 	// Goroutine to process results and update progress
 	go func() {
 		for res := range resultsChan {
 			testResults.Add(res)
-			progressTracker.Add(res.Status)
+			progressTracker.Add(res.Status, res.Path)
 		}
+		close(resultsDone)
 	}()
 
 	var testPaths []string
@@ -69,7 +96,7 @@ func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results
 		}
 
 		shouldSkip := false
-		if skips {
+		if config.Skips {
 			for _, skip := range SKIP {
 				if strings.HasPrefix(p, skip) {
 					skippedPaths = append(skippedPaths, path)
@@ -90,7 +117,8 @@ func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results
 
 	scheduler.EnrichTimingsWithFallback(timingData, testPaths)
 
-	min, max, avg, fastCount, mediumCount, slowCount, riskCount := scheduler.GetStatistics(timingData)
+	// Get statistics only for tests we're actually running
+	min, max, avg, fastCount, mediumCount, slowCount, riskCount := scheduler.GetStatisticsForTests(timingData, testPaths)
 	log.Printf("Timing statistics - Min: %v, Max: %v, Avg: %v", min, max, avg)
 	log.Printf("Test distribution - Fast: %d, Medium: %d, Slow: %d, Risky: %d",
 		fastCount, mediumCount, slowCount, riskCount)
@@ -118,12 +146,15 @@ func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results
 	}()
 
 	wg.Wait()
+	close(resultsChan)
+
+	<-resultsDone
+
+	progressTracker.Finish()
 
 	fmt.Printf("\n")
 
 	log.Printf("Finished running %d tests in %s", num, time.Since(now).String())
-
-	close(resultsChan)
 
 	return testResults
 }

@@ -19,7 +19,15 @@ func main() {
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	testResults := run.TestsInDir(testRoot, config.Workers, config.Skips, config.Timings)
+	runConfig := run.RunConfig{
+		Workers:     config.Workers,
+		Skips:       config.Skips,
+		Timings:     config.Timings,
+		Timeout:     config.Timeout,
+		Interactive: config.Interactive,
+	}
+
+	testResults := run.TestsInDir(testRoot, runConfig)
 
 	if config.Diff && !config.CI {
 		printDiff(testResults, config.DiffFilter)
@@ -27,8 +35,8 @@ func main() {
 
 	if config.CI {
 		ci.RunCi(testResults, config.RepoPath, config.HistoryOnly, config.Diff, testRoot)
-	} else {
-		testResults.PrintResults()
+	} else if config.Verbose {
+		testResults.PrintResults(config.ShowStats)
 
 		print("\n\n\n")
 		_ = testResults.ComparePrev()

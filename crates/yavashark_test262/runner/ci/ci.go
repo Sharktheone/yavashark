@@ -75,7 +75,7 @@ func runCI(testResults *results.TestResults, overall Summary, repo string, histo
 	if diff {
 		tooManyFailures = printCiDiff(filepath.Join(repo, "results.json"), testResults, root)
 	} else {
-		testResults.PrintResults()
+		testResults.PrintResults(false)
 	}
 
 	if err := results.WriteCIResultsPath(testResults.TestResults, filepath.Join(repo, "results.json"), root); err != nil {
@@ -271,7 +271,7 @@ func printCiDiff(path string, testResults *results.TestResults, root string) boo
 		fmt.Println()
 		fmt.Println("<=== Test Results ===>")
 
-		testResults.PrintResults()
+		testResults.PrintResults(false)
 
 		fmt.Println()
 		fmt.Println("<=== Comparison ===>")
