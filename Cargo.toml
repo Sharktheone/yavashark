@@ -62,8 +62,6 @@ gui = ["yavashark_env/gui"]
 [profile.release]
 opt-level = 3
 codegen-units = 1
-panic = "abort"
-incremental = false
 debug = false
 strip = true
 
