@@ -55,6 +55,9 @@ jobs:
         run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
 
       - name: Build (wasm with wasm-pack for web)
+        env:
+          CARGO_PROFILE_RELEASE_LTO: fat
+          CARGO_PROFILE_RELEASE_OPT_LEVEL: z
         run: wasm-pack build --target web --release
 
       - name: Upload artifact (Linux x86_64)
