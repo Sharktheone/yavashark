@@ -321,9 +321,7 @@ impl RegExp {
         Ok(Value::Boolean(!matches!(result, Value::Undefined)))
     }
 
-    pub fn compile(&self, _a: Value, _b: Value) {
-
-    }
+    pub fn compile(&self, _a: Value, _b: Value) {}
 
     #[prop(Symbol::MATCH)]
     pub fn symbol_match(
