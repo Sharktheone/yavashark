@@ -185,7 +185,6 @@ impl RegExp {
         escape(value)
     }
 
-    #[prop("exec")]
     pub fn exec(
         &self,
         #[this] this: &Value,
@@ -312,7 +311,6 @@ impl RegExp {
         Ok(result.into_value())
     }
 
-    #[prop("test")]
     pub fn test(
         &self,
         #[this] this: &Value,
@@ -322,9 +320,9 @@ impl RegExp {
         let result = self.exec(this, value, realm)?;
         Ok(Value::Boolean(!matches!(result, Value::Undefined)))
     }
-    
+
     pub fn compile(&self, _a: Value, _b: Value) {
-        
+
     }
 
     #[prop(Symbol::MATCH)]
