@@ -1,24 +1,54 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"time"
+)
 
-	"github.com/BurntSushi/toml"
+const (
+	DEFAULT_PROFILE_FILE = "profiles.json"
 )
 
 type Config struct {
-	CI          bool   `toml:"ci"`
-	RepoPath    string `toml:"repo_path"`
-	HistoryOnly bool   `toml:"history_only"`
-	Workers     int    `toml:"workers"`
-	TestRootDir string `toml:"test_root_dir"`
-	Diff        bool   `toml:"diff"`
-	DiffFilter  string `toml:"diff_filter"`
-	TestDir     string `toml:"test_dir"`
-	Skips       bool   `toml:"skips"`
-	Timings     bool   `toml:"timings"`
+	CI          bool          `json:"ci"`
+	RepoPath    string        `json:"repo_path"`
+	HistoryOnly bool          `json:"history_only"`
+	Workers     int           `json:"workers"`
+	TestRootDir string        `json:"test_root_dir"`
+	Diff        bool          `json:"diff"`
+	DiffFilter  string        `json:"diff_filter"`
+	TestDir     string        `json:"test_dir"`
+	Skips       bool          `json:"skips"`
+	Timings     bool          `json:"timings"`
+	Timeout     time.Duration `json:"timeout"`
+	Interactive bool          `json:"interactive"`
+	ShowStats   bool          `json:"show_stats"`
+	Verbose     bool          `json:"verbose"`
+}
+
+type ProfileConfig struct {
+	Profiles map[string]Profile `json:"profiles"`
+}
+
+type Profile struct {
+	CI          *bool   `json:"ci,omitempty"`
+	RepoPath    *string `json:"repo_path,omitempty"`
+	HistoryOnly *bool   `json:"history_only,omitempty"`
+	Workers     *int    `json:"workers,omitempty"`
+	TestRootDir *string `json:"test_root,omitempty"`
+	Diff        *bool   `json:"diff,omitempty"`
+	DiffFilter  *string `json:"diff_filter,omitempty"`
+	TestDir     *string `json:"test_dir,omitempty"`
+	NoSkip      *bool   `json:"noskip,omitempty"`
+	Timings     *bool   `json:"timings,omitempty"`
+	Timeout     *string `json:"timeout,omitempty"`
+	Interactive *bool   `json:"interactive,omitempty"`
+	ShowStats   *bool   `json:"show_stats,omitempty"`
+	Verbose     *bool   `json:"verbose,omitempty"`
 }
 
 func NewConfig() *Config {
@@ -33,13 +63,18 @@ func NewConfig() *Config {
 		TestDir:     "",
 		Skips:       true,
 		Timings:     false,
+		Timeout:     30 * time.Second,
+		Interactive: false,
+		ShowStats:   false,
+		Verbose:     false,
 	}
 }
 
 func LoadConfig() *Config {
 	config := NewConfig()
 
-	configFile := flag.String("config", "config.toml", "Path to TOML config file")
+	profileFile := flag.String("profiles", DEFAULT_PROFILE_FILE, "Path to JSON profiles file")
+	profile := flag.String("p", "", "Profile name to load from profiles file")
 	ciEnabled := flag.Bool("ci", config.CI, "Enable CI mode to commit results")
 	repoPath := flag.String("repo", config.RepoPath, "Path to external repository for CI results")
 	historyOnly := flag.Bool("history-only", config.HistoryOnly, "Only generate the history file (skip git commit)")
@@ -48,19 +83,23 @@ func LoadConfig() *Config {
 	diff := flag.Bool("diff", config.Diff, "Diff to use for CI results")
 	diffFilter := flag.String("dfilter", config.DiffFilter, "Diff filter to use for CI results")
 	testdir := flag.String("testdir", config.TestDir, "Path in the test directory")
-	noskip := flag.Bool("noskip", false, "Path in the test directory")
+	noskip := flag.Bool("noskip", false, "Disable skipping of certain test directories")
 	timings := flag.Bool("timings", false, "Attempt to parse timings from test output (if enabled)")
+	timeout := flag.Duration("timeout", config.Timeout, "Timeout for each test (e.g., 30s, 1m)")
+	interactive := flag.Bool("i", false, "Enable interactive TUI mode")
+	showStats := flag.Bool("stats", false, "Show memory and timing statistics")
+	verbose := flag.Bool("v", false, "Show verbose output (detailed results)")
 
 	flag.Parse()
 
-	if *configFile != "" {
-		if err := loadConfigFile(*configFile, config); err != nil {
-			if !os.IsNotExist(err) {
-				log.Fatalf("Failed to load config file %s: %v", *configFile, err)
-			}
+	// Load profile if specified
+	if *profile != "" {
+		if err := loadProfile(*profileFile, *profile, config); err != nil {
+			log.Printf("Warning: Failed to load profile '%s': %v", *profile, err)
 		}
 	}
 
+	// Override with command-line flags (flags take precedence over profile)
 	flag.Visit(func(f *flag.Flag) {
 		switch f.Name {
 		case "ci":
@@ -83,13 +122,83 @@ func LoadConfig() *Config {
 			config.Skips = !*noskip
 		case "timings":
 			config.Timings = *timings
+		case "timeout":
+			config.Timeout = *timeout
+		case "i":
+			config.Interactive = *interactive
+		case "stats":
+			config.ShowStats = *showStats
+		case "v":
+			config.Verbose = *verbose
 		}
 	})
 
 	return config
 }
 
-func loadConfigFile(filename string, config *Config) error {
-	_, err := toml.DecodeFile(filename, config)
-	return err
+func loadProfile(filename string, profileName string, config *Config) error {
+	contents, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("failed to read profiles file: %w", err)
+	}
+
+	var profileConfig ProfileConfig
+	if err := json.Unmarshal(contents, &profileConfig); err != nil {
+		return fmt.Errorf("failed to parse profiles file: %w", err)
+	}
+
+	profile, exists := profileConfig.Profiles[profileName]
+	if !exists {
+		return fmt.Errorf("profile '%s' not found in profiles file", profileName)
+	}
+
+	// Apply profile settings to config
+	if profile.CI != nil {
+		config.CI = *profile.CI
+	}
+	if profile.RepoPath != nil {
+		config.RepoPath = *profile.RepoPath
+	}
+	if profile.HistoryOnly != nil {
+		config.HistoryOnly = *profile.HistoryOnly
+	}
+	if profile.Workers != nil {
+		config.Workers = *profile.Workers
+	}
+	if profile.TestRootDir != nil {
+		config.TestRootDir = *profile.TestRootDir
+	}
+	if profile.Diff != nil {
+		config.Diff = *profile.Diff
+	}
+	if profile.DiffFilter != nil {
+		config.DiffFilter = *profile.DiffFilter
+	}
+	if profile.TestDir != nil {
+		config.TestDir = *profile.TestDir
+	}
+	if profile.NoSkip != nil {
+		config.Skips = !*profile.NoSkip
+	}
+	if profile.Timings != nil {
+		config.Timings = *profile.Timings
+	}
+	if profile.Timeout != nil {
+		duration, err := time.ParseDuration(*profile.Timeout)
+		if err != nil {
+			return fmt.Errorf("invalid timeout in profile: %w", err)
+		}
+		config.Timeout = duration
+	}
+	if profile.Interactive != nil {
+		config.Interactive = *profile.Interactive
+	}
+	if profile.ShowStats != nil {
+		config.ShowStats = *profile.ShowStats
+	}
+	if profile.Verbose != nil {
+		config.Verbose = *profile.Verbose
+	}
+
+	return nil
 }

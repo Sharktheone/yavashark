@@ -1,5 +1,9 @@
 module yavashark_test262_runner
 
-go 1.23.2
+go 1.24.0
 
-require github.com/BurntSushi/toml v1.5.0 // indirect
+toolchain go1.24.6
+
+require golang.org/x/term v0.38.0
+
+require golang.org/x/sys v0.39.0 // indirect

@@ -18,13 +18,19 @@ import (
 const (
 	ENGINE_LOCATION = "../../target/release/yavashark_test262"
 
-	TIMEOUT = 30 * time.Second
+	DEFAULT_TIMEOUT = 30 * time.Second
 )
+
+var TestTimeout = DEFAULT_TIMEOUT
+
+func SetTimeout(timeout time.Duration) {
+	TestTimeout = timeout
+}
 
 func RunTest(path string, timings bool) results.Result {
 	startTime := time.Now()
 
-	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
+	ctx, cancel := context.WithTimeout(context.Background(), TestTimeout)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, ENGINE_LOCATION, path)

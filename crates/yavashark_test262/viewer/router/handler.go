@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 	"viewer/cache"
 	"viewer/conf"
 	"yavashark_test262_runner/results"
@@ -37,7 +38,15 @@ func rerunAll(c *fiber.Ctx) error {
 
 	defer testRun.Unlock()
 
-	res := run.TestsInDir(conf.TestRoot, conf.Workers, true, false)
+	runConfig := run.RunConfig{
+		Workers:     conf.Workers,
+		Skips:       true,
+		Timings:     false,
+		Timeout:     30 * time.Second,
+		Interactive: false,
+	}
+
+	res := run.TestsInDir(conf.TestRoot, runConfig)
 	res.Write()
 
 	resCi := results.ConvertResultsToCI(res.TestResults, conf.TestRoot)
@@ -63,7 +72,15 @@ func rerun(c *fiber.Ctx) error {
 
 	fullPath := filepath.Join(conf.TestRoot, path)
 
-	run.TestsInDir(fullPath, conf.Workers, true, false)
+	runConfig := run.RunConfig{
+		Workers:     conf.Workers,
+		Skips:       true,
+		Timings:     false,
+		Timeout:     30 * time.Second,
+		Interactive: false,
+	}
+
+	run.TestsInDir(fullPath, runConfig)
 
 	return current(c)
 }

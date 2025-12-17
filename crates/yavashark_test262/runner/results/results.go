@@ -8,6 +8,18 @@ import (
 	"yavashark_test262_runner/status"
 )
 
+const (
+	ColorGreen   = "\033[32m"
+	ColorRed     = "\033[31m"
+	ColorYellow  = "\033[33m"
+	ColorBlue    = "\033[34m"
+	ColorMagenta = "\033[35m"
+	ColorCyan    = "\033[36m"
+	ColorReset   = "\033[0m"
+	ColorBold    = "\033[1m"
+	ColorDim     = "\033[2m"
+)
+
 type TestResults struct {
 	TestResults       []Result
 	Passed            uint32
@@ -90,7 +102,7 @@ func (tr *TestResults) Add(res Result) {
 	tr.TestResults = append(tr.TestResults, res)
 }
 
-func (tr *TestResults) PrintResults() {
+func (tr *TestResults) PrintResults(showStats bool) {
 	printRes("Passed", tr.Passed, tr.Total)
 	printRes("Failed", tr.Failed, tr.Total)
 	printRes("Skipped", tr.Skipped, tr.Total)
@@ -111,8 +123,9 @@ func (tr *TestResults) PrintResults() {
 	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
 	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
 
-	// Print memory usage statistics
-	tr.PrintMemoryStats()
+	if showStats {
+		tr.PrintMemoryStats()
+	}
 }
 
 func formatMemory(kb uint64) string {
@@ -212,7 +225,119 @@ func (tr *TestResults) Compare(other *TestResults) {
 	printDiff("Timeout", tr.Timeout, other.Timeout, tr.Total)
 	printDiff("Parse Error", tr.ParseError, other.ParseError, tr.Total)
 	printDiff("Total", tr.Total, other.Total, tr.Total)
+}
 
+func (tr *TestResults) PrintResultsWithDiff(other *TestResults) {
+	fmt.Printf("\n%s=== Test Results Summary ===%s\n\n", ColorBold, ColorReset)
+
+	fmt.Printf("%sCurrent Run:%s\n", ColorBold, ColorReset)
+	tr.printResultsLine("Passed", tr.Passed, tr.Total, other.Passed)
+	tr.printResultsLine("Failed", tr.Failed, tr.Total, other.Failed)
+	tr.printResultsLine("Timeout", tr.Timeout, tr.Total, other.Timeout)
+	tr.printResultsLine("Crashed", tr.Crashed, tr.Total, other.Crashed)
+	tr.printResultsLine("Skipped", tr.Skipped, tr.Total, other.Skipped)
+	tr.printResultsLine("Not Implemented", tr.NotImplemented, tr.Total, other.NotImplemented)
+	tr.printResultsLine("Runner Error", tr.RunnerError, tr.Total, other.RunnerError)
+	tr.printResultsLine("Parse Error", tr.ParseError, tr.Total, other.ParseError)
+	tr.printResultsLine("Parse Success Error", tr.ParseSuccessError, tr.Total, other.ParseSuccessError)
+
+	fmt.Printf("\n%sTotal: %d%s\n", ColorBold, tr.Total, ColorReset)
+
+	fmt.Printf("\n%s=== Net Changes ===%s\n", ColorBold, ColorReset)
+	netPassed := int32(tr.Passed) - int32(other.Passed)
+	netFailed := int32(tr.Failed) - int32(other.Failed)
+	netTimeout := int32(tr.Timeout) - int32(other.Timeout)
+	netCrashed := int32(tr.Crashed) - int32(other.Crashed)
+
+	if netPassed != 0 {
+		if netPassed > 0 {
+			fmt.Printf("%s✓ Passed: +%d%s (gained)\n", ColorGreen, netPassed, ColorReset)
+		} else {
+			fmt.Printf("%s✗ Passed: %d%s (lost)\n", ColorRed, netPassed, ColorReset)
+		}
+	}
+
+	if netFailed != 0 {
+		if netFailed > 0 {
+			fmt.Printf("%s✗ Failed: +%d%s (gained)\n", ColorRed, netFailed, ColorReset)
+		} else {
+			fmt.Printf("%s✓ Failed: %d%s (improved)\n", ColorGreen, netFailed, ColorReset)
+		}
+	}
+
+	if netTimeout != 0 {
+		if netTimeout > 0 {
+			fmt.Printf("%s⏱ Timeout: +%d%s (gained)\n", ColorYellow, netTimeout, ColorReset)
+		} else {
+			fmt.Printf("%s✓ Timeout: %d%s (improved)\n", ColorGreen, netTimeout, ColorReset)
+		}
+	}
+
+	if netCrashed != 0 {
+		if netCrashed > 0 {
+			fmt.Printf("%s💥 Crashed: +%d%s (gained)\n", ColorMagenta, netCrashed, ColorReset)
+		} else {
+			fmt.Printf("%s✓ Crashed: %d%s (improved)\n", ColorGreen, netCrashed, ColorReset)
+		}
+	}
+
+	// Overall summary
+	fmt.Printf("\n%s=== Overall Summary ===%s\n", ColorBold, ColorReset)
+	totalChanges := abs(netPassed) + abs(netFailed) + abs(netTimeout) + abs(netCrashed)
+	if totalChanges > 0 {
+		fmt.Printf("Total test status changes: %d\n", totalChanges)
+
+		passedGained := 0
+		if netPassed > 0 {
+			passedGained = int(netPassed)
+		}
+		failedLost := 0
+		if netFailed < 0 {
+			failedLost = int(-netFailed)
+		}
+		improvements := passedGained + failedLost
+
+		if improvements > 0 {
+			fmt.Printf("%s↑ Improvements: %d%s\n", ColorGreen, improvements, ColorReset)
+		}
+
+		failedGained := 0
+		if netFailed > 0 {
+			failedGained = int(netFailed)
+		}
+		passedLost := 0
+		if netPassed < 0 {
+			passedLost = int(-netPassed)
+		}
+		regressions := failedGained + passedLost
+
+		if regressions > 0 {
+			fmt.Printf("%s↓ Regressions: %d%s\n", ColorRed, regressions, ColorReset)
+		}
+	} else {
+		fmt.Printf("%sNo changes from previous run%s\n", ColorDim, ColorReset)
+	}
+}
+
+func (tr *TestResults) printResultsLine(name string, current, total, previous uint32) {
+	percentage := float64(current) / float64(total) * 100
+	diff := int32(current) - int32(previous)
+
+	var diffStr string
+	if diff > 0 {
+		diffStr = fmt.Sprintf(" %s(+%d)%s", ColorGreen, diff, ColorReset)
+	} else if diff < 0 {
+		diffStr = fmt.Sprintf(" %s(%d)%s", ColorRed, diff, ColorReset)
+	}
+
+	fmt.Printf("  %s: %d (%.2f%%)%s\n", name, current, percentage, diffStr)
+}
+
+func abs(n int32) int32 {
+	if n < 0 {
+		return -n
+	}
+	return n
 }
 
 func printDiff(name string, n1 uint32, n2 uint32, total uint32) {

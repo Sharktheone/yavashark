@@ -4,6 +4,7 @@ import (
 	"log"
 	"path/filepath"
 	"yavashark_test262_runner/ci"
+	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
 	"yavashark_test262_runner/timing"
@@ -19,16 +20,28 @@ func main() {
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	testResults := run.TestsInDir(testRoot, config.Workers, config.Skips, config.Timings)
+	runConfig := run.RunConfig{
+		Workers:     config.Workers,
+		Skips:       config.Skips,
+		Timings:     config.Timings,
+		Timeout:     config.Timeout,
+		Interactive: config.Interactive,
+	}
+
+	testResults, summary := run.TestsInDir(testRoot, runConfig)
 
 	if config.Diff && !config.CI {
 		printDiff(testResults, config.DiffFilter)
 	}
 
+	if !config.CI {
+		progress.PrintSummary(summary)
+	}
+
 	if config.CI {
 		ci.RunCi(testResults, config.RepoPath, config.HistoryOnly, config.Diff, testRoot)
-	} else {
-		testResults.PrintResults()
+	} else if config.Verbose {
+		testResults.PrintResults(config.ShowStats)
 
 		print("\n\n\n")
 		_ = testResults.ComparePrev()
