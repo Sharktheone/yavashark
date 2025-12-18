@@ -198,6 +198,21 @@ impl PlainDate {
         self.date.to_string()
     }
 
+    #[prop("withCalendar")]
+    pub fn with_calendar(
+        &self,
+        calendar: &str,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
+
+        let date = self
+            .date
+            .with_calendar(calendar);
+
+        Ok(Self::new(date, realm)?.into_object())
+    }
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res {
