@@ -1457,6 +1457,17 @@ impl Object {
         let value = self.get(name, realm)?;
         T::from_value_out(value, realm)
     }
+
+    pub fn extract_opt<T: FromValueOutput>(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<T::Output>> {
+        let Some(value) = self.get_opt(name, realm)? else {
+            return Ok(None);
+        };
+        T::from_value_out(value, realm).map(Some)
+    }
 }
 
 impl From<Box<dyn Obj>> for Object {
