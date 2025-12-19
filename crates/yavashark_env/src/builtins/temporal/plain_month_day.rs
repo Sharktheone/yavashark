@@ -45,11 +45,11 @@ impl PlainMonthDay {
     pub fn construct(
         month: u8,
         day: u8,
-        calendar: Option<YSString>,
+        calendar: Option<Calendar>,
         ref_year: Option<i32>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = calendar_opt(calendar.as_deref())?;
+        let calendar = calendar.unwrap_or_default();
 
         let month_day = temporal_rs::PlainMonthDay::new_with_overflow(
             month,
@@ -205,15 +205,7 @@ pub fn value_to_plain_month_day(
                     .resolve_property("day", realm)?
                     .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
-                let calendar = obj
-                    .resolve_property("calendar", realm)?
-                    .and_then(|v| v.to_string(realm).ok());
-
-                let calendar = calendar
-                    .as_deref()
-                    .map(Calendar::from_str)
-                    .transpose()
-                    .map_err(Error::from_temporal)?
+                let calendar = obj.extract_opt::<Calendar>("calendar", realm)?
                     .unwrap_or_default();
 
                 return temporal_rs::PlainMonthDay::new_with_overflow(
