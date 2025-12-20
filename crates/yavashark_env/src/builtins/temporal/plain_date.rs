@@ -61,14 +61,10 @@ impl PlainDate {
         year: i32,
         month: u8,
         day: u8,
-        calendar: Option<YSString>,
+        calendar: Option<Calendar>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let calendar = calendar
-            .as_deref()
-            .map(Calendar::from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?
             .unwrap_or_default();
 
         let date = temporal_rs::PlainDate::new(year, month, day, calendar)
@@ -201,11 +197,9 @@ impl PlainDate {
     #[prop("withCalendar")]
     pub fn with_calendar(
         &self,
-        calendar: &str,
+        calendar: Calendar,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
-
         let date = self
             .date
             .with_calendar(calendar);

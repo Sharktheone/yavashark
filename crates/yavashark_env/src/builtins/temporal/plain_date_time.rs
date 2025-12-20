@@ -65,7 +65,7 @@ impl PlainDateTime {
         millisecond: Option<u16>,
         microsecond: Option<u16>,
         nanosecond: Option<u16>,
-        calendar: Option<String>,
+        calendar: Option<Calendar>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let hour = hour.unwrap_or(0);
@@ -76,10 +76,6 @@ impl PlainDateTime {
         let nanosecond = nanosecond.unwrap_or(0);
 
         let calendar = calendar
-            .as_deref()
-            .map(Calendar::from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?
             .unwrap_or_default();
 
         let datetime = temporal_rs::PlainDateTime::new(
@@ -379,9 +375,7 @@ impl PlainDateTime {
     }
 
     #[prop("withCalendar")]
-    pub fn with_calendar(&self, calendar: &str, realm: &mut Realm) -> Res<ObjectHandle> {
-        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
-
+    pub fn with_calendar(&self, calendar: Calendar, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self.date.with_calendar(calendar);
 
         Ok(Self::new(date, realm)?.into_object())
@@ -494,18 +488,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
 
         let calendar = obj
-            .resolve_property("calendar", realm)?
-            .and_then(|v| v.to_string(realm).ok());
-
-        if calendar.as_ref().is_some_and(YSString::is_empty) {
-            return Err(Error::range("Invalid calendar"));
-        }
-
-        let calendar = calendar
-            .as_deref()
-            .map(Calendar::from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?
+            .extract_opt::<Calendar>("calendar", realm)?
             .unwrap_or_default();
 
         let datetime = temporal_rs::PlainDateTime::new(

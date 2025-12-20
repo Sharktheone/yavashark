@@ -1,7 +1,7 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{
-    calendar_opt, difference_settings, display_calendar, overflow_options, overflow_options_opt,
+    difference_settings, display_calendar, overflow_options, overflow_options_opt,
     value_to_year_month_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
@@ -9,6 +9,7 @@ use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
+use temporal_rs::Calendar;
 use temporal_rs::fields::CalendarFields;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
@@ -43,11 +44,11 @@ impl PlainYearMonth {
     pub fn construct(
         year: i32,
         month: u8,
-        calendar: Option<YSString>,
+        calendar: Option<Calendar>,
         reference_day: Option<u8>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = calendar_opt(calendar.as_deref())?;
+        let calendar = calendar.unwrap_or_default();
 
         let year_month = temporal_rs::PlainYearMonth::new(year, month, reference_day, calendar)
             .map_err(Error::from_temporal)?;
@@ -313,8 +314,8 @@ pub fn value_to_plain_year_month(
                 .unwrap_or_default();
 
             let calendar = obj
-                .get_property_opt("calendar", realm)?
-                .and_then(|v| v.to_string(realm).ok());
+                .extract_opt::<Calendar>("calendar", realm)?
+                .unwrap_or_default();
 
             // let era = obj
             //     .get_property_opt(&"era".into())?
@@ -353,8 +354,6 @@ pub fn value_to_plain_year_month(
                 .to_number(realm)?;
 
             let year = year as i32;
-
-            let calendar = calendar_opt(calendar.as_deref())?;
 
             temporal_rs::PlainYearMonth::new_with_overflow(year, month, None, calendar, opts)
                 .map_err(Error::from_temporal)

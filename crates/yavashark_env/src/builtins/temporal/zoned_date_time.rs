@@ -65,7 +65,7 @@ impl ZonedDateTime {
     pub fn construct(
         ns: &BigIntOrNumber,
         tz: &str,
-        calendar: Option<YSString>,
+        calendar: Option<Calendar>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let nanos = ns
@@ -76,8 +76,6 @@ impl ZonedDateTime {
         let tz = TimeZone::try_from_str(tz).map_err(Error::from_temporal)?;
 
         let date = if let Some(cal) = calendar {
-            let cal = Calendar::from_str(&cal).map_err(Error::from_temporal)?;
-
             temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
         } else {
             temporal_rs::ZonedDateTime::try_new_iso(nanos, tz)
@@ -291,9 +289,7 @@ impl ZonedDateTime {
     }
 
     #[prop("withCalendar")]
-    pub fn with_calendar(&self, calendar: &str, realm: &mut Realm) -> Res<ObjectHandle> {
-        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
-
+    pub fn with_calendar(&self, calendar: Calendar, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = self.date.with_calendar(calendar);
 
         Ok(Self::new(date, realm)?.into_object())
@@ -530,13 +526,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         partial.fields.offset = Some(offset);
     }
 
-    if let Some(calendar) = obj.get_opt("calendar", realm)? {
-        let Value::String(calendar) = calendar else {
-            return Err(Error::ty("Expected calendar to be a string"));
-        };
-
-        let calendar = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
-
+    if let Some(calendar) = obj.extract_opt::<Calendar>("calendar", realm)? {
         partial.calendar = calendar;
     }
 

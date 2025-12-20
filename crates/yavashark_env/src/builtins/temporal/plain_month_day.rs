@@ -1,6 +1,6 @@
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{
-    calendar_opt, display_calendar, overflow_options, overflow_options_opt,
+    display_calendar, overflow_options, overflow_options_opt,
     value_to_calendar_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
@@ -235,11 +235,7 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
         calendar: Calendar::new(AnyCalendarKind::Iso),
     };
 
-    if let Some(calendar) = value.get_opt("calendar", realm)? {
-        let calendar = calendar.to_string(realm)?;
-
-        let cal = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
-
+    if let Some(cal) = value.extract_opt::<Calendar>("calendar", realm)? {
         partial_date = partial_date.with_calendar(cal);
     }
 

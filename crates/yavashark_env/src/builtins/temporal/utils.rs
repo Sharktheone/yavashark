@@ -14,7 +14,7 @@ use temporal_rs::options::{
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
-use temporal_rs::{Calendar, UtcOffset};
+use temporal_rs::UtcOffset;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -273,14 +273,6 @@ pub fn overflow_options_opt(
         Some(obj) => overflow_options(obj, realm)?,
         None => None,
     })
-}
-
-pub fn calendar_opt(cal: Option<&str>) -> Res<Calendar> {
-    Ok(cal
-        .map(temporal_rs::Calendar::from_str)
-        .transpose()
-        .map_err(crate::Error::from_temporal)?
-        .unwrap_or_default())
 }
 
 pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayCalendar> {

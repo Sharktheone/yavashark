@@ -13,7 +13,7 @@ impl FromValueOutput for Calendar {
             ));
         };
 
-        Calendar::from_str(&calendar)
+        Self::from_str(&calendar)
             .map_err(Error::from_temporal)
     }
 }
