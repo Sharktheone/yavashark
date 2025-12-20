@@ -402,12 +402,11 @@ impl PlainDateTime {
     #[prop("toZonedDateTime")]
     pub fn to_zoned_date_time(
         &self,
-        tz: &str,
+        tz: TimeZone,
         options: Option<ObjectHandle>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
-        let tz = TimeZone::try_from_str(tz).map_err(Error::from_temporal)?;
 
         let date = self
             .date

@@ -23,35 +23,17 @@ impl Now {
     }
 
     #[prop("plainDateISO")]
-    fn plain_date_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainDate> {
-        let tz = tz
-            .as_deref()
-            .map(TimeZone::try_from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?;
-
+    fn plain_date_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainDate> {
         PlainDate::now_obj(realm, tz)
     }
 
     #[prop("plainDateTimeISO")]
-    fn plain_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainDateTime> {
-        let tz = tz
-            .as_deref()
-            .map(TimeZone::try_from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?;
-
+    fn plain_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainDateTime> {
         PlainDateTime::now_obj(realm, tz)
     }
 
     #[prop("plainTimeISO")]
-    fn plain_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<PlainTime> {
-        let tz = tz
-            .as_deref()
-            .map(TimeZone::try_from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?;
-
+    fn plain_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainTime> {
         PlainTime::now_obj(realm, tz)
     }
 
@@ -65,13 +47,7 @@ impl Now {
     }
 
     #[prop("zonedDateTimeISO")]
-    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<YSString>) -> Res<ZonedDateTime> {
-        let tz = tz
-            .as_deref()
-            .map(TimeZone::try_from_str)
-            .transpose()
-            .map_err(Error::from_temporal)?;
-
+    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ZonedDateTime> {
         ZonedDateTime::now_obj(realm, tz)
     }
 }

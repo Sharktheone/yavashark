@@ -341,13 +341,9 @@ impl PlainDate {
             let tz = TimeZone::try_from_str(tz.as_str()).map_err(Error::from_temporal)?;
             (tz, None)
         } else if let Value::Object(obj) = opts {
-            let Some(tz) = obj.resolve_property("timeZone", realm)? else {
+            let Some(tz) = obj.extract_opt::<TimeZone>("timeZone", realm)? else {
                 return Err(Error::ty("Missing timeZone property for toZonedDateTime"));
             };
-
-            let tz = tz.to_string(realm)?;
-
-            let tz = TimeZone::try_from_str(tz.as_str()).map_err(Error::from_temporal)?;
 
             let time = obj.resolve_property("plainTime", realm)?;
 

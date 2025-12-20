@@ -64,7 +64,7 @@ impl ZonedDateTime {
     #[constructor]
     pub fn construct(
         ns: &BigIntOrNumber,
-        tz: &str,
+        tz: TimeZone,
         calendar: Option<Calendar>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
@@ -72,8 +72,6 @@ impl ZonedDateTime {
             .to_big_int()
             .and_then(|n| n.to_i128())
             .ok_or_else(|| Error::ty("Invalid nanoseconds value"))?;
-
-        let tz = TimeZone::try_from_str(tz).map_err(Error::from_temporal)?;
 
         let date = if let Some(cal) = calendar {
             temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
@@ -308,9 +306,7 @@ impl ZonedDateTime {
     }
 
     #[prop("withTimeZone")]
-    pub fn with_time_zone(&self, time_zone: &str, realm: &mut Realm) -> Res<Value> {
-        let tz = TimeZone::try_from_str(time_zone).map_err(Error::from_temporal)?;
-
+    pub fn with_time_zone(&self, tz: TimeZone, realm: &mut Realm) -> Res<Value> {
         let date = self.date.with_timezone(tz).map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_value())
@@ -657,10 +653,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         partial.fields.time = partial.fields.time.with_nanosecond(Some(nanosecond as u16));
     }
 
-    if let Some(time_zone) = obj.get_opt("timeZone", realm)? {
-        let time_zone = time_zone.to_string(realm)?;
-        let time_zone = TimeZone::try_from_str(&time_zone).map_err(Error::from_temporal)?;
-
+    if let Some(time_zone) = obj.extract_opt::<TimeZone>("timeZone", realm)? {
         partial.timezone = Some(time_zone);
     } else {
         return Err(Error::ty("Expected timeZone to be defined"));
