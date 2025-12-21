@@ -17,10 +17,29 @@ func Start() {
 
 	api := app.Group("api")
 
+	api.Get("capabilities", capabilities)
+	api.Get("profiles", profiles)
+
 	api.Get("current", current)
+	api.Get("info/*", info)
+
 	api.Get("rerun", rerunAll)
 	api.Get("rerun/*", rerun)
-	api.Get("info/*", info)
+
+	api.Get("rerun-stream", rerunStream)
+	api.Get("rerun-stream/*", rerunStreamPath)
+
+	api.Post("cancel", cancelRun)
+
+	api.Get("history", getRunHistory)
+	api.Get("history/:id", getRunHistoryEntry)
+	api.Delete("history/:id", deleteRunHistoryEntry)
+	api.Delete("history", clearRunHistory)
+
+	api.Get("git/info", getCurrentGitInfo)
+	api.Get("git/branches", getDataRepoBranches)
+	api.Get("git/commits", getDataRepoCommits)
+	api.Get("git/results/:hash", getResultsForCommit)
 
 	web.Serve(app)
 
