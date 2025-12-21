@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"path/filepath"
+	"yavashark_test262_runner/build"
 	"yavashark_test262_runner/ci"
 	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
@@ -17,6 +18,17 @@ const (
 
 func main() {
 	config := LoadConfig()
+
+	if config.Rebuild {
+		buildConfig := build.Config{
+			Rebuild:  true,
+			Mode:     config.BuildMode,
+			Compiler: config.BuildCompiler,
+		}
+		if err := build.RebuildEngine(buildConfig); err != nil {
+			log.Fatalf("Failed to rebuild engine: %v", err)
+		}
+	}
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 

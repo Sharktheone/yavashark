@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"yavashark_test262_runner/build"
 )
 
 const (
@@ -28,6 +29,10 @@ type Config struct {
 	Interactive bool          `json:"interactive"`
 	ShowStats   bool          `json:"show_stats"`
 	Verbose     bool          `json:"verbose"`
+
+	Rebuild       bool            `json:"rebuild"`
+	BuildMode     build.BuildMode `json:"build_mode"`
+	BuildCompiler build.Compiler  `json:"build_compiler"`
 }
 
 type ProfileConfig struct {
@@ -49,6 +54,10 @@ type Profile struct {
 	Interactive *bool   `json:"interactive,omitempty"`
 	ShowStats   *bool   `json:"show_stats,omitempty"`
 	Verbose     *bool   `json:"verbose,omitempty"`
+
+	Rebuild       *bool   `json:"rebuild,omitempty"`
+	BuildMode     *string `json:"build_mode,omitempty"`
+	BuildCompiler *string `json:"build_compiler,omitempty"`
 }
 
 func NewConfig() *Config {
@@ -67,6 +76,10 @@ func NewConfig() *Config {
 		Interactive: false,
 		ShowStats:   false,
 		Verbose:     false,
+
+		Rebuild:       false,
+		BuildMode:     build.BuildModeRelease,
+		BuildCompiler: build.CompilerLLVM,
 	}
 }
 
@@ -89,6 +102,10 @@ func LoadConfig() *Config {
 	interactive := flag.Bool("i", false, "Enable interactive TUI mode")
 	showStats := flag.Bool("stats", false, "Show memory and timing statistics")
 	verbose := flag.Bool("v", false, "Show verbose output (detailed results)")
+
+	rebuild := flag.Bool("rebuild", config.Rebuild, "Rebuild the engine before running tests")
+	buildMode := flag.String("build-mode", string(config.BuildMode), "Build mode: debug or release")
+	buildCompiler := flag.String("compiler", string(config.BuildCompiler), "Compiler backend: llvm or cranelift")
 
 	flag.Parse()
 
@@ -130,6 +147,20 @@ func LoadConfig() *Config {
 			config.ShowStats = *showStats
 		case "v":
 			config.Verbose = *verbose
+		case "rebuild":
+			config.Rebuild = *rebuild
+		case "build-mode":
+			mode, err := build.ParseBuildMode(*buildMode)
+			if err != nil {
+				log.Fatalf("Invalid build mode: %v", err)
+			}
+			config.BuildMode = mode
+		case "compiler":
+			compiler, err := build.ParseCompiler(*buildCompiler)
+			if err != nil {
+				log.Fatalf("Invalid compiler: %v", err)
+			}
+			config.BuildCompiler = compiler
 		}
 	})
 
@@ -198,6 +229,24 @@ func loadProfile(filename string, profileName string, config *Config) error {
 	}
 	if profile.Verbose != nil {
 		config.Verbose = *profile.Verbose
+	}
+
+	if profile.Rebuild != nil {
+		config.Rebuild = *profile.Rebuild
+	}
+	if profile.BuildMode != nil {
+		mode, err := build.ParseBuildMode(*profile.BuildMode)
+		if err != nil {
+			return fmt.Errorf("invalid build mode in profile: %w", err)
+		}
+		config.BuildMode = mode
+	}
+	if profile.BuildCompiler != nil {
+		compiler, err := build.ParseCompiler(*profile.BuildCompiler)
+		if err != nil {
+			return fmt.Errorf("invalid compiler in profile: %w", err)
+		}
+		config.BuildCompiler = compiler
 	}
 
 	return nil
