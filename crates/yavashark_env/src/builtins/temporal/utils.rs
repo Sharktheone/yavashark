@@ -2,7 +2,7 @@ mod calendar;
 mod timezone;
 
 use crate::builtins::temporal::plain_date::value_to_plain_date;
-use crate::{Error, ObjectHandle, Realm, Res, Value};
+use crate::{builtins, Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::fields::{
     CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
@@ -16,6 +16,7 @@ use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
 use temporal_rs::UtcOffset;
+use crate::builtins::value_to_zoned_date_time;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -33,9 +34,13 @@ pub fn relative_to_wrap(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Rel
 pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
     Ok(match rel {
         Value::Object(obj) => {
-            let plain_date = value_to_plain_date(obj.into(), realm)?;
+            if let Some(pd) = obj.downcast::<builtins::PlainDate>() {
+                return Ok(Some(RelativeTo::PlainDate(pd.date.clone())));
+            }
 
-            Some(RelativeTo::PlainDate(plain_date))
+            let zdt = value_to_zoned_date_time(&obj.into(), None, realm)?;
+
+            Some(RelativeTo::ZonedDateTime(zdt))
         }
         Value::String(str) => {
             Some(RelativeTo::try_from_str(str.as_str()).map_err(Error::from_temporal)?)
