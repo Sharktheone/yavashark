@@ -2,15 +2,14 @@ use crate::builtins::temporal::utils::{
     opt_relative_to_wrap, rounding_options, string_rounding_mode_opts,
 };
 use crate::conversion::{downcast_obj, NonFract};
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::Object;
-use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
-use std::cell::RefCell;
+use crate::{Error, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::str::FromStr;
 use temporal_rs::options::{ToStringRoundingOptions, Unit};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 
-#[object]
 #[derive(Debug)]
 pub struct Duration {
     pub dur: temporal_rs::Duration,
@@ -18,28 +17,16 @@ pub struct Duration {
 
 impl Duration {
     #[allow(unused)]
-    fn new(realm: &mut Realm) -> Res<Self> {
+    fn new(realm: &mut Realm) -> Res<NativeObject<Self>> {
         Self::with_duration(realm, temporal_rs::Duration::default())
     }
 
-    pub fn with_duration(realm: &mut Realm, duration: temporal_rs::Duration) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutableDuration {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_duration
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            dur: duration,
-        })
+    pub fn with_duration(realm: &mut Realm, duration: temporal_rs::Duration) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { dur: duration }, realm)
     }
 
-    pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
-        if let Ok(this) = downcast_obj::<Self>(info.copy()) {
+    pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<NativeObject<Self>>> {
+        if let Ok(this) = downcast_obj::<NativeObject<Self>>(info.copy()) {
             return Ok(RefOrOwned::Ref(this));
         }
 
@@ -110,7 +97,7 @@ impl Duration {
         Err(Error::ty("Invalid value for Duration"))
     }
 
-    fn from_value(info: Value, realm: &mut Realm) -> Res<Self> {
+    fn from_value(info: Value, realm: &mut Realm) -> Res<NativeObject<Self>> {
         Ok(match Self::from_value_ref(info, realm)? {
             RefOrOwned::Ref(r) => {
                 return Ok(Self::with_duration(realm, r.dur)?);
@@ -132,7 +119,7 @@ impl Duration {
         microseconds: Option<i128>,
         nanoseconds: Option<i128>,
         realm: &mut Realm,
-    ) -> Res<Self> {
+    ) -> Res<NativeObject<Self>> {
         let years = years.unwrap_or(0);
         let months = months.unwrap_or(0);
         let weeks = weeks.unwrap_or(0);
@@ -177,7 +164,7 @@ impl Duration {
         microseconds: Option<NonFract<i128>>,
         nanoseconds: Option<NonFract<i128>>,
         #[realm] realm: &mut Realm,
-    ) -> Res<Self> {
+    ) -> Res<NativeObject<Self>> {
         let years = years.map(|n| n.0);
         let months = months.map(|n| n.0);
         let weeks = weeks.map(|n| n.0);
@@ -204,7 +191,7 @@ impl Duration {
         )
     }
 
-    fn from(info: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn from(info: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         Self::from_value(info, realm)
     }
 
@@ -225,13 +212,13 @@ impl Duration {
             .map_err(Error::from_temporal)? as i8)
     }
 
-    fn abs(&self, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn abs(&self, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let res = self.dur.abs();
 
         Self::with_duration(realm, res)
     }
 
-    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let other = Self::from_value_ref(other, realm)?;
 
         let dur = self.dur.add(&other.dur).map_err(Error::from_temporal)?;
@@ -239,13 +226,13 @@ impl Duration {
         Self::with_duration(realm, dur)
     }
 
-    fn negated(&self, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn negated(&self, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let neg = self.dur.negated();
 
         Self::with_duration(realm, neg)
     }
 
-    fn round(&self, unit: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn round(&self, unit: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         if unit.is_undefined() {
             return Err(Error::ty("Invalid unit for Duration.round"));
         }
@@ -257,7 +244,7 @@ impl Duration {
         Self::with_duration(realm, dur)
     }
 
-    fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let other = Self::from_value(other, realm)?;
 
         let dur = self

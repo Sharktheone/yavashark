@@ -15,6 +15,7 @@ use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::Temporal;
 use yavashark_macro::{object, props};
+use crate::native_obj::NativeObject;
 
 #[object]
 #[derive(Debug)]
@@ -138,7 +139,7 @@ impl Instant {
         other: Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-    ) -> Res<Duration> {
+    ) -> Res<NativeObject<Duration>> {
         let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
@@ -194,7 +195,7 @@ impl Instant {
         other: Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-    ) -> Res<Duration> {
+    ) -> Res<NativeObject<Duration>> {
         let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
