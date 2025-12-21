@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use std::borrow::Borrow;
 use crate::conversion::TryIntoValue;
 use crate::inline_props::{InlineObject, PropertiesHook};
 use crate::partial_init::Initializer;
@@ -8,6 +9,7 @@ use crate::value::{IntoValue, ObjectImpl};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::ops::Deref;
 
 #[derive(Debug)]
 pub struct NativeObject<T: ?Sized> {
@@ -51,5 +53,19 @@ impl<T: ?Sized + Debug + 'static> ObjectImpl for NativeObject<T> {
 
     fn get_inner_mut(&self) -> impl std::ops::DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
+    }
+}
+
+impl<T: ?Sized + 'static> Deref for NativeObject<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.native
+    }
+}
+
+impl<T: ?Sized + 'static> Borrow<T> for NativeObject<T> {
+    fn borrow(&self) -> &T {
+        &self.native
     }
 }
