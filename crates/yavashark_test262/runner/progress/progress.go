@@ -549,8 +549,13 @@ func FormatStatusPill(s status.Status) string {
 	}
 }
 
-func formatDelta(gained, lost int32) string {
+func formatDelta(gained, lost int32, prevTotal uint32) string {
 	total := gained - lost
+
+	// If no changes, return empty
+	if gained == 0 && lost == 0 {
+		return ""
+	}
 
 	var totalStr string
 	if total > 0 {
@@ -558,17 +563,25 @@ func formatDelta(gained, lost int32) string {
 	} else if total < 0 {
 		totalStr = fmt.Sprintf("%s%d%s", FgBrightRed, total, ColorReset)
 	} else {
-		totalStr = fmt.Sprintf("%s0%s", FgGray, ColorReset)
+		totalStr = "0"
 	}
 
-	var breakdown string
-	if gained > 0 || lost > 0 {
-		breakdown = fmt.Sprintf(" (%s%s%d%s %s%s%d%s)",
-			FgBrightGreen, ArrowUp, gained, ColorReset,
-			FgBrightRed, ArrowDown, lost, ColorReset)
+	breakdown := fmt.Sprintf("(%s%s%d%s %s%s%d%s)",
+		FgBrightGreen, ArrowUp, gained, ColorReset,
+		FgBrightRed, ArrowDown, lost, ColorReset)
+
+	// Calculate percentage difference
+	var percentDiff string
+	if prevTotal > 0 && total != 0 {
+		diff := float64(total) / float64(prevTotal) * 100
+		if diff > 0 {
+			percentDiff = fmt.Sprintf(" %s+%.2f%%%s", FgBrightGreen, diff, ColorReset)
+		} else {
+			percentDiff = fmt.Sprintf(" %s%.2f%%%s", FgBrightRed, diff, ColorReset)
+		}
 	}
 
-	return totalStr + breakdown
+	return totalStr + " " + breakdown + percentDiff
 }
 
 func (pt *ProgressTracker) renderInteractive(current uint32) {
@@ -770,16 +783,20 @@ func getFractionalBlock(fraction float64) string {
 func (pt *ProgressTracker) renderStatusLine(label string, count uint32, total uint32, gained, lost int32, style PillStyle) {
 	percentage := float64(count) / float64(total) * 100
 	pill := formatPill(label, style)
-	delta := formatDelta(gained, lost)
+	delta := formatDelta(gained, lost, total)
 
-	fmt.Printf(" %s %6d (%5.2f%%) %s\033[K\n", pill, count, percentage, delta)
+	// Pad after pill based on label length (longest is 9 chars for PARSE_ERR)
+	padding := 9 - len(label)
+	fmt.Printf(" %s%s %6d (%6.2f%%) %s\033[K\n", pill, strings.Repeat(" ", padding), count, percentage, delta)
 }
 
 func (pt *ProgressTracker) renderStatusLineSimple(label string, count uint32, total uint32, style PillStyle) {
 	percentage := float64(count) / float64(total) * 100
 	pill := formatPill(label, style)
 
-	fmt.Printf(" %s %6d (%5.2f%%)\033[K\n", pill, count, percentage)
+	// Pad after pill based on label length (longest is 9 chars for PARSE_ERR)
+	padding := 9 - len(label)
+	fmt.Printf(" %s%s %6d (%6.2f%%)\033[K\n", pill, strings.Repeat(" ", padding), count, percentage)
 }
 
 func (pt *ProgressTracker) printProgressBar(current uint32) {
@@ -831,9 +848,10 @@ func PrintSummary(s Summary) {
 func printFinalStatusLine(label string, count uint32, total uint32, gained, lost int32, style PillStyle) {
 	percentage := float64(count) / float64(total) * 100
 	pill := formatPill(label, style)
-	delta := formatDelta(gained, lost)
+	delta := formatDelta(gained, lost, total)
 
-	fmt.Printf("%s %6d (%5.2f%%) %s\n", pill, count, percentage, delta)
+	padding := 9 - len(label)
+	fmt.Printf("%s%s %6d (%6.2f%%) %s\n", pill, strings.Repeat(" ", padding), count, percentage, delta)
 }
 
 func printFinalStatusLineSimple(label string, count uint32, total uint32, style PillStyle) {
