@@ -858,6 +858,61 @@ func printFinalStatusLineSimple(label string, count uint32, total uint32, style 
 	printFinalStatusLine(label, count, total, 0, 0, style)
 }
 
+type SimpleSummary struct {
+	Passed            uint32
+	Failed            uint32
+	Skipped           uint32
+	Timeout           uint32
+	Crashed           uint32
+	ParseError        uint32
+	ParseSuccessError uint32
+	NotImplemented    uint32
+	RunnerError       uint32
+	Total             uint32
+}
+
+func PrintSummaryWithFilter(main Summary, filtered SimpleSummary, filterPath string) {
+	fmt.Printf("\n%s=== Final Results ===%s                    %s=== %s ===%s\n\n",
+		ColorBold, ColorReset, ColorBold, filterPath, ColorReset)
+
+	printDualStatusLine("PASS", main.Passed, main.Total, main.PassGained, main.PassLost, filtered.Passed, filtered.Total, pillStylePass)
+	printDualStatusLine("FAIL", main.Failed, main.Total, main.FailGained, main.FailLost, filtered.Failed, filtered.Total, pillStyleFail)
+	printDualStatusLine("SKIP", main.Skipped, main.Total, main.SkipGained, main.SkipLost, filtered.Skipped, filtered.Total, pillStyleSkip)
+	printDualStatusLine("TIMEOUT", main.Timeout, main.Total, main.TimeoutGained, main.TimeoutLost, filtered.Timeout, filtered.Total, pillStyleTimeout)
+	printDualStatusLine("CRASH", main.Crashed, main.Total, main.CrashGained, main.CrashLost, filtered.Crashed, filtered.Total, pillStyleCrash)
+	printDualStatusLine("PARSE_ERR", main.ParseError, main.Total, main.ParseErrGained, main.ParseErrLost, filtered.ParseError, filtered.Total, pillStyleParseError)
+	printDualStatusLine("PARSE_SUC", main.ParseSuccessError, main.Total, main.ParseSucGained, main.ParseSucLost, filtered.ParseSuccessError, filtered.Total, pillStyleParseError)
+	printDualStatusLine("NOT_IMPL", main.NotImplemented, main.Total, main.NotImplGained, main.NotImplLost, filtered.NotImplemented, filtered.Total, pillStyleNotImpl)
+	printDualStatusLine("RUN_ERR", main.RunnerError, main.Total, main.RunErrGained, main.RunErrLost, filtered.RunnerError, filtered.Total, pillStyleRunnerError)
+
+	fmt.Printf("\n%sTotal: %-6d%s                              %sTotal: %d%s\n",
+		ColorBold, main.Total, ColorReset, ColorBold, filtered.Total, ColorReset)
+}
+
+func printDualStatusLine(label string, mainCount, mainTotal uint32, gained, lost int32, filterCount, filterTotal uint32, style PillStyle) {
+	mainPercentage := float64(mainCount) / float64(mainTotal) * 100
+	filterPercentage := float64(0)
+	if filterTotal > 0 {
+		filterPercentage = float64(filterCount) / float64(filterTotal) * 100
+	}
+
+	pill := formatPill(label, style)
+	delta := formatDelta(gained, lost, mainTotal)
+
+	padding := 9 - len(label)
+
+	var mainDelta string
+	if delta != "" {
+		mainDelta = delta
+	}
+
+	filterPill := formatPill(label, style)
+
+	fmt.Printf("%s%s %6d (%6.2f%%) %-20s  %s%s %6d (%6.2f%%)\n",
+		pill, strings.Repeat(" ", padding), mainCount, mainPercentage, mainDelta,
+		filterPill, strings.Repeat(" ", padding), filterCount, filterPercentage)
+}
+
 func (pt *ProgressTracker) GetStats() (passed, failed, skipped, timeout, crashed, parseError, parseSuccessError, notImplemented, runnerError, total uint32) {
 	return pt.passed.Load(), pt.failed.Load(), pt.skipped.Load(), pt.timeout.Load(), pt.crashed.Load(),
 		pt.parseError.Load(), pt.parseSuccessError.Load(), pt.notImplemented.Load(), pt.runnerError.Load(),

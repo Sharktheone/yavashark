@@ -354,3 +354,26 @@ func (tr *TestResults) Write() {
 		log.Fatalf("Failed to write results: %v", err)
 	}
 }
+
+func (tr *TestResults) MergeInto(base []Result) *TestResults {
+	newResultsMap := make(map[string]Result)
+	for _, r := range tr.TestResults {
+		newResultsMap[r.Path] = r
+	}
+
+	merged := make([]Result, 0, len(base))
+	for _, r := range base {
+		if newResult, exists := newResultsMap[r.Path]; exists {
+			merged = append(merged, newResult)
+			delete(newResultsMap, r.Path)
+		} else {
+			merged = append(merged, r)
+		}
+	}
+
+	for _, r := range newResultsMap {
+		merged = append(merged, r)
+	}
+
+	return FromResults(merged)
+}

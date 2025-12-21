@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 	"yavashark_test262_runner/build"
 )
@@ -33,6 +35,8 @@ type Config struct {
 	Rebuild       bool            `json:"rebuild"`
 	BuildMode     build.BuildMode `json:"build_mode"`
 	BuildCompiler build.Compiler  `json:"build_compiler"`
+
+	FilterPath string `json:"-"`
 }
 
 type ProfileConfig struct {
@@ -164,7 +168,41 @@ func LoadConfig() *Config {
 		}
 	})
 
+	args := flag.Args()
+	if len(args) > 0 {
+		config.FilterPath = args[0]
+	}
+
 	return config
+}
+
+func NormalizeFilterPath(filterPath string, testRoot string) string {
+	if filterPath == "" {
+		return ""
+	}
+
+	prefixes := []string{
+		"../../test262/test/",
+		"../test262/test/",
+		"test262/test/",
+		"test/",
+	}
+
+	result := filterPath
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(result, prefix) {
+			result = strings.TrimPrefix(result, prefix)
+			break
+		}
+	}
+
+	if filepath.IsAbs(result) {
+		if rel, err := filepath.Rel(testRoot, result); err == nil {
+			result = rel
+		}
+	}
+
+	return result
 }
 
 func loadProfile(filename string, profileName string, config *Config) error {
