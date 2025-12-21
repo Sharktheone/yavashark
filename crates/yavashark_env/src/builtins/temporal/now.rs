@@ -6,7 +6,6 @@ use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::{Error, Realm, Res, Symbol};
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::{object, props};
-use yavashark_string::YSString;
 
 #[object]
 #[derive(Debug)]

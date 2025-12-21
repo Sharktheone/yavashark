@@ -22,7 +22,7 @@ use yavashark_string::YSString;
 #[object]
 #[derive(Debug)]
 pub struct PlainDate {
-    date: temporal_rs::PlainDate,
+    pub date: temporal_rs::PlainDate,
 }
 
 impl PlainDate {

@@ -17,7 +17,7 @@ use yavashark_string::YSString;
 #[object]
 #[derive(Debug)]
 pub struct PlainYearMonth {
-    year_month: temporal_rs::PlainYearMonth,
+    pub year_month: temporal_rs::PlainYearMonth,
 }
 
 impl PlainYearMonth {

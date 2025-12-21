@@ -26,7 +26,7 @@ use yavashark_string::YSString;
 #[object]
 #[derive(Debug)]
 pub struct ZonedDateTime {
-    date: temporal_rs::ZonedDateTime,
+    pub date: temporal_rs::ZonedDateTime,
 }
 
 impl ZonedDateTime {

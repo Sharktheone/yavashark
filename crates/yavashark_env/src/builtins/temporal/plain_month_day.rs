@@ -18,7 +18,7 @@ use yavashark_string::YSString;
 #[object]
 #[derive(Debug)]
 pub struct PlainMonthDay {
-    month_day: temporal_rs::PlainMonthDay,
+    pub month_day: temporal_rs::PlainMonthDay,
 }
 
 impl PlainMonthDay {
