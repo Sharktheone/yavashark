@@ -2,6 +2,7 @@ package build
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -55,6 +56,10 @@ func ParseCompiler(s string) (Compiler, error) {
 }
 
 func RebuildEngine(config Config) error {
+	return RebuildEngineWithOutput(config, os.Stdout, os.Stderr)
+}
+
+func RebuildEngineWithOutput(config Config, stdout, stderr io.Writer) error {
 	if !config.Rebuild {
 		return nil
 	}
@@ -75,8 +80,8 @@ func RebuildEngine(config Config) error {
 	env := buildEnv(mode, compiler)
 
 	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
 	cmd.Env = append(os.Environ(), env...)
 
 	if err := cmd.Run(); err != nil {

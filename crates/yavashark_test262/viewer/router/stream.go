@@ -83,6 +83,80 @@ func sendSSE(w *bufio.Writer, event StreamEvent) error {
 	return w.Flush()
 }
 
+type buildOutputWriter struct {
+	w      *bufio.Writer
+	mu     sync.Mutex
+	buffer []byte
+}
+
+func newBuildOutputWriter(w *bufio.Writer) *buildOutputWriter {
+	return &buildOutputWriter{
+		w:      w,
+		buffer: make([]byte, 0, 1024),
+	}
+}
+
+func (b *buildOutputWriter) Write(p []byte) (n int, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	b.buffer = append(b.buffer, p...)
+
+	for {
+		idx := -1
+		for i, c := range b.buffer {
+			if c == '\n' || c == '\r' {
+				idx = i
+				break
+			}
+		}
+
+		if idx == -1 {
+			if len(b.buffer) > 512 {
+				line := string(b.buffer)
+				b.buffer = b.buffer[:0]
+				sendSSE(b.w, StreamEvent{
+					Type:    "build_output",
+					Message: line,
+				})
+			}
+			break
+		}
+
+		line := string(b.buffer[:idx])
+		if idx+1 < len(b.buffer) && b.buffer[idx] == '\r' && b.buffer[idx+1] == '\n' {
+			b.buffer = b.buffer[idx+2:]
+		} else {
+			b.buffer = b.buffer[idx+1:]
+		}
+
+		if len(strings.TrimSpace(line)) > 0 {
+			sendSSE(b.w, StreamEvent{
+				Type:    "build_output",
+				Message: line,
+			})
+		}
+	}
+
+	return len(p), nil
+}
+
+func (b *buildOutputWriter) Flush() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if len(b.buffer) > 0 {
+		line := string(b.buffer)
+		b.buffer = b.buffer[:0]
+		if len(strings.TrimSpace(line)) > 0 {
+			sendSSE(b.w, StreamEvent{
+				Type:    "build_output",
+				Message: line,
+			})
+		}
+	}
+}
+
 func rerunStream(c *fiber.Ctx) error {
 	return runTestsWithStream(c, conf.TestRoot)
 }
@@ -192,13 +266,17 @@ func runTestsWithStream(c *fiber.Ctx, testPath string) error {
 				}
 			}
 
-			if err := build.RebuildEngine(buildConfig); err != nil {
+			buildWriter := newBuildOutputWriter(w)
+
+			if err := build.RebuildEngineWithOutput(buildConfig, buildWriter, buildWriter); err != nil {
+				buildWriter.Flush()
 				sendSSE(w, StreamEvent{
 					Type:    "error",
 					Message: "Build failed: " + err.Error(),
 				})
 				return
 			}
+			buildWriter.Flush()
 		}
 
 		select {
