@@ -617,6 +617,40 @@ impl TypedArray {
         create_ta_from_buffer(realm, ty, buffer)
     }
 
+    pub fn from(
+        this: Value,
+        source: &Value,
+        map_fn: Option<ObjectHandle>,
+        this_arg: Option<Value>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let obj = this.as_object()?;
+
+        let ty = constructor_type_id_to_type(obj.object_type_id())?;
+
+        let iter = ValueIterator::new(source, realm)?;
+
+        let mut items = Vec::new();
+
+        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+
+        while let Some(item) = iter.next(realm)? {
+            let item = if let Some(map_fn) = &map_fn {
+                let args = vec![item, (items.len() as isize).into(), source.copy()];
+
+                map_fn.call(args, this_arg.copy(), realm)?
+            } else {
+                item
+            };
+
+            items.push(item);
+        }
+
+        let buffer = convert_buffer(items, ty, realm)?;
+
+        create_ta_from_buffer(realm, ty, buffer)
+    }
+
     #[get("buffer")]
     pub fn get_buffer(&self) -> ObjectHandle {
         self.buffer.gc().into()
