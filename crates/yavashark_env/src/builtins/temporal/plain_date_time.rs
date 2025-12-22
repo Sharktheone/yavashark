@@ -75,8 +75,7 @@ impl PlainDateTime {
         let microsecond = microsecond.unwrap_or(0);
         let nanosecond = nanosecond.unwrap_or(0);
 
-        let calendar = calendar
-            .unwrap_or_default();
+        let calendar = calendar.unwrap_or_default();
 
         let datetime = temporal_rs::PlainDateTime::new(
             year,

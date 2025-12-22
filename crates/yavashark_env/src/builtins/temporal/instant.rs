@@ -3,6 +3,7 @@ use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
 use crate::conversion::downcast_obj;
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{Obj, Object};
@@ -15,7 +16,6 @@ use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::Temporal;
 use yavashark_macro::{object, props};
-use crate::native_obj::NativeObject;
 
 #[object]
 #[derive(Debug)]

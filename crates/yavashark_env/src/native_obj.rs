@@ -1,13 +1,13 @@
 #![allow(unused)]
 
-use std::any::TypeId;
-use std::borrow::Borrow;
 use crate::conversion::TryIntoValue;
 use crate::inline_props::{InlineObject, PropertiesHook};
 use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
-use crate::value::{IntoValue, Obj, ObjectImpl, MutObj};
+use crate::value::{IntoValue, MutObj, Obj, ObjectImpl};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
+use std::any::TypeId;
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::Deref;
@@ -56,7 +56,6 @@ impl<T: ?Sized + Debug + 'static> ObjectImpl for NativeObject<T> {
     fn get_inner_mut(&self) -> impl std::ops::DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
-
 
     /// # Safety
     /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents

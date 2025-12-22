@@ -1,7 +1,6 @@
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{
-    display_calendar, overflow_options, overflow_options_opt,
-    value_to_calendar_fields,
+    display_calendar, overflow_options, overflow_options_opt, value_to_calendar_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
@@ -205,7 +204,8 @@ pub fn value_to_plain_month_day(
                     .resolve_property("day", realm)?
                     .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
-                let calendar = obj.extract_opt::<Calendar>("calendar", realm)?
+                let calendar = obj
+                    .extract_opt::<Calendar>("calendar", realm)?
                     .unwrap_or_default();
 
                 return temporal_rs::PlainMonthDay::new_with_overflow(

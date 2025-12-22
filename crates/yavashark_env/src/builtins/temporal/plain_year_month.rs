@@ -9,8 +9,8 @@ use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::Calendar;
 use temporal_rs::fields::CalendarFields;
+use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 

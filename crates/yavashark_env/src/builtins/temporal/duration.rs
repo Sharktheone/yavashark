@@ -21,7 +21,10 @@ impl Duration {
         Self::with_duration(realm, temporal_rs::Duration::default())
     }
 
-    pub fn with_duration(realm: &mut Realm, duration: temporal_rs::Duration) -> Res<NativeObject<Self>> {
+    pub fn with_duration(
+        realm: &mut Realm,
+        duration: temporal_rs::Duration,
+    ) -> Res<NativeObject<Self>> {
         NativeObject::new(Self { dur: duration }, realm)
     }
 

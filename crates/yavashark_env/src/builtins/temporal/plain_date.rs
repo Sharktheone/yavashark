@@ -64,8 +64,7 @@ impl PlainDate {
         calendar: Option<Calendar>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = calendar
-            .unwrap_or_default();
+        let calendar = calendar.unwrap_or_default();
 
         let date = temporal_rs::PlainDate::new(year, month, day, calendar)
             .map_err(Error::from_temporal)?;
@@ -200,9 +199,7 @@ impl PlainDate {
         calendar: Calendar,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let date = self
-            .date
-            .with_calendar(calendar);
+        let date = self.date.with_calendar(calendar);
 
         Ok(Self::new(date, realm)?.into_object())
     }
