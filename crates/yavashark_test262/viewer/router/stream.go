@@ -84,16 +84,24 @@ func sendSSE(w *bufio.Writer, event StreamEvent) error {
 }
 
 type buildOutputWriter struct {
-	w      *bufio.Writer
-	mu     sync.Mutex
-	buffer []byte
+	w           *bufio.Writer
+	mu          sync.Mutex
+	buffer      []byte
+	outputLines []string
 }
 
 func newBuildOutputWriter(w *bufio.Writer) *buildOutputWriter {
 	return &buildOutputWriter{
-		w:      w,
-		buffer: make([]byte, 0, 1024),
+		w:           w,
+		buffer:      make([]byte, 0, 1024),
+		outputLines: make([]string, 0, 100),
 	}
+}
+
+func (b *buildOutputWriter) GetOutputLines() []string {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return append([]string(nil), b.outputLines...)
 }
 
 func (b *buildOutputWriter) Write(p []byte) (n int, err error) {
@@ -115,6 +123,7 @@ func (b *buildOutputWriter) Write(p []byte) (n int, err error) {
 			if len(b.buffer) > 512 {
 				line := string(b.buffer)
 				b.buffer = b.buffer[:0]
+				b.outputLines = append(b.outputLines, line)
 				sendSSE(b.w, StreamEvent{
 					Type:    "build_output",
 					Message: line,
@@ -131,6 +140,7 @@ func (b *buildOutputWriter) Write(p []byte) (n int, err error) {
 		}
 
 		if len(strings.TrimSpace(line)) > 0 {
+			b.outputLines = append(b.outputLines, line)
 			sendSSE(b.w, StreamEvent{
 				Type:    "build_output",
 				Message: line,
@@ -149,6 +159,7 @@ func (b *buildOutputWriter) Flush() {
 		line := string(b.buffer)
 		b.buffer = b.buffer[:0]
 		if len(strings.TrimSpace(line)) > 0 {
+			b.outputLines = append(b.outputLines, line)
 			sendSSE(b.w, StreamEvent{
 				Type:    "build_output",
 				Message: line,
@@ -277,50 +288,91 @@ func runTestsWithStream(c *fiber.Ctx, testPath string) error {
 				return
 			}
 			buildWriter.Flush()
-		}
 
-		select {
-		case <-ctx.Done():
+			select {
+			case <-ctx.Done():
+				sendSSE(w, StreamEvent{
+					Type: "progress",
+					Data: RunProgress{Phase: "cancelled", RunID: runMeta.ID},
+				})
+				return
+			default:
+			}
+
 			sendSSE(w, StreamEvent{
 				Type: "progress",
-				Data: RunProgress{Phase: "cancelled", RunID: runMeta.ID},
+				Data: RunProgress{Phase: "counting", RunID: runMeta.ID},
 			})
-			return
-		default:
-		}
 
-		sendSSE(w, StreamEvent{
-			Type: "progress",
-			Data: RunProgress{Phase: "counting", RunID: runMeta.ID},
-		})
+			runConfig := run.RunConfig{
+				Workers:     conf.Workers,
+				Skips:       true,
+				Timings:     false,
+				Timeout:     30 * time.Second,
+				Interactive: false,
+			}
 
-		// Get run configuration
-		runConfig := run.RunConfig{
-			Workers:     conf.Workers,
-			Skips:       true,
-			Timings:     false,
-			Timeout:     30 * time.Second,
-			Interactive: false,
-		}
-
-		if profile != "" {
-			profileConfig := loadProfileConfig(profile)
-			if profileConfig != nil {
-				if profileConfig.Workers != nil {
-					runConfig.Workers = *profileConfig.Workers
-				}
-				if profileConfig.Timeout != nil {
-					if d, err := time.ParseDuration(*profileConfig.Timeout); err == nil {
-						runConfig.Timeout = d
+			if profile != "" {
+				profileConfig := loadProfileConfig(profile)
+				if profileConfig != nil {
+					if profileConfig.Workers != nil {
+						runConfig.Workers = *profileConfig.Workers
+					}
+					if profileConfig.Timeout != nil {
+						if d, err := time.ParseDuration(*profileConfig.Timeout); err == nil {
+							runConfig.Timeout = d
+						}
+					}
+					if profileConfig.NoSkip != nil {
+						runConfig.Skips = !*profileConfig.NoSkip
 					}
 				}
-				if profileConfig.NoSkip != nil {
-					runConfig.Skips = !*profileConfig.NoSkip
+			}
+
+			streamingRun(ctx, w, testPath, runConfig, &runMeta, buildWriter.GetOutputLines())
+		} else {
+			select {
+			case <-ctx.Done():
+				sendSSE(w, StreamEvent{
+					Type: "progress",
+					Data: RunProgress{Phase: "cancelled", RunID: runMeta.ID},
+				})
+				return
+			default:
+			}
+
+			sendSSE(w, StreamEvent{
+				Type: "progress",
+				Data: RunProgress{Phase: "counting", RunID: runMeta.ID},
+			})
+
+			runConfig := run.RunConfig{
+				Workers:     conf.Workers,
+				Skips:       true,
+				Timings:     false,
+				Timeout:     30 * time.Second,
+				Interactive: false,
+			}
+
+			if profile != "" {
+				profileConfig := loadProfileConfig(profile)
+				if profileConfig != nil {
+					if profileConfig.Workers != nil {
+						runConfig.Workers = *profileConfig.Workers
+					}
+					if profileConfig.Timeout != nil {
+						if d, err := time.ParseDuration(*profileConfig.Timeout); err == nil {
+							runConfig.Timeout = d
+						}
+					}
+					if profileConfig.NoSkip != nil {
+						runConfig.Skips = !*profileConfig.NoSkip
+					}
 				}
 			}
-		}
 
-		streamingRun(ctx, w, testPath, runConfig, &runMeta)
+			streamingRun(ctx, w, testPath, runConfig, &runMeta, nil)
+		}
 	})
 
 	return nil
@@ -396,7 +448,7 @@ func fetchResultsFromGitHub(commitHash string) ([]results.Result, error) {
 	return fullResults, nil
 }
 
-func streamingRun(ctx context.Context, w *bufio.Writer, testPath string, config run.RunConfig, runMeta *RunMetadata) {
+func streamingRun(ctx context.Context, w *bufio.Writer, testPath string, config run.RunConfig, runMeta *RunMetadata, buildOutput []string) {
 	test.SetTimeout(config.Timeout)
 
 	var prevResults []results.Result
@@ -438,6 +490,7 @@ func streamingRun(ctx context.Context, w *bufio.Writer, testPath string, config 
 
 	gained := 0
 	lost := 0
+	changedTests := make([]ChangedTest, 0)
 
 	fileInfo, err := os.Stat(testPath)
 	if err != nil {
@@ -571,8 +624,18 @@ resultLoop:
 				prevStatus = prev.String()
 				if prev != status.PASS && res.Status == status.PASS {
 					gained++
+					changedTests = append(changedTests, ChangedTest{
+						Path:      res.Path,
+						OldStatus: prevStatus,
+						NewStatus: res.Status.String(),
+					})
 				} else if prev == status.PASS && res.Status != status.PASS {
 					lost++
+					changedTests = append(changedTests, ChangedTest{
+						Path:      res.Path,
+						OldStatus: prevStatus,
+						NewStatus: res.Status.String(),
+					})
 				}
 			}
 
@@ -600,20 +663,22 @@ resultLoop:
 			relPath = ""
 		}
 		historyEntry := RunHistoryEntry{
-			ID:          runMeta.ID,
-			Path:        relPath,
-			Profile:     runMeta.Profile,
-			StartedAt:   runMeta.StartedAt,
-			CompletedAt: time.Now(),
-			Phase:       phase,
-			Total:       progress.Total,
-			Passed:      progress.Passed,
-			Failed:      progress.Failed,
-			Skipped:     progress.Skipped,
-			Crashed:     progress.Crashed,
-			Timeout:     progress.Timeout,
-			Gained:      gained,
-			Lost:        lost,
+			ID:           runMeta.ID,
+			Path:         relPath,
+			Profile:      runMeta.Profile,
+			StartedAt:    runMeta.StartedAt,
+			CompletedAt:  time.Now(),
+			Phase:        phase,
+			Total:        progress.Total,
+			Passed:       progress.Passed,
+			Failed:       progress.Failed,
+			Skipped:      progress.Skipped,
+			Crashed:      progress.Crashed,
+			Timeout:      progress.Timeout,
+			Gained:       gained,
+			Lost:         lost,
+			ChangedTests: changedTests,
+			BuildOutput:  buildOutput,
 		}
 		AddRunToHistory(historyEntry)
 	}

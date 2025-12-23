@@ -16,22 +16,30 @@ const (
 	maxHistoryRuns  = 50
 )
 
+type ChangedTest struct {
+	Path      string `json:"path"`
+	OldStatus string `json:"oldStatus"`
+	NewStatus string `json:"newStatus"`
+}
+
 type RunHistoryEntry struct {
-	ID          string    `json:"id"`
-	Path        string    `json:"path"`
-	Profile     string    `json:"profile,omitempty"`
-	StartedAt   time.Time `json:"startedAt"`
-	CompletedAt time.Time `json:"completedAt,omitempty"`
-	Phase       string    `json:"phase"`
-	Total       int       `json:"total"`
-	Passed      int       `json:"passed"`
-	Failed      int       `json:"failed"`
-	Skipped     int       `json:"skipped"`
-	Crashed     int       `json:"crashed"`
-	Timeout     int       `json:"timeout"`
-	Gained      int       `json:"gained"`
-	Lost        int       `json:"lost"`
-	BaselineRef string    `json:"baselineRef,omitempty"`
+	ID           string        `json:"id"`
+	Path         string        `json:"path"`
+	Profile      string        `json:"profile,omitempty"`
+	StartedAt    time.Time     `json:"startedAt"`
+	CompletedAt  time.Time     `json:"completedAt,omitempty"`
+	Phase        string        `json:"phase"`
+	Total        int           `json:"total"`
+	Passed       int           `json:"passed"`
+	Failed       int           `json:"failed"`
+	Skipped      int           `json:"skipped"`
+	Crashed      int           `json:"crashed"`
+	Timeout      int           `json:"timeout"`
+	Gained       int           `json:"gained"`
+	Lost         int           `json:"lost"`
+	BaselineRef  string        `json:"baselineRef,omitempty"`
+	ChangedTests []ChangedTest `json:"changedTests,omitempty"`
+	BuildOutput  []string      `json:"buildOutput,omitempty"`
 }
 
 type RunHistory struct {
