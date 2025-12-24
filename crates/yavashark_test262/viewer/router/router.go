@@ -1,11 +1,12 @@
 package router
 
 import (
+	"viewer/web"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"viewer/web"
 )
 
 func Start() {
