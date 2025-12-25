@@ -34,6 +34,7 @@ pub mod value;
 
 mod iter;
 pub mod partial_init;
+pub mod or_symbol;
 
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
