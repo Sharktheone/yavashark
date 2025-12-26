@@ -1,6 +1,6 @@
 use crate::conversion::FromValueOutput;
-use crate::Realm;
 use crate::value::{FromValue, IntoValue, Symbol, Value};
+use crate::Realm;
 
 #[derive(Debug)]
 pub enum OrSymbol<T = Value> {
@@ -52,7 +52,6 @@ impl<T: Into<Value>> Into<Value> for OrSymbol<T> {
         }
     }
 }
-
 
 impl<T> From<T> for OrSymbol<T> {
     fn from(value: T) -> Self {

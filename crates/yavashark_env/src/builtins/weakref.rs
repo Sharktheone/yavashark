@@ -1,8 +1,8 @@
+use crate::or_symbol::OrSymbol;
 use crate::value::Obj;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value, WeakObjectHandle};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use crate::or_symbol::OrSymbol;
 
 #[object]
 #[derive(Debug)]
