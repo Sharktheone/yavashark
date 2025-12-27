@@ -1188,40 +1188,74 @@ impl Array {
     fn reduce(
         #[this] this: Value,
         #[realm] realm: &mut Realm,
-        func: &ObjectHandle,
+        callback: &Value,
         initial_value: Option<Value>,
     ) -> ValueResult {
-        let this = coerce_object_strict(this, realm)?;
+        let o = coerce_object_strict(this, realm)?;
 
-        let len = this
+        // 2. Let len be ? LengthOfArrayLike(O).
+        let len = o
             .resolve_property("length", realm)?
-            .unwrap_or(Value::Undefined);
+            .unwrap_or(Value::Undefined)
+            .to_number(realm)? as usize;
 
-        let len = len.to_number(realm)? as usize;
+        if !callback.is_callable() {
+            return Err(Error::ty("Reduce callback is not a function"));
+        }
 
-        let begin = usize::from(initial_value.is_none());
+        if len == 0 && initial_value.is_none() {
+            return Err(Error::ty(
+                "Reduce of empty array with no initial value",
+            ));
+        }
 
-        let mut acc = if let Some(initial_value) = initial_value {
-            initial_value
+        let mut k = 0usize;
+
+        let mut accumulator = Value::Undefined;
+
+        if let Some(initial_value) = initial_value {
+            accumulator = initial_value;
         } else {
-            let (_, val) = this.get_array_or_done(0, realm)?;
+            let mut k_present = false;
 
-            val.unwrap_or(Value::Undefined)
-        };
+            while !k_present && k < len {
+                let pk = k.into();
 
-        for idx in begin..len {
-            let (_, val) = this.get_array_or_done(idx, realm)?;
+                k_present = o.contains_key(pk, realm)?;
 
-            if let Some(val) = val {
-                acc = func.call(
-                    vec![acc, val.clone(), idx.into(), this.clone().into()],
-                    realm.global.clone().into(),
-                    realm,
-                )?;
+                if k_present {
+                    accumulator = o.get(k, realm)?;
+                }
+
+                k += 1;
+            }
+
+            if !k_present {
+                return Err(Error::ty(
+                    "Reduce of empty array with no initial value",
+                ));
             }
         }
 
-        Ok(acc)
+        while k < len {
+            let pk = k.into();
+
+            let k_present = o.contains_key(pk, realm)?;
+
+            if k_present {
+                let k_value = o.get(k, realm)?;
+
+                accumulator = callback.call(
+                    realm,
+                    vec![accumulator, k_value, k.into(), o.clone().into()],
+                    Value::Undefined,
+                )?;
+            }
+
+            k += 1;
+        }
+
+        Ok(accumulator)
     }
 
     #[prop("reduceRight")]
