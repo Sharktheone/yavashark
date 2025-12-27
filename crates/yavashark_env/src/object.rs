@@ -937,7 +937,13 @@ impl MutObj for MutObject {
         }
 
         if let InternalPropertyKey::Index(n) = name {
-            return Ok(self.contains_array_key(n));
+            if self.contains_array_key(n) {
+                return Ok(true);
+            }
+            if let ObjectOrNull::Object(obj) = &self.prototype {
+                return obj.contains_key(name, realm);
+            }
+            return Ok(false);
         }
 
         if self
