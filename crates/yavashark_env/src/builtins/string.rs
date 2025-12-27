@@ -125,6 +125,26 @@ impl crate::value::ObjectImpl for StringObj {
         Ok((true, Some(value)))
     }
 
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(n) = name {
+            let inner = self.inner.borrow();
+            if n < inner.string.len() {
+                return Ok(true);
+            }
+        }
+        self.get_wrapped_object().contains_key(name, realm)
+    }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(n) = name {
+            let inner = self.inner.borrow();
+            if n < inner.string.len() {
+                return Ok(true);
+            }
+        }
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
     fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
         Ok(Some(self.inner.borrow().string.clone().into()))
     }
