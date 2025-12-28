@@ -202,6 +202,19 @@ impl Array {
         Ok(array)
     }
 
+    pub fn with_elements_sparse(realm: &mut Realm, elements: Vec<Option<Value>>) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
+
+        let len = elements.len();
+        let mut inner = array.inner.try_borrow_mut()?;
+        inner.set_array_sparse(elements.into_iter());
+        drop(inner);
+
+        array.length.set(len);
+
+        Ok(array)
+    }
+
     pub fn with_elements_this(
         realm: &mut Realm,
         elements: Vec<Value>,

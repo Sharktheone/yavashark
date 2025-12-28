@@ -519,6 +519,24 @@ impl MutObject {
         Ok(())
     }
 
+    pub fn set_array_sparse(&mut self, elements: impl ExactSizeIterator<Item = Option<Value>>) {
+        self.array.clear();
+
+        let len = self.values.len();
+        let elements_len = elements.len();
+
+        let mut value_idx = len;
+        for (i, elem) in elements.enumerate() {
+            if let Some(val) = elem {
+                self.values.push(ObjectProperty::new(val));
+                self.array.push((i, value_idx));
+                value_idx += 1;
+            }
+        }
+
+        let _ = elements_len;
+    }
+
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
 

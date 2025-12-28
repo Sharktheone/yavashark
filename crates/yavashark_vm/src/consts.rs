@@ -76,10 +76,10 @@ impl ConstIntoValue for ArrayLiteralBlueprint {
         let props = self
             .properties
             .into_iter()
-            .map(|v| v.map_or(Ok(Value::Undefined), |v| v.into_value(vm)))
+            .map(|v| v.map(|v| v.into_value(vm)).transpose())
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Array::with_elements(vm.get_realm(), props)?.into_value())
+        Ok(Array::with_elements_sparse(vm.get_realm(), props)?.into_value())
     }
 }
 
