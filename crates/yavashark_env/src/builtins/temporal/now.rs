@@ -3,11 +3,11 @@ use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::PlainTime;
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Symbol};
 use temporal_rs::{Temporal, TimeZone};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 
-#[object]
 #[derive(Debug)]
 pub struct Now {}
 
@@ -17,22 +17,22 @@ impl Now {
     #[configurable]
     const TO_STRING_TAG: &'static str = "Temporal.Now";
 
-    fn instant(realm: &mut Realm) -> Res<Instant> {
+    fn instant(realm: &mut Realm) -> Res<NativeObject<Instant>> {
         Instant::now_obj(realm)
     }
 
     #[prop("plainDateISO")]
-    fn plain_date_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainDate> {
+    fn plain_date_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<PlainDate>> {
         PlainDate::now_obj(realm, tz)
     }
 
     #[prop("plainDateTimeISO")]
-    fn plain_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainDateTime> {
+    fn plain_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<PlainDateTime>> {
         PlainDateTime::now_obj(realm, tz)
     }
 
     #[prop("plainTimeISO")]
-    fn plain_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainTime> {
+    fn plain_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<PlainTime>> {
         PlainTime::now_obj(realm, tz)
     }
 
@@ -46,7 +46,7 @@ impl Now {
     }
 
     #[prop("zonedDateTimeISO")]
-    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<ZonedDateTime> {
+    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<ZonedDateTime>> {
         ZonedDateTime::now_obj(realm, tz)
     }
 }

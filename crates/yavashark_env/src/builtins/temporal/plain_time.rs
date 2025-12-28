@@ -4,36 +4,23 @@ use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{
     difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
 };
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use std::cell::RefCell;
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::{Temporal, TimeZone};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 
-#[object]
 #[derive(Debug)]
 pub struct PlainTime {
     time: temporal_rs::PlainTime,
 }
 
 impl PlainTime {
-    pub fn new(time: temporal_rs::PlainTime, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutablePlainTime {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_time
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            time,
-        })
+    pub fn new(time: temporal_rs::PlainTime, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { time }, realm)
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
@@ -42,7 +29,7 @@ impl PlainTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<PlainTime> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<Self>> {
         let time = Self::now(tz)?;
 
         Self::new(time, realm)
@@ -242,11 +229,11 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
             Ok(time)
         }
         Value::Object(obj) => {
-            if let Some(plain_time) = obj.downcast::<PlainTime>() {
+            if let Some(plain_time) = obj.downcast::<NativeObject<PlainTime>>() {
                 return Ok(plain_time.time);
             }
 
-            if let Some(plain_date_time) = obj.downcast::<PlainDateTime>() {
+            if let Some(plain_date_time) = obj.downcast::<NativeObject<PlainDateTime>>() {
                 return Ok(plain_date_time.date.to_plain_time());
             }
 

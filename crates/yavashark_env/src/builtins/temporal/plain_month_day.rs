@@ -2,39 +2,26 @@ use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{
     display_calendar, overflow_options, overflow_options_opt, value_to_calendar_fields,
 };
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use icu::calendar::AnyCalendarKind;
-use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 use yavashark_string::YSString;
 
-#[object]
 #[derive(Debug)]
 pub struct PlainMonthDay {
     pub month_day: temporal_rs::PlainMonthDay,
 }
 
 impl PlainMonthDay {
-    pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &mut crate::Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutablePlainMonthDay {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_month_day
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            month_day,
-        })
+    pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &mut crate::Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { month_day }, realm)
     }
 }
 
@@ -166,7 +153,7 @@ pub fn value_to_plain_month_day(
 ) -> Res<temporal_rs::PlainMonthDay> {
     match value {
         Value::Object(obj) => {
-            if let Some(plain_month_day) = obj.downcast::<PlainMonthDay>() {
+            if let Some(plain_month_day) = obj.downcast::<NativeObject<PlainMonthDay>>() {
                 return Ok(plain_month_day.month_day.clone());
             }
 

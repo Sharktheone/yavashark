@@ -7,45 +7,31 @@ use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::Temporal;
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 
-#[object]
 #[derive(Debug)]
 pub struct Instant {
     stamp: temporal_rs::Instant,
 }
 
 impl Instant {
-    pub fn from_stamp(stamp: temporal_rs::Instant, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutableInstant {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_instant
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            stamp,
-        })
+    pub fn from_stamp(stamp: temporal_rs::Instant, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { stamp }, realm)
     }
 
     #[allow(unused)]
-    pub fn from(value: Value, realm: &mut Realm) -> Res<Self> {
-        if let Value::Object(obj) = &value {
-            let instant = downcast_obj::<Self>(value)?;
+    pub fn from(value: Value, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        if let Value::Object(_) = &value {
+            let instant = downcast_obj::<NativeObject<Self>>(value)?;
 
-            return Ok(Self::from_stamp(instant.stamp, realm)?);
+            return Self::from_stamp(instant.stamp, realm);
         }
 
         let str = value.to_string(realm)?;
@@ -59,7 +45,7 @@ impl Instant {
         Temporal::now().instant().map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm) -> Res<Self> {
+    pub fn now_obj(realm: &mut Realm) -> Res<NativeObject<Self>> {
         let i = Self::now()?;
 
         Self::from_stamp(i, realm)
@@ -69,7 +55,7 @@ impl Instant {
 #[props(intrinsic_name = temporal_instant, to_string_tag = "Temporal.Instant")]
 impl Instant {
     #[constructor]
-    fn construct(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn construct(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         Self::from_epoch_nanoseconds(epoch, realm)
     }
 
@@ -83,7 +69,7 @@ impl Instant {
 
     #[prop("from")]
     fn from_js(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        Self::from(info, realm).map(Obj::into_object)
+        Self::from(info, realm).map(NativeObject::into_object)
     }
 
     #[prop("fromEpochMilliseconds")]
@@ -104,7 +90,7 @@ impl Instant {
     }
 
     #[prop("fromEpochNanoseconds")]
-    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
@@ -112,7 +98,7 @@ impl Instant {
         Self::from_stamp(i, realm)
     }
 
-    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let other = Duration::from_value_ref(other, realm)?;
 
         let i = self.stamp.add(&other.dur).map_err(Error::from_temporal)?;
@@ -126,7 +112,7 @@ impl Instant {
         Ok(self.stamp == other)
     }
 
-    fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let (opts, _) = rounding_options(opts, realm)?;
 
         let stamp = self.stamp.round(opts).map_err(Error::from_temporal)?;
@@ -156,7 +142,7 @@ impl Instant {
         Duration::with_duration(realm, res)
     }
 
-    pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<Self> {
+    pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
         let other = Duration::from_value_ref(other, realm)?;
 
         let i = self
@@ -232,7 +218,7 @@ impl Instant {
 pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Instant> {
     match value {
         Value::Object(obj) => {
-            if let Some(other_instant) = obj.downcast::<Instant>() {
+            if let Some(other_instant) = obj.downcast::<NativeObject<Instant>>() {
                 Ok(other_instant.stamp)
             } else {
                 if obj.eq(realm

@@ -6,36 +6,23 @@ use crate::builtins::temporal::utils::{
     string_rounding_mode_opts, value_to_date_time_fields,
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use std::cell::RefCell;
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::{Calendar, Temporal, TimeZone};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 use yavashark_string::YSString;
 
-#[object]
 #[derive(Debug)]
 pub struct PlainDateTime {
     pub date: temporal_rs::PlainDateTime,
 }
 
 impl PlainDateTime {
-    pub fn new(date: temporal_rs::PlainDateTime, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_date_time
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            date,
-        })
+    pub fn new(date: temporal_rs::PlainDateTime, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { date }, realm)
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDateTime> {
@@ -44,7 +31,7 @@ impl PlainDateTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<Self> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<Self>> {
         let date = Self::now(tz)?;
 
         Self::new(date, realm)
@@ -425,7 +412,7 @@ impl PlainDateTime {
 
 pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
     if let Value::Object(obj) = &info {
-        if let Some(date) = obj.downcast::<PlainDateTime>() {
+        if let Some(date) = obj.downcast::<NativeObject<PlainDateTime>>() {
             return Ok(date.date.clone());
         }
     }

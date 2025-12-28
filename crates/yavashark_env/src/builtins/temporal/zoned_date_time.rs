@@ -8,42 +8,29 @@ use crate::builtins::temporal::utils::{
     offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts,
     transition_direction, value_to_zoned_date_time_fields,
 };
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{IntoValue, Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 use yavashark_string::YSString;
 
-#[object]
 #[derive(Debug)]
 pub struct ZonedDateTime {
     pub date: temporal_rs::ZonedDateTime,
 }
 
 impl ZonedDateTime {
-    pub fn new(date: temporal_rs::ZonedDateTime, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutableZonedDateTime {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_zoned_date_time
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            date,
-        })
+    pub fn new(date: temporal_rs::ZonedDateTime, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { date }, realm)
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::ZonedDateTime> {
@@ -52,7 +39,7 @@ impl ZonedDateTime {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<Self> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<Self>> {
         let date = Self::now(tz)?;
 
         Self::new(date, realm)
@@ -479,7 +466,7 @@ pub fn value_to_zoned_date_time(
         Value::Object(obj) => {
             let overflow = overflow_options_opt(options.as_ref(), realm)?;
 
-            if let Some(zdt) = obj.downcast::<ZonedDateTime>() {
+            if let Some(zdt) = obj.downcast::<NativeObject<ZonedDateTime>>() {
                 return Ok(zdt.date.clone());
             }
 

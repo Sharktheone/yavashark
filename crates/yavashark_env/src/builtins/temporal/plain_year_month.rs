@@ -4,37 +4,24 @@ use crate::builtins::temporal::utils::{
     difference_settings, display_calendar, overflow_options, overflow_options_opt,
     value_to_year_month_fields,
 };
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use std::cell::RefCell;
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::fields::CalendarFields;
 use temporal_rs::Calendar;
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 use yavashark_string::YSString;
 
-#[object]
 #[derive(Debug)]
 pub struct PlainYearMonth {
     pub year_month: temporal_rs::PlainYearMonth,
 }
 
 impl PlainYearMonth {
-    pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutablePlainYearMonth {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_year_month
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            year_month,
-        })
+    pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { year_month }, realm)
     }
 }
 
@@ -302,7 +289,7 @@ pub fn value_to_plain_year_month(
 ) -> Res<temporal_rs::PlainYearMonth> {
     match value {
         Value::Object(obj) => {
-            if let Some(obj) = obj.downcast::<PlainYearMonth>() {
+            if let Some(obj) = obj.downcast::<NativeObject<PlainYearMonth>>() {
                 return Ok(obj.year_month.clone());
             }
 

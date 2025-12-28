@@ -9,37 +9,24 @@ use crate::builtins::temporal::utils::{
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::builtins::value_to_partial_date;
+use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use std::cell::RefCell;
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::options::DisplayCalendar;
 use temporal_rs::{Calendar, Temporal, TimeZone};
-use yavashark_macro::{object, props};
+use yavashark_macro::props;
 use yavashark_string::YSString;
 
-#[object]
 #[derive(Debug)]
 pub struct PlainDate {
     pub date: temporal_rs::PlainDate,
 }
 
 impl PlainDate {
-    pub fn new(date: temporal_rs::PlainDate, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_date
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            date,
-        })
+    pub fn new(date: temporal_rs::PlainDate, realm: &mut Realm) -> Res<NativeObject<Self>> {
+        NativeObject::new(Self { date }, realm)
     }
 
     fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
@@ -48,7 +35,7 @@ impl PlainDate {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<Self> {
+    pub fn now_obj(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<Self>> {
         let date = Self::now(tz)?;
         Self::new(date, realm)
     }
@@ -69,20 +56,7 @@ impl PlainDate {
         let date = temporal_rs::PlainDate::new(year, month, day, calendar)
             .map_err(Error::from_temporal)?;
 
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(
-                    realm
-                        .intrinsics
-                        .clone_public()
-                        .temporal_plain_date
-                        .get(realm)?
-                        .clone(),
-                ),
-            }),
-            date,
-        }
-        .into_object())
+        Ok(Self::new(date, realm)?.into_object())
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -400,7 +374,7 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
 
     let obj = info.to_object()?;
 
-    if let Some(this) = obj.downcast::<PlainDate>() {
+    if let Some(this) = obj.downcast::<NativeObject<PlainDate>>() {
         return Ok(this.date.clone());
     }
 
