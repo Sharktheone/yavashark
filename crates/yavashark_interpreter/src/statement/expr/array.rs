@@ -23,7 +23,7 @@ impl Interpreter {
                     arr.push(value);
                 }
             } else {
-                arr.push(Value::Undefined);
+                arr.increment_length();
             }
         }
 

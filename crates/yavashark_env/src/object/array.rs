@@ -433,6 +433,11 @@ impl Array {
         Ok(Value::Undefined)
     }
 
+    pub fn increment_length(&self) {
+        let current_len = self.length.get();
+        self.length.set(current_len + 1);
+    }
+
     pub fn to_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
