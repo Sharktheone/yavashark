@@ -302,6 +302,80 @@ impl Duration {
         Ok(dur.as_inner())
     }
 
+    fn with(&self, obj: ObjectHandle, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
+        // Macro to extract an optional field value
+        macro_rules! extract_opt {
+            ($name:literal, $ty:ty) => {{
+                let val = obj.get($name, realm)?;
+                if val.is_undefined() {
+                    None
+                } else {
+                    let n = val.to_number(realm)?;
+                    if n.is_infinite() || n.is_nan() || n.fract() != 0.0 {
+                        return Err(Error::range("Invalid value for Duration field"));
+                    }
+                    Some(n as $ty)
+                }
+            }};
+        }
+
+        // Extract fields from the options object in alphabetical order per spec
+        let days_opt: Option<i64> = extract_opt!("days", i64);
+        let hours_opt: Option<i64> = extract_opt!("hours", i64);
+        let microseconds_opt: Option<i128> = extract_opt!("microseconds", i128);
+        let milliseconds_opt: Option<i64> = extract_opt!("milliseconds", i64);
+        let minutes_opt: Option<i64> = extract_opt!("minutes", i64);
+        let months_opt: Option<i64> = extract_opt!("months", i64);
+        let nanoseconds_opt: Option<i128> = extract_opt!("nanoseconds", i128);
+        let seconds_opt: Option<i64> = extract_opt!("seconds", i64);
+        let weeks_opt: Option<i64> = extract_opt!("weeks", i64);
+        let years_opt: Option<i64> = extract_opt!("years", i64);
+
+        // Check if at least one field was provided
+        if years_opt.is_none()
+            && months_opt.is_none()
+            && weeks_opt.is_none()
+            && days_opt.is_none()
+            && hours_opt.is_none()
+            && minutes_opt.is_none()
+            && seconds_opt.is_none()
+            && milliseconds_opt.is_none()
+            && microseconds_opt.is_none()
+            && nanoseconds_opt.is_none()
+        {
+            return Err(Error::ty(
+                "At least one field must be provided for Duration.with",
+            ));
+        }
+
+        // Fall back to current duration values for fields not provided
+        let years = years_opt.unwrap_or(self.dur.years());
+        let months = months_opt.unwrap_or(self.dur.months());
+        let weeks = weeks_opt.unwrap_or(self.dur.weeks());
+        let days = days_opt.unwrap_or(self.dur.days());
+        let hours = hours_opt.unwrap_or(self.dur.hours());
+        let minutes = minutes_opt.unwrap_or(self.dur.minutes());
+        let seconds = seconds_opt.unwrap_or(self.dur.seconds());
+        let milliseconds = milliseconds_opt.unwrap_or(self.dur.milliseconds());
+        let microseconds = microseconds_opt.unwrap_or(self.dur.microseconds());
+        let nanoseconds = nanoseconds_opt.unwrap_or(self.dur.nanoseconds());
+
+        temporal_rs::Duration::new(
+            years,
+            months,
+            weeks,
+            days,
+            hours,
+            minutes,
+            seconds,
+            milliseconds,
+            microseconds,
+            nanoseconds,
+        )
+        .map_err(Error::from_temporal)
+        .and_then(|dur| Self::with_duration(realm, dur))
+    }
+
     #[nonstatic]
     #[prop("valueOf")]
     const fn value_of() -> Res {
