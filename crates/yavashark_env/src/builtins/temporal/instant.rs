@@ -2,6 +2,7 @@ use crate::builtins::temporal::duration::Duration;
 use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
+use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::conversion::downcast_obj;
 use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
@@ -13,7 +14,7 @@ use num_traits::ToPrimitive;
 use std::str::FromStr;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
-use temporal_rs::Temporal;
+use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::props;
 
 #[derive(Debug)]
@@ -162,10 +163,22 @@ impl Instant {
 
     #[prop("toString")]
     fn to_string_js(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+        let timezone = if let Some(ref obj) = opts {
+            let tz_val = obj.get("timeZone", realm)?;
+            if tz_val.is_undefined() {
+                None
+            } else {
+                let tz_str = tz_val.to_string(realm)?;
+                Some(TimeZone::try_from_str(&tz_str).map_err(Error::from_temporal)?)
+            }
+        } else {
+            None
+        };
+        
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
-            .to_ixdtf_string(None, opts)
+            .to_ixdtf_string(timezone, opts)
             .map_err(Error::from_temporal)
     }
 
@@ -174,6 +187,20 @@ impl Instant {
         self.stamp
             .to_ixdtf_string(None, ToStringRoundingOptions::default())
             .map_err(Error::from_temporal)
+    }
+
+    #[prop("toZonedDateTimeISO")]
+    fn to_zoned_date_time_iso(
+        &self,
+        time_zone: TimeZone,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let zdt = self
+            .stamp
+            .to_zoned_date_time_iso(time_zone)
+            .map_err(Error::from_temporal)?;
+        
+        Ok(ZonedDateTime::new(zdt, realm)?.into_object())
     }
 
     pub fn until(
