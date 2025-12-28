@@ -15,7 +15,7 @@ use yavashark_macro::props;
 
 #[derive(Debug)]
 pub struct PlainTime {
-    time: temporal_rs::PlainTime,
+    pub(crate) time: temporal_rs::PlainTime,
 }
 
 impl PlainTime {

@@ -18,7 +18,7 @@ use yavashark_macro::props;
 
 #[derive(Debug)]
 pub struct Instant {
-    stamp: temporal_rs::Instant,
+    pub(crate) stamp: temporal_rs::Instant,
 }
 
 impl Instant {
