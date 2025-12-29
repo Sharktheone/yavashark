@@ -343,6 +343,26 @@ impl Value {
         }
     }
 
+    /// SameValueZero comparison as per ECMAScript spec.
+    /// This is like `===` but:
+    /// - NaN equals NaN (unlike `===`)
+    /// - +0 equals -0 (same as `===`)
+    #[must_use]
+    pub fn same_value_zero(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Number(a), Self::Number(b)) => {
+                // NaN === NaN in SameValueZero
+                if a.is_nan() && b.is_nan() {
+                    return true;
+                }
+                // +0 === -0 in SameValueZero (same as regular equality)
+                a == b
+            }
+            // For all other types, use regular equality
+            _ => self == other,
+        }
+    }
+
     #[must_use]
     pub fn is_falsey(&self) -> bool {
         match self {
