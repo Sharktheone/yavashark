@@ -96,6 +96,62 @@ impl ObjectImpl for Array {
         Ok(DefinePropertyResult::Handled)
     }
 
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.get_wrapped_object()
+            .define_getter_attributes(name, callback, attributes, realm)?;
+
+        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let current_len = self.length.get();
+        if new_len > current_len {
+            self.length.set(new_len);
+        }
+
+        Ok(())
+    }
+
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.get_wrapped_object()
+            .define_setter_attributes(name, callback, attributes, realm)?;
+
+        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let current_len = self.length.get();
+        if new_len > current_len {
+            self.length.set(new_len);
+        }
+
+        Ok(())
+    }
+
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        self.get_wrapped_object()
+            .define_empty_accessor(name, attributes, realm)?;
+
+        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let current_len = self.length.get();
+        if new_len > current_len {
+            self.length.set(new_len);
+        }
+
+        Ok(())
+    }
+
     fn resolve_property(
         &self,
         name: InternalPropertyKey,
