@@ -571,6 +571,28 @@ impl Array {
     }
 }
 
+/// IsConcatSpreadable ( O )
+/// Returns true if the object should be spread during Array.prototype.concat
+fn is_concat_spreadable(obj: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
+    // 1. If O is not an Object, return false.
+
+    // 2. Let spreadable be ? Get(O, @@isConcatSpreadable).
+    let spreadable = obj.get_opt(crate::Symbol::IS_CONCAT_SPREADABLE, realm)?;
+
+    // 3. If spreadable is not undefined, return ToBoolean(spreadable).
+    if let Some(spreadable) = spreadable {
+        if !matches!(spreadable, Value::Undefined) {
+            return Ok(spreadable.is_truthy());
+        }
+    }
+
+    // 4. Return ? IsArray(O).
+    // Check if it's an Array instance
+    let is_array = obj.downcast::<Array>().is_some();
+
+    Ok(is_array)
+}
+
 #[must_use]
 pub fn convert_index(idx: isize, len: usize) -> usize {
     if idx < 0 {
@@ -602,27 +624,89 @@ impl Array {
     }
 
     fn concat(#[this] this: Value, #[realm] realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let array = if let Some(array) = this.downcast::<Self>()? {
-            array.shallow_clone(realm)?
-        } else {
-            let items = ArrayLike::new(this, realm)?.to_vec(realm)?;
+        // 1. Let O be ? ToObject(this value).
+        let o = coerce_object_strict(this, realm)?;
 
-            Self::with_elements(realm, items)?
-        };
+        // 2. Let A be ? ArraySpeciesCreate(O, 0).
+        // TODO: Proper ArraySpeciesCreate with Symbol.species support
+        let a = Self::from_realm(realm)?;
 
-        for arg in args {
-            if ArrayLike::is_array_like(&arg, realm)? {
-                let items = ArrayLike::new(arg, realm)?.to_vec(realm)?;
+        // 3. Let n be 0.
+        let mut n: u64 = 0;
 
-                for item in items {
-                    array.push(item)?;
+        // 4. Prepend O to items.
+        let mut items = Vec::with_capacity(args.len() + 1);
+        items.push(o.clone().into()); // Use the ToObject result, not the raw this value
+        items.extend(args);
+
+        // 5. For each element E of items, do
+        for e in items {
+
+
+            match e {
+                // 5.a. Let spreadable be ? IsConcatSpreadable(E).
+                Value::Object(e_obj) if is_concat_spreadable(&e_obj, realm)? => {
+                    // 5.b.i. Let len be ? LengthOfArrayLike(E).
+                    let len_raw = e_obj
+                        .resolve_property("length", realm)?
+                        .unwrap_or(Value::Undefined)
+                        .to_number(realm)?;
+
+                    // ToLength conversion
+                    let len = if len_raw.is_nan() || len_raw <= 0.0 {
+                        0u64
+                    } else if len_raw >= NumberConstructor::MAX_SAFE_INTEGER {
+                        NumberConstructor::MAX_SAFE_INTEGER as u64
+                    } else {
+                        len_raw.trunc() as u64
+                    };
+
+                    // 5.b.ii. If n + len > 2^53 - 1, throw a TypeError exception.
+                    if n.saturating_add(len) > NumberConstructor::MAX_SAFE_INTEGER as u64 {
+                        return Err(Error::ty("Array length exceeds maximum safe integer"));
+                    }
+
+                // 5.b.iii-iv. Repeat, while k < len
+                for k in 0..len {
+                    // 5.b.iv.a. Let Pk be ! ToString(𝔽(k)).
+                    // 5.b.iv.b. Let exists be ? HasProperty(E, Pk).
+                    let exists = e_obj.contains_key((k as usize).into(), realm)?;
+                    // 5.b.iii-iv. Repeat, while k < len
+                    for k in 0..len {
+                        // 5.b.iv.a. Let Pk be ! ToString(𝔽(k)).
+                        // 5.b.iv.b. Let exists be ? HasProperty(E, Pk).
+                        let exists = e_obj.contains_key((k as usize).into(), realm)?;
+
+                        // 5.b.iv.c. If exists is true, then
+                        if exists {
+                            // 5.b.iv.c.i. Let subElement be ? Get(E, Pk).
+                            let sub_element = e_obj.get(k as usize, realm)?;
+                            // 5.b.iv.c.ii. Perform ? CreateDataPropertyOrThrow(A, ! ToString(𝔽(n)), subElement).
+                            a.insert_array(sub_element, n as usize)?;
+                        }
+                        // 5.b.iv.d. Set n to n + 1. (always increment, preserving holes)
+                        n += 1;
+                    }
                 }
-            } else {
-                array.push(arg)?;
+                _ => {
+                    // 5.c. Else (spreadable is false)
+                    // 5.c.i. If n >= 2^53 - 1, throw a TypeError exception.
+                    if n >= NumberConstructor::MAX_SAFE_INTEGER as u64 {
+                        return Err(Error::ty("Array length exceeds maximum safe integer"));
+                    }
+                    // 5.c.ii. Perform ? CreateDataPropertyOrThrow(A, ! ToString(𝔽(n)), E).
+                    a.insert_array(e, n as usize)?;
+                    // 5.c.iii. Set n to n + 1.
+                    n += 1;
+                }
             }
         }
 
-        Ok(array.into_value())
+        // 6. Perform ? Set(A, "length", 𝔽(n), true).
+        a.set_len(n as usize)?;
+
+        // 7. Return A.
+        Ok(a.into_value())
     }
 
     #[prop("copyWithin")]
