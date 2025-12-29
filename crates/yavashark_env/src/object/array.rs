@@ -56,8 +56,11 @@ impl ObjectImpl for Array {
         self.get_wrapped_object()
             .define_property(name, value, realm)?;
 
-        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
-        self.length.set(len);
+        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let current_len = self.length.get();
+        if new_len > current_len {
+            self.length.set(new_len);
+        }
 
         Ok(DefinePropertyResult::Handled)
     }
@@ -84,8 +87,11 @@ impl ObjectImpl for Array {
             return Ok(DefinePropertyResult::ReadOnly);
         }
 
-        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
-        self.length.set(len);
+        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let current_len = self.length.get();
+        if new_len > current_len {
+            self.length.set(new_len);
+        }
 
         Ok(DefinePropertyResult::Handled)
     }
