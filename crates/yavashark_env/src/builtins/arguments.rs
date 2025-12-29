@@ -1,4 +1,4 @@
-use crate::array::{ArrayIterator, MutableArrayIterator};
+use crate::array::{ArrayIterator, ArrayIteratorKind, MutableArrayIterator};
 use crate::error::Error;
 use crate::value::{
     Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
@@ -433,6 +433,7 @@ impl Arguments {
             array: obj,
             next: Cell::new(0),
             done: Cell::new(false),
+            kind: ArrayIteratorKind::Values,
         };
 
         let iter: Box<dyn Obj> = Box::new(iter);

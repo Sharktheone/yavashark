@@ -1,6 +1,6 @@
 mod conv;
 
-use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
+use crate::array::{convert_index, Array, ArrayIterator, ArrayIteratorKind, MutableArrayIterator};
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
 use crate::builtins::biguint64array::{BigUint64Array, BigUint64ArrayConstructor};
@@ -770,6 +770,7 @@ impl TypedArray {
             array,
             next: Cell::new(0),
             done: Cell::new(false),
+            kind: ArrayIteratorKind::Entries,
         };
 
         Ok(iter.into_value())
@@ -1116,6 +1117,7 @@ impl TypedArray {
             array,
             next: Cell::new(0),
             done: Cell::new(false),
+            kind: ArrayIteratorKind::Keys,
         };
 
         Ok(iter.into_object())
@@ -1583,6 +1585,7 @@ impl TypedArray {
             array,
             next: Cell::new(0),
             done: Cell::new(false),
+            kind: ArrayIteratorKind::Values,
         };
 
         Ok(iter.into_object())
@@ -1627,6 +1630,7 @@ impl TypedArray {
             array,
             next: Cell::new(0),
             done: Cell::new(false),
+            kind: ArrayIteratorKind::Values,
         };
 
         let iter: Box<dyn Obj> = Box::new(iter);
