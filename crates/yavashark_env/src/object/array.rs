@@ -497,7 +497,7 @@ impl Array {
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 
-        let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
+        let index = self.length.get();
 
         let len = inner.values.len();
         inner.values.push(Variable::new(value).into());
