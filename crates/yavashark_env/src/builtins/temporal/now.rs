@@ -27,7 +27,10 @@ impl Now {
     }
 
     #[prop("plainDateTimeISO")]
-    fn plain_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<PlainDateTime>> {
+    fn plain_date_time_iso(
+        realm: &mut Realm,
+        tz: Option<TimeZone>,
+    ) -> Res<NativeObject<PlainDateTime>> {
         PlainDateTime::now_obj(realm, tz)
     }
 
@@ -46,7 +49,10 @@ impl Now {
     }
 
     #[prop("zonedDateTimeISO")]
-    fn zoned_date_time_iso(realm: &mut Realm, tz: Option<TimeZone>) -> Res<NativeObject<ZonedDateTime>> {
+    fn zoned_date_time_iso(
+        realm: &mut Realm,
+        tz: Option<TimeZone>,
+    ) -> Res<NativeObject<ZonedDateTime>> {
         ZonedDateTime::now_obj(realm, tz)
     }
 }

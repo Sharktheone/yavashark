@@ -91,7 +91,10 @@ impl Instant {
     }
 
     #[prop("fromEpochNanoseconds")]
-    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &mut Realm) -> Res<NativeObject<Self>> {
+    fn from_epoch_nanoseconds(
+        epoch: &BigInt,
+        #[realm] realm: &mut Realm,
+    ) -> Res<NativeObject<Self>> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
@@ -174,7 +177,7 @@ impl Instant {
         } else {
             None
         };
-        
+
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
@@ -199,7 +202,7 @@ impl Instant {
             .stamp
             .to_zoned_date_time_iso(time_zone)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(ZonedDateTime::new(zdt, realm)?.into_object())
     }
 

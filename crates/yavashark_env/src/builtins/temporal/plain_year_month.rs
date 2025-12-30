@@ -20,7 +20,10 @@ pub struct PlainYearMonth {
 }
 
 impl PlainYearMonth {
-    pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &mut Realm) -> Res<NativeObject<Self>> {
+    pub fn new(
+        year_month: temporal_rs::PlainYearMonth,
+        realm: &mut Realm,
+    ) -> Res<NativeObject<Self>> {
         NativeObject::new(Self { year_month }, realm)
     }
 }

@@ -20,7 +20,10 @@ pub struct PlainMonthDay {
 }
 
 impl PlainMonthDay {
-    pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &mut crate::Realm) -> Res<NativeObject<Self>> {
+    pub fn new(
+        month_day: temporal_rs::PlainMonthDay,
+        realm: &mut crate::Realm,
+    ) -> Res<NativeObject<Self>> {
         NativeObject::new(Self { month_day }, realm)
     }
 }

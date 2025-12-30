@@ -641,8 +641,6 @@ impl Array {
 
         // 5. For each element E of items, do
         for e in items {
-
-
             match e {
                 // 5.a. Let spreadable be ? IsConcatSpreadable(E).
                 Value::Object(e_obj) if is_concat_spreadable(&e_obj, realm)? => {
@@ -841,11 +839,8 @@ impl Array {
 
                 // 5.c.ii. Let testResult be ToBoolean(? Call(callback, thisArg, « kValue, 𝔽(k), O »)).
                 let this_arg = this_arg.clone().unwrap_or(Value::Undefined);
-                let test_result = func.call(
-                    vec![k_value, k.into(), o.clone().into()],
-                    this_arg,
-                    realm,
-                )?;
+                let test_result =
+                    func.call(vec![k_value, k.into(), o.clone().into()], this_arg, realm)?;
 
                 // 5.c.iii. If testResult is false, return false.
                 if test_result.is_falsey() {
@@ -1016,11 +1011,8 @@ impl Array {
 
             // 5.c. Let testResult be ToBoolean(? Call(predicate, thisArg, « kValue, 𝔽(k), O »)).
             let this_arg = this_arg.clone().unwrap_or(Value::Undefined);
-            let test_result = func.call(
-                vec![k_value, k.into(), o.clone().into()],
-                this_arg,
-                realm,
-            )?;
+            let test_result =
+                func.call(vec![k_value, k.into(), o.clone().into()], this_arg, realm)?;
 
             // 5.d. If testResult is true, return 𝔽(k).
             if test_result.is_truthy() {
@@ -1108,11 +1100,8 @@ impl Array {
 
             // 5.c. Let testResult be ToBoolean(? Call(predicate, thisArg, « kValue, 𝔽(k), O »)).
             let this_arg = this_arg.clone().unwrap_or(Value::Undefined);
-            let test_result = func.call(
-                vec![k_value, k.into(), o.clone().into()],
-                this_arg,
-                realm,
-            )?;
+            let test_result =
+                func.call(vec![k_value, k.into(), o.clone().into()], this_arg, realm)?;
 
             // 5.d. If testResult is true, return 𝔽(k).
             if test_result.is_truthy() {
@@ -1346,16 +1335,16 @@ impl Array {
         // 10. Repeat, while k < len,
         for idx in k..len {
             let pk = idx.to_string();
-            
+
             // a. Let Pk be ! ToString(𝔽(k)).
             // b. Let kPresent be ? HasProperty(O, Pk).
             let k_present = o.contains_key(pk.clone().into(), realm)?;
-            
+
             // c. If kPresent is true, then
             if k_present {
                 // i. Let elementK be ? Get(O, Pk).
                 let element_k = o.get(pk, realm)?;
-                
+
                 // ii. If IsStrictlyEqual(searchElement, elementK) is true, return 𝔽(k).
                 if search_element == &element_k {
                     return Ok(idx.into());
@@ -1377,7 +1366,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength conversion
         let len = if len.is_nan() || len <= 0.0 {
             0usize
@@ -1395,7 +1384,7 @@ impl Array {
 
         // 5. Let R be the empty String.
         let mut r = String::new();
-        
+
         // 6. Let k be 0.
         // 7. Repeat, while k < len,
         for k in 0..len {
@@ -1403,10 +1392,10 @@ impl Array {
             if k > 0 {
                 r.push_str(&sep);
             }
-            
+
             // 7.b. Let element be ? Get(O, ! ToString(𝔽(k))).
             let element = o.get(k, realm)?;
-            
+
             // 7.c. If element is neither undefined nor null, then
             if !element.is_undefined() && !element.is_null() {
                 // 7.c.i. Let S be ? ToString(element).
@@ -1430,7 +1419,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength conversion
         let len = if len.is_nan() || len <= 0.0 {
             0usize
@@ -1444,7 +1433,7 @@ impl Array {
 
         // 4. Let R be the empty String.
         let mut r = String::new();
-        
+
         // 5. Let k be 0.
         // 6. Repeat, while k < len,
         for k in 0..len {
@@ -1452,10 +1441,10 @@ impl Array {
             if k > 0 {
                 r.push_str(sep);
             }
-            
+
             // 6.b. Let element be ? Get(array, ! ToString(𝔽(k))).
             let element = array.get(k, realm)?;
-            
+
             // 6.c. If element is neither undefined nor null, then
             if !element.is_undefined() && !element.is_null() {
                 // 6.c.i. Let S be ? ToString(? Invoke(element, "toLocaleString")).
@@ -1468,7 +1457,7 @@ impl Array {
                     element
                 };
                 let s_str = s.to_string(realm)?;
-                
+
                 // 6.c.ii. Set R to the string-concatenation of R and S.
                 r.push_str(&s_str);
             }
@@ -1631,11 +1620,8 @@ impl Array {
 
                 // 6.c.ii. Let mappedValue be ? Call(callback, thisArg, « kValue, 𝔽(k), O »).
                 let this_arg = this_arg.clone().unwrap_or(Value::Undefined);
-                let mapped_value = callback.call(
-                    realm,
-                    vec![k_value, k.into(), o.clone().into()],
-                    this_arg,
-                )?;
+                let mapped_value =
+                    callback.call(realm, vec![k_value, k.into(), o.clone().into()], this_arg)?;
 
                 // 6.c.iii. Perform ? CreateDataPropertyOrThrow(A, Pk, mappedValue).
                 a.insert_array(mapped_value, k)?;
@@ -1658,7 +1644,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength conversion
         let len = if len_raw.is_nan() || len_raw <= 0.0 {
             0u64
@@ -1680,19 +1666,19 @@ impl Array {
         // 4.a. Assert: len > 0.
         // 4.b. Let newLen be 𝔽(len - 1).
         let new_len = len - 1;
-        
+
         // 4.c. Let index be ! ToString(newLen).
         let index = new_len.to_string();
-        
+
         // 4.d. Let element be ? Get(O, index).
         let element = o.get(index.clone(), realm)?;
-        
+
         // 4.e. Perform ? DeletePropertyOrThrow(O, index).
         o.delete_property(index.into(), realm)?;
-        
+
         // 4.f. Perform ? Set(O, "length", newLen, true).
         o.set("length", Value::Number(new_len as f64), realm)?;
-        
+
         // 4.g. Return element.
         Ok(element)
     }
@@ -1716,7 +1702,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToIntegerOrInfinity: NaN, +0, -0 -> 0; +inf -> +inf; -inf -> -inf; else truncate
         let len = if len_raw.is_nan() || len_raw == 0.0 {
             0u64
@@ -1779,9 +1765,7 @@ impl Array {
 
         // 4. If len = 0 and initialValue is not present, throw a TypeError exception.
         if len == 0 && !initial_value_present {
-            return Err(Error::ty(
-                "Reduce of empty array with no initial value",
-            ));
+            return Err(Error::ty("Reduce of empty array with no initial value"));
         }
 
         // 5. Let k be 0.
@@ -1811,9 +1795,7 @@ impl Array {
             }
 
             if !k_present {
-                return Err(Error::ty(
-                    "Reduce of empty array with no initial value",
-                ));
+                return Err(Error::ty("Reduce of empty array with no initial value"));
             }
         }
 
@@ -1866,9 +1848,7 @@ impl Array {
 
         // 4. If len = 0 and initialValue is not present, throw a TypeError exception.
         if len == 0 && !initial_value_present {
-            return Err(Error::ty(
-                "Reduce of empty array with no initial value",
-            ));
+            return Err(Error::ty("Reduce of empty array with no initial value"));
         }
 
         // 5. Let k be len - 1.
@@ -1907,9 +1887,7 @@ impl Array {
 
             // 8.c. If kPresent is false, throw a TypeError exception.
             if !k_present {
-                return Err(Error::ty(
-                    "Reduce of empty array with no initial value",
-                ));
+                return Err(Error::ty("Reduce of empty array with no initial value"));
             }
         }
 
@@ -1951,7 +1929,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength conversion
         let len = if len.is_nan() || len <= 0.0 {
             0u64
@@ -1963,39 +1941,39 @@ impl Array {
 
         // 3. Let middle be floor(len / 2).
         let middle = len / 2;
-        
+
         // 4. Let lower be 0.
         let mut lower = 0u64;
-        
+
         // 5. Repeat, while lower ≠ middle,
         while lower != middle {
             // 5.a. Let upper be len - lower - 1.
             let upper = len - lower - 1;
-            
+
             // 5.b-c. Let upperP and lowerP be the string representations.
             let upper_p = upper.to_string();
             let lower_p = lower.to_string();
-            
+
             // 5.d. Let lowerExists be ? HasProperty(O, lowerP).
             let lower_exists = o.contains_key(lower_p.clone().into(), realm)?;
-            
+
             // 5.e. If lowerExists is true, then let lowerValue be ? Get(O, lowerP).
             let lower_value = if lower_exists {
                 Some(o.get(lower_p.clone(), realm)?)
             } else {
                 None
             };
-            
+
             // 5.f. Let upperExists be ? HasProperty(O, upperP).
             let upper_exists = o.contains_key(upper_p.clone().into(), realm)?;
-            
+
             // 5.g. If upperExists is true, then let upperValue be ? Get(O, upperP).
             let upper_value = if upper_exists {
                 Some(o.get(upper_p.clone(), realm)?)
             } else {
                 None
             };
-            
+
             // 5.h. If lowerExists is true and upperExists is true, then
             if lower_exists && upper_exists {
                 // 5.h.i. Perform ? Set(O, lowerP, upperValue, true).
@@ -2018,11 +1996,11 @@ impl Array {
                 o.set(upper_p, lower_value.unwrap(), realm)?;
             }
             // 5.k. Else (both don't exist - no action needed)
-            
+
             // 5.l. Set lower to lower + 1.
             lower += 1;
         }
-        
+
         // 6. Return O.
         Ok(o.into())
     }
@@ -2036,7 +2014,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength conversion
         let len = if len_raw.is_nan() || len_raw <= 0.0 {
             0u64
@@ -2064,10 +2042,10 @@ impl Array {
             let from = k.to_string();
             // 6.b. Let to be ! ToString(𝔽(k - 1)).
             let to = (k - 1).to_string();
-            
+
             // 6.c. Let fromPresent be ? HasProperty(O, from).
             let from_present = o.contains_key(from.clone().into(), realm)?;
-            
+
             // 6.d. If fromPresent is true, then
             if from_present {
                 // 6.d.i. Let fromValue be ? Get(O, from).
@@ -2085,10 +2063,10 @@ impl Array {
 
         // 7. Perform ? DeletePropertyOrThrow(O, ! ToString(𝔽(len - 1))).
         o.delete_property((len - 1).to_string().into(), realm)?;
-        
+
         // 8. Perform ? Set(O, "length", 𝔽(len - 1), true).
         o.set("length", Value::Number((len - 1) as f64), realm)?;
-        
+
         // 9. Return first.
         Ok(first)
     }
@@ -2108,7 +2086,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // Convert to i64 for proper handling of large values
         let len = if len.is_nan() || len <= 0.0 {
             0i64
@@ -2185,13 +2163,13 @@ impl Array {
         if count > MAX_ARRAY_LENGTH {
             return Err(Error::range("Invalid array length"));
         }
-        
+
         // TODO: Implement proper ArraySpeciesCreate with Symbol.species support
         let array = Self::from_realm(realm)?;
 
         // 13. Let n be 0.
         let mut n = 0u64;
-        
+
         // 14. Repeat, while k < final,
         let mut k = k as u64;
         let final_idx = final_idx as u64;
@@ -2199,7 +2177,7 @@ impl Array {
             // 14.a. Let Pk be ! ToString(𝔽(k)).
             // 14.b. Let kPresent be ? HasProperty(O, Pk).
             let k_present = o.contains_key((k as usize).into(), realm)?;
-            
+
             // 14.c. If kPresent is true, then
             if k_present {
                 // 14.c.i. Let kValue be ? Get(O, Pk).
@@ -2252,11 +2230,8 @@ impl Array {
 
                 // 5.c.ii. Let testResult be ToBoolean(? Call(callback, thisArg, « kValue, 𝔽(k), O »)).
                 let this_arg = this_arg.clone().unwrap_or(Value::Undefined);
-                let test_result = func.call(
-                    vec![k_value, k.into(), o.clone().into()],
-                    this_arg,
-                    realm,
-                )?;
+                let test_result =
+                    func.call(vec![k_value, k.into(), o.clone().into()], this_arg, realm)?;
 
                 // 5.c.iii. If testResult is true, return true.
                 if test_result.is_truthy() {
@@ -2367,11 +2342,7 @@ impl Array {
     }
 
     #[length(2)]
-    fn splice(
-        #[this] this: Value,
-        args: Vec<Value>,
-        #[realm] realm: &mut Realm,
-    ) -> ValueResult {
+    fn splice(#[this] this: Value, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
         // 1. Let O be ? ToObject(this value).
         let o = coerce_object_strict(this, realm)?;
 
@@ -2593,11 +2564,7 @@ impl Array {
                     return Ordering::Less;
                 }
                 // 4. Call comparator
-                let Ok(x) = func.call(
-                    realm,
-                    vec![a.clone(), b.clone()],
-                    Value::Undefined,
-                ) else {
+                let Ok(x) = func.call(realm, vec![a.clone(), b.clone()], Value::Undefined) else {
                     //TODO: this is NOT good, we can't throw the error here
                     return Ordering::Equal;
                 };
@@ -2652,7 +2619,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         // ToLength: If len is NaN, negative, or not a finite number, treat as 0
         let len = if len_num.is_nan() || len_num < 0.0 || !len_num.is_finite() {
             0usize
@@ -2830,7 +2797,7 @@ impl Array {
             .resolve_property("length", realm)?
             .unwrap_or(Value::Undefined)
             .to_number(realm)?;
-        
+
         let len = if len_raw.is_nan() || len_raw <= 0.0 {
             0i64
         } else if len_raw >= 9007199254740991.0 {
@@ -2885,10 +2852,10 @@ impl Array {
             } else {
                 o.get(k, realm)?
             };
-            
+
             // 9.d. Perform ! CreateDataPropertyOrThrow(A, Pk, fromValue).
             array.insert_array(from_value, k)?;
-            
+
             // 9.e. Set k to k + 1.
         }
 
@@ -2958,10 +2925,10 @@ impl Array {
     fn to_string_js(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // 1. Let array be ? ToObject(this value).
         let array = coerce_object_strict(this.clone(), realm)?;
-        
+
         // 2. Let func be ? Get(array, "join").
         let func = array.get("join", realm)?;
-        
+
         // 3. If IsCallable(func) is false, set func to the intrinsic function %Object.prototype.toString%.
         // 4. Return ? Call(func, array).
         if func.is_callable() {
@@ -3038,16 +3005,16 @@ impl Constructor for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         // 3. Let numberOfArgs be the number of elements in values.
         let number_of_args = args.len();
-        
+
         // 4. If numberOfArgs = 0, return ArrayCreate(0, proto).
         if number_of_args == 0 {
             return Ok(Obj::into_object(Array::from_realm(realm)?));
         }
-        
+
         // 5. Else if numberOfArgs = 1, then
         if number_of_args == 1 {
             let len = &args[0];
-            
+
             // 5.c. If len is not a Number, then
             if !matches!(len, Value::Number(_)) {
                 // 5.c.i. Perform ! CreateDataPropertyOrThrow(array, "0", len).
@@ -3055,19 +3022,19 @@ impl Constructor for ArrayConstructor {
                 let array = Array::with_elements(realm, args)?;
                 return Ok(Obj::into_object(array));
             }
-            
+
             // 5.d. Else (len is a Number)
             let len_num = len.as_number();
-            
+
             // 5.d.i. Let intLen be ! ToUint32(len).
             let int_len = len_num as u32;
-            
+
             // 5.d.ii. If SameValueZero(intLen, len) is false, throw a RangeError exception.
             // SameValueZero: intLen as f64 should equal len_num
             if (int_len as f64) != len_num {
                 return Err(Error::range("Invalid array length"));
             }
-            
+
             // 5.e. Perform ! Set(array, "length", intLen, true).
             return Ok(Obj::into_object(Array::with_len(realm, int_len as usize)?));
         }

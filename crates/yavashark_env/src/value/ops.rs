@@ -515,9 +515,7 @@ impl PartialOrd for Value {
                 a.partial_cmp(&0.0)
             }
             (Self::String(a), Self::Number(b)) => a.parse::<f64>().ok()?.partial_cmp(b),
-            (Self::String(a), Self::String(b)) => {
-                a.as_str().partial_cmp(b.as_str())
-            }
+            (Self::String(a), Self::String(b)) => a.as_str().partial_cmp(b.as_str()),
             (Self::String(a), Self::Boolean(b)) => {
                 let a = a.parse::<f64>().ok()?;
                 a.partial_cmp(&b.num())
