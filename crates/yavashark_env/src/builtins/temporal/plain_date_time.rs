@@ -3,7 +3,7 @@ use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 use crate::builtins::temporal::utils::{
     difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options,
-    string_rounding_mode_opts, value_to_date_time_fields,
+    string_rounding_mode_opts, value_to_date_time_fields, value_to_date_time_fields_no_validate,
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::native_obj::NativeObject;
@@ -11,6 +11,7 @@ use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
+use temporal_rs::partial::PartialDateTime;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -423,77 +424,15 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 
     let obj = info.to_object()?;
 
-    if obj.contains_key("year".into(), realm)?
-        || obj.contains_key("month".into(), realm)?
-        || obj.contains_key("monthCode".into(), realm)?
-        || obj.contains_key("day".into(), realm)?
-    {
-        let year = obj
-            .resolve_property("year", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
-        let month = obj
-            .resolve_property("month", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+    let calendar = obj
+        .extract_opt::<Calendar>("calendar", realm)?
+        .unwrap_or_default();
 
-        let month = if month == 0 {
-            obj.resolve_property("monthCode", realm)?
-                .and_then(|v| v.to_string(realm).ok())
-                .and_then(|s| {
-                    if s.is_empty() {
-                        None
-                    } else {
-                        s.as_str()[1..].parse::<u8>().ok()
-                    }
-                })
-                .unwrap_or(0)
-        } else {
-            month
-        };
+    let fields = value_to_date_time_fields_no_validate(&obj, true, realm)?;
 
-        let day = obj
-            .resolve_property("day", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-        let hour = obj
-            .resolve_property("hour", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-        let minute = obj
-            .resolve_property("minute", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-        let second = obj
-            .resolve_property("second", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-        let millisecond = obj
-            .resolve_property("millisecond", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-        let microsecond = obj
-            .resolve_property("microsecond", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-        let nanosecond = obj
-            .resolve_property("nanosecond", realm)?
-            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
+    let partial = PartialDateTime { fields, calendar };
 
-        let calendar = obj
-            .extract_opt::<Calendar>("calendar", realm)?
-            .unwrap_or_default();
-
-        let datetime = temporal_rs::PlainDateTime::new(
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            millisecond,
-            microsecond,
-            nanosecond,
-            calendar,
-        )
-        .map_err(Error::from_temporal)?;
-
-        return Ok(datetime);
-    }
-
-    Err(Error::range("Invalid date")) //TODO
+    temporal_rs::PlainDateTime::from_partial(partial, None).map_err(Error::from_temporal)
 }
 
 impl PrettyObjectOverride for PlainDateTime {

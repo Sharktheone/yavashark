@@ -540,8 +540,26 @@ pub fn value_to_date_time_fields(
     needs_fields: bool,
     realm: &mut Realm,
 ) -> Res<DateTimeFields> {
-    let calendar_fields = value_to_calendar_fields(other, needs_fields, true, realm)?;
-    let time = value_to_partial_time(other, needs_fields, realm)?;
+    value_to_date_time_fields_inner(other, needs_fields, needs_fields, true, realm)
+}
+
+pub fn value_to_date_time_fields_no_validate(
+    other: &ObjectHandle,
+    needs_date_fields: bool,
+    realm: &mut Realm,
+) -> Res<DateTimeFields> {
+    value_to_date_time_fields_inner(other, needs_date_fields, false, false, realm)
+}
+
+fn value_to_date_time_fields_inner(
+    other: &ObjectHandle,
+    needs_date_fields: bool,
+    needs_time_fields: bool,
+    validate: bool,
+    realm: &mut Realm,
+) -> Res<DateTimeFields> {
+    let calendar_fields = value_to_calendar_fields(other, needs_date_fields, validate, realm)?;
+    let time = value_to_partial_time(other, needs_time_fields, realm)?;
 
     Ok(DateTimeFields {
         calendar_fields,
