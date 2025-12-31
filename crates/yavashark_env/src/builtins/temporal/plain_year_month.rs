@@ -10,6 +10,7 @@ use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
 use temporal_rs::fields::CalendarFields;
+use temporal_rs::partial::PartialYearMonth;
 use temporal_rs::Calendar;
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -296,56 +297,24 @@ pub fn value_to_plain_year_month(
                 return Ok(obj.year_month.clone());
             }
 
-            let opts = opts
+            let overflow = opts
                 .as_ref()
                 .map(|opts| overflow_options(opts, realm))
                 .transpose()?
-                .flatten()
-                .unwrap_or_default();
+                .flatten();
 
             let calendar = obj
                 .extract_opt::<Calendar>("calendar", realm)?
                 .unwrap_or_default();
 
-            // let era = obj
-            //     .get_property_opt(&"era".into())?
-            //     .map(|v| v.value)
-            //     .and_then(|v| v.to_string(realm).ok());
-            //
-            // let era_year = obj
-            //     .get_property_opt(&"eraYear".into())?
-            //     .map(|v| v.value)
-            //     .and_then(|v| v.to_number(realm).ok());
+            let calendar_fields = value_to_year_month_fields(&obj, realm)?;
 
-            let month = obj
-                .get_property_opt("month", realm)?
-                .and_then(|v| v.to_number(realm).ok())
-                .map(|v| v as u8)
-                .ok_or_else(|| Error::ty("Expected month to be a number"))?;
-
-            let month = if month == 0 {
-                obj.resolve_property("monthCode", realm)?
-                    .and_then(|v| v.to_string(realm).ok())
-                    .and_then(|s| {
-                        if s.is_empty() {
-                            None
-                        } else {
-                            s.as_str()[1..].parse::<u8>().ok()
-                        }
-                    })
-                    .unwrap_or(0)
-            } else {
-                month
+            let partial = PartialYearMonth {
+                calendar_fields,
+                calendar,
             };
 
-            let year = obj
-                .resolve_property("year", realm)?
-                .unwrap_or(Value::Undefined)
-                .to_number(realm)?;
-
-            let year = year as i32;
-
-            temporal_rs::PlainYearMonth::new_with_overflow(year, month, None, calendar, opts)
+            temporal_rs::PlainYearMonth::from_partial(partial, overflow)
                 .map_err(Error::from_temporal)
         }
         Value::String(str) => {
