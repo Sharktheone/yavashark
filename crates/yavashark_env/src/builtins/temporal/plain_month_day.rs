@@ -63,9 +63,7 @@ impl PlainMonthDay {
             .transpose()?
             .flatten();
 
-        let mut month_day = value_to_plain_month_day(info, realm, overflow)?;
-
-        month_day.iso.year = 1972;
+        let month_day = value_to_plain_month_day(info, realm, overflow)?;
 
         Ok(Self::new(month_day, realm)?.into_object())
     }
@@ -160,53 +158,19 @@ pub fn value_to_plain_month_day(
                 return Ok(plain_month_day.month_day.clone());
             }
 
-            let overflow = overflow.unwrap_or(Overflow::Constrain);
+            let calendar = obj
+                .extract_opt::<Calendar>("calendar", realm)?
+                .unwrap_or_default();
 
-            if (obj.contains_key("month".into(), realm)?
-                || obj.contains_key("monthCode".into(), realm)?)
-                && obj.contains_key("day".into(), realm)?
-            {
-                let year = obj
-                    .resolve_property("year", realm)?
-                    .map(|v| v.to_number(realm).map(|v| v as i32))
-                    .transpose()?;
+            let calendar_fields = value_to_calendar_fields(&obj, true, false, realm)?;
 
-                let month = obj
-                    .resolve_property("month", realm)?
-                    .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let partial = PartialDate {
+                calendar_fields,
+                calendar,
+            };
 
-                let month = if month == 0 {
-                    obj.resolve_property("monthCode", realm)?
-                        .and_then(|v| v.to_string(realm).ok())
-                        .and_then(|s| {
-                            if s.is_empty() {
-                                None
-                            } else {
-                                s.as_str()[1..].parse::<u8>().ok()
-                            }
-                        })
-                        .unwrap_or(0)
-                } else {
-                    month
-                };
-
-                let day = obj
-                    .resolve_property("day", realm)?
-                    .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-
-                let calendar = obj
-                    .extract_opt::<Calendar>("calendar", realm)?
-                    .unwrap_or_default();
-
-                return temporal_rs::PlainMonthDay::new_with_overflow(
-                    month, day, calendar, overflow, year,
-                )
-                .map_err(Error::from_temporal);
-            }
-
-            Err(Error::ty(
-                "Expected PlainMonthDay object with year, month, and day properties",
-            ))
+            temporal_rs::PlainMonthDay::from_partial(partial, overflow)
+                .map_err(Error::from_temporal)
         }
         Value::String(s) => {
             let month_day = temporal_rs::PlainMonthDay::from_str(&s.to_string())
