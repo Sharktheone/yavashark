@@ -1371,7 +1371,7 @@ impl Array {
         let len = if len.is_nan() || len <= 0.0 {
             0usize
         } else {
-            (len.trunc() as usize).min(9007199254740991)
+            (len.trunc() as usize).min(isize::MAX as usize)
         };
 
         // 3. If separator is undefined, let sep be ",".
@@ -1424,7 +1424,7 @@ impl Array {
         let len = if len.is_nan() || len <= 0.0 {
             0usize
         } else {
-            (len.trunc() as usize).min(9007199254740991)
+            (len.trunc() as usize).min(isize::MAX as usize)
         };
 
         // 3. Let separator be the implementation-defined list-separator String value appropriate for the host environment's current locale.
