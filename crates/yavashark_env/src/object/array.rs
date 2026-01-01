@@ -1974,28 +1974,33 @@ impl Array {
                 None
             };
 
-            // 5.h. If lowerExists is true and upperExists is true, then
-            if lower_exists && upper_exists {
-                // 5.h.i. Perform ? Set(O, lowerP, upperValue, true).
-                o.set(lower_p, upper_value.unwrap(), realm)?;
-                // 5.h.ii. Perform ? Set(O, upperP, lowerValue, true).
-                o.set(upper_p, lower_value.unwrap(), realm)?;
+
+            match (upper_value, lower_value) {
+                // 5.h. If lowerExists is true and upperExists is true, then
+                (Some(uv), Some(lv)) => {
+                    // 5.h.i. Perform ? Set(O, lowerP, upperValue, true).
+                    o.set(lower_p, uv, realm)?;
+                    // 5.h.ii. Perform ? Set(O, upperP, lowerValue, true).
+                    o.set(upper_p, lv, realm)?;
+                }
+                // 5.i. Else if lowerExists is false and upperExists is true, then
+                (Some(uv), None) => {
+                    // 5.i.i. Perform ? Set(O, lowerP, upperValue, true).
+                    o.set(lower_p, uv, realm)?;
+                    // 5.i.ii. Perform ? DeletePropertyOrThrow(O, upperP).
+                    o.delete_property(upper_p.into(), realm)?;
+                }
+                // 5.j. Else if lowerExists is true and upperExists is false, then
+                (None, Some(lv)) => {
+                    // 5.j.i. Perform ? DeletePropertyOrThrow(O, lowerP).
+                    o.delete_property(lower_p.into(), realm)?;
+                    // 5.j.ii. Perform ? Set(O, upperP, lowerValue, true).
+                    o.set(upper_p, lv, realm)?;
+                }
+                // 5.k. Else (both don't exist - no action needed)
+                _ => {}
             }
-            // 5.i. Else if lowerExists is false and upperExists is true, then
-            else if !lower_exists && upper_exists {
-                // 5.i.i. Perform ? Set(O, lowerP, upperValue, true).
-                o.set(lower_p, upper_value.unwrap(), realm)?;
-                // 5.i.ii. Perform ? DeletePropertyOrThrow(O, upperP).
-                o.delete_property(upper_p.into(), realm)?;
-            }
-            // 5.j. Else if lowerExists is true and upperExists is false, then
-            else if lower_exists && !upper_exists {
-                // 5.j.i. Perform ? DeletePropertyOrThrow(O, lowerP).
-                o.delete_property(lower_p.into(), realm)?;
-                // 5.j.ii. Perform ? Set(O, upperP, lowerValue, true).
-                o.set(upper_p, lower_value.unwrap(), realm)?;
-            }
-            // 5.k. Else (both don't exist - no action needed)
+
 
             // 5.l. Set lower to lower + 1.
             lower += 1;
@@ -2646,13 +2651,13 @@ impl Array {
         let actual_skip_count = if start.is_none() {
             // If start is not present, actualSkipCount = 0
             0
-        } else if skip_count.is_none() {
+        } else if let Some(skip_count) = skip_count {
+            // Clamp sc between 0 and len - actualStart
+            let sc = skip_count.max(0) as usize;
+            sc.min(len.saturating_sub(actual_start))
+        } else {
             // If skipCount is not present, actualSkipCount = len - actualStart
             len.saturating_sub(actual_start)
-        } else {
-            // Clamp sc between 0 and len - actualStart
-            let sc = skip_count.unwrap().max(0) as usize;
-            sc.min(len.saturating_sub(actual_start))
         };
 
         // 12. Let newLen be len + insertCount - actualSkipCount.
