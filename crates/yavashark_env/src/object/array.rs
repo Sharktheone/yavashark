@@ -1974,7 +1974,6 @@ impl Array {
                 None
             };
 
-
             match (upper_value, lower_value) {
                 // 5.h. If lowerExists is true and upperExists is true, then
                 (Some(uv), Some(lv)) => {
@@ -2000,7 +1999,6 @@ impl Array {
                 // 5.k. Else (both don't exist - no action needed)
                 _ => {}
             }
-
 
             // 5.l. Set lower to lower + 1.
             lower += 1;
