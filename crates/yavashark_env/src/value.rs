@@ -769,7 +769,8 @@ impl Value {
                     return Ok(prim.to_string().into());
                 }
 
-                o.to_string(realm)?
+                let prim = o.to_primitive(Hint::String, realm)?;
+                prim.to_string(realm)?
             }
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
@@ -788,7 +789,8 @@ impl Value {
                     return Ok(prim.into_string());
                 }
 
-                o.to_string(realm)?
+                let prim = o.to_primitive(Hint::String, realm)?;
+                prim.into_string(realm)?
             }
             Self::Null => YSString::new_static("null"),
             Self::Undefined => YSString::new_static("undefined"),
