@@ -1355,49 +1355,27 @@ impl Object {
             }
         }
 
-        if hint == Hint::String {
-            let to_string = self.resolve_property("toString", realm)?;
+        // OrdinaryToPrimitive
+        let method_names = if hint == Hint::String {
+            ["toString", "valueOf"]
+        } else {
+            ["valueOf", "toString"]
+        };
 
-            if let Some(Value::Object(to_string)) = to_string {
-                if to_string.is_callable() {
-                    return to_string
-                        .call(Vec::new(), self.clone().into(), realm)?
-                        .assert_no_object();
-                }
-            }
+        for method_name in method_names {
+            let method = self.resolve_property(method_name, realm)?;
 
-            let to_value = self.resolve_property("valueOf", realm)?;
-
-            if let Some(Value::Object(to_value)) = to_value {
-                if to_value.is_callable() {
-                    return to_value
-                        .call(Vec::new(), self.clone().into(), realm)?
-                        .assert_no_object();
-                }
-            }
-        }
-
-        let to_value = self.resolve_property("valueOf", realm)?;
-
-        if let Some(Value::Object(to_value)) = to_value {
-            if to_value.is_callable() {
-                let val = to_value.call(Vec::new(), self.clone().into(), realm)?;
-
-                if !val.is_object() {
-                    return Ok(val);
+            if let Some(Value::Object(method)) = method {
+                if method.is_callable() {
+                    let result = method.call(Vec::new(), self.clone().into(), realm)?;
+                    if !result.is_object() {
+                        return Ok(result);
+                    }
+                    // If result is an object, continue to the next method
                 }
             }
         }
 
-        let to_string = self.resolve_property("toString", realm)?;
-
-        if let Some(Value::Object(to_string)) = to_string {
-            if to_string.is_callable() {
-                return to_string
-                    .call(Vec::new(), self.clone().into(), realm)?
-                    .assert_no_object();
-            }
-        }
         Err(Error::ty("Cannot convert object to primitive"))
     }
 
