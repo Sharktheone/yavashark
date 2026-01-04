@@ -84,7 +84,7 @@ pub(crate) fn main() {
         )
         .get_matches();
 
-    let interpreter = matches.get_flag("interpreter");
+    let mut interpreter = matches.get_flag("interpreter");
     let bytecode = matches.get_flag("bytecode");
     let old_bytecode = matches.get_flag("oldbytecode");
     let ast = matches.get_flag("ast");
@@ -93,8 +93,7 @@ pub(crate) fn main() {
     let shellold = matches.get_flag("shellold");
 
     if !(interpreter || bytecode || ast || instructions) {
-        println!("No interpreter specified");
-        return;
+        interpreter = true;
     }
 
     let src = matches.get_one::<String>("source");
