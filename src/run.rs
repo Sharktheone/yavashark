@@ -82,6 +82,14 @@ pub(crate) fn main() {
                 .default_value("false")
                 .action(clap::ArgAction::SetTrue),
         )
+        .arg(
+            clap::Arg::new("eval")
+                .help("Evaluate the provided JavaScript code")
+                .short('e')
+                .long("eval")
+                .value_name("CODE")
+                .required(false),
+        )
         .get_matches();
 
     let mut interpreter = matches.get_flag("interpreter");
@@ -91,6 +99,7 @@ pub(crate) fn main() {
     let instructions = matches.get_flag("instructions");
     let shell = matches.get_flag("shell");
     let shellold = matches.get_flag("shellold");
+    let eval_code = matches.get_one::<String>("eval");
 
     if !(interpreter || bytecode || ast || instructions) {
         interpreter = true;
@@ -103,140 +112,38 @@ pub(crate) fn main() {
         return;
     }
 
+    if eval_code.is_some() && src.is_some() {
+        println!("Cannot use both -e and a source file");
+        return;
+    }
+
+    if eval_code.is_some() && shell {
+        println!("Cannot use both -e and shell");
+        return;
+    }
+
+    // Handle -e option
+    if let Some(code) = eval_code {
+        run_code(code, "<eval>".into(), ast, interpreter, bytecode, old_bytecode, instructions);
+        return;
+    }
+
     if let Some(src) = src {
         let path = PathBuf::from(src);
 
-        let input = std::fs::read_to_string(src).unwrap();
+        let input = match std::fs::read_to_string(src) {
+            Ok(content) => content,
+            Err(e) => {
+                println!("Error reading file: {e}");
+                return;
+            }
+        };
 
         if input.is_empty() {
             return;
         }
 
-        let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32));
-
-        let c = EsSyntax {
-            jsx: false,
-            fn_bind: false,
-            decorators: true,
-            decorators_before_export: true,
-            export_default_from: true,
-            import_attributes: true,
-            allow_super_outside_method: false,
-            allow_return_outside_function: false,
-            auto_accessors: true,
-            explicit_resource_management: true,
-        };
-
-        let mut p = Parser::new(Syntax::Es(c), input, None);
-
-        let script = p.parse_script().unwrap();
-
-        if ast {
-            println!("AST:\n{script:#?}");
-        }
-
-        if let Err(e) = Validator::new().validate_statements(&script.body) {
-            println!("SyntaxError: {e}");
-            return;
-        }
-        let rt = Builder::new_current_thread().enable_all().build().unwrap();
-
-        if interpreter {
-            let mut realm = Realm::new().unwrap();
-            let mut scope = Scope::global(&realm, path.clone());
-            realm.set_eval(InterpreterEval, false).unwrap();
-            yavashark_vm::init(&mut realm).unwrap();
-
-            let result = match yavashark_interpreter::Interpreter::run_in(
-                &script.body,
-                &mut realm,
-                &mut scope,
-            ) {
-                Ok(v) => v,
-                Err(e) => {
-                    println!("Error: {}", e.pretty_print(&mut realm));
-                    return;
-                }
-            };
-            println!("Interpreter: {result:?}");
-
-            rt.block_on(realm.run_event_loop());
-        }
-
-        #[cfg(feature = "vm")]
-        if bytecode {
-            let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
-
-            if instructions {
-                println!("{bc:#?}");
-            }
-
-            if bytecode {
-                use yavashark_vm::yavashark_bytecode::data::DataSection;
-                use yavashark_vm::{OwnedVM, VM};
-                let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
-                let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
-
-                match vm.run() {
-                    Ok(()) => {}
-                    Err(ControlFlow::Continue(_)) => {
-                        println!("Error: Unexpected continue");
-                        return;
-                    }
-                    Err(ControlFlow::Break(_)) => {
-                        println!("Error: Unexpected break");
-                        return;
-                    }
-                    Err(ControlFlow::Return(_)) => {
-                        println!("Error: Unexpected return");
-                        return;
-                    }
-                    Err(ControlFlow::Error(err)) => {
-                        println!("Error: {}", err.pretty_print(vm.get_realm()));
-                        return;
-                    }
-                    Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
-                        println!("Error: Unexpected yield");
-                        return;
-                    }
-                    Err(ControlFlow::Await(_)) => {
-                        println!("Error: Unexpected await");
-                        return;
-                    }
-                    Err(ControlFlow::OptChainShortCircuit) => {
-                        println!("Error: Unexpected optional chaining short-circuit");
-                        return;
-                    }
-                }
-
-                rt.block_on(vm.get_realm().run_event_loop());
-
-                println!("Bytecode: {:?}", vm.acc());
-            }
-        }
-
-        #[cfg(feature = "vm")]
-        if old_bytecode || instructions {
-            let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
-
-            if instructions {
-                println!("{bc:#?}");
-            }
-
-            #[cfg(feature = "vm")]
-            if old_bytecode {
-                use yavashark_vm::yavashark_bytecode::data::DataSection;
-                use yavashark_vm::OldOwnedVM;
-                let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
-
-                let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
-
-                vm.run().unwrap();
-                rt.block_on(vm.get_realm().run_event_loop());
-
-                println!("OldBytecode: {:?}", vm.acc());
-            }
-        }
+        run_code(&input, path, ast, interpreter, bytecode, old_bytecode, instructions);
     }
 
     let config = conf::Conf {
@@ -258,5 +165,146 @@ pub(crate) fn main() {
 
     if shellold {
         old_repl(config).unwrap();
+    }
+}
+
+#[allow(clippy::unwrap_used, clippy::too_many_arguments, clippy::fn_params_excessive_bools)]
+fn run_code(
+    input: &str,
+    path: PathBuf,
+    ast: bool,
+    interpreter: bool,
+    #[allow(unused_variables)] bytecode: bool,
+    #[allow(unused_variables)] old_bytecode: bool,
+    #[allow(unused_variables)] instructions: bool,
+) {
+    let string_input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
+
+    let c = EsSyntax {
+        jsx: false,
+        fn_bind: false,
+        decorators: true,
+        decorators_before_export: true,
+        export_default_from: true,
+        import_attributes: true,
+        allow_super_outside_method: false,
+        allow_return_outside_function: false,
+        auto_accessors: true,
+        explicit_resource_management: true,
+    };
+
+    let mut p = Parser::new(Syntax::Es(c), string_input, None);
+
+    let script = match p.parse_script() {
+        Ok(s) => s,
+        Err(e) => {
+            println!("SyntaxError: {e:?}");
+            return;
+        }
+    };
+
+    if ast {
+        println!("AST:\n{script:#?}");
+    }
+
+    if let Err(e) = Validator::new().validate_statements(&script.body) {
+        println!("SyntaxError: {e}");
+        return;
+    }
+
+    let rt = Builder::new_current_thread().enable_all().build().unwrap();
+
+    if interpreter {
+        let mut realm = Realm::new().unwrap();
+        let mut scope = Scope::global(&realm, path.clone());
+        realm.set_eval(InterpreterEval, false).unwrap();
+        yavashark_vm::init(&mut realm).unwrap();
+
+        let result = match yavashark_interpreter::Interpreter::run_in(
+            &script.body,
+            &mut realm,
+            &mut scope,
+        ) {
+            Ok(v) => v,
+            Err(e) => {
+                println!("Error: {}", e.pretty_print(&mut realm));
+                return;
+            }
+        };
+        println!("Interpreter: {result:?}");
+
+        rt.block_on(realm.run_event_loop());
+    }
+
+    #[cfg(feature = "vm")]
+    if bytecode {
+        let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
+
+        if instructions {
+            println!("{bc:#?}");
+        }
+
+        use yavashark_vm::yavashark_bytecode::data::DataSection;
+        use yavashark_vm::{OwnedVM, VM};
+        let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
+        let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
+
+        match vm.run() {
+            Ok(()) => {}
+            Err(ControlFlow::Continue(_)) => {
+                println!("Error: Unexpected continue");
+                return;
+            }
+            Err(ControlFlow::Break(_)) => {
+                println!("Error: Unexpected break");
+                return;
+            }
+            Err(ControlFlow::Return(_)) => {
+                println!("Error: Unexpected return");
+                return;
+            }
+            Err(ControlFlow::Error(err)) => {
+                println!("Error: {}", err.pretty_print(vm.get_realm()));
+                return;
+            }
+            Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
+                println!("Error: Unexpected yield");
+                return;
+            }
+            Err(ControlFlow::Await(_)) => {
+                println!("Error: Unexpected await");
+                return;
+            }
+            Err(ControlFlow::OptChainShortCircuit) => {
+                println!("Error: Unexpected optional chaining short-circuit");
+                return;
+            }
+        }
+
+        rt.block_on(vm.get_realm().run_event_loop());
+
+        println!("Bytecode: {:?}", vm.acc());
+    }
+
+    #[cfg(feature = "vm")]
+    if old_bytecode || instructions {
+        let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
+
+        if instructions {
+            println!("{bc:#?}");
+        }
+
+        if old_bytecode {
+            use yavashark_vm::yavashark_bytecode::data::DataSection;
+            use yavashark_vm::OldOwnedVM;
+            let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
+
+            let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
+
+            vm.run().unwrap();
+            rt.block_on(vm.get_realm().run_event_loop());
+
+            println!("OldBytecode: {:?}", vm.acc());
+        }
     }
 }
