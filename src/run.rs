@@ -124,7 +124,15 @@ pub(crate) fn main() {
 
     // Handle -e option
     if let Some(code) = eval_code {
-        run_code(code, "<eval>".into(), ast, interpreter, bytecode, old_bytecode, instructions);
+        run_code(
+            code,
+            "<eval>".into(),
+            ast,
+            interpreter,
+            bytecode,
+            old_bytecode,
+            instructions,
+        );
         return;
     }
 
@@ -143,7 +151,15 @@ pub(crate) fn main() {
             return;
         }
 
-        run_code(&input, path, ast, interpreter, bytecode, old_bytecode, instructions);
+        run_code(
+            &input,
+            path,
+            ast,
+            interpreter,
+            bytecode,
+            old_bytecode,
+            instructions,
+        );
     }
 
     let config = conf::Conf {
@@ -168,7 +184,11 @@ pub(crate) fn main() {
     }
 }
 
-#[allow(clippy::unwrap_used, clippy::too_many_arguments, clippy::fn_params_excessive_bools)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::too_many_arguments,
+    clippy::fn_params_excessive_bools
+)]
 fn run_code(
     input: &str,
     path: PathBuf,
