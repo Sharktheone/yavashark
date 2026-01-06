@@ -1,11 +1,57 @@
-use crate::builtins::check_radix;
+use crate::builtins::{check_radix, NumberConstructor};
 use crate::conversion::downcast_obj;
+use crate::error::Error;
 use crate::value::Obj;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
+use num_traits::{Signed, Zero};
 use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, props};
+
+
+/// ToIndex(value) - Converts a value to a non-negative integer index.
+/// Returns RangeError if the value is negative or > 2^53-1.
+fn to_index(value: &Value, realm: &mut Realm) -> Res<u64> {
+    // 1. If value is undefined, return 0.
+    if value.is_undefined() {
+        return Ok(0);
+    }
+
+    // 2. Let integerIndex be ? ToIntegerOrInfinity(value).
+    let number = value.to_number(realm)?;
+
+    // Handle NaN -> 0
+    if number.is_nan() {
+        return Ok(0);
+    }
+
+    // Truncate towards zero (ToIntegerOrInfinity behavior)
+    let integer = number.trunc();
+
+    // 3. If integerIndex < 0, throw a RangeError exception.
+    if integer < 0.0 {
+        return Err(Error::range("Invalid index: negative value"));
+    }
+
+    // 4. If integerIndex > 2^53 - 1, throw a RangeError exception.
+    if integer > NumberConstructor::MAX_SAFE_INTEGER {
+        return Err(Error::range("Invalid index: value too large"));
+    }
+
+    Ok(integer as u64)
+}
+
+/// Mathematical modulo operation that always returns a non-negative result.
+/// This differs from Rust's `%` operator which can return negative values.
+fn modulo(n: &BigInt, d: &BigInt) -> BigInt {
+    let rem = n % d;
+    if rem.is_negative() {
+        rem + d
+    } else {
+        rem
+    }
+}
 
 #[object]
 #[derive(Debug)]
@@ -38,20 +84,51 @@ impl BigIntObj {
     }
 
     #[prop("asIntN")]
-    pub fn int_n(bits: u64, bigint: BigInt) -> ValueResult {
-        let mut mask = BigInt::from(1) << bits;
-        mask -= 1;
-        //TODO: this handles the sign bit incorrectly
+    pub fn int_n(bits: Value, bigint: Value, realm: &mut Realm) -> ValueResult {
+        // 1. Set bits to ? ToIndex(bits).
+        let bits = to_index(&bits, realm)?;
 
-        Ok((bigint & mask).into())
+        // 2. Set bigint to ? ToBigInt(bigint).
+        // Note: ToBigInt throws TypeError for Number values
+        let bigint = bigint.to_big_int_strict(realm)?;
+
+        // Handle special case: bits == 0
+        if bits == 0 {
+            return Ok(BigInt::zero().into());
+        }
+
+        // 3. Let mod be ℝ(bigint) modulo 2^bits.
+        let two_pow_bits = BigInt::from(1) << bits;
+        let mod_value = modulo(&bigint, &two_pow_bits);
+
+        // 4. If mod ≥ 2^(bits-1), return ℤ(mod - 2^bits); otherwise return ℤ(mod).
+        let two_pow_bits_minus_1 = BigInt::from(1) << (bits - 1);
+        if mod_value >= two_pow_bits_minus_1 {
+            Ok((mod_value - two_pow_bits).into())
+        } else {
+            Ok(mod_value.into())
+        }
     }
 
     #[prop("asUintN")]
-    pub fn uint_n(bits: u64, bigint: BigInt) -> ValueResult {
-        let mut mask = BigInt::from(1) << bits;
-        mask -= 1;
+    pub fn uint_n(bits: Value, bigint: Value, realm: &mut Realm) -> ValueResult {
+        // 1. Set bits to ? ToIndex(bits).
+        let bits = to_index(&bits, realm)?;
 
-        Ok((bigint & mask).into())
+        // 2. Set bigint to ? ToBigInt(bigint).
+        // Note: ToBigInt throws TypeError for Number values
+        let bigint = bigint.to_big_int_strict(realm)?;
+
+        // Handle special case: bits == 0
+        if bits == 0 {
+            return Ok(BigInt::zero().into());
+        }
+
+        // 3. Return ℤ(ℝ(bigint) modulo 2^bits).
+        let two_pow_bits = BigInt::from(1) << bits;
+        let mod_value = modulo(&bigint, &two_pow_bits);
+
+        Ok(mod_value.into())
     }
 
     #[prop("toString")]
