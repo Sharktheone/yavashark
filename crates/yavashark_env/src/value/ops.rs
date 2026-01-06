@@ -187,8 +187,10 @@ impl Value {
 }
 
 fn parse_big_int(s: &str) -> Result<BigInt, Error> {
+    let s = s.trim();
+
     if s.is_empty() {
-        return Err(Error::ty("Cannot convert empty string to BigInt"));
+        return Ok(BigInt::zero());
     }
 
     if s.starts_with("0x") || s.starts_with("0X") {
