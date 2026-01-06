@@ -158,6 +158,13 @@ impl BigIntObj {
 
         Ok(inner.big_int.clone().into())
     }
+
+    #[prop("toLocaleString")]
+    fn to_locale_string(&self) -> ValueResult {
+        let inner = self.inner.try_borrow()?;
+        Ok(inner.big_int.to_string().into())
+    }
+
     #[prop(Symbol::TO_STRING_TAG)]
     #[nonstatic]
     #[configurable]
