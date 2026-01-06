@@ -143,31 +143,27 @@ impl Value {
     }
 
     pub fn to_big_int(&self, realm: &mut Realm) -> Result<BigInt, Error> {
-        Ok(match self {
-            Self::Number(n) => {
-                if n.fract() > 0.0 {
-                    return Err(Error::ty("Cannot convert non-integer number to BigInt"));
-                }
+        // 1. Let prim be ? ToPrimitive(argument, number).
+        let prim = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
-                BigInt::from_f64(*n).ok_or_else(|| Error::ty("Cannot convert number to BigInt"))?
-            }
+        // 2. Based on the type of prim:
+        Ok(match prim {
+            // Number -> NumberToBigInt(prim) - throws RangeError for non-integers
+            Self::Number(n) => number_to_big_int(n)?,
             Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
             Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
             Self::Boolean(b) => {
-                if *b {
+                if b {
                     BigInt::one()
                 } else {
                     BigInt::zero()
                 }
             }
-            Self::String(s) => parse_big_int(s)?,
-            Self::Object(_) => {
-                let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
-
-                return v.to_big_int(realm);
-            }
-            Self::BigInt(b) => (**b).clone(),
+            // String -> StringToBigInt(prim) - throws SyntaxError for invalid strings
+            Self::String(s) => parse_big_int(&s)?,
+            Self::BigInt(b) => (*b).clone(),
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
+            Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
         })
     }
 
@@ -213,29 +209,74 @@ impl Value {
     }
 }
 
-fn parse_big_int(s: &str) -> Result<BigInt, Error> {
+/// NumberToBigInt ( number ) - per ECMAScript spec
+/// Throws RangeError if the number is not a safe integer (NaN, Infinity, or has fractional part)
+pub fn number_to_big_int(n: f64) -> Result<BigInt, Error> {
+    // 1. If IsIntegralNumber(number) is false, throw a RangeError exception.
+    // IsIntegralNumber returns false for NaN, Infinity, -Infinity, and non-integers
+    if n.is_nan() {
+        return Err(Error::range("Cannot convert NaN to BigInt"));
+    }
+    if n.is_infinite() {
+        return Err(Error::range("Cannot convert Infinity to BigInt"));
+    }
+    if n.fract() != 0.0 {
+        return Err(Error::range("Cannot convert non-integer to BigInt"));
+    }
+
+    // 2. Return ℤ(ℝ(number)).
+    BigInt::from_f64(n).ok_or_else(|| Error::range("Cannot convert number to BigInt"))
+}
+
+/// StringToBigInt - per ECMAScript spec
+/// Returns None if the string cannot be parsed as a BigInt
+fn string_to_big_int(s: &str) -> Option<BigInt> {
     let s = s.trim();
 
     if s.is_empty() {
-        return Ok(BigInt::zero());
+        return Some(BigInt::zero());
+    }
+
+    // Check for negative hex/octal/binary which is not allowed
+    if s.starts_with("-0x")
+        || s.starts_with("-0X")
+        || s.starts_with("-0b")
+        || s.starts_with("-0B")
+        || s.starts_with("-0o")
+        || s.starts_with("-0O")
+    {
+        return None;
     }
 
     if s.starts_with("0x") || s.starts_with("0X") {
-        return BigInt::from_str_radix(&s[2..], 16)
-            .map_err(|_| Error::ty("Cannot convert hex string to BigInt"));
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return BigInt::from_str_radix(digits, 16).ok();
     }
 
     if s.starts_with("0b") || s.starts_with("0B") {
-        return BigInt::from_str_radix(&s[2..], 2)
-            .map_err(|_| Error::ty("Cannot convert binary string to BigInt"));
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return BigInt::from_str_radix(digits, 2).ok();
     }
 
     if s.starts_with("0o") || s.starts_with("0O") {
-        return BigInt::from_str_radix(&s[2..], 8)
-            .map_err(|_| Error::ty("Cannot convert octal string to BigInt"));
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return BigInt::from_str_radix(digits, 8).ok();
     }
 
-    BigInt::from_str(s).map_err(|_| Error::ty("Cannot convert string to BigInt"))
+    BigInt::from_str(s).ok()
+}
+
+fn parse_big_int(s: &str) -> Result<BigInt, Error> {
+    string_to_big_int(s).ok_or_else(|| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))
 }
 
 // impl Add for Value {
