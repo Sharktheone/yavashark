@@ -1,4 +1,4 @@
-use crate::value::{fmt_num, Symbol, Value};
+use crate::value::{fmt_num, Hint, Symbol, Value};
 use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
@@ -256,11 +256,12 @@ impl IntoPropertyKey for Value {
             Self::Boolean(b) => PropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => PropertyKey::String(b.to_string().into()),
             Self::Object(obj) => {
-                if let Some(primitive) = obj.primitive(realm)? {
-                    return primitive.into_property_key(realm);
+                let prim = obj.to_primitive(Hint::String, realm)?;
+                if let Value::Symbol(s) = prim {
+                    PropertyKey::Symbol(s)
+                } else {
+                    PropertyKey::String(prim.to_string(realm)?)
                 }
-
-                PropertyKey::String(obj.to_string(realm)?)
             }
         })
     }
@@ -285,11 +286,13 @@ impl IntoPropertyKey for Value {
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::Object(obj) => {
-                if let Some(primitive) = obj.primitive(realm)? {
-                    return primitive.into_internal_property_key(realm);
+                let prim = obj.to_primitive(Hint::String, realm)?;
+                if let Value::Symbol(s) = prim {
+                    InternalPropertyKey::Symbol(s)
+                } else {
+                    let s = prim.to_string(realm)?;
+                    string_to_internal_property_key(s)
                 }
-
-                InternalPropertyKey::String(obj.to_string(realm)?)
             }
         })
     }

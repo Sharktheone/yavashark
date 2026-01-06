@@ -1334,10 +1334,6 @@ impl Object {
     }
 
     pub fn to_primitive(&self, hint: Hint, realm: &mut Realm) -> ValueResult {
-        if let Some(prim) = self.primitive(realm)? {
-            return Ok(prim.into());
-        }
-
         let to_prim = self.resolve_property(Symbol::TO_PRIMITIVE, realm)?;
 
         match to_prim {

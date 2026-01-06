@@ -765,10 +765,6 @@ impl Value {
     pub fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
-                if let Some(prim) = o.primitive(realm)? {
-                    return Ok(prim.to_string().into());
-                }
-
                 let prim = o.to_primitive(Hint::String, realm)?;
                 prim.to_string(realm)?
             }
@@ -785,10 +781,6 @@ impl Value {
     pub fn into_string(self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
-                if let Some(prim) = o.primitive(realm)? {
-                    return Ok(prim.into_string());
-                }
-
                 let prim = o.to_primitive(Hint::String, realm)?;
                 prim.into_string(realm)?
             }
