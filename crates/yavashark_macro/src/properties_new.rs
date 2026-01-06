@@ -46,6 +46,7 @@ pub struct PropertiesArgs {
     override_object: Option<Path>,
     to_string_tag: Option<String>,
     intrinsic_name: Option<Ident>,
+    constructor_name: Option<String>,
     #[darling(default)]
     no_intrinsic: bool,
     #[darling(default)]
@@ -177,6 +178,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         call_constructor,
         &config,
         args.extends.is_some(),
+        args.constructor_name.as_deref(),
     )?;
 
     let try_into_value = &config.try_into_value;
@@ -332,6 +334,7 @@ fn init_constructor(
     call_constructor: Option<Method>,
     config: &Config,
     extends: bool,
+    constructor_name: Option<&str>,
 ) -> syn::Result<(TokenStream, TokenStream)> {
     if static_props.is_empty() && constructor.is_none() && call_constructor.is_none() {
         return Ok((TokenStream::new(), TokenStream::new()));
@@ -443,6 +446,12 @@ fn init_constructor(
         quote! { realm.intrinsics.func.clone() }
     };
 
+    let display_name = if let Some(custom_name) = constructor_name {
+        quote! { #custom_name }
+    } else {
+        quote! { stringify!(#ty_name) }
+    };
+
     let init_tokens = quote! {
         let constructor = #name::new(#constr_proto, realm)?;
 
@@ -450,7 +459,7 @@ fn init_constructor(
 
         constructor.define_property_attributes("prototype".into(), #variable::new_read_only(obj.clone().into()), realm)?;
         constructor.define_property_attributes("length".into(), #variable::config(#value::from(#constructor_length)).into(), realm)?;
-        constructor.define_property_attributes("name".into(), #variable::config(#value::from(stringify!(#ty_name)).into()), realm)?;
+        constructor.define_property_attributes("name".into(), #variable::config(#value::from(#display_name).into()), realm)?;
 
 
     };
