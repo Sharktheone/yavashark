@@ -2,13 +2,12 @@ use crate::builtins::{check_radix, NumberConstructor};
 use crate::conversion::downcast_obj;
 use crate::error::Error;
 use crate::value::Obj;
-use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use num_traits::{Signed, Zero};
 use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, props};
-
 
 /// ToIndex(value) - Converts a value to a non-negative integer index.
 /// Returns RangeError if the value is negative or > 2^53-1.
@@ -76,11 +75,18 @@ impl BigIntObj {
     }
 }
 
-#[props(intrinsic_name = bigint)]
+#[props(intrinsic_name = bigint, constructor_name = "BigInt")]
 impl BigIntObj {
+    #[constructor]
+    #[length(1)]
+    fn construct(_realm: &mut Realm, _args: Vec<Value>) -> Res<ObjectHandle> {
+        Err(Error::ty("BigInt is not a constructor"))
+    }
+
     #[call_constructor]
-    fn call(realm: &mut Realm, bint: Value) -> ValueResult {
-        Ok(bint.to_big_int(realm)?.into())
+    #[length(1)]
+    fn call(realm: &mut Realm, value: Value) -> ValueResult {
+        Ok(value.to_big_int(realm)?.into())
     }
 
     #[prop("asIntN")]
