@@ -158,4 +158,8 @@ impl BigIntObj {
 
         Ok(inner.big_int.clone().into())
     }
+    #[prop(Symbol::TO_STRING_TAG)]
+    #[nonstatic]
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "BigInt";
 }
