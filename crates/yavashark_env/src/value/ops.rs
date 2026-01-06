@@ -171,6 +171,33 @@ impl Value {
         })
     }
 
+    /// ToBigInt abstract operation - throws TypeError for Number values.
+    /// This is different from `to_big_int` which is used by the BigInt constructor
+    /// and converts integral numbers using NumberToBigInt.
+    pub fn to_big_int_strict(&self, realm: &mut Realm) -> Result<BigInt, Error> {
+        // 1. Let prim be ? ToPrimitive(argument, number).
+        let prim = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+        // 2. Return the value that prim corresponds to in the ToBigInt table.
+        Ok(match prim {
+            Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
+            Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
+            Self::Boolean(b) => {
+                if b {
+                    BigInt::one()
+                } else {
+                    BigInt::zero()
+                }
+            }
+            Self::BigInt(b) => (*b).clone(),
+            Self::Number(_) => return Err(Error::ty("Cannot convert Number to BigInt")),
+            Self::String(s) => parse_big_int(&s)
+                .map_err(|_| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))?,
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
+            Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
+        })
+    }
+
     pub fn to_int_or_null(&self, realm: &mut Realm) -> Result<i64, Error> {
         Ok(match self {
             Self::Number(n) => *n as i64,
