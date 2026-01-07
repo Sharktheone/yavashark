@@ -25,6 +25,8 @@ enum Type {
 pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut mode = Mode::Prototype;
     let mut constructor = None;
+    let mut constructor_length: Option<usize> = None;
+    let mut constructor_name: Option<String> = None;
     let mut proto_default = None;
     let mut no_intrinsic = false;
     let mut intrinsic_name = None;
@@ -40,6 +42,18 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             meta.parse_nested_meta(|meta| {
                 constructor = Some(meta.path);
 
+                Ok(())
+            });
+            Ok(())
+        } else if meta.path.is_ident("constructor_length") {
+            let value: syn::LitInt = meta.value()?.parse()?;
+            constructor_length = Some(value.base10_parse()?);
+            Ok(())
+        } else if meta.path.is_ident("constructor_name") {
+            meta.parse_nested_meta(|meta| {
+                if let Some(ident) = meta.path.get_ident() {
+                    constructor_name = Some(ident.to_string());
+                }
                 Ok(())
             });
             Ok(())
@@ -403,6 +417,22 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let (constructor, proto_define) = if let Some(constructor) = constructor {
+        let length_define = if let Some(len) = constructor_length {
+            quote! {
+                constructor.define_property_attributes("length".into(), #variable::config(#value::from(#len)).into(), realm)?;
+            }
+        } else {
+            TokenStream::new()
+        };
+
+        let name_define = if let Some(ref name) = constructor_name {
+            quote! {
+                constructor.define_property_attributes("name".into(), #variable::config(#value::from(#name)).into(), realm)?;
+            }
+        } else {
+            TokenStream::new()
+        };
+
         (
             quote! {
                 let constructor = #constructor(&obj, realm.intrinsics.func.clone(), realm)?;
@@ -411,6 +441,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             },
             quote! {
                 constructor.define_property_attributes("prototype".into(), #variable::new_read_only(obj.clone().into()), realm)?;
+                #length_define
+                #name_define
             },
         )
     } else {
