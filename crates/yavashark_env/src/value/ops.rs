@@ -38,34 +38,50 @@ impl ToNumber for bool {
 
 impl ToNumber for &str {
     fn num(&self) -> f64 {
-        if self.is_empty() {
+        // Trim leading and trailing whitespace (JavaScript semantics)
+        let trimmed = self.trim();
+        
+        if trimmed.is_empty() {
             0.0
         } else {
-            if self.starts_with("0x") || self.starts_with("0X") {
-                if !only_numeric_digits(&self[2..], 16) {
+            if trimmed.starts_with("0x") || trimmed.starts_with("0X") {
+                if !only_numeric_digits(&trimmed[2..], 16) {
                     return f64::NAN;
                 }
 
-                return f64::from_str_radix(&self[2..], 16).unwrap_or(f64::NAN);
+                return f64::from_str_radix(&trimmed[2..], 16).unwrap_or(f64::NAN);
             }
 
-            if self.starts_with("0b") || self.starts_with("0B") {
-                if !only_numeric_digits(&self[2..], 2) {
+            if trimmed.starts_with("0b") || trimmed.starts_with("0B") {
+                if !only_numeric_digits(&trimmed[2..], 2) {
                     return f64::NAN;
                 }
 
-                return f64::from_str_radix(&self[2..], 2).unwrap_or(f64::NAN);
+                return f64::from_str_radix(&trimmed[2..], 2).unwrap_or(f64::NAN);
             }
 
-            if self.starts_with("0o") || self.starts_with("0O") {
-                if !only_numeric_digits(&self[2..], 8) {
+            if trimmed.starts_with("0o") || trimmed.starts_with("0O") {
+                if !only_numeric_digits(&trimmed[2..], 8) {
                     return f64::NAN;
                 }
 
-                return f64::from_str_radix(&self[2..], 8).unwrap_or(f64::NAN);
+                return f64::from_str_radix(&trimmed[2..], 8).unwrap_or(f64::NAN);
             }
 
-            self.parse().unwrap_or(f64::NAN)
+            if trimmed == "Infinity" || trimmed == "+Infinity" {
+                return f64::INFINITY;
+            }
+            if trimmed == "-Infinity" {
+                return f64::NEG_INFINITY;
+            }
+            
+            let lower = trimmed.to_lowercase();
+            if lower == "infinity" || lower == "+infinity" || lower == "-infinity" 
+                || lower == "inf" || lower == "+inf" || lower == "-inf" {
+                return f64::NAN;
+            }
+
+            trimmed.parse().unwrap_or(f64::NAN)
         }
     }
 }
