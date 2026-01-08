@@ -107,7 +107,9 @@ impl BooleanObj {
 #[properties_new(
     intrinsic_name(boolean),
     default_null(boolean),
-    constructor(BooleanConstructor::new)
+    constructor(BooleanConstructor::new),
+    constructor_length = 1,
+    constructor_name(Boolean),
 )]
 impl BooleanObj {
     #[prop("valueOf")]
