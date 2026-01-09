@@ -3,10 +3,7 @@ use super::{Attributes, IntoValue, ObjectOrNull, PrimitiveValue, Value, Variable
 use crate::conversion::FromValueOutput;
 use crate::error::Error;
 use crate::value::property_key::IntoPropertyKey;
-use crate::{
-    GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol,
-    ValueResult,
-};
+use crate::{GCd, InternalPropertyKey, MutObject, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol, ValueResult};
 use indexmap::Equivalent;
 use std::any::TypeId;
 use std::fmt::{Debug, Display, Formatter};
@@ -1000,6 +997,7 @@ impl BoxedObj {
     }
 
     #[allow(clippy::needless_lifetimes)]
+    #[must_use]
     pub fn downcast<'a, T: 'static>(&'a self) -> Option<&'a T> {
         // Safety:
         // - we only interpret the returned pointer as T
@@ -1008,6 +1006,30 @@ impl BoxedObj {
             let ptr = self.deref().inner_downcast(TypeId::of::<T>())?.cast();
 
             Some(ptr.as_ref())
+        }
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    #[must_use]
+    pub fn downcast_dyn<'a, T: ?Sized + 'static>(&'a self) -> Option<&'a T> {
+        //TODO: this check does not work at compile time yet :/
+        const {
+            assert!(
+                size_of::<&T>() == size_of::<NonNull<[()]>>(),
+                "downcast_dyn requires T to be a trait object (fat pointer)"
+            );
+        }
+
+
+        // Safety:
+        // - The fat pointer returned by inner_downcast_fat_ptr is valid for the lifetime of self
+        // - The TypeId check ensures we only interpret the pointer as the correct type
+        // - The transmute reconstructs the fat pointer (&T) from the stored NonNull<[()]>
+        
+        unsafe {
+            let fat_ptr = self.deref().inner_downcast_fat_ptr(TypeId::of::<T>())?;
+            // Transmute the [()]  pointer (which stores the fat pointer data) back to &T
+            Some(std::mem::transmute_copy::<NonNull<[()]>, &T>(&fat_ptr))
         }
     }
 }
