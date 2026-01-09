@@ -16,6 +16,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
+use crate::builtins::iterator::Iterator as IteratorConstructor;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
     DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
@@ -230,6 +231,9 @@ pub struct GlobalProperties {
     #[prop("Promise")]
     promise: Partial<ObjectHandle, GlobalInitializer<Promise>>,
 
+    #[prop("Iterator")]
+    iterator: Partial<ObjectHandle, GlobalInitializer<IteratorConstructor>>,
+
     #[prop("parseInt")]
     parse_int: Partial<ObjectHandle, IntrinsicParseInt>,
 
@@ -316,6 +320,7 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         temporal: Default::default(),
         signal: Default::default(),
         promise: Default::default(),
+        iterator: Default::default(),
         parse_int: Default::default(),
         parse_float: Default::default(),
         is_nan: Default::default(),

@@ -16,10 +16,10 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    intl, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj,
-    BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError,
-    ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError, TypeError,
-    URIError, WeakMap, WeakRef, WeakSet,
+    intl, iterator, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics,
+    BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy,
+    RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError,
+    TypeError, URIError, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
@@ -104,6 +104,10 @@ pub struct Intrinsics {
     pub intl_relative_time_format: PartialIntrinsic<intl::RelativeTimeFormat>,
     pub intl_segmenter: PartialIntrinsic<intl::Segmenter>,
     pub throw_type_error: Partial<ObjectHandle, ThrowTypeError>,
+
+    pub iterator: PartialIntrinsic<iterator::Iterator>,
+    pub iterator_prototype: PartialIntrinsic<iterator::IteratorPrototype>,
+    pub iterator_helper: PartialIntrinsic<iterator::IteratorHelperPrototype>,
 
     pub parse_int: Partial<ObjectHandle, crate::builtins::ParseInt>,
     pub parse_float: Partial<ObjectHandle, crate::builtins::ParseFloat>,
@@ -193,6 +197,9 @@ impl Intrinsics {
             intl_relative_time_format: Default::default(),
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
+            iterator: Default::default(),
+            iterator_prototype: Default::default(),
+            iterator_helper: Default::default(),
             parse_int: Default::default(),
             parse_float: Default::default(),
             disposable_stack: Default::default(),
@@ -288,6 +295,9 @@ impl Default for Intrinsics {
             intl_relative_time_format: Default::default(),
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
+            iterator: Default::default(),
+            iterator_prototype: Default::default(),
+            iterator_helper: Default::default(),
             parse_int: Default::default(),
             parse_float: Default::default(),
             disposable_stack: Default::default(),

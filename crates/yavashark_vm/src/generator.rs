@@ -5,12 +5,15 @@ use std::fmt::Debug;
 use std::path::PathBuf;
 use std::rc::Rc;
 use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
+use yavashark_env::builtins::iterator::Iterator as IteratorBuiltin;
 use yavashark_env::builtins::Arguments;
 use yavashark_env::error::Error;
 use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
-use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::{
+    MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult,
+};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -185,9 +188,14 @@ impl Generator {
     }
 }
 
-#[props(intrinsic_name = generator)]
+#[props(intrinsic_name = generator, extends = IteratorBuiltin)]
 impl Generator {
-    pub fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "Generator";
+
+    #[length(1)]
+    fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let Some(state) = self.state.take() else {
             let obj = Object::new(realm);
 
@@ -224,7 +232,8 @@ impl Generator {
     }
 
     #[prop("return")]
-    fn ret(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+    #[length(1)]
+    fn ret(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if self.state.borrow().is_none() {
             let obj = Object::new(realm);
 
@@ -243,14 +252,15 @@ impl Generator {
         Ok(obj)
     }
 
-    fn throw(&self, realm: &mut Realm, exception: Value) -> Res<ObjectHandle> {
+    #[length(1)]
+    fn throw(&self, exception: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let Some(state) = self.state.take() else {
             return Err(Error::new("Generator is already finished"));
         };
 
         let mut vm = ResumableVM::from_state(state, realm);
 
-        vm.handle_root_error(Error::throw(exception))?;
+        vm.handle_root_error(Error::throw(exception.unwrap_or(Value::Undefined)))?;
 
         match vm.next() {
             GeneratorPoll::Yield(state, val) => {
@@ -277,11 +287,11 @@ impl Generator {
     }
 
     #[prop(Symbol::ITERATOR)]
-    #[nonstatic]
-    pub const fn iterator(this: Value) -> Value {
+    pub const fn iterator(#[this] this: Value) -> Value {
         this
     }
 }
+
 
 impl Debug for Generator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
