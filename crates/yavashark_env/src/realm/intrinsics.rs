@@ -105,6 +105,9 @@ pub struct Intrinsics {
     pub intl_segmenter: PartialIntrinsic<intl::Segmenter>,
     pub throw_type_error: Partial<ObjectHandle, ThrowTypeError>,
 
+    pub parse_int: Partial<ObjectHandle, crate::builtins::ParseInt>,
+    pub parse_float: Partial<ObjectHandle, crate::builtins::ParseFloat>,
+
     pub disposable_stack: PartialIntrinsic<DisposableStack>,
     pub async_disposable_stack: PartialIntrinsic<AsyncDisposableStack>,
 
@@ -190,6 +193,8 @@ impl Intrinsics {
             intl_relative_time_format: Default::default(),
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
+            parse_int: Default::default(),
+            parse_float: Default::default(),
             disposable_stack: Default::default(),
             async_disposable_stack: Default::default(),
             other: FxHashMap::default(),
@@ -283,6 +288,8 @@ impl Default for Intrinsics {
             intl_relative_time_format: Default::default(),
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
+            parse_int: Default::default(),
+            parse_float: Default::default(),
             disposable_stack: Default::default(),
             async_disposable_stack: Default::default(),
             other: FxHashMap::default(),

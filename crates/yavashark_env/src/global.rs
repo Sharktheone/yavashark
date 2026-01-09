@@ -19,7 +19,7 @@ use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
     DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
-    IsFinite, IsNan, Map, Math, NumberObj, ParseFloat, ParseInt, Promise, Proxy, RangeError,
+    IsFinite, IsNan, Map, Math, NumberObj, Promise, Proxy, RangeError,
     ReferenceError, Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError,
     Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
 };
@@ -231,10 +231,10 @@ pub struct GlobalProperties {
     promise: Partial<ObjectHandle, GlobalInitializer<Promise>>,
 
     #[prop("parseInt")]
-    parse_int: Partial<ObjectHandle, ParseInt>,
+    parse_int: Partial<ObjectHandle, IntrinsicParseInt>,
 
     #[prop("parseFloat")]
-    parse_float: Partial<ObjectHandle, ParseFloat>,
+    parse_float: Partial<ObjectHandle, IntrinsicParseFloat>,
 
     #[prop("isNaN")]
     is_nan: Partial<ObjectHandle, IsNan>,
@@ -358,5 +358,23 @@ pub struct GlobalThis;
 impl Initializer<ObjectHandle> for GlobalThis {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(realm.global.clone())
+    }
+}
+
+/// Initializer that gets parseInt from intrinsics
+pub struct IntrinsicParseInt;
+
+impl Initializer<ObjectHandle> for IntrinsicParseInt {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        realm.intrinsics.clone_public().parse_int.get(realm).cloned()
+    }
+}
+
+/// Initializer that gets parseFloat from intrinsics
+pub struct IntrinsicParseFloat;
+
+impl Initializer<ObjectHandle> for IntrinsicParseFloat {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        realm.intrinsics.clone_public().parse_float.get(realm).cloned()
     }
 }

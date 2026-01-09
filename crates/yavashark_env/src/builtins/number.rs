@@ -8,6 +8,86 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
 
+/// ToIntegerOrInfinity operation
+fn to_integer_or_infinity(n: f64) -> f64 {
+    if n.is_nan() {
+        0.0
+    } else if n == 0.0 || n.is_infinite() {
+        n
+    } else {
+        n.trunc()
+    }
+}
+
+fn format_exponential(x: f64, f: usize) -> YSString {
+    if x == 0.0 {
+        let mut s = String::from("0");
+        if f > 0 {
+            s.push('.');
+            s.push_str(&"0".repeat(f));
+        }
+        s.push_str("e+0");
+        return s.into();
+    }
+
+    let is_negative = x < 0.0;
+    let x = x.abs();
+
+    let e = x.log10().floor() as i32;
+
+    if f > 15 {
+        let formatted = format!("{:.prec$e}", if is_negative { -x } else { x }, prec = f);
+        let parts: Vec<&str> = formatted.split('e').collect();
+        let mantissa = parts[0];
+        let exp: i32 = parts.get(1).and_then(|ee| ee.parse().ok()).unwrap_or(0);
+
+        let mut s = String::new();
+        s.push_str(mantissa);
+        s.push('e');
+        if exp >= 0 {
+            s.push('+');
+        }
+        s.push_str(&exp.to_string());
+        return s.into();
+    }
+
+    let scale = 10f64.powi(f as i32 - e);
+    let n = (x * scale).round() as i64;
+
+    let max_n = 10i64.pow((f + 1) as u32);
+    let (n, e) = if n >= max_n {
+        (n / 10, e + 1)
+    } else if n < 10i64.pow(f as u32) && f > 0 {
+        (n * 10, e - 1)
+    } else {
+        (n, e)
+    };
+
+    let digits = format!("{:0>width$}", n, width = f + 1);
+
+    let mut s = String::new();
+    if is_negative {
+        s.push('-');
+    }
+
+    if f > 0 {
+        let (first, rest) = digits.split_at(1);
+        s.push_str(first);
+        s.push('.');
+        s.push_str(rest);
+    } else {
+        s.push_str(&digits);
+    }
+
+    s.push('e');
+    if e >= 0 {
+        s.push('+');
+    }
+    s.push_str(&e.to_string());
+
+    s.into()
+}
+
 #[object]
 #[derive(Debug)]
 pub struct NumberObj {
@@ -45,6 +125,8 @@ pub struct NumberConstructor {}
 impl NumberConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
+        use crate::value::{Obj, Variable};
+        
         let mut this = Self {
             inner: RefCell::new(MutableNumberConstructor {
                 object: MutObject::with_proto(func.clone()),
@@ -53,7 +135,23 @@ impl NumberConstructor {
 
         this.initialize(realm)?;
 
-        Ok(this.into_object())
+        let handle = this.into_object();
+        
+        let parse_float = realm.intrinsics.clone_public().parse_float.get(realm)?.clone();
+        let parse_int = realm.intrinsics.clone_public().parse_int.get(realm)?.clone();
+        
+        handle.define_property_attributes(
+            "parseFloat".into(),
+            Variable::write_config(parse_float.into()),
+            realm,
+        )?;
+        handle.define_property_attributes(
+            "parseInt".into(),
+            Variable::write_config(parse_int.into()),
+            realm,
+        )?;
+
+        Ok(handle)
     }
 
     pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
@@ -135,18 +233,6 @@ impl NumberConstructor {
             false
         }
     }
-
-    #[prop("parseFloat")]
-    #[must_use]
-    pub fn parse_float(string: &str) -> f64 {
-        parse_float(string)
-    }
-
-    #[prop("parseInt")]
-    #[must_use]
-    pub fn parse_int(string: &str, radix: Option<u32>) -> f64 {
-        parse_int(string, radix)
-    }
 }
 
 impl Constructor for NumberConstructor {
@@ -196,7 +282,9 @@ impl NumberObj {
 #[properties_new(
     intrinsic_name(number),
     default_null(number),
-    constructor(NumberConstructor::new)
+    constructor(NumberConstructor::new),
+    constructor_length = 1,
+    constructor_name(Number),
 )]
 impl NumberObj {
     #[prop("toString")]
@@ -228,111 +316,192 @@ impl NumberObj {
     }
 
     #[prop("toExponential")]
-    fn to_exponential(&self, fraction_digits: Option<u32>) -> Res<String> {
+    #[length(1)]
+    fn to_exponential(
+        &self,
+        fraction_digits: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
-
         let num = inner.number;
 
-        if num.is_nan() {
-            return Ok("NaN".to_owned());
-        }
+        let fraction_digits_undefined = fraction_digits.is_undefined();
+        let f = if fraction_digits_undefined {
+            0
+        } else {
+            to_integer_or_infinity(fraction_digits.to_number(realm)?) as isize
+        };
 
-        if num.is_infinite() {
+        if !num.is_finite() {
+            if num.is_nan() {
+                return Ok("NaN".into());
+            }
             return Ok(if num.is_sign_positive() {
-                "Infinity".to_owned()
+                "Infinity".into()
             } else {
-                "-Infinity".to_owned()
+                "-Infinity".into()
             });
         }
 
-        let fraction_digits = fraction_digits.unwrap_or(0);
+        if !(0..=100).contains(&f) {
+            return Err(crate::Error::range(
+                "toExponential() argument must be between 0 and 100",
+            ));
+        }
+        let f = f as usize;
 
-        let result = format!("{:.1$e}", num, fraction_digits as usize);
+        if fraction_digits_undefined {
+            let x = num;
+            let mut s = String::new();
+            let x = if x < 0.0 {
+                s.push('-');
+                -x
+            } else {
+                x
+            };
 
-        let result = result.replace('e', "e+");
+            if x == 0.0 {
+                s.push_str("0e+0");
+                return Ok(s.into());
+            }
 
-        Ok(result)
+            let formatted = format!("{x:e}");
+            let parts: Vec<&str> = formatted.split('e').collect();
+            let mantissa = parts[0];
+            let exp: i32 = parts.get(1).and_then(|e| e.parse().ok()).unwrap_or(0);
+
+            let mantissa = mantissa.trim_end_matches('0').trim_end_matches('.');
+
+            s.push_str(mantissa);
+            s.push('e');
+            if exp >= 0 {
+                s.push('+');
+            }
+            s.push_str(&exp.to_string());
+            return Ok(s.into());
+        }
+
+        Ok(format_exponential(num, f))
     }
 
     #[prop("toFixed")]
-    fn to_fixed(&self, fraction_digits: Option<u32>) -> Res<String> {
+    #[length(1)]
+    fn to_fixed(&self, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
-
         let num = inner.number;
 
-        if num.is_nan() {
-            return Ok("NaN".to_owned());
-        }
+        let f = to_integer_or_infinity(fraction_digits.to_number(realm)?);
 
-        if num.is_infinite() {
-            return Ok(if num.is_sign_positive() {
-                "Infinity".to_owned()
-            } else {
-                "-Infinity".to_owned()
-            });
-        }
-
-        let fraction_digits = fraction_digits.unwrap_or(0);
-        let result = format!("{:.1$}", num, fraction_digits as usize);
-
-        Ok(result)
-    }
-
-    #[prop("toPrecision")]
-    fn to_precision(&self, precision: Option<u32>) -> Res<String> {
-        const MAX_PRECISION: u32 = 2000;
-
-        let inner = self.inner.try_borrow()?;
-
-        let num = inner.number;
-
-        if num.is_nan() {
-            return Ok("NaN".to_owned());
-        }
-
-        if num.is_infinite() {
-            return Ok(if num.is_sign_positive() {
-                "Infinity".to_owned()
-            } else {
-                "-Infinity".to_owned()
-            });
-        }
-
-        let Some(precision) = precision else {
-            return Ok(num.to_string());
-        };
-
-        if num > 10f64.powi(precision as i32) {
-            let result = format!("{:.1$e}", num, precision.saturating_sub(1) as usize);
-
-            let result = result.replace('e', "e+");
-
-            return Ok(result);
-        }
-
-        let num_digits = num.log10().ceil();
-
-        let num_digits = if num_digits.is_infinite() || num_digits.is_nan() {
-            1
-        } else {
-            num_digits as i32
-        };
-
-        let precision = if num_digits.is_negative() {
-            precision + num_digits.unsigned_abs()
-        } else {
-            precision.saturating_sub(num_digits as u32)
-        };
-
-        if precision > MAX_PRECISION {
+        if !f.is_finite() {
             return Err(crate::Error::range(
-                "toPrecision() precision argument must be between 0 and 2000",
+                "toFixed() digits argument must be between 0 and 100",
             ));
         }
 
-        let result = format!("{:.1$}", num, precision as usize);
+        if f < 0.0 || f > 100.0 {
+            return Err(crate::Error::range(
+                "toFixed() digits argument must be between 0 and 100",
+            ));
+        }
+        let f = f as usize;
 
-        Ok(result)
+        if !num.is_finite() {
+            if num.is_nan() {
+                return Ok("NaN".into());
+            }
+            return Ok(if num.is_sign_positive() {
+                "Infinity".into()
+            } else {
+                "-Infinity".into()
+            });
+        }
+
+        if num.abs() >= 1e21 {
+            return Ok(fmt_num(num));
+        }
+
+        let result = format!("{:.1$}", num, f);
+        Ok(result.into())
+    }
+
+    #[prop("toPrecision")]
+    #[length(1)]
+    fn to_precision(&self, precision: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let inner = self.inner.try_borrow()?;
+        let num = inner.number;
+
+        if precision.is_undefined() {
+            return Ok(fmt_num(num));
+        }
+
+        let p = to_integer_or_infinity(precision.to_number(realm)?);
+
+        if !num.is_finite() {
+            if num.is_nan() {
+                return Ok("NaN".into());
+            }
+            return Ok(if num.is_sign_positive() {
+                "Infinity".into()
+            } else {
+                "-Infinity".into()
+            });
+        }
+
+        if p < 1.0 || p > 100.0 {
+            return Err(crate::Error::range(
+                "toPrecision() argument must be between 1 and 100",
+            ));
+        }
+        let p = p as usize;
+
+        let x = num;
+        let mut s = String::new();
+        let x = if x < 0.0 {
+            s.push('-');
+            -x
+        } else {
+            x
+        };
+
+        if x == 0.0 {
+            s.push_str(&"0".repeat(p));
+            if p > 1 {
+                s.insert(1, '.');
+            }
+            return Ok(s.into());
+        }
+
+        let e = x.log10().floor() as i32;
+
+        if e < -6 || e >= p as i32 {
+            let formatted = format!("{:.1$e}", x, p - 1);
+            let parts: Vec<&str> = formatted.split('e').collect();
+            let mantissa = parts[0];
+            let exp: i32 = parts.get(1).and_then(|ee| ee.parse().ok()).unwrap_or(0);
+
+            let (c, e_abs) = if exp >= 0 {
+                ("+", exp)
+            } else {
+                ("-", -exp)
+            };
+
+            s.push_str(mantissa);
+            s.push('e');
+            s.push_str(c);
+            s.push_str(&e_abs.to_string());
+            return Ok(s.into());
+        }
+
+        let decimal_places = if e >= 0 {
+            (p as i32 - e - 1).max(0) as usize
+        } else {
+            ((-e - 1) + p as i32) as usize
+        };
+
+        let formatted = format!("{:.1$}", x, decimal_places);
+        s.push_str(&formatted);
+
+        Ok(s.into())
     }
 
     #[prop("valueOf")]
@@ -576,7 +745,7 @@ pub fn get_parse_int(realm: &mut Realm) -> ObjectHandle {
                 .and_then(|v| v.to_string(realm).ok())
                 .unwrap_or_default();
 
-            Ok(Value::Number(NumberConstructor::parse_int(&str, radix)))
+            Ok(Value::Number(parse_int(&str, radix)))
         },
         realm,
         2,
@@ -601,7 +770,7 @@ pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
                 .and_then(|v| v.to_string(realm).ok())
                 .unwrap_or_default();
 
-            Ok(Value::Number(NumberConstructor::parse_float(&str)))
+            Ok(Value::Number(parse_float(&str)))
         },
         realm,
         1,
