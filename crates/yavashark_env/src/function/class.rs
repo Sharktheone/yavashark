@@ -29,6 +29,7 @@ pub enum PrivateMember {
 }
 
 impl PrivateMember {
+    #[allow(unused)]
     fn as_value(&self) -> Value {
         match self {
             Self::Field(v) | Self::Method(v) => v.clone(),
