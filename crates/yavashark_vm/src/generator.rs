@@ -287,6 +287,7 @@ impl Generator {
     }
 
     #[prop(Symbol::ITERATOR)]
+    #[nonstatic]
     pub const fn iterator(#[this] this: Value) -> Value {
         this
     }
