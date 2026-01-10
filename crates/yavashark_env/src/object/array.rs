@@ -1,4 +1,4 @@
-use crate::builtins::iterator::IteratorPrototype;
+use crate::builtins::iterator::Iterator;
 use crate::builtins::{Map, NumberConstructor, Proxy, Set};
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::conversion::TryIntoValue;
@@ -3292,7 +3292,7 @@ impl ArrayIterator {
 
 impl Intrinsic for ArrayIterator {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        let iterator_proto = IteratorPrototype::get_intrinsic(realm)?;
+        let iterator_proto = Iterator::get_intrinsic(realm)?;
         Self::initialize_proto(
             Object::raw_with_proto(iterator_proto),
             realm.intrinsics.func.clone(),
