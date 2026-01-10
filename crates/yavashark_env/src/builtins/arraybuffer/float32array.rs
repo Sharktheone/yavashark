@@ -28,7 +28,7 @@ impl Float32Array {
     }
 }
 
-#[props(intrinsic_name = float32array, extends = TypedArray)]
+#[props(intrinsic_name = float32array, extends = TypedArray, extends_constructor)]
 impl Float32Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<f32>();

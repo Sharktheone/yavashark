@@ -1,16 +1,16 @@
 mod constant;
 mod method;
 
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl, Path};
+use quote::{ToTokens, format_ident, quote};
+use syn::{Expr, ImplItem, ItemImpl, Path, spanned::Spanned};
 
 use crate::config::Config;
-use crate::properties_new::constant::{parse_constant, Constant};
-use crate::properties_new::method::{parse_method, Method};
+use crate::properties_new::constant::{Constant, parse_constant};
+use crate::properties_new::method::{Method, parse_method};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Type {
@@ -41,6 +41,8 @@ enum MaybeStatic<T> {
 #[derive(Default, FromMeta)]
 pub struct PropertiesArgs {
     extends: Option<Ident>,
+    #[darling(default)]
+    extends_constructor: bool,
     #[allow(unused)]
     or: Option<Expr>,
     override_object: Option<Path>,
@@ -177,7 +179,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         constructor,
         call_constructor,
         &config,
-        args.extends.is_some(),
+        args.extends.as_ref(),
+        args.extends_constructor,
         args.constructor_name.as_deref(),
     )?;
 
@@ -333,7 +336,8 @@ fn init_constructor(
     constructor: Option<Method>,
     call_constructor: Option<Method>,
     config: &Config,
-    extends: bool,
+    extends: Option<&Ident>,
+    extends_constructor: bool,
     constructor_name: Option<&str>,
 ) -> syn::Result<(TokenStream, TokenStream)> {
     if static_props.is_empty() && constructor.is_none() && call_constructor.is_none() {
@@ -438,10 +442,15 @@ fn init_constructor(
 
     let variable = &config.variable;
 
-    let constr_proto = if extends {
-        quote! { {
+    let constr_proto = if extends_constructor {
+        if let Some(extends_ty) = extends {
+            quote! { {
             obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
         } }
+        } else {
+            // If extends_constructor is true but no extends type, fall back to Function.prototype
+            quote! { realm.intrinsics.func.clone() }
+        }
     } else {
         quote! { realm.intrinsics.func.clone() }
     };

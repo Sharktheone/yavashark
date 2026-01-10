@@ -31,7 +31,7 @@ impl Uint8Array {
     }
 }
 
-#[props(intrinsic_name = uint8array, extends = TypedArray)]
+#[props(intrinsic_name = uint8array, extends = TypedArray, extends_constructor)]
 impl Uint8Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u8>();

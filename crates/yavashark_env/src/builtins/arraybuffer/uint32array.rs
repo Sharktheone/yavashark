@@ -28,7 +28,7 @@ impl Uint32Array {
     }
 }
 
-#[props(intrinsic_name = uint32array, extends = TypedArray)]
+#[props(intrinsic_name = uint32array, extends = TypedArray, extends_constructor)]
 impl Uint32Array {
     #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u32>();
