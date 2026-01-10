@@ -22,6 +22,7 @@ impl IteratorPrototype {
     /// 27.1.2.1 %IteratorPrototype% [ @@iterator ] ( )
     /// Returns `this` value.
     #[prop(Symbol::ITERATOR)]
+    #[nonstatic]
     fn iterator(#[this] this: Value) -> Value {
         this
     }
@@ -29,6 +30,7 @@ impl IteratorPrototype {
     /// 27.1.2.14 %IteratorPrototype% [ @@dispose ] ( )
     /// Calls `return()` on the iterator if it exists.
     #[prop(Symbol::DISPOSE)]
+    #[nonstatic]
     fn dispose(#[this] this: Value, #[realm] realm: &mut Realm) -> Res<Value> {
         // 1. Let O be the this value.
         let o = this.clone().to_object()?;
