@@ -40,7 +40,7 @@ impl ToNumber for &str {
     fn num(&self) -> f64 {
         // Trim leading and trailing whitespace (JavaScript semantics)
         let trimmed = self.trim();
-        
+
         if trimmed.is_empty() {
             0.0
         } else {
@@ -74,10 +74,15 @@ impl ToNumber for &str {
             if trimmed == "-Infinity" {
                 return f64::NEG_INFINITY;
             }
-            
+
             let lower = trimmed.to_lowercase();
-            if lower == "infinity" || lower == "+infinity" || lower == "-infinity" 
-                || lower == "inf" || lower == "+inf" || lower == "-inf" {
+            if lower == "infinity"
+                || lower == "+infinity"
+                || lower == "-infinity"
+                || lower == "inf"
+                || lower == "+inf"
+                || lower == "-inf"
+            {
                 return f64::NAN;
             }
 

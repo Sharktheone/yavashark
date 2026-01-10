@@ -126,7 +126,7 @@ impl NumberConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         use crate::value::{Obj, Variable};
-        
+
         let mut this = Self {
             inner: RefCell::new(MutableNumberConstructor {
                 object: MutObject::with_proto(func.clone()),
@@ -136,10 +136,20 @@ impl NumberConstructor {
         this.initialize(realm)?;
 
         let handle = this.into_object();
-        
-        let parse_float = realm.intrinsics.clone_public().parse_float.get(realm)?.clone();
-        let parse_int = realm.intrinsics.clone_public().parse_int.get(realm)?.clone();
-        
+
+        let parse_float = realm
+            .intrinsics
+            .clone_public()
+            .parse_float
+            .get(realm)?
+            .clone();
+        let parse_int = realm
+            .intrinsics
+            .clone_public()
+            .parse_int
+            .get(realm)?
+            .clone();
+
         handle.define_property_attributes(
             "parseFloat".into(),
             Variable::write_config(parse_float.into()),
@@ -284,7 +294,7 @@ impl NumberObj {
     default_null(number),
     constructor(NumberConstructor::new),
     constructor_length = 1,
-    constructor_name(Number),
+    constructor_name(Number)
 )]
 impl NumberObj {
     #[prop("toString")]
@@ -317,11 +327,7 @@ impl NumberObj {
 
     #[prop("toExponential")]
     #[length(1)]
-    fn to_exponential(
-        &self,
-        fraction_digits: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<YSString> {
+    fn to_exponential(&self, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
         let num = inner.number;
 
@@ -479,11 +485,7 @@ impl NumberObj {
             let mantissa = parts[0];
             let exp: i32 = parts.get(1).and_then(|ee| ee.parse().ok()).unwrap_or(0);
 
-            let (c, e_abs) = if exp >= 0 {
-                ("+", exp)
-            } else {
-                ("-", -exp)
-            };
+            let (c, e_abs) = if exp >= 0 { ("+", exp) } else { ("-", -exp) };
 
             s.push_str(mantissa);
             s.push('e');

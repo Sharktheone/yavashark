@@ -375,7 +375,7 @@ impl StringObj {
     default_null(string),
     constructor(StringConstructor::new),
     constructor_length = 1,
-    constructor_name(String),
+    constructor_name(String)
 )]
 impl StringObj {
     #[get("length")]

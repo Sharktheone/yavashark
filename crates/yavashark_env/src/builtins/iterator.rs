@@ -12,12 +12,14 @@ pub use helper::*;
 pub use iterator_prototype::*;
 pub use record::*;
 
-use iterator_helper_obj::IteratorHelperObject;
 use crate::native_obj::NativeObject;
 use crate::realm::Intrinsic;
 use crate::value::IntoValue;
 use crate::value::Obj;
-use crate::{Error, NativeFunction, Object, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, Variable};
+use crate::{
+    Error, NativeFunction, Object, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, Variable,
+};
+use iterator_helper_obj::IteratorHelperObject;
 use yavashark_macro::props;
 
 /// %Iterator% - The Iterator constructor (27.1.3)
@@ -35,7 +37,7 @@ impl Iterator {
     /// Note: Without proper NewTarget support, we can't perfectly implement the spec.
     /// Per spec, `new Iterator()` should throw if NewTarget is Iterator itself.
     /// But subclass calls like `new SubIterator()` should work.
-    /// 
+    ///
     /// Current behavior: We allow construction to support subclassing.
     /// This means `new Iterator()` won't throw (deviates from spec).
     #[constructor]
@@ -97,8 +99,7 @@ impl Iterator {
             return Err(Error::ty("Object is not iterable"));
         }
 
-        let wrapped =
-            WrapForValidIteratorPrototype::new(o_obj, next_method.to_object()?, realm)?;
+        let wrapped = WrapForValidIteratorPrototype::new(o_obj, next_method.to_object()?, realm)?;
         Ok(wrapped.into_object().into())
     }
 
@@ -195,7 +196,8 @@ impl Iterator {
 
         // 3. Let options be ? GetOptionsObject(options).
         let options_arg = args.get(1).cloned().unwrap_or(Value::Undefined);
-        let (mode, padding_values) = parse_zip_keyed_options(&options_arg, &keys, &iterables_obj, realm)?;
+        let (mode, padding_values) =
+            parse_zip_keyed_options(&options_arg, &keys, &iterables_obj, realm)?;
 
         // 4. For each key, get the iterator
         let mut iterator_records: Vec<(String, IteratorRecord)> = Vec::new();
@@ -313,7 +315,11 @@ impl Iterator {
 
     /// 27.1.2.5 Iterator.prototype.filter ( predicate )
     #[nonstatic]
-    fn filter(#[this] this: Value, predicate: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn filter(
+        #[this] this: Value,
+        predicate: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         // 1. Let O be the this value.
         let o = this.to_object()?;
 
@@ -386,7 +392,11 @@ impl Iterator {
     /// 27.1.2.7 Iterator.prototype.flatMap ( mapper )
     #[nonstatic]
     #[prop("flatMap")]
-    fn flat_map(#[this] this: Value, mapper: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn flat_map(
+        #[this] this: Value,
+        mapper: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         // 1. Let O be the this value.
         let o = this.to_object()?;
 
@@ -468,7 +478,12 @@ impl Iterator {
 
     /// 27.1.2.10 Iterator.prototype.reduce ( reducer [ , initialValue ] )
     #[nonstatic]
-    fn reduce(#[this] this: Value, reducer: Value, initial_value: Option<Value>, #[realm] realm: &mut Realm) -> Res<Value> {
+    fn reduce(
+        #[this] this: Value,
+        reducer: Value,
+        initial_value: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<Value> {
         // 1. Let O be the this value.
         let o = this.to_object()?;
 
@@ -763,7 +778,11 @@ fn to_integer_or_infinity(num: f64) -> f64 {
 }
 
 /// Check if obj has proto in its prototype chain
-fn has_in_prototype_chain(obj: &ObjectHandle, proto: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
+fn has_in_prototype_chain(
+    obj: &ObjectHandle,
+    proto: &ObjectHandle,
+    realm: &mut Realm,
+) -> Res<bool> {
     use crate::ObjectOrNull;
     let mut current = obj.prototype(realm)?;
     loop {
@@ -805,16 +824,15 @@ impl WrapForValidIteratorPrototype {
             realm,
         )
     }
-    
+
     fn next_impl(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         // 1. Let O be this value.
         // 2. Let iteratorRecord be O.[[Iterated]].
         // 3. Return ? Call(iteratorRecord.[[NextMethod]], iteratorRecord.[[Iterator]]).
-        let result = self.iterated.next_method.call(
-            vec![],
-            self.iterated.iterator.clone().into(),
-            realm,
-        )?;
+        let result =
+            self.iterated
+                .next_method
+                .call(Vec::new(), self.iterated.iterator.clone().into(), realm)?;
         result.to_object()
     }
 
@@ -898,7 +916,9 @@ impl Intrinsic for WrapForValidIteratorPrototype {
             return Ok(proto);
         }
         let proto = Self::initialize(realm)?;
-        realm.intrinsics.insert::<WrapForValidIteratorPrototype>(proto.clone());
+        realm
+            .intrinsics
+            .insert::<WrapForValidIteratorPrototype>(proto.clone());
         Ok(proto)
     }
 
@@ -1125,11 +1145,7 @@ pub struct TakeIteratorHelper {
 }
 
 impl TakeIteratorHelper {
-    pub fn create(
-        iterated: IteratorRecord,
-        limit: u64,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn create(iterated: IteratorRecord, limit: u64, realm: &mut Realm) -> Res<ObjectHandle> {
         let helper = IteratorHelperObject::new(
             Self {
                 iterated,
@@ -1193,11 +1209,7 @@ pub struct DropIteratorHelper {
 }
 
 impl DropIteratorHelper {
-    pub fn create(
-        iterated: IteratorRecord,
-        limit: u64,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn create(iterated: IteratorRecord, limit: u64, realm: &mut Realm) -> Res<ObjectHandle> {
         let helper = IteratorHelperObject::new(
             Self {
                 iterated,
@@ -1220,8 +1232,7 @@ impl IteratorHelperImpl for DropIteratorHelper {
         while self.remaining_to_skip.get() > 0 {
             match self.iterated.step(realm) {
                 Ok(Some(_)) => {
-                    self.remaining_to_skip
-                        .set(self.remaining_to_skip.get() - 1);
+                    self.remaining_to_skip.set(self.remaining_to_skip.get() - 1);
                 }
                 Ok(None) => {
                     self.alive.set(false);
@@ -1410,7 +1421,7 @@ impl IteratorHelperImpl for FlatMapIteratorHelper {
 
             // Close outer iterator, propagating any error
             let outer_result = self.iterated.close(realm);
-            
+
             // Propagate errors (prefer outer error if both fail, per IteratorCloseAll semantics)
             inner_result?;
             outer_result?;
@@ -1457,7 +1468,11 @@ impl ConcatIteratorHelper {
     }
 
     /// Get iterator from an iterable object using the cached method
-    fn get_iterator(method: &ObjectHandle, iterable: &Value, realm: &mut Realm) -> Res<IteratorRecord> {
+    fn get_iterator(
+        method: &ObjectHandle,
+        iterable: &Value,
+        realm: &mut Realm,
+    ) -> Res<IteratorRecord> {
         let iter = method.call(vec![], iterable.clone(), realm)?;
         let iterator_obj = iter.to_object()?;
         IteratorRecord::new(iterator_obj, realm)
@@ -1497,7 +1512,7 @@ impl IteratorHelperImpl for ConcatIteratorHelper {
             // Get next iterable
             let index = self.index.get();
             let iterables = self.iterables.borrow();
-            
+
             if index >= iterables.len() {
                 // All iterables exhausted
                 self.alive.set(false);
@@ -1600,14 +1615,14 @@ impl IteratorHelperImpl for ZipIteratorHelper {
         }
 
         let iterators = self.iterators.borrow();
-        
+
         // If there are no iterators, we're immediately done
         if iterators.is_empty() {
             drop(iterators);
             self.alive.set(false);
             return create_iter_result_object(Value::Undefined, true, realm);
         }
-        
+
         let mut done_flags = self.done.borrow_mut();
         let padding = self.padding.borrow();
         let mut values = Vec::with_capacity(iterators.len());
@@ -1691,9 +1706,7 @@ impl IteratorHelperImpl for ZipIteratorHelper {
                     for iter in self.iterators.borrow().iter() {
                         let _ = iter.close(realm);
                     }
-                    return Err(Error::ty(
-                        "Iterators have different lengths in strict mode",
-                    ));
+                    return Err(Error::ty("Iterators have different lengths in strict mode"));
                 }
                 if all_done {
                     self.alive.set(false);
@@ -1781,14 +1794,14 @@ impl IteratorHelperImpl for ZipKeyedIteratorHelper {
         }
 
         let iterators = self.iterators.borrow();
-        
+
         // If there are no iterators, we're immediately done
         if iterators.is_empty() {
             drop(iterators);
             self.alive.set(false);
             return create_iter_result_object(Value::Undefined, true, realm);
         }
-        
+
         let mut done_flags = self.done.borrow_mut();
         let padding = self.padding.borrow();
         let mut any_done = false;
@@ -1878,9 +1891,7 @@ impl IteratorHelperImpl for ZipKeyedIteratorHelper {
                     for (_, iter) in self.iterators.borrow().iter() {
                         let _ = iter.close(realm);
                     }
-                    return Err(Error::ty(
-                        "Iterators have different lengths in strict mode",
-                    ));
+                    return Err(Error::ty("Iterators have different lengths in strict mode"));
                 }
                 if all_done {
                     self.alive.set(false);

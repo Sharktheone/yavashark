@@ -74,7 +74,10 @@ impl<T: IteratorHelperImpl> ObjectImpl for IteratorHelperObject<T> {
             let trait_ref: &dyn IteratorHelperImpl = &self.native;
             // Transmute the fat pointer to NonNull<[()]> for storage
             // This preserves both the data pointer and vtable pointer
-            Some(std::mem::transmute_copy::<&dyn IteratorHelperImpl, NonNull<[()]>>(&trait_ref))
+            Some(std::mem::transmute_copy::<
+                &dyn IteratorHelperImpl,
+                NonNull<[()]>,
+            >(&trait_ref))
         } else {
             None
         }

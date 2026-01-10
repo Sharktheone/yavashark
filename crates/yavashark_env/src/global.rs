@@ -10,19 +10,19 @@ use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
 use crate::builtins::int8array::Int8Array;
 use crate::builtins::intl::Intl;
+use crate::builtins::iterator::Iterator as IteratorConstructor;
 use crate::builtins::shared_buf::SharedArrayBuffer;
 use crate::builtins::signal::Signal;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::iterator::Iterator as IteratorConstructor;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
     DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
-    IsFinite, IsNan, Map, Math, NumberObj, Promise, Proxy, RangeError,
-    ReferenceError, Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError,
-    Temporal, TypeError, URIError, Unescape, WeakMap, WeakRef, WeakSet, JSON,
+    IsFinite, IsNan, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError, Reflect,
+    RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, Temporal, TypeError, URIError,
+    Unescape, WeakMap, WeakRef, WeakSet, JSON,
 };
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
@@ -371,7 +371,12 @@ pub struct IntrinsicParseInt;
 
 impl Initializer<ObjectHandle> for IntrinsicParseInt {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        realm.intrinsics.clone_public().parse_int.get(realm).cloned()
+        realm
+            .intrinsics
+            .clone_public()
+            .parse_int
+            .get(realm)
+            .cloned()
     }
 }
 
@@ -380,6 +385,11 @@ pub struct IntrinsicParseFloat;
 
 impl Initializer<ObjectHandle> for IntrinsicParseFloat {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        realm.intrinsics.clone_public().parse_float.get(realm).cloned()
+        realm
+            .intrinsics
+            .clone_public()
+            .parse_float
+            .get(realm)
+            .cloned()
     }
 }

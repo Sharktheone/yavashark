@@ -11,9 +11,7 @@ use yavashark_env::error::Error;
 use yavashark_env::realm::Intrinsic;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, IntoValue, Obj};
-use yavashark_env::{
-    MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult,
-};
+use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 
@@ -292,7 +290,6 @@ impl Generator {
         this
     }
 }
-
 
 impl Debug for Generator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

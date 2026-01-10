@@ -26,7 +26,8 @@ impl IteratorHelperPrototype {
     #[nonstatic]
     fn next(#[this] this: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let this_obj = this.to_object()?;
-        let helper = this_obj.downcast_dyn::<dyn IteratorHelperImpl>()
+        let helper = this_obj
+            .downcast_dyn::<dyn IteratorHelperImpl>()
             .ok_or_else(|| Error::ty("not an iterator helper"))?;
         helper.next_impl(realm)
     }
@@ -35,7 +36,8 @@ impl IteratorHelperPrototype {
     #[nonstatic]
     fn return_method(#[this] this: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let this_obj = this.to_object()?;
-        let helper = this_obj.downcast_dyn::<dyn IteratorHelperImpl>()
+        let helper = this_obj
+            .downcast_dyn::<dyn IteratorHelperImpl>()
             .ok_or_else(|| Error::ty("not an iterator helper"))?;
         helper.return_impl(realm)
     }
