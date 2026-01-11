@@ -829,10 +829,11 @@ impl WrapForValidIteratorPrototype {
         // 1. Let O be this value.
         // 2. Let iteratorRecord be O.[[Iterated]].
         // 3. Return ? Call(iteratorRecord.[[NextMethod]], iteratorRecord.[[Iterator]]).
-        let result =
-            self.iterated
-                .next_method
-                .call(Vec::new(), self.iterated.iterator.clone().into(), realm)?;
+        let result = self.iterated.next_method.call(
+            Vec::new(),
+            self.iterated.iterator.clone().into(),
+            realm,
+        )?;
         result.to_object()
     }
 

@@ -1,16 +1,16 @@
 mod constant;
 mod method;
 
-use darling::FromMeta;
 use darling::ast::NestedMeta;
+use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{ToTokens, format_ident, quote};
-use syn::{Expr, ImplItem, ItemImpl, Path, spanned::Spanned};
+use quote::{format_ident, quote, ToTokens};
+use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl, Path};
 
 use crate::config::Config;
-use crate::properties_new::constant::{Constant, parse_constant};
-use crate::properties_new::method::{Method, parse_method};
+use crate::properties_new::constant::{parse_constant, Constant};
+use crate::properties_new::method::{parse_method, Method};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Type {
@@ -445,8 +445,8 @@ fn init_constructor(
     let constr_proto = if extends_constructor {
         if let Some(extends_ty) = extends {
             quote! { {
-            obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
-        } }
+                obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
+            } }
         } else {
             // If extends_constructor is true but no extends type, fall back to Function.prototype
             quote! { realm.intrinsics.func.clone() }
