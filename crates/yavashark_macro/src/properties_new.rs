@@ -445,7 +445,7 @@ fn init_constructor(
     let variable = &config.variable;
 
     let constr_proto = if extends_constructor {
-        if let Some(extends_ty) = extends {
+        if let Some(_extends_ty) = extends {
             quote! { {
                 obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
             } }

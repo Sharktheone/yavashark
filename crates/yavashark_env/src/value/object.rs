@@ -4,7 +4,7 @@ use crate::conversion::FromValueOutput;
 use crate::error::Error;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{
-    GCd, InternalPropertyKey, MutObject, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm,
+    GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm,
     Res, Symbol, ValueResult,
 };
 use indexmap::Equivalent;
