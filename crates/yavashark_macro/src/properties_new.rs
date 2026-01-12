@@ -1,16 +1,16 @@
 mod constant;
 mod method;
 
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl, Path};
+use quote::{ToTokens, format_ident, quote};
+use syn::{Expr, ImplItem, ItemImpl, Path, spanned::Spanned};
 
 use crate::config::Config;
-use crate::properties_new::constant::{parse_constant, Constant};
-use crate::properties_new::method::{parse_method, Method};
+use crate::properties_new::constant::{Constant, parse_constant};
+use crate::properties_new::method::{Method, parse_method};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Type {
@@ -49,6 +49,7 @@ pub struct PropertiesArgs {
     to_string_tag: Option<String>,
     intrinsic_name: Option<Ident>,
     constructor_name: Option<String>,
+    constructor_length: Option<u32>,
     #[darling(default)]
     no_intrinsic: bool,
     #[darling(default)]
@@ -182,6 +183,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         args.extends.as_ref(),
         args.extends_constructor,
         args.constructor_name.as_deref(),
+        args.constructor_length,
     )?;
 
     let try_into_value = &config.try_into_value;
@@ -339,6 +341,7 @@ fn init_constructor(
     extends: Option<&Ident>,
     extends_constructor: bool,
     constructor_name: Option<&str>,
+    constructor_length: Option<u32>,
 ) -> syn::Result<(TokenStream, TokenStream)> {
     if static_props.is_empty() && constructor.is_none() && call_constructor.is_none() {
         return Ok((TokenStream::new(), TokenStream::new()));
@@ -368,7 +371,7 @@ fn init_constructor(
         pub struct #name {}
     };
 
-    let mut constructor_length = 0;
+    let mut calculated_length = 0;
 
     if let Some(ref constructor) = constructor {
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
@@ -384,7 +387,7 @@ fn init_constructor(
             }
         });
 
-        constructor_length = constructor.calculate_length().0;
+        calculated_length = constructor.calculate_length().0;
     }
 
     if let Some(ref call_constructor) = call_constructor {
@@ -402,12 +405,11 @@ fn init_constructor(
         });
 
         if constructor.is_none() || constructor.as_ref().is_some_and(|c| c.length.is_none()) {
-            constructor_length = call_constructor
-                .calculate_length()
-                .0
-                .max(constructor_length);
+            calculated_length = call_constructor.calculate_length().0.max(calculated_length);
         }
     }
+
+    let constructor_length = constructor_length.unwrap_or_else(|| calculated_length as u32);
 
     {
         let init = init_props(static_props, config, Some(ty.to_token_stream()));
