@@ -128,8 +128,10 @@ impl Math {
         res
     }
 
-    const fn imul(left: u32, right: u32) -> i32 {
-        left.wrapping_mul(right) as i32
+    const fn imul(left: f64, right: f64) -> i32 {
+        let a = left as i64 as u32;
+        let b = right as i64 as u32;
+        a.wrapping_mul(b) as i32
     }
 
     fn log(value: f64) -> f64 {
