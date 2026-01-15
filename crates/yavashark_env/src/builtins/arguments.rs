@@ -4,7 +4,8 @@ use crate::value::{
     Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
 };
 use crate::{
-    InternalPropertyKey, MutObject, PropertyKey, Realm, Res, Value, ValueResult, Variable,
+    InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult,
+    Variable,
 };
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
@@ -16,6 +17,7 @@ pub struct Arguments {
     pub callee: Option<Value>,
     pub length: RefCell<Value>,
     pub args: RefCell<Vec<Value>>,
+    pub unmapped: RefCell<Vec<usize>>,
 }
 
 impl Arguments {
@@ -32,19 +34,37 @@ impl Arguments {
             callee,
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
+            unmapped: RefCell::new(Vec::new()),
         })
     }
 
+    fn is_mapped(&self, idx: usize) -> bool {
+        idx < self.args.borrow().len() && self.unmapped.borrow().binary_search(&idx).is_err()
+    }
+
+    fn unmap_index(&self, idx: usize) {
+        let mut unmapped = self.unmapped.borrow_mut();
+        if let Err(pos) = unmapped.binary_search(&idx) {
+            unmapped.insert(pos, idx);
+        }
+    }
+
     pub fn resolve_array(&self, idx: usize) -> Option<Value> {
-        Some(self.args.borrow().get(idx)?.copy())
+        if self.is_mapped(idx) {
+            Some(self.args.borrow().get(idx)?.copy())
+        } else {
+            None
+        }
     }
 
     pub fn set_array(&self, idx: usize, value: Value) -> Res<()> {
-        if let Some(v) = self.args.borrow_mut().get_mut(idx) {
-            *v = value;
-            return Ok(());
+        if self.is_mapped(idx) {
+            if let Some(v) = self.args.borrow_mut().get_mut(idx) {
+                *v = value;
+                return Ok(());
+            }
         }
-        Err(Error::new("Index out of bounds"))
+        Err(Error::new("Index out of bounds or unmapped"))
     }
 }
 
@@ -70,10 +90,15 @@ impl ObjectImpl for Arguments {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(idx) = name {
-            if let Some(v) = self.args.borrow_mut().get_mut(idx) {
-                *v = value;
-                return Ok(DefinePropertyResult::Handled);
+            if self.is_mapped(idx) {
+                if let Some(v) = self.args.borrow_mut().get_mut(idx) {
+                    *v = value;
+                    return Ok(DefinePropertyResult::Handled);
+                }
             }
+            return self
+                .get_wrapped_object()
+                .define_property(name, value, realm);
         }
 
         if let InternalPropertyKey::String(s) = &name {
@@ -98,10 +123,21 @@ impl ObjectImpl for Arguments {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(idx) = name {
-            if let Some(v) = self.args.borrow_mut().get_mut(idx) {
-                *v = value.value;
-                return Ok(DefinePropertyResult::Handled);
+            if self.is_mapped(idx) {
+                if !value.properties.is_writable() {
+                    self.unmap_index(idx);
+                    return self
+                        .get_wrapped_object()
+                        .define_property_attributes(name, value, realm);
+                }
+                if let Some(v) = self.args.borrow_mut().get_mut(idx) {
+                    *v = value.value;
+                    return Ok(DefinePropertyResult::Handled);
+                }
             }
+            return self
+                .get_wrapped_object()
+                .define_property_attributes(name, value, realm);
         }
 
         if let InternalPropertyKey::String(s) = &name {
@@ -117,6 +153,53 @@ impl ObjectImpl for Arguments {
 
         self.get_wrapped_object()
             .define_property_attributes(name, value, realm)
+    }
+
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        if let InternalPropertyKey::Index(idx) = &name {
+            if self.is_mapped(*idx) {
+                self.unmap_index(*idx);
+            }
+        }
+        self.get_wrapped_object()
+            .define_getter_attributes(name, callback, attributes, realm)
+    }
+
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        if let InternalPropertyKey::Index(idx) = &name {
+            if self.is_mapped(*idx) {
+                self.unmap_index(*idx);
+            }
+        }
+        self.get_wrapped_object()
+            .define_setter_attributes(name, callback, attributes, realm)
+    }
+
+    fn define_empty_accessor(
+        &self,
+        name: InternalPropertyKey,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        if let InternalPropertyKey::Index(idx) = &name {
+            if self.is_mapped(*idx) {
+                self.unmap_index(*idx);
+            }
+        }
+        self.get_wrapped_object()
+            .define_empty_accessor(name, attributes, realm)
     }
 
     fn resolve_property(
