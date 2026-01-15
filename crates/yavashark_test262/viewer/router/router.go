@@ -1,6 +1,8 @@
 package router
 
 import (
+	"fmt"
+	"viewer/conf"
 	"viewer/web"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,8 +11,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
 
-func Start() {
-	app := fiber.New()
+var app *fiber.App
+
+// Setup creates and configures the Fiber app with all routes
+func Setup() *fiber.App {
+	app = fiber.New()
 
 	app.Use(cors.New())
 	app.Use(logger.New())
@@ -42,9 +47,31 @@ func Start() {
 	api.Get("git/commits", getDataRepoCommits)
 	api.Get("git/results/:hash", getResultsForCommit)
 
-	web.Serve(app)
+	// Script API call endpoint (used by Deno runtime)
+	api.Post("script/call", scriptAPICall)
 
-	if err := app.Listen(":1215"); err != nil {
+	return app
+}
+
+// ServeStatic sets up static file serving. Call this AFTER registering
+// other routes (like MCP) to ensure proper route priority.
+func ServeStatic() {
+	web.Serve(app)
+}
+
+// GetApp returns the Fiber app instance
+func GetApp() *fiber.App {
+	return app
+}
+
+// Start begins listening on the configured port
+func Start() {
+	if app == nil {
+		app = Setup()
+	}
+
+	addr := fmt.Sprintf(":%d", conf.Port)
+	if err := app.Listen(addr); err != nil {
 		panic(err)
 	}
 }

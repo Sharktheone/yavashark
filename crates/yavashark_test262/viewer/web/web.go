@@ -28,12 +28,16 @@ func Serve(a *fiber.App) {
 		Index:  "index.html",
 		Browse: true,
 		MaxAge: 3600,
+		Next: func(c *fiber.Ctx) bool {
+			// Skip static file serving for API and MCP paths
+			return strings.HasPrefix(c.Path(), "/api") || strings.HasPrefix(c.Path(), "/mcp")
+		},
 	})
 
 	a.Use(static)
 
 	a.Get("*", func(c *fiber.Ctx) error {
-		if strings.HasPrefix(c.Path(), "/api") {
+		if strings.HasPrefix(c.Path(), "/api") || strings.HasPrefix(c.Path(), "/mcp") {
 			return c.Next()
 		}
 		return filesystem.SendFile(c, FS, "index.html")
