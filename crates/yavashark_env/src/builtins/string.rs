@@ -207,6 +207,7 @@ impl StringConstructor {
             .collect::<String>()
     }
 
+    #[length(1)]
     fn raw(
         template: ObjectHandle,
         #[variadic] args: &[Value],
