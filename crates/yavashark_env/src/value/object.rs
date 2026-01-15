@@ -4,8 +4,8 @@ use crate::conversion::FromValueOutput;
 use crate::error::Error;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{
-    GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm,
-    Res, Symbol, ValueResult,
+    GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol,
+    ValueResult,
 };
 use indexmap::Equivalent;
 use std::any::TypeId;
@@ -321,7 +321,7 @@ impl From<Variable> for PropertyDescriptor {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DefinePropertyDescriptor {
     Data {
-        value: Value,
+        value: Option<Value>,
         writable: Option<bool>,
         enumerable: Option<bool>,
         configurable: Option<bool>,
@@ -332,6 +332,25 @@ pub enum DefinePropertyDescriptor {
         enumerable: Option<bool>,
         configurable: Option<bool>,
     },
+}
+
+impl DefinePropertyDescriptor {
+    pub fn is_generic(&self) -> bool {
+        match self {
+            DefinePropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable: _,
+                configurable: _,
+            } => value.is_none() && writable.is_none(),
+            DefinePropertyDescriptor::Accessor {
+                get,
+                set,
+                enumerable: _,
+                configurable: _,
+            } => get.is_none() && set.is_none(),
+        }
+    }
 }
 
 impl FromValueOutput for DefinePropertyDescriptor {
@@ -390,7 +409,7 @@ impl FromValueOutput for DefinePropertyDescriptor {
             })
         } else {
             Ok(Self::Data {
-                value: value.unwrap_or(Value::Undefined),
+                value,
                 writable,
                 enumerable,
                 configurable,
@@ -1231,6 +1250,241 @@ impl Object {
         desc: DefinePropertyDescriptor,
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
+        let current = self.get_own_property_no_get_set(name.clone(), realm)?;
+
+        let Some(current) = current else {
+            if !self.is_extensible() {
+                return Ok(DefinePropertyResult::ReadOnly);
+            }
+            return self.define_descriptor_new(name, desc, realm);
+        };
+
+        let current_attrs = current.attributes();
+        let is_configurable = current_attrs.is_configurable();
+
+        // ES5 8.12.9 step 7: If current is not configurable, validate the change is allowed
+        if !is_configurable {
+            if let DefinePropertyDescriptor::Data {
+                configurable: Some(true),
+                ..
+            }
+            | DefinePropertyDescriptor::Accessor {
+                configurable: Some(true),
+                ..
+            } = &desc
+            {
+                return Err(Error::ty("Cannot change configurable from false to true"));
+            }
+
+            // Cannot change enumerable if not configurable
+            let new_enumerable = match &desc {
+                DefinePropertyDescriptor::Data { enumerable, .. } => *enumerable,
+                DefinePropertyDescriptor::Accessor { enumerable, .. } => *enumerable,
+            };
+            if let Some(new_enum) = new_enumerable {
+                if new_enum != current_attrs.is_enumerable() {
+                    return Err(Error::ty(
+                        "Cannot change enumerable on non-configurable property",
+                    ));
+                }
+            }
+        }
+
+        let current_is_data = current.is_data();
+
+        // Match on descriptor type and handle all cases with proper pattern matching
+        match desc {
+            DefinePropertyDescriptor::Accessor {
+                get,
+                set,
+                enumerable,
+                configurable,
+            } => {
+                let desc_is_generic = get.is_none() && set.is_none();
+
+                // ES5 8.12.9 step 9: Handle type conversion (data -> accessor)
+                if current_is_data && !desc_is_generic {
+                    if !is_configurable {
+                        return Err(Error::ty(
+                            "Cannot convert data property to accessor on non-configurable property",
+                        ));
+                    }
+                    let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                    let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                    let attributes = Attributes::from_values(false, enumerable, configurable);
+
+                    self.0.delete_property(name.clone(), realm)?;
+
+                    if let Some(getter) = get {
+                        self.define_getter_attributes(name.clone(), getter, attributes, realm)?;
+                    }
+                    if let Some(setter) = set {
+                        self.define_setter_attributes(name, setter, attributes, realm)?;
+                    }
+                    return Ok(DefinePropertyResult::Handled);
+                }
+
+                // Handle generic descriptor on accessor property
+                if !current_is_data && desc_is_generic {
+                    if !is_configurable {
+                        if let Some(new_enum) = enumerable {
+                            if new_enum != current_attrs.is_enumerable() {
+                                return Err(Error::ty(
+                                    "Cannot change enumerable on non-configurable property",
+                                ));
+                            }
+                        }
+                    }
+
+                    let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                    let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                    let attributes = Attributes::from_values(false, enumerable, configurable);
+
+                    if let Some(PropertyDescriptor::Accessor {
+                        get: cur_get,
+                        set: cur_set,
+                        ..
+                    }) = self.0.get_property_descriptor(name.clone(), realm)?
+                    {
+                        if let Some(getter) = cur_get {
+                            self.define_getter_attributes(name.clone(), getter, attributes, realm)?;
+                        }
+                        if let Some(setter) = cur_set {
+                            self.define_setter_attributes(name, setter, attributes, realm)?;
+                        }
+                    }
+                    return Ok(DefinePropertyResult::Handled);
+                }
+
+                // ES5 8.12.9 step 11: Validate accessor property changes on non-configurable
+                if !is_configurable && (get.is_some() || set.is_some()) {
+                    return Err(Error::ty(
+                        "Cannot change accessor on non-configurable property",
+                    ));
+                }
+
+                // Merge with existing values
+                let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                let attributes = Attributes::from_values(false, enumerable, configurable);
+
+                if let Some(getter) = get {
+                    self.define_getter_attributes(name.clone(), getter, attributes, realm)?;
+                }
+                if let Some(setter) = set {
+                    self.define_setter_attributes(name, setter, attributes, realm)?;
+                }
+
+                Ok(DefinePropertyResult::Handled)
+            }
+            DefinePropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable,
+                configurable,
+            } => {
+                // A generic descriptor doesn't specify value or writable
+                // (enumerable and configurable alone don't make it a data descriptor)
+                let desc_is_generic = value.is_none() && writable.is_none();
+
+                // ES5 8.12.9 step 9: Handle type conversion (accessor -> data)
+                if !current_is_data && !desc_is_generic {
+                    if !is_configurable {
+                        return Err(Error::ty(
+                            "Cannot convert accessor property to data on non-configurable property",
+                        ));
+                    }
+                    let value = value.unwrap_or(Value::Undefined);
+                    let writable = writable.unwrap_or(false);
+                    let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                    let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                    let attributes = Attributes::from_values(writable, enumerable, configurable);
+
+                    self.0.delete_property(name.clone(), realm)?;
+
+                    return self.define_property_attributes(
+                        name,
+                        Variable::with_attributes(value, attributes),
+                        realm,
+                    );
+                }
+
+                // Handle generic descriptor on accessor property
+                if !current_is_data && desc_is_generic {
+                    if !is_configurable {
+                        if let Some(new_enum) = enumerable {
+                            if new_enum != current_attrs.is_enumerable() {
+                                return Err(Error::ty(
+                                    "Cannot change enumerable on non-configurable property",
+                                ));
+                            }
+                        }
+                    }
+
+                    let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                    let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                    let attributes = Attributes::from_values(false, enumerable, configurable);
+
+                    if let Some(PropertyDescriptor::Accessor {
+                        get: cur_get,
+                        set: cur_set,
+                        ..
+                    }) = self.0.get_property_descriptor(name.clone(), realm)?
+                    {
+                        if let Some(getter) = cur_get {
+                            self.define_getter_attributes(name.clone(), getter, attributes, realm)?;
+                        }
+                        if let Some(setter) = cur_set {
+                            self.define_setter_attributes(name, setter, attributes, realm)?;
+                        }
+                    }
+                    return Ok(DefinePropertyResult::Handled);
+                }
+
+                // Current is data property, desc is data descriptor
+                let current_value = match current {
+                    Property::Value(v, _) => v,
+                    Property::Getter(_, _) => Value::Undefined, // Should not happen given checks above
+                };
+
+                // ES5 8.12.9 step 10: Validate data property changes on non-configurable
+                if !is_configurable && !current_attrs.is_writable() {
+                    if let Some(true) = writable {
+                        return Err(Error::ty(
+                            "Cannot change writable from false to true on non-configurable property",
+                        ));
+                    }
+                    if let Some(ref new_value) = value {
+                        if !new_value.same_value(&current_value) {
+                            return Err(Error::ty(
+                                "Cannot change value of non-writable non-configurable property",
+                            ));
+                        }
+                    }
+                    return Ok(DefinePropertyResult::Handled);
+                }
+
+                let final_value = value.unwrap_or(current_value);
+                let writable = writable.unwrap_or(current_attrs.is_writable());
+                let enumerable = enumerable.unwrap_or(current_attrs.is_enumerable());
+                let configurable = configurable.unwrap_or(current_attrs.is_configurable());
+                let attributes = Attributes::from_values(writable, enumerable, configurable);
+
+                self.define_property_attributes_force(
+                    name,
+                    Variable::with_attributes(final_value, attributes),
+                    realm,
+                )
+            }
+        }
+    }
+
+    fn define_descriptor_new(
+        &self,
+        name: InternalPropertyKey,
+        desc: DefinePropertyDescriptor,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         match desc {
             DefinePropertyDescriptor::Data {
                 value,
@@ -1238,30 +1492,10 @@ impl Object {
                 enumerable,
                 configurable,
             } => {
-                let (writable, enumerable, configurable) =
-                    if writable.is_none() || enumerable.is_none() || configurable.is_none() {
-                        let current = self.get_own_property_no_get_set(name.clone(), realm)?;
-                        if let Some(Property::Value(_, attrs)) = current {
-                            (
-                                writable.unwrap_or(attrs.is_writable()),
-                                enumerable.unwrap_or(attrs.is_enumerable()),
-                                configurable.unwrap_or(attrs.is_configurable()),
-                            )
-                        } else {
-                            (
-                                writable.unwrap_or(false),
-                                enumerable.unwrap_or(false),
-                                configurable.unwrap_or(false),
-                            )
-                        }
-                    } else {
-                        (
-                            writable.unwrap_or(false),
-                            enumerable.unwrap_or(false),
-                            configurable.unwrap_or(false),
-                        )
-                    };
-
+                let value = value.unwrap_or(Value::Undefined);
+                let writable = writable.unwrap_or(false);
+                let enumerable = enumerable.unwrap_or(false);
+                let configurable = configurable.unwrap_or(false);
                 let attributes = Attributes::from_values(writable, enumerable, configurable);
                 self.define_property_attributes(
                     name,
@@ -1275,20 +1509,8 @@ impl Object {
                 enumerable,
                 configurable,
             } => {
-                let (enumerable, configurable) = if enumerable.is_none() || configurable.is_none() {
-                    let current = self.get_own_property_no_get_set(name.clone(), realm)?;
-                    if let Some(Property::Getter(_, attrs)) = current {
-                        (
-                            enumerable.unwrap_or(attrs.is_enumerable()),
-                            configurable.unwrap_or(attrs.is_configurable()),
-                        )
-                    } else {
-                        (enumerable.unwrap_or(false), configurable.unwrap_or(false))
-                    }
-                } else {
-                    (enumerable.unwrap_or(false), configurable.unwrap_or(false))
-                };
-
+                let enumerable = enumerable.unwrap_or(false);
+                let configurable = configurable.unwrap_or(false);
                 let attributes = Attributes::from_values(false, enumerable, configurable);
 
                 if get.is_none() && set.is_none() {
@@ -1301,10 +1523,19 @@ impl Object {
                         self.define_setter_attributes(name, setter, attributes, realm)?;
                     }
                 }
-
                 Ok(DefinePropertyResult::Handled)
             }
         }
+    }
+
+    fn define_property_attributes_force(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        self.0.delete_property(name.clone(), realm)?;
+        self.define_property_attributes(name, value, realm)
     }
 
     #[must_use]
@@ -1371,7 +1602,7 @@ impl Object {
                 return Err(Error::ty_error(format!(
                     "Symbol.toPrimitive must be a function, got {}",
                     to_prim.type_of()
-                )))
+                )));
             }
         }
 

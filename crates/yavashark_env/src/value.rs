@@ -343,6 +343,29 @@ impl Value {
         }
     }
 
+    /// SameValue comparison as per ECMAScript spec (ES5 9.12).
+    /// This is like `===` but:
+    /// - NaN equals NaN (unlike `===`)
+    /// - +0 does NOT equal -0 (unlike `===`)
+    #[must_use]
+    pub fn same_value(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Number(a), Self::Number(b)) => {
+                // NaN === NaN in SameValue
+                if a.is_nan() && b.is_nan() {
+                    return true;
+                }
+                // +0 !== -0 in SameValue
+                if *a == 0.0 && *b == 0.0 {
+                    return a.is_sign_positive() == b.is_sign_positive();
+                }
+                a == b
+            }
+            // For all other types, use regular equality
+            _ => self == other,
+        }
+    }
+
     /// SameValueZero comparison as per ECMAScript spec.
     /// This is like `===` but:
     /// - NaN equals NaN (unlike `===`)

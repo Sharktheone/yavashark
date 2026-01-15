@@ -391,7 +391,8 @@ impl MutObject {
                 };
 
                 if v.attributes.is_writable() {
-                    *v = value.into();
+                    let new_prop = value.into();
+                    v.value = new_prop.value;
                 } else {
                     return DefinePropertyResult::ReadOnly;
                 }
@@ -417,6 +418,36 @@ impl MutObject {
 
         self.array.insert(i, (index, len));
         // self.properties.insert(property_key, len);
+
+        DefinePropertyResult::Handled
+    }
+
+    pub fn insert_array_force(
+        &mut self,
+        index: usize,
+        value: impl Into<ObjectProperty>,
+    ) -> DefinePropertyResult {
+        let (i, found) = self.array_position(index);
+
+        if found {
+            if let Some(vi) = self.array.get(i) {
+                let Some(v) = self.values.get_mut(vi.1) else {
+                    return DefinePropertyResult::Handled;
+                };
+
+                if v.attributes.is_configurable() || v.attributes.is_writable() {
+                    *v = value.into();
+                } else {
+                    return DefinePropertyResult::ReadOnly;
+                }
+                return DefinePropertyResult::Handled;
+            }
+        }
+
+        let len = self.values.len();
+        self.values.push(value.into());
+
+        self.array.insert(i, (index, len));
 
         DefinePropertyResult::Handled
     }
@@ -658,6 +689,16 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
+            if let Some(desc) = self.get_array_descriptor(n) {
+                if let PropertyDescriptor::Accessor { set, get, .. } = desc {
+                    if let Some(setter) = set {
+                        return Ok(DefinePropertyResult::Setter(setter, value));
+                    }
+                    if get.is_some() {
+                        return Ok(DefinePropertyResult::ReadOnly);
+                    }
+                }
+            }
             return Ok(self.insert_array(n, value));
         }
 
@@ -716,6 +757,16 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
+            if let Some(desc) = self.get_array_descriptor(n) {
+                if let PropertyDescriptor::Accessor { set, get, .. } = desc {
+                    if let Some(setter) = set {
+                        return Ok(DefinePropertyResult::Setter(setter, value.value));
+                    }
+                    if get.is_some() {
+                        return Ok(DefinePropertyResult::ReadOnly);
+                    }
+                }
+            }
             return Ok(self.insert_array(n, value));
         }
 
@@ -744,8 +795,7 @@ impl MutObj for MutObject {
                 }
 
                 return Ok(if e.attributes.is_writable() {
-                    *e = value.into();
-
+                    e.value = value.value;
                     DefinePropertyResult::Handled
                 } else {
                     DefinePropertyResult::ReadOnly
@@ -1247,7 +1297,21 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res {
         if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, ObjectProperty::getter(value.into()));
+            let existing_setter = self
+                .get_array_descriptor(n)
+                .and_then(|p| match p {
+                    PropertyDescriptor::Accessor { set, .. } => set.map(Into::into),
+                    _ => None,
+                })
+                .unwrap_or(Value::Undefined);
+
+            let prop = ObjectProperty {
+                value: Value::Undefined,
+                attributes,
+                get: value.into(),
+                set: existing_setter,
+            };
+            self.insert_array_force(n, prop);
             return Ok(());
         }
 
@@ -1260,6 +1324,7 @@ impl MutObj for MutObject {
 
         if let Some(prop) = val {
             prop.get = value.into();
+            prop.attributes = attributes;
             return Ok(());
         }
 
@@ -1298,7 +1363,21 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res {
         if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, ObjectProperty::setter(value.into()));
+            let existing_getter = self
+                .get_array_descriptor(n)
+                .and_then(|p| match p {
+                    PropertyDescriptor::Accessor { get, .. } => get.map(Into::into),
+                    _ => None,
+                })
+                .unwrap_or(Value::Undefined);
+
+            let prop = ObjectProperty {
+                value: Value::Undefined,
+                attributes,
+                get: existing_getter,
+                set: value.into(),
+            };
+            self.insert_array_force(n, prop);
             return Ok(());
         }
 
@@ -1311,6 +1390,7 @@ impl MutObj for MutObject {
 
         if let Some(prop) = val {
             prop.set = value.into();
+            prop.attributes = attributes;
             return Ok(());
         }
 
