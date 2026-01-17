@@ -190,6 +190,12 @@ impl NumberConstructor {
     }
 }
 
+impl NumberConstructor {
+    pub const MAX_SAFE_INTEGER_U: u64 = 9_007_199_254_740_991;
+    pub const MIN_SAFE_INTEGER_U: i64 = -9_007_199_254_740_991;
+}
+
+
 #[properties_new(raw)]
 impl NumberConstructor {
     pub const EPSILON: f64 = f64::EPSILON;
