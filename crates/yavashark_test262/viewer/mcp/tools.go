@@ -230,7 +230,14 @@ func truncateOutput(text string) string {
 
 // getTypeScriptAPIDocs returns the TypeScript API documentation
 func getTypeScriptAPIDocs() string {
-	return "## Available APIs\n\n" +
+	return "## IMPORTANT: Use MCP to Run Tests\n\n" +
+		"**Do NOT use shell commands or the `yavashark_test262` binary directly.**\n\n" +
+		"Always use `ys.runner.rerun()` to run tests. The MCP server provides:\n" +
+		"- Proper result tracking and caching\n" +
+		"- Before/after diff calculation\n" +
+		"- Integration with the viewer UI\n\n" +
+		"---\n\n" +
+		"## Available APIs\n\n" +
 		"The `ys` namespace provides access to all functionality:\n\n" +
 		"### ys.print() - Output text\n\n" +
 		"```typescript\n" +
@@ -282,15 +289,30 @@ func getTypeScriptAPIDocs() string {
 		"ys.spec.forIntrinsic(name: string): Promise<string>\n" +
 		"```\n\n" +
 		"### ys.runner - Run tests\n\n" +
+		"**Always use this API to run tests. Do not use CLI commands.**\n\n" +
+		"```typescript\n" +
+		"// Run a single test by path\n" +
+		"ys.runner.rerun({ paths: ['built-ins/Array/from/from-a.js'] })\n\n" +
+		"// Run multiple specific tests\n" +
+		"ys.runner.rerun({ paths: ['path/to/test1.js', 'path/to/test2.js'] })\n\n" +
+		"// Run all tests in a directory\n" +
+		"ys.runner.rerun({ dir: 'built-ins/Array' })\n\n" +
+		"// Run only currently-failing tests in a directory\n" +
+		"ys.runner.rerun({ dir: 'built-ins/Array', failedOnly: true })\n\n" +
+		"// Run specific paths only if they're currently failing\n" +
+		"ys.runner.rerun({ paths: ['test1.js', 'test2.js'], failedOnly: true })\n\n" +
+		"// Rebuild engine before running\n" +
+		"ys.runner.rerun({ paths: ['test.js'], rebuild: true })\n" +
+		"```\n\n" +
 		"```typescript\n" +
 		"ys.runner.rerun(opts: RerunOptions): Promise<RerunResult>      // Blocking\n" +
-		"ys.runner.rerunAsync(opts: RerunOptions): Promise<RerunJob>    // Non-blocking\n" +
-		"ys.runner.getJob(jobId: string): Promise<RerunJob>\n" +
-		"ys.runner.cancelJob(jobId: string): Promise<void>\n\n" +
+		"ys.runner.rerunAsync(opts: RerunOptions): Promise<RerunJob>    // Non-blocking (not implemented)\n" +
+		"ys.runner.getJob(jobId: string): Promise<RerunJob>             // Not implemented\n" +
+		"ys.runner.cancelJob(jobId: string): Promise<void>              // Not implemented\n\n" +
 		"interface RerunOptions {\n" +
-		"  paths?: string[]       // Specific test paths\n" +
-		"  dir?: string           // Directory to run\n" +
-		"  failedOnly?: boolean   // Only run failed tests\n" +
+		"  paths?: string[]       // Specific test paths (files or directories)\n" +
+		"  dir?: string           // Directory to run (ignored if paths is set)\n" +
+		"  failedOnly?: boolean   // Only run currently-failing tests\n" +
 		"  rebuild?: boolean      // Rebuild engine first\n" +
 		"}\n" +
 		"```\n\n" +
@@ -361,12 +383,25 @@ func getTypeScriptAPIDocs() string {
 
 // getExampleScripts returns example scripts
 func getExampleScripts() string {
-	return "### Example 1: Simple count with print\n\n" +
+	return "### Example 1: Run a single test\n\n" +
+		"```typescript\n" +
+		"// Run one specific test and check the result\n" +
+		"const result = await ys.runner.rerun({\n" +
+		"  paths: ['built-ins/Array/prototype/map/15.4.4.19-1-1.js']\n" +
+		"});\n\n" +
+		"return {\n" +
+		"  path: result.after[0]?.path,\n" +
+		"  status: result.after[0]?.status,\n" +
+		"  improved: result.diff.gained.length > 0,\n" +
+		"  duration: result.duration\n" +
+		"};\n" +
+		"```\n\n" +
+		"### Example 2: Simple count with print\n\n" +
 		"```typescript\n" +
 		"const count = await ys.tests.failing().count();\n" +
 		"ys.print(`There are ${count} failing tests`);\n" +
 		"```\n\n" +
-		"### Example 2: Get failing tests in a directory\n\n" +
+		"### Example 3: Get failing tests in a directory\n\n" +
 		"```typescript\n" +
 		"const failing = await ys.tests\n" +
 		"  .inDir(\"built-ins/Array/prototype/map\")\n" +
@@ -377,7 +412,7 @@ func getExampleScripts() string {
 		"  paths: failing.map(t => t.path)\n" +
 		"};\n" +
 		"```\n\n" +
-		"### Example 2: Get output for first 5 failing tests\n\n" +
+		"### Example 4: Get output for first 5 failing tests\n\n" +
 		"```typescript\n" +
 		"const failing = await ys.tests.failing().first(5);\n" +
 		"const outputs = await Promise.all(\n" +
@@ -388,7 +423,7 @@ func getExampleScripts() string {
 		"  message: o.message\n" +
 		"}));\n" +
 		"```\n\n" +
-		"### Example 3: Rerun failing tests and compare\n\n" +
+		"### Example 5: Rerun failing tests in a directory\n\n" +
 		"```typescript\n" +
 		"const result = await ys.runner.rerun({\n" +
 		"  dir: \"built-ins/Array\",\n" +
@@ -401,7 +436,7 @@ func getExampleScripts() string {
 		"  duration: result.duration\n" +
 		"};\n" +
 		"```\n\n" +
-		"### Example 4: Group tests by status\n\n" +
+		"### Example 6: Group tests by status\n\n" +
 		"```typescript\n" +
 		"const byStatus = await ys.tests\n" +
 		"  .inDir(\"language/expressions\")\n" +
@@ -412,7 +447,7 @@ func getExampleScripts() string {
 		"  )\n" +
 		");\n" +
 		"```\n\n" +
-		"### Example 5: Use session to track progress\n\n" +
+		"### Example 7: Use session to track progress\n\n" +
 		"```typescript\n" +
 		"// Get or initialize our working set\n" +
 		"let workingSet = ys.session.get<string[]>(\"failingTests\");\n" +
@@ -432,7 +467,7 @@ func getExampleScripts() string {
 		"  codePreview: code.substring(0, 500)\n" +
 		"};\n" +
 		"```\n\n" +
-		"### Example 6: Control output truncation\n\n" +
+		"### Example 8: Control output truncation\n\n" +
 		"```typescript\n" +
 		"// Limit output to 10000 chars\n" +
 		"await ys.output.setMaxChars(10000);\n\n" +

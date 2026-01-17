@@ -455,6 +455,13 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 		return nil, err
 	}
 
+	// Validate paths - reject any containing ".."
+	for _, p := range opts.Paths {
+		if strings.Contains(p, "..") {
+			return nil, fmt.Errorf("invalid path (contains '..'): %s", p)
+		}
+	}
+
 	// Rebuild if requested
 	if opts.Rebuild {
 		if err := build.RebuildEngine(build.Config{
@@ -472,21 +479,75 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 		return nil, err
 	}
 
-	// Determine what to run
-	var testDir string
-	if opts.Dir != "" {
-		testDir = filepath.Join(conf.TestRoot, opts.Dir)
-	} else {
-		testDir = conf.TestRoot
+	runConfig := run.RunConfig{
+		Workers:     conf.Workers,
+		Skips:       true,
+		Timings:     false,
+		Timeout:     30 * time.Second,
+		Interactive: false,
+		FailedOnly:  opts.FailedOnly,
 	}
 
-	// Collect before entries
-	var beforeEntries []TestEntry
+	startTime := time.Now()
+
+	var newResults *results.TestResults
+	var errorPaths []string
+	var pathsToTrack []string // Paths we're actually running (for before/after filtering)
+
+	if len(opts.Paths) > 0 {
+		// Run specific paths (files or directories)
+		fullPaths := make([]string, 0, len(opts.Paths))
+		for _, p := range opts.Paths {
+			fullPath := filepath.Join(conf.TestRoot, p)
+			fullPaths = append(fullPaths, fullPath)
+			pathsToTrack = append(pathsToTrack, p)
+		}
+
+		if len(fullPaths) == 0 {
+			return RerunResult{
+				Before:   []TestEntry{},
+				After:    []TestEntry{},
+				Diff:     DiffResult{Gained: []TestEntry{}, Lost: []TestEntry{}, Changed: []TestEntry{}},
+				Duration: 0,
+				Status:   "complete",
+			}, nil
+		}
+
+		newResults, _, errorPaths = run.TestSpecificPaths(fullPaths, runConfig)
+	} else {
+		// Run tests in directory (existing behavior)
+		var testDir string
+		if opts.Dir != "" {
+			testDir = filepath.Join(conf.TestRoot, opts.Dir)
+		} else {
+			testDir = conf.TestRoot
+		}
+
+		newResults, _ = run.TestsInDir(testDir, runConfig)
+	}
+
+	// Collect before entries based on what we're tracking
+	beforeEntries := []TestEntry{}
 	for path, result := range *resultsMap {
 		relPath, _ := filepath.Rel(conf.TestRoot, path)
-		if opts.Dir != "" && !strings.HasPrefix(relPath, opts.Dir) {
+
+		// Filter based on paths or dir
+		if len(opts.Paths) > 0 {
+			// Check if this path matches any of the paths we're running
+			matches := false
+			for _, trackPath := range pathsToTrack {
+				if relPath == trackPath || strings.HasPrefix(relPath, trackPath+"/") {
+					matches = true
+					break
+				}
+			}
+			if !matches {
+				continue
+			}
+		} else if opts.Dir != "" && !strings.HasPrefix(relPath, opts.Dir) {
 			continue
 		}
+
 		if opts.FailedOnly && result.Status == status.PASS {
 			continue
 		}
@@ -495,19 +556,6 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 			Status: result.Status.String(),
 		})
 	}
-
-	startTime := time.Now()
-
-	// Run tests
-	runConfig := run.RunConfig{
-		Workers:     conf.Workers,
-		Skips:       true,
-		Timings:     false,
-		Timeout:     30 * time.Second,
-		Interactive: false,
-	}
-
-	newResults, _ := run.TestsInDir(testDir, runConfig)
 
 	// Merge results
 	existingResults, err := results.LoadResults()
@@ -525,12 +573,26 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 	resultsMap, _ = cache.GetResultsIndex()
 
 	// Collect after entries
-	var afterEntries []TestEntry
+	afterEntries := []TestEntry{}
 	for path, result := range *resultsMap {
 		relPath, _ := filepath.Rel(conf.TestRoot, path)
-		if opts.Dir != "" && !strings.HasPrefix(relPath, opts.Dir) {
+
+		// Filter based on paths or dir
+		if len(opts.Paths) > 0 {
+			matches := false
+			for _, trackPath := range pathsToTrack {
+				if relPath == trackPath || strings.HasPrefix(relPath, trackPath+"/") {
+					matches = true
+					break
+				}
+			}
+			if !matches {
+				continue
+			}
+		} else if opts.Dir != "" && !strings.HasPrefix(relPath, opts.Dir) {
 			continue
 		}
+
 		afterEntries = append(afterEntries, TestEntry{
 			Path:   relPath,
 			Status: result.Status.String(),
@@ -540,13 +602,23 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 	// Compute diff
 	diff := computeDiff(beforeEntries, afterEntries)
 
-	return RerunResult{
+	result := RerunResult{
 		Before:   beforeEntries,
 		After:    afterEntries,
 		Diff:     diff,
 		Duration: float64(duration.Milliseconds()),
 		Status:   "complete",
-	}, nil
+	}
+
+	// If there were error paths, include them in the response
+	if len(errorPaths) > 0 {
+		return map[string]any{
+			"result":     result,
+			"errorPaths": errorPaths,
+		}, nil
+	}
+
+	return result, nil
 }
 
 func handleRunnerRerunAsync(params json.RawMessage) (any, error) {
@@ -740,7 +812,10 @@ func computeDiff(before, after []TestEntry) DiffResult {
 		afterMap[e.Path] = e.Status
 	}
 
-	var gained, lost, changed []TestEntry
+	// Initialize as empty slices (not nil) for proper JSON serialization
+	gained := []TestEntry{}
+	lost := []TestEntry{}
+	changed := []TestEntry{}
 
 	for _, e := range after {
 		beforeStatus, existed := beforeMap[e.Path]
