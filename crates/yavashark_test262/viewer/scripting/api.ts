@@ -312,4 +312,88 @@ export const ys = {
       getSessionStore().clear();
     },
   },
+
+  output: {
+    /**
+     * Set the maximum number of characters for tool output.
+     * @param maxChars - Maximum characters (0 for unlimited)
+     */
+    async setMaxChars(maxChars: number): Promise<void> {
+      await apiCall("output.setMaxChars", { maxChars });
+    },
+
+    /**
+     * Get the current maximum output characters setting.
+     */
+    async getMaxChars(): Promise<{ maxChars: number; unlimited: boolean }> {
+      return await apiCall("output.getMaxChars", {}) as { maxChars: number; unlimited: boolean };
+    },
+
+    /**
+     * Set the offset for truncated output (skip first N chars).
+     * @param offset - Number of characters to skip from the start
+     */
+    async setOffset(offset: number): Promise<void> {
+      await apiCall("output.setOffset", { offset });
+    },
+
+    /**
+     * Get the current offset setting.
+     */
+    async getOffset(): Promise<number> {
+      return (await apiCall("output.getOffset", {}) as { offset: number }).offset;
+    },
+
+    /**
+     * Set whether to take characters from head or tail of output.
+     * @param mode - "head" to take from start, "tail" to take from end
+     */
+    async setMode(mode: "head" | "tail"): Promise<void> {
+      await apiCall("output.setMode", { mode });
+    },
+
+    /**
+     * Get the current mode setting.
+     */
+    async getMode(): Promise<"head" | "tail"> {
+      return (await apiCall("output.getMode", {}) as { mode: "head" | "tail" }).mode;
+    },
+
+    /**
+     * Configure all output settings at once.
+     * @param config - Output configuration
+     */
+    async configure(config: {
+      maxChars?: number;
+      offset?: number;
+      mode?: "head" | "tail";
+    }): Promise<void> {
+      await apiCall("output.configure", config);
+    },
+
+    /**
+     * Get all current output settings.
+     */
+    async getConfig(): Promise<{
+      maxChars: number;
+      offset: number;
+      mode: "head" | "tail";
+      unlimited: boolean;
+    }> {
+      return await apiCall("output.getConfig", {}) as {
+        maxChars: number;
+        offset: number;
+        mode: "head" | "tail";
+        unlimited: boolean;
+      };
+    },
+
+    /**
+     * Get the length of the last tool output (before truncation).
+     * Useful for deciding how to paginate large outputs.
+     */
+    async getLastLength(): Promise<number> {
+      return (await apiCall("output.getLastLength", {}) as { length: number }).length;
+    },
+  },
 };

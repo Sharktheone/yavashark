@@ -107,6 +107,26 @@ func HandleAPICall(method string, params json.RawMessage) (any, error) {
 	case "runner.cancelJob":
 		return handleRunnerCancelJob(params)
 
+	// output.*
+	case "output.setMaxChars":
+		return handleOutputSetMaxChars(params)
+	case "output.getMaxChars":
+		return handleOutputGetMaxChars(params)
+	case "output.setOffset":
+		return handleOutputSetOffset(params)
+	case "output.getOffset":
+		return handleOutputGetOffset(params)
+	case "output.setMode":
+		return handleOutputSetMode(params)
+	case "output.getMode":
+		return handleOutputGetMode(params)
+	case "output.configure":
+		return handleOutputConfigure(params)
+	case "output.getConfig":
+		return handleOutputGetConfig(params)
+	case "output.getLastLength":
+		return handleOutputGetLastLength(params)
+
 	default:
 		return nil, fmt.Errorf("unknown method: %s", method)
 	}
@@ -542,6 +562,108 @@ func handleRunnerGetJob(params json.RawMessage) (any, error) {
 func handleRunnerCancelJob(params json.RawMessage) (any, error) {
 	// TODO: Implement async job system
 	return nil, fmt.Errorf("job system not yet implemented")
+}
+
+// output.* handlers
+
+func handleOutputSetMaxChars(params json.RawMessage) (any, error) {
+	var p struct {
+		MaxChars int `json:"maxChars"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+	if p.MaxChars < 0 {
+		return nil, fmt.Errorf("maxChars must be >= 0")
+	}
+	conf.MaxOutputChars = p.MaxChars
+	return nil, nil
+}
+
+func handleOutputGetMaxChars(params json.RawMessage) (any, error) {
+	return map[string]any{
+		"maxChars":  conf.MaxOutputChars,
+		"unlimited": conf.MaxOutputChars == 0,
+	}, nil
+}
+
+func handleOutputSetOffset(params json.RawMessage) (any, error) {
+	var p struct {
+		Offset int `json:"offset"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+	if p.Offset < 0 {
+		return nil, fmt.Errorf("offset must be >= 0")
+	}
+	conf.OutputOffset = p.Offset
+	return nil, nil
+}
+
+func handleOutputGetOffset(params json.RawMessage) (any, error) {
+	return map[string]int{"offset": conf.OutputOffset}, nil
+}
+
+func handleOutputSetMode(params json.RawMessage) (any, error) {
+	var p struct {
+		Mode string `json:"mode"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+	if p.Mode != "head" && p.Mode != "tail" {
+		return nil, fmt.Errorf("mode must be 'head' or 'tail'")
+	}
+	conf.OutputMode = p.Mode
+	return nil, nil
+}
+
+func handleOutputGetMode(params json.RawMessage) (any, error) {
+	return map[string]string{"mode": conf.OutputMode}, nil
+}
+
+func handleOutputConfigure(params json.RawMessage) (any, error) {
+	var p struct {
+		MaxChars *int    `json:"maxChars,omitempty"`
+		Offset   *int    `json:"offset,omitempty"`
+		Mode     *string `json:"mode,omitempty"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+	if p.MaxChars != nil {
+		if *p.MaxChars < 0 {
+			return nil, fmt.Errorf("maxChars must be >= 0")
+		}
+		conf.MaxOutputChars = *p.MaxChars
+	}
+	if p.Offset != nil {
+		if *p.Offset < 0 {
+			return nil, fmt.Errorf("offset must be >= 0")
+		}
+		conf.OutputOffset = *p.Offset
+	}
+	if p.Mode != nil {
+		if *p.Mode != "head" && *p.Mode != "tail" {
+			return nil, fmt.Errorf("mode must be 'head' or 'tail'")
+		}
+		conf.OutputMode = *p.Mode
+	}
+	return nil, nil
+}
+
+func handleOutputGetConfig(params json.RawMessage) (any, error) {
+	return map[string]any{
+		"maxChars":  conf.MaxOutputChars,
+		"offset":    conf.OutputOffset,
+		"mode":      conf.OutputMode,
+		"unlimited": conf.MaxOutputChars == 0,
+	}, nil
+}
+
+func handleOutputGetLastLength(params json.RawMessage) (any, error) {
+	return map[string]int{"length": conf.LastOutputLength}, nil
 }
 
 // Helper functions

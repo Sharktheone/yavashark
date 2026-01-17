@@ -3,6 +3,8 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"viewer/conf"
 
 	"github.com/google/uuid"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -18,6 +20,12 @@ type RunScriptParams struct {
 	Script    string `json:"script" jsonschema:"TypeScript code to execute. Has access to the ys namespace with tests, harness, spec, runner, and session APIs."`
 	SessionId string `json:"sessionId,omitempty" jsonschema:"Optional session ID for state persistence between calls. Get one from GetSession."`
 }
+
+type SetMaxOutputCharsParams struct {
+	MaxChars int `json:"maxChars" jsonschema:"Maximum number of characters for tool output. Set to 0 for unlimited. Default is 50000."`
+}
+
+type GetMaxOutputCharsParams struct{}
 
 // addTools registers all MCP tools with the server
 func addTools(s *mcp.Server) {
@@ -38,6 +46,18 @@ func addTools(s *mcp.Server) {
 		Name:        "RunScript",
 		Description: "Execute TypeScript code. Use ys.print() for output or return an object. Only pass 'script' argument (required) and optionally 'sessionId'.",
 	}, handleRunScript)
+
+	// SetMaxOutputChars - Set the maximum output characters for tool responses
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "SetMaxOutputChars",
+		Description: "Set the maximum number of characters returned in tool output. Useful to prevent excessive output from consuming context. Default is 50000. Set to 0 for unlimited. You can also use ys.output.configure() in scripts for more control (offset, head/tail mode).",
+	}, handleSetMaxOutputChars)
+
+	// GetMaxOutputChars - Get the current maximum output characters setting
+	mcp.AddTool(s, &mcp.Tool{
+		Name:        "GetMaxOutputChars",
+		Description: "Get the current maximum output characters setting. Takes NO arguments - just call it. For full config including offset and mode, use ys.output.getConfig() in a script.",
+	}, handleGetMaxOutputChars)
 }
 
 func handleGetApiDocs(ctx context.Context, req *mcp.CallToolRequest, args GetApiDocsParams) (*mcp.CallToolResult, any, error) {
@@ -54,6 +74,28 @@ func handleGetApiDocs(ctx context.Context, req *mcp.CallToolRequest, args GetApi
 func handleGetSession(ctx context.Context, req *mcp.CallToolRequest, args GetSessionParams) (*mcp.CallToolResult, any, error) {
 	sessionID := uuid.New().String()
 	return respondWith(map[string]string{"sessionId": sessionID}), nil, nil
+}
+
+func handleSetMaxOutputChars(ctx context.Context, req *mcp.CallToolRequest, args SetMaxOutputCharsParams) (*mcp.CallToolResult, any, error) {
+	if args.MaxChars < 0 {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "maxChars must be >= 0 (0 means unlimited)"}},
+			IsError: true,
+		}, nil, nil
+	}
+	conf.MaxOutputChars = args.MaxChars
+	msg := fmt.Sprintf("Max output chars set to %d", args.MaxChars)
+	if args.MaxChars == 0 {
+		msg = "Max output chars set to unlimited"
+	}
+	return respondWith(map[string]any{"maxChars": args.MaxChars, "message": msg}), nil, nil
+}
+
+func handleGetMaxOutputChars(ctx context.Context, req *mcp.CallToolRequest, args GetMaxOutputCharsParams) (*mcp.CallToolResult, any, error) {
+	return respondWith(map[string]any{
+		"maxChars":  conf.MaxOutputChars,
+		"unlimited": conf.MaxOutputChars == 0,
+	}), nil, nil
 }
 
 func handleRunScript(ctx context.Context, req *mcp.CallToolRequest, args RunScriptParams) (*mcp.CallToolResult, any, error) {
@@ -102,8 +144,11 @@ func handleRunScript(ctx context.Context, req *mcp.CallToolRequest, args RunScri
 		structuredContent, _ = json.Marshal(wrapped)
 	}
 
+	// Apply truncation to text output
+	displayText := truncateOutput(resultText)
+
 	return &mcp.CallToolResult{
-		Content:           []mcp.Content{&mcp.TextContent{Text: resultText}},
+		Content:           []mcp.Content{&mcp.TextContent{Text: displayText}},
 		StructuredContent: structuredContent,
 	}, nil, nil
 }
@@ -111,10 +156,76 @@ func handleRunScript(ctx context.Context, req *mcp.CallToolRequest, args RunScri
 // respondWith creates a tool result with JSON content
 func respondWith(res any) *mcp.CallToolResult {
 	b, _ := json.Marshal(res)
+	text := truncateOutput(string(b))
 	return &mcp.CallToolResult{
 		StructuredContent: json.RawMessage(b),
-		Content:           []mcp.Content{&mcp.TextContent{Text: string(b)}},
+		Content:           []mcp.Content{&mcp.TextContent{Text: text}},
 	}
+}
+
+// truncateOutput truncates the output text based on configured settings
+func truncateOutput(text string) string {
+	maxChars := conf.MaxOutputChars
+	offset := conf.OutputOffset
+	mode := conf.OutputMode
+
+	totalLen := len(text)
+
+	// Record the length before truncation
+	conf.LastOutputLength = totalLen
+
+	// No truncation if unlimited
+	if maxChars <= 0 && offset <= 0 {
+		return text
+	}
+
+	// Apply offset and maxChars based on mode
+	var start, end int
+	if mode == "tail" {
+		// Take from end: start from (totalLen - offset - maxChars) to (totalLen - offset)
+		end = totalLen - offset
+		if end < 0 {
+			end = 0
+		}
+		if maxChars > 0 && end > maxChars {
+			start = end - maxChars
+		} else {
+			start = 0
+		}
+	} else {
+		// "head" mode (default): start from offset, take maxChars
+		start = offset
+		if start > totalLen {
+			start = totalLen
+		}
+		if maxChars > 0 {
+			end = start + maxChars
+			if end > totalLen {
+				end = totalLen
+			}
+		} else {
+			end = totalLen
+		}
+	}
+
+	// No truncation needed
+	if start == 0 && end == totalLen {
+		return text
+	}
+
+	truncated := text[start:end]
+
+	// Build truncation message
+	var msg string
+	if start > 0 && end < totalLen {
+		msg = fmt.Sprintf("\n\n[Output truncated: showing chars %d-%d of %d total. Use ys.output.configure() to adjust.]", start, end, totalLen)
+	} else if start > 0 {
+		msg = fmt.Sprintf("\n\n[Output truncated: skipped first %d chars, showing %d of %d total. Use ys.output.configure() to adjust.]", start, end-start, totalLen)
+	} else {
+		msg = fmt.Sprintf("\n\n[Output truncated: %d chars shown of %d total. Use ys.output.configure() to adjust.]", end, totalLen)
+	}
+
+	return truncated + msg
 }
 
 // getTypeScriptAPIDocs returns the TypeScript API documentation
@@ -189,6 +300,32 @@ func getTypeScriptAPIDocs() string {
 		"ys.session.set<T>(key: string, value: T): void\n" +
 		"ys.session.delete(key: string): void\n" +
 		"ys.session.clear(): void\n" +
+		"```\n\n" +
+		"### ys.output - Control output truncation\n\n" +
+		"```typescript\n" +
+		"// Set max characters (0 for unlimited, default: 50000)\n" +
+		"ys.output.setMaxChars(maxChars: number): Promise<void>\n" +
+		"ys.output.getMaxChars(): Promise<{ maxChars: number; unlimited: boolean }>\n\n" +
+		"// Set character offset (skip first/last N chars)\n" +
+		"ys.output.setOffset(offset: number): Promise<void>\n" +
+		"ys.output.getOffset(): Promise<number>\n\n" +
+		"// Set mode: 'head' (from start) or 'tail' (from end)\n" +
+		"ys.output.setMode(mode: 'head' | 'tail'): Promise<void>\n" +
+		"ys.output.getMode(): Promise<'head' | 'tail'>\n\n" +
+		"// Configure all at once\n" +
+		"ys.output.configure(config: {\n" +
+		"  maxChars?: number;   // Max chars to return (0 = unlimited)\n" +
+		"  offset?: number;     // Chars to skip\n" +
+		"  mode?: 'head' | 'tail';  // Take from start or end\n" +
+		"}): Promise<void>\n\n" +
+		"ys.output.getConfig(): Promise<{\n" +
+		"  maxChars: number;\n" +
+		"  offset: number;\n" +
+		"  mode: 'head' | 'tail';\n" +
+		"  unlimited: boolean;\n" +
+		"}>\n\n" +
+		"// Get length of last output (before truncation)\n" +
+		"ys.output.getLastLength(): Promise<number>\n" +
 		"```\n\n" +
 		"### Types\n\n" +
 		"```typescript\n" +
@@ -294,5 +431,23 @@ func getExampleScripts() string {
 		"  output: output.message,\n" +
 		"  codePreview: code.substring(0, 500)\n" +
 		"};\n" +
+		"```\n\n" +
+		"### Example 6: Control output truncation\n\n" +
+		"```typescript\n" +
+		"// Limit output to 10000 chars\n" +
+		"await ys.output.setMaxChars(10000);\n\n" +
+		"// Get last 5000 chars of output (tail mode)\n" +
+		"await ys.output.configure({ maxChars: 5000, mode: 'tail' });\n\n" +
+		"// Skip first 1000 chars, get next 5000\n" +
+		"await ys.output.configure({ maxChars: 5000, offset: 1000, mode: 'head' });\n\n" +
+		"// Check current settings\n" +
+		"const config = await ys.output.getConfig();\n" +
+		"ys.print(`Max: ${config.maxChars}, Mode: ${config.mode}`);\n\n" +
+		"// Paginate through large output\n" +
+		"const len = await ys.output.getLastLength();\n" +
+		"if (len > 10000) {\n" +
+		"  ys.print(`Output was ${len} chars, fetching next page...`);\n" +
+		"  await ys.output.setOffset(10000);  // Skip first 10k\n" +
+		"}\n" +
 		"```\n"
 }

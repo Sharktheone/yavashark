@@ -13,8 +13,11 @@ const (
 	DefaultRunnerPath       = "../runner"
 	DefaultPort             = 1215
 	DefaultMCPEnabled       = true
-	DefaultScriptTimeout    = 10 // seconds
-	DefaultMaxScriptTimeout = 30 // seconds
+	DefaultScriptTimeout    = 10    // seconds
+	DefaultMaxScriptTimeout = 30    // seconds
+	DefaultMaxOutputChars   = 25000 // characters - reasonable default for LLM context
+	DefaultOutputOffset     = 0
+	DefaultOutputMode       = "head" // "head" or "tail"
 )
 
 // Runtime configuration (set from flags or defaults)
@@ -28,6 +31,10 @@ var (
 	MaxScriptTimeout int
 	DenoPath         string
 	DenoAvailable    bool
+	MaxOutputChars   int
+	OutputOffset     int
+	OutputMode       string // "head" or "tail"
+	LastOutputLength int    // Length of the last output before truncation
 )
 
 func init() {
@@ -39,6 +46,9 @@ func init() {
 	flag.IntVar(&ScriptTimeout, "script-timeout", DefaultScriptTimeout, "Default script execution timeout in seconds")
 	flag.IntVar(&MaxScriptTimeout, "max-script-timeout", DefaultMaxScriptTimeout, "Maximum script execution timeout in seconds")
 	flag.StringVar(&DenoPath, "deno-path", "", "Path to Deno executable (auto-detected if empty)")
+	flag.IntVar(&MaxOutputChars, "max-output-chars", DefaultMaxOutputChars, "Maximum characters in MCP tool output (0 for unlimited)")
+	flag.IntVar(&OutputOffset, "output-offset", DefaultOutputOffset, "Character offset for truncated output")
+	flag.StringVar(&OutputMode, "output-mode", DefaultOutputMode, "Output truncation mode: head or tail")
 }
 
 // ParseFlags parses command line flags and initializes configuration
