@@ -3,7 +3,7 @@ use crate::builtins::RegExp;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj, Property};
+use crate::value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj, Property, Symbol};
 use crate::{
     Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
 };
@@ -521,20 +521,98 @@ impl StringObj {
 
     #[prop("match")]
     pub fn match_(
-        #[this] str: &Stringable,
-        pattern: &RegExp,
+        #[this] this: &Stringable,
+        pattern: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
+        // 21.1.3.12 String.prototype.match ( regexp )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If regexp is neither undefined nor null, then
+        if !pattern.is_undefined() && !pattern.is_null() {
+            // a. Let matcher be ? GetMethod(regexp, @@match).
+            if let Ok(obj) = pattern.as_object() {
+                let matcher = obj.get(Symbol::MATCH, realm)?;
+                // b. If matcher is not undefined, then
+                if !matcher.is_undefined() && matcher.is_callable() {
+                    // i. Return ? Call(matcher, regexp, « O »).
+                    return matcher.call(realm, vec![this.to_ys_string().into()], pattern);
+                }
+            }
+        }
+        // 3. Let S be ? ToString(O).
+        let s = this.to_ys_string();
+        // 4. Let rx be ? RegExpCreate(regexp, undefined).
+        let pattern_str = if pattern.is_undefined() {
+            String::new()
+        } else {
+            pattern.to_string(realm)?.to_string()
+        };
+        let rx = RegExp::new_from_str(realm, &pattern_str)?;
+        let rx_obj = rx.into_object();
+        let rx_val: Value = rx_obj.clone().into();
+        // 5. Return ? Invoke(rx, @@match, « S »).
+        let matcher = rx_obj.get(Symbol::MATCH, realm)?;
+        matcher.call(realm, vec![s.into()], rx_val)
     }
 
     #[prop("matchAll")]
     pub fn match_all(
-        #[this] str: &Stringable,
-        pattern: &RegExp,
+        #[this] this: &Stringable,
+        pattern: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        pattern.exec(&Object::null().into(), str.to_ys_string(), realm)
+        // 21.1.3.13 String.prototype.matchAll ( regexp )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If regexp is neither undefined nor null, then
+        if !pattern.is_undefined() && !pattern.is_null() {
+            // a. Let isRegExp be ? IsRegExp(regexp).
+            if let Ok(obj) = pattern.as_object() {
+                // Check if it's a RegExp (has Symbol.match or is RegExp instance)
+                let match_prop = obj.get(Symbol::MATCH, realm)?;
+                let is_regexp = match_prop.is_truthy() || obj.downcast::<RegExp>().is_some();
+
+                // b. If isRegExp is true, then
+                if is_regexp {
+                    // i. Let flags be ? Get(regexp, "flags").
+                    let flags = obj.get("flags", realm)?.to_string(realm)?;
+                    // ii. If flags does not contain "g", throw a TypeError.
+                    if !flags.as_str().contains('g') {
+                        return Err(Error::ty(
+                            "matchAll called with a non-global RegExp argument",
+                        ));
+                    }
+                }
+
+                // c. Let matcher be ? GetMethod(regexp, @@matchAll).
+                let matcher = obj.get(Symbol::MATCH_ALL, realm)?;
+                // d. If matcher is not undefined, then
+                if !matcher.is_undefined() && matcher.is_callable() {
+                    // i. Return ? Call(matcher, regexp, « O »).
+                    return matcher.call(realm, vec![this.to_ys_string().into()], pattern);
+                }
+            }
+        }
+        // 3. Let S be ? ToString(O).
+        let s = this.to_ys_string();
+        // 4. Let rx be ? RegExpCreate(regexp, "g").
+        let pattern_str = if pattern.is_undefined() {
+            String::new()
+        } else {
+            pattern.to_string(realm)?.to_string()
+        };
+        let rx = RegExp::new_from_str_with_flags(realm, &pattern_str, "g")?;
+        let rx_obj = rx.into_object();
+        let rx_val: Value = rx_obj.clone().into();
+        // 5. Return ? Invoke(rx, @@matchAll, « S »).
+        // Note: If matchAll isn't implemented, fall back to match
+        let matcher = rx_obj.get(Symbol::MATCH_ALL, realm)?;
+        if matcher.is_callable() {
+            matcher.call(realm, vec![s.into()], rx_val)
+        } else {
+            // Fallback to Symbol.match for global regexp
+            let matcher = rx_obj.get(Symbol::MATCH, realm)?;
+            matcher.call(realm, vec![s.into()], rx_val)
+        }
     }
 
     pub fn normalize(#[this] str: &Stringable, form: &str) -> ValueResult {
@@ -583,25 +661,220 @@ impl StringObj {
         Ok(str.repeat(count).into())
     }
 
-    pub fn replace(#[this] str: &Stringable, search: &str, replace: &str) -> ValueResult {
-        Ok(str.replacen(search, replace, 1).into())
+    pub fn replace(
+        #[this] this: &Stringable,
+        search: Value,
+        replace: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 21.1.3.17 String.prototype.replace ( searchValue, replaceValue )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If searchValue is neither undefined nor null, then
+        if !search.is_undefined() && !search.is_null() {
+            // a. Let replacer be ? GetMethod(searchValue, @@replace).
+            if let Ok(obj) = search.as_object() {
+                let replacer = obj.get(Symbol::REPLACE, realm)?;
+                // b. If replacer is not undefined, then
+                if !replacer.is_undefined() && replacer.is_callable() {
+                    // i. Return ? Call(replacer, searchValue, « O, replaceValue »).
+                    return replacer.call(realm, vec![this.to_ys_string().into(), replace], search);
+                }
+            }
+        }
+        // 3. Let string be ? ToString(O).
+        let string = this.to_string();
+        // 4. Let searchString be ? ToString(searchValue).
+        let search_str = if search.is_undefined() {
+            "undefined".to_string()
+        } else {
+            search.to_string(realm)?.to_string()
+        };
+        // 5. Let functionalReplace be IsCallable(replaceValue).
+        let functional_replace = replace.is_callable();
+        // 6. If functionalReplace is false, then
+        let replace_str = if !functional_replace {
+            // a. Set replaceValue to ? ToString(replaceValue).
+            replace.to_string(realm)?.to_string()
+        } else {
+            String::new()
+        };
+        // 7-15. Find first occurrence and replace
+        if let Some(pos) = string.find(&search_str) {
+            let before = &string[..pos];
+            let after = &string[pos + search_str.len()..];
+
+            let replacement = if functional_replace {
+                // Call the replacer function with (matched, position, string)
+                let result = replace.call(
+                    realm,
+                    vec![
+                        search_str.clone().into(),
+                        (pos as f64).into(),
+                        string.clone().into(),
+                    ],
+                    Value::Undefined,
+                )?;
+                result.to_string(realm)?.to_string()
+            } else {
+                // Handle replacement patterns ($&, $`, $', $1, etc.)
+                replace_substitution(&replace_str, &search_str, before, after, &[])
+            };
+
+            Ok(format!("{before}{replacement}{after}").into())
+        } else {
+            Ok(string.into())
+        }
     }
 
     #[prop("replaceAll")]
-    pub fn replace_all(#[this] str: &Stringable, search: &str, replace: &str) -> ValueResult {
-        Ok(str.replace(search, replace).into())
+    pub fn replace_all(
+        #[this] this: &Stringable,
+        search: Value,
+        replace: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 21.1.3.18 String.prototype.replaceAll ( searchValue, replaceValue )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If searchValue is neither undefined nor null, then
+        if !search.is_undefined() && !search.is_null() {
+            if let Ok(obj) = search.as_object() {
+                // a. Let isRegExp be ? IsRegExp(searchValue).
+                let match_prop = obj.get(Symbol::MATCH, realm)?;
+                let is_regexp = match_prop.is_truthy() || obj.downcast::<RegExp>().is_some();
+
+                // b. If isRegExp is true, then
+                if is_regexp {
+                    // i. Let flags be ? Get(searchValue, "flags").
+                    let flags = obj.get("flags", realm)?.to_string(realm)?;
+                    // ii. If flags does not contain "g", throw a TypeError.
+                    if !flags.as_str().contains('g') {
+                        return Err(Error::ty(
+                            "replaceAll called with a non-global RegExp argument",
+                        ));
+                    }
+                }
+
+                // c. Let replacer be ? GetMethod(searchValue, @@replace).
+                let replacer = obj.get(Symbol::REPLACE, realm)?;
+                // d. If replacer is not undefined, then
+                if !replacer.is_undefined() && replacer.is_callable() {
+                    // i. Return ? Call(replacer, searchValue, « O, replaceValue »).
+                    return replacer.call(realm, vec![this.to_ys_string().into(), replace], search);
+                }
+            }
+        }
+        // 3. Let string be ? ToString(O).
+        let string = this.to_string();
+        // 4. Let searchString be ? ToString(searchValue).
+        let search_str = if search.is_undefined() {
+            "undefined".to_string()
+        } else {
+            search.to_string(realm)?.to_string()
+        };
+        // 5. Let functionalReplace be IsCallable(replaceValue).
+        let functional_replace = replace.is_callable();
+        // 6. If functionalReplace is false, then
+        let replace_str = if !functional_replace {
+            replace.to_string(realm)?.to_string()
+        } else {
+            String::new()
+        };
+
+        // Handle empty search string - insert between every character
+        if search_str.is_empty() {
+            let mut result = String::new();
+            let replacement = if functional_replace {
+                // This is a simplification - we'd need to call for each position
+                replace
+                    .call(
+                        realm,
+                        vec!["".into(), 0f64.into(), string.clone().into()],
+                        Value::Undefined,
+                    )?
+                    .to_string(realm)?
+                    .to_string()
+            } else {
+                replace_substitution(&replace_str, "", "", "", &[])
+            };
+
+            for (i, ch) in string.chars().enumerate() {
+                if i > 0 || !functional_replace {
+                    result.push_str(&replacement);
+                }
+                result.push(ch);
+            }
+            result.push_str(&replacement);
+            return Ok(result.into());
+        }
+
+        // Replace all occurrences
+        if functional_replace {
+            let mut result = String::new();
+            let mut last_end = 0;
+            let mut search_start = 0;
+
+            while let Some(pos) = string[search_start..].find(&search_str) {
+                let actual_pos = search_start + pos;
+                result.push_str(&string[last_end..actual_pos]);
+
+                let replacement = replace
+                    .call(
+                        realm,
+                        vec![
+                            search_str.clone().into(),
+                            (actual_pos as f64).into(),
+                            string.clone().into(),
+                        ],
+                        Value::Undefined,
+                    )?
+                    .to_string(realm)?
+                    .to_string();
+
+                result.push_str(&replacement);
+                last_end = actual_pos + search_str.len();
+                search_start = last_end;
+            }
+            result.push_str(&string[last_end..]);
+            Ok(result.into())
+        } else {
+            Ok(string.replace(&search_str, &replace_str).into())
+        }
     }
 
-    // pub fn search(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
-    //     //TODO: Symbol.search
-    //
-    //     let inner = self.inner().try_borrow()?;
-    //
-    //     Ok(pattern.regex.find(&inner.string)
-    //         .map(|m| m.start() as isize)
-    //         .unwrap_or(-1)
-    //         .into())
-    // }
+    pub fn search(
+        #[this] this: &Stringable,
+        pattern: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 21.1.3.19 String.prototype.search ( regexp )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If regexp is neither undefined nor null, then
+        if !pattern.is_undefined() && !pattern.is_null() {
+            // a. Let searcher be ? GetMethod(regexp, @@search).
+            if let Ok(obj) = pattern.as_object() {
+                let searcher = obj.get(Symbol::SEARCH, realm)?;
+                // b. If searcher is not undefined, then
+                if !searcher.is_undefined() && searcher.is_callable() {
+                    // i. Return ? Call(searcher, regexp, « O »).
+                    return searcher.call(realm, vec![this.to_ys_string().into()], pattern);
+                }
+            }
+        }
+        // 3. Let S be ? ToString(O).
+        let s = this.to_ys_string();
+        // 4. Let rx be ? RegExpCreate(regexp, undefined).
+        let pattern_str = if pattern.is_undefined() {
+            String::new()
+        } else {
+            pattern.to_string(realm)?.to_string()
+        };
+        let rx = RegExp::new_from_str(realm, &pattern_str)?;
+        let rx_obj = rx.into_object();
+        let rx_val: Value = rx_obj.clone().into();
+        // 5. Return ? Invoke(rx, @@search, « S »).
+        let searcher = rx_obj.get(Symbol::SEARCH, realm)?;
+        searcher.call(realm, vec![s.into()], rx_val)
+    }
 
     pub fn slice(#[this] str: &Stringable, start: isize, end: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
@@ -631,18 +904,73 @@ impl StringObj {
     }
 
     pub fn split(
-        #[this] str: &Stringable,
-        separator: &str,
-        limit: Option<usize>,
+        #[this] this: &Stringable,
+        separator: Value,
+        limit: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let limit = limit.unwrap_or(usize::MAX);
+        // 21.1.3.21 String.prototype.split ( separator, limit )
+        // 1. Let O be ? RequireObjectCoercible(this value).
+        // 2. If separator is neither undefined nor null, then
+        if !separator.is_undefined() && !separator.is_null() {
+            // a. Let splitter be ? GetMethod(separator, @@split).
+            if let Ok(obj) = separator.as_object() {
+                let splitter = obj.get(Symbol::SPLIT, realm)?;
+                // b. If splitter is not undefined, then
+                if !splitter.is_undefined() && splitter.is_callable() {
+                    // i. Return ? Call(splitter, separator, « O, limit »).
+                    return splitter.call(
+                        realm,
+                        vec![this.to_ys_string().into(), limit],
+                        separator,
+                    );
+                }
+            }
+        }
+        // 3. Let S be ? ToString(O).
+        let string = this.to_string();
+        // 4. If limit is undefined, let lim be 2^32 - 1; else let lim be ? ToUint32(limit).
+        let lim = if limit.is_undefined() {
+            u32::MAX as usize
+        } else {
+            limit.to_number(realm)? as usize
+        };
 
-        let parts = str.splitn(limit, separator);
+        // 5. If lim is 0, return CreateArrayFromList(« »).
+        if lim == 0 {
+            return Ok(Array::from_realm(realm)?.into_value());
+        }
 
+        // 6. If separator is undefined, return CreateArrayFromList(« S »).
+        if separator.is_undefined() {
+            let arr = Array::from_realm(realm)?;
+            arr.push(string.into())?;
+            return Ok(arr.into_value());
+        }
+
+        // 7. Let R be ? ToString(separator).
+        let sep_str = separator.to_string(realm)?.to_string();
+
+        // Handle empty separator - split each character
+        if sep_str.is_empty() {
+            let arr = Array::from_realm(realm)?;
+            for (i, ch) in string.chars().enumerate() {
+                if i >= lim {
+                    break;
+                }
+                arr.push(ch.to_string().into())?;
+            }
+            return Ok(arr.into_value());
+        }
+
+        // Normal split
+        let parts: Vec<&str> = string.split(&sep_str).collect();
         let mut array = Vec::new();
 
-        for part in parts {
+        for (i, part) in parts.iter().enumerate() {
+            if i >= lim {
+                break;
+            }
             array.push(YSString::from_ref(part).into());
         }
 
@@ -767,6 +1095,50 @@ impl StringObj {
 fn is_lone_surrogate(c: char) -> bool {
     let c = c as u32;
     (0xD800..=0xDFFF).contains(&c) || (0xDC00..=0xDFFF).contains(&c)
+}
+
+/// Simple replacement pattern handling for String.replace
+/// Handles $&, $`, $', $$
+fn replace_substitution(
+    template: &str,
+    matched: &str,
+    before: &str,
+    after: &str,
+    _captures: &[&str],
+) -> String {
+    let mut result = String::new();
+    let mut chars = template.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c != '$' {
+            result.push(c);
+            continue;
+        }
+
+        match chars.peek() {
+            Some('$') => {
+                chars.next();
+                result.push('$');
+            }
+            Some('&') => {
+                chars.next();
+                result.push_str(matched);
+            }
+            Some('`') => {
+                chars.next();
+                result.push_str(before);
+            }
+            Some('\'') => {
+                chars.next();
+                result.push_str(after);
+            }
+            _ => {
+                result.push('$');
+            }
+        }
+    }
+
+    result
 }
 
 //

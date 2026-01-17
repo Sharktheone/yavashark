@@ -1,12 +1,15 @@
 use crate::array::Array;
+use crate::builtins::iterator::{Iterator, create_iter_result_object};
 use crate::console::print::PrettyObjectOverride;
-use crate::value::{IntoValue, Obj, Symbol};
-use crate::{ControlFlow, Error, MutObject, Object, Realm, Res, Value, ValueResult};
+use crate::realm::Intrinsic;
+use crate::value::{DefinePropertyResult, IntoValue, Obj, Symbol};
+use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
-use yavashark_macro::{object, props};
+use yavashark_macro::{object, properties, props};
 use yavashark_string::YSString;
+use crate::builtins::NumberConstructor;
 
 #[object()]
 #[derive(Debug)]
@@ -162,7 +165,17 @@ impl RegExp {
     fn set_last_index_value(&self, this: &Value, value: usize, realm: &mut Realm) -> Res<()> {
         let obj = this.as_object()?;
 
-        obj.define_property("lastIndex".into(), value.into(), realm)?;
+        match obj.define_property("lastIndex".into(), value.into(), realm)? {
+            DefinePropertyResult::ReadOnly => {
+                return Err(Error::ty(
+                    "Cannot set property lastIndex which is non-writable",
+                ));
+            }
+            DefinePropertyResult::Setter(setter, val) => {
+                setter.call(vec![val], this.clone(), realm)?;
+            }
+            DefinePropertyResult::Handled => {}
+        }
 
         self.last_index.set(value);
 
@@ -178,7 +191,7 @@ impl RegExp {
         let regex = regex.as_deref().unwrap_or_default();
         let flags = flags.as_deref().unwrap_or_default();
 
-        Ok(RegExp::new_from_str_with_flags(realm, &regex, &flags)?)
+        RegExp::new_from_str_with_flags(realm, &regex, &flags)
     }
 
     fn escape(value: &str) -> String {
@@ -194,8 +207,19 @@ impl RegExp {
         let input = inp.as_str();
         let input_len = input.len();
 
+        // Let lastIndex be ? ToLength(? Get(R, "lastIndex")).
+        let this_obj = this.as_object()?;
+        let last_index_val = this_obj.get("lastIndex", realm)?;
+        let last_index_raw = last_index_val.to_number(realm)?;
+        // ToLength: clamp to 0..2^53-1 as integer
+        let last_index_full = if last_index_raw.is_nan() || last_index_raw < 0.0 {
+            0usize
+        } else {
+            (last_index_raw as usize).min(NumberConstructor::MAX_SAFE_INTEGER_U as usize)
+        };
+
         let last_index = if self.flags.global || self.flags.sticky {
-            self.last_index.get()
+            last_index_full
         } else {
             0
         };
@@ -204,19 +228,19 @@ impl RegExp {
             if self.flags.global || self.flags.sticky {
                 self.set_last_index_value(this, 0, realm)?;
             }
-            return Ok(Value::Undefined);
+            return Ok(Value::Null);
         }
 
         let Some(matched) = self.regex.find_from(input, last_index).next() else {
             if self.flags.global || self.flags.sticky {
                 self.set_last_index_value(this, 0, realm)?;
             }
-            return Ok(Value::Undefined);
+            return Ok(Value::Null);
         };
 
         if self.flags.sticky && matched.start() != last_index {
             self.set_last_index_value(this, 0, realm)?;
-            return Ok(Value::Undefined);
+            return Ok(Value::Null);
         }
 
         let match_start = matched.start();
@@ -224,8 +248,6 @@ impl RegExp {
 
         if self.flags.global || self.flags.sticky {
             self.set_last_index_value(this, match_end, realm)?;
-        } else {
-            self.set_last_index_value(this, 0, realm)?;
         }
 
         let result = Array::from_realm(realm)?;
@@ -318,10 +340,11 @@ impl RegExp {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let result = self.exec(this, value, realm)?;
-        Ok(Value::Boolean(!matches!(result, Value::Undefined)))
+        Ok(Value::Boolean(!result.is_nullish()))
     }
 
     pub fn compile(&self, _a: Value, _b: Value) {}
+
 
     #[prop(Symbol::MATCH)]
     pub fn symbol_match(
@@ -331,12 +354,7 @@ impl RegExp {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         if !self.flags.global {
-            let exec_result = self.exec(this, input.clone(), realm)?;
-            return if exec_result.is_undefined() {
-                Ok(Value::Null)
-            } else {
-                Ok(exec_result)
-            };
+            return self.regexp_exec(this, input.clone(), realm);
         }
 
         self.set_last_index_value(this, 0, realm)?;
@@ -345,9 +363,9 @@ impl RegExp {
 
         loop {
             let previous_last_index = self.last_index.get();
-            let exec_result = self.exec(this, input.clone(), realm)?;
+            let exec_result = self.regexp_exec(this, input.clone(), realm)?;
 
-            if exec_result.is_undefined() {
+            if exec_result.is_null() {
                 self.set_last_index_value(this, 0, realm)?;
                 return if found {
                     Ok(matches.into_value())
@@ -365,10 +383,11 @@ impl RegExp {
                 );
             };
 
-            let matched_value = result_obj.get("0", realm)?;
-            matches.push(matched_value)?;
+            let matched_value = result_obj.get(0usize, realm)?;
+            matches.push(matched_value.clone())?;
 
-            if self.last_index.get() == previous_last_index {
+            let matched_str = matched_value.to_string(realm)?;
+            if matched_str.is_empty() {
                 let next_index =
                     advance_string_index(&input, previous_last_index, self.flags.unicode);
                 self.set_last_index_value(this, next_index, realm)?;
@@ -386,10 +405,10 @@ impl RegExp {
         let previous_last_index = self.last_index.get();
 
         self.set_last_index_value(this, 0, realm)?;
-        let exec_result = self.exec(this, input, realm)?;
+        let exec_result = self.regexp_exec(this, input, realm)?;
         self.set_last_index_value(this, previous_last_index, realm)?;
 
-        if exec_result.is_undefined() {
+        if exec_result.is_null() {
             return Ok(Value::Number(-1.0));
         }
 
@@ -400,6 +419,337 @@ impl RegExp {
         let index_value = result_obj.get("index", realm)?;
         let index = index_value.to_number(realm)?;
         Ok(Value::Number(index))
+    }
+
+    #[prop(Symbol::MATCH_ALL)]
+    pub fn symbol_match_all(
+        &self,
+        #[this] this: &Value,
+        string: YSString,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 22.2.6.8 RegExp.prototype [ @@matchAll ] ( string )
+
+        // 1. Let R be the this value.
+        // 2. If Type(R) is not Object, throw a TypeError exception.
+        let this_obj = this.as_object()?;
+
+        // 3. Let S be ? ToString(string).
+        // (already have string as YSString)
+
+        // 5. Let flags be ? ToString(? Get(R, "flags")).
+        let flags = this_obj.get("flags", realm)?.to_string(realm)?;
+        let flags_str = flags.as_str();
+
+        // 6. Let matcher be ? Construct(C, « R, flags »).
+        // Create a copy of the regexp
+        let matcher =
+            RegExp::new_from_str_with_flags(realm, self.original_source.as_str(), flags_str)?;
+        let matcher_handle: ObjectHandle = Obj::into_object(matcher);
+
+        // 7. Let lastIndex be ? ToLength(? Get(R, "lastIndex")).
+        let last_index = this_obj.get("lastIndex", realm)?.to_number(realm)? as usize;
+
+        // 8. Perform ? Set(matcher, "lastIndex", lastIndex, true).
+        matcher_handle.define_property("lastIndex".into(), last_index.into(), realm)?;
+
+        // 9-10. global and unicode flags
+        let global = flags_str.contains('g');
+        let unicode = flags_str.contains('u') || flags_str.contains('v');
+
+        // 13. Return CreateRegExpStringIterator(matcher, S, global, fullUnicode).
+        let iterator = RegExpStringIterator::new(matcher_handle, string, global, unicode, realm)?;
+        Ok(iterator.into_value())
+    }
+
+    #[prop(Symbol::REPLACE)]
+    pub fn symbol_replace(
+        &self,
+        #[this] this: &Value,
+        string: YSString,
+        replace_value: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // Convert to owned String to avoid borrow issues with as_str() during exec calls
+        let s: String = string.as_str().to_string();
+        let length_s = s.len();
+
+        let functional_replace = replace_value.is_callable();
+        let replace_str = if !functional_replace {
+            replace_value.to_string(realm)?
+        } else {
+            YSString::new()
+        };
+
+        // Per spec:
+        // Let global be ! ToBoolean(? Get(rx, "global")).
+        // Let fullUnicode be ! ToBoolean(? Get(rx, "unicode")) or ! ToBoolean(? Get(rx, "unicodeSets")).
+        let this_obj = this.as_object()?;
+        let global = this_obj.get("global", realm)?.is_truthy();
+        let unicode = this_obj.get("unicode", realm)?.is_truthy();
+        let unicode_sets = this_obj.get("unicodeSets", realm)?.is_truthy();
+        let full_unicode = unicode || unicode_sets;
+
+        if global {
+            self.set_last_index_value(this, 0, realm)?;
+        }
+
+        // Collect all match results
+        let mut results: Vec<crate::value::Object> = Vec::new();
+
+        loop {
+            let result = self.regexp_exec(this, string.clone(), realm)?;
+
+            if result.is_null() {
+                break;
+            }
+
+            let Value::Object(result_obj) = result else {
+                return Err(Error::ty("RegExp exec must return an object"));
+            };
+
+            results.push(result_obj.clone());
+
+            if !global {
+                break;
+            }
+
+            // If empty match, advance lastIndex
+            let match_str = result_obj.get(0usize, realm)?.to_string(realm)?;
+            if match_str.is_empty() {
+                let this_index = self.last_index.get();
+                let next_index = advance_string_index(&string, this_index, full_unicode);
+                self.set_last_index_value(this, next_index, realm)?;
+            }
+        }
+
+        let mut accumulated_result = String::new();
+        let mut next_source_position: usize = 0;
+
+        for result_obj in results {
+            // Get result length (number of captures + 1)
+            let result_length = result_obj.get("length", realm)?.to_number(realm)? as usize;
+            let n_captures = result_length.saturating_sub(1);
+
+            // Get matched string (use numeric index, not string "0")
+            let matched = result_obj.get(0usize, realm)?.to_string(realm)?;
+            let match_length = matched.len();
+
+            // Get position
+            let position_val = result_obj.get("index", realm)?;
+            let position = position_val.to_number(realm)? as usize;
+            let position = position.min(length_s);
+
+            // Collect captures
+            let mut captures: Vec<Value> = Vec::with_capacity(n_captures);
+            for n in 1..=n_captures {
+                let cap_n = result_obj.get(n, realm)?;
+                let cap_val = if cap_n.is_undefined() {
+                    Value::Undefined
+                } else {
+                    cap_n.to_string(realm)?.into()
+                };
+                captures.push(cap_val);
+            }
+
+            // Get named captures
+            let named_captures = result_obj.get("groups", realm)?;
+
+            // Per spec: If namedCaptures is not undefined, set namedCaptures to ? ToObject(namedCaptures).
+            // This will throw TypeError for null
+            let named_captures = if !named_captures.is_undefined() {
+                named_captures.to_object()?.into()
+            } else {
+                named_captures
+            };
+
+            let replacement_string = if functional_replace {
+                // Build replacer arguments: matched, ...captures, position, S, [namedCaptures]
+                let mut replacer_args: Vec<Value> = vec![matched.clone().into()];
+                replacer_args.extend(captures.iter().cloned());
+                replacer_args.push((position as f64).into());
+                replacer_args.push(string.clone().into());
+                if !named_captures.is_undefined() {
+                    replacer_args.push(named_captures);
+                }
+
+                let replacement_value =
+                    replace_value.call(realm, replacer_args, Value::Undefined)?;
+                replacement_value.to_string(realm)?
+            } else {
+                // GetSubstitution
+                get_substitution(
+                    &matched,
+                    &s,
+                    position,
+                    &captures,
+                    &named_captures,
+                    &replace_str,
+                    realm,
+                )?
+            };
+
+            if position >= next_source_position {
+                accumulated_result.push_str(&s[next_source_position..position]);
+                accumulated_result.push_str(replacement_string.as_str());
+                next_source_position = position + match_length;
+            }
+        }
+
+        if next_source_position < length_s {
+            accumulated_result.push_str(&s[next_source_position..]);
+        }
+
+        Ok(YSString::from(accumulated_result).into())
+    }
+
+    #[prop(Symbol::SPLIT)]
+    pub fn symbol_split(
+        &self,
+        #[this] _this: &Value,
+        string: YSString,
+        limit: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 21.2.5.13 RegExp.prototype [ @@split ] ( string, limit )
+        let s = string.as_str();
+        // size is the length in UTF-16 code units (not bytes)
+        let size: usize = s.chars().map(|c| c.len_utf16()).sum();
+
+        // 5. Let flags be ? ToString(? Get(rx, "flags")).
+        let flags = self.original_flags.as_str();
+
+        // 6-7. unicodeMatching
+        let full_unicode = flags.contains('u') || flags.contains('v');
+
+        // 8-9. If flags contains "y", let newFlags be flags. Else add "y".
+        let new_flags = if flags.contains('y') {
+            self.original_flags.to_string()
+        } else {
+            format!("{}y", flags)
+        };
+
+        // 10. Let splitter be ? Construct(C, « rx, newFlags »).
+        // Create a new RegExp with the sticky flag
+        let splitter =
+            RegExp::new_from_str_with_flags(realm, self.original_source.as_str(), &new_flags)?;
+        let splitter_value: Value = splitter.into_value();
+        let splitter_obj = splitter_value.as_object()?;
+
+        // 13. If limit is undefined, let lim be 2^32 - 1; else let lim be ? ToUint32(limit).
+        let lim = if limit.is_undefined() {
+            u32::MAX as usize
+        } else {
+            let n = limit.to_number(realm)?;
+            if n.is_nan() || n.is_infinite() || n == 0.0 {
+                0
+            } else {
+                // ToUint32: truncate then modulo 2^32
+                let int = n.trunc() as i64;
+                (int as u32) as usize
+            }
+        };
+
+        // 14. If lim is 0, return A.
+        if lim == 0 {
+            return Ok(Array::from_realm(realm)?.into_value());
+        }
+
+        // 16. If size is 0, then
+        if size == 0 {
+            // a. Let z be ? RegExpExec(splitter, S).
+            let exec_prop = splitter_obj.get("exec", realm)?;
+            let result =
+                exec_prop.call(realm, vec![string.clone().into()], splitter_value.clone())?;
+
+            // b. If z is not null, return empty array
+            if !result.is_null() {
+                return Ok(Array::from_realm(realm)?.into_value());
+            }
+
+            // c. Return array with original string
+            let arr = Array::from_realm(realm)?;
+            arr.push(string.into())?;
+            return Ok(arr.into_value());
+        }
+
+        // 17. Let p be 0.
+        let mut p: usize = 0;
+        // 18. Let q be p.
+        let mut q: usize = 0;
+
+        let mut result_vec: Vec<Value> = Vec::new();
+
+        // 19. Repeat, while q < size
+        while q < size {
+            // a. Perform ? Set(splitter, "lastIndex", q, true).
+            splitter_obj.define_property("lastIndex".into(), q.into(), realm)?;
+
+            // b. Let z be ? RegExpExec(splitter, S).
+            let exec_prop = splitter_obj.get("exec", realm)?;
+            let exec_result =
+                exec_prop.call(realm, vec![string.clone().into()], splitter_value.clone())?;
+
+            // c. If z is null, set q to AdvanceStringIndex(S, q, unicodeMatching).
+            if exec_result.is_null() {
+                q = advance_string_index(&string, q, full_unicode);
+                continue;
+            }
+
+            // d. Else,
+            let result_obj = exec_result.as_object()?;
+
+            // i. Let e be ? ToLength(? Get(splitter, "lastIndex")).
+            let e_val = splitter_obj.get("lastIndex", realm)?;
+            let e_raw = e_val.to_number(realm)?;
+            let e = (e_raw as usize).min(size);
+
+            // iii. If e = p, set q to AdvanceStringIndex(S, q, unicodeMatching).
+            if e == p {
+                q = advance_string_index(&string, q, full_unicode);
+                continue;
+            }
+
+            // iv. Else,
+            // 1. Let T be the substring of S from p to q.
+            // Convert UTF-16 indices to byte offsets for slicing
+            let p_byte = utf16_index_to_byte_offset(s, p);
+            let q_byte = utf16_index_to_byte_offset(s, q);
+            let substring = &s[p_byte..q_byte];
+            result_vec.push(YSString::from_ref(substring).into());
+
+            // 4. If lengthA = lim, return A.
+            if result_vec.len() >= lim {
+                return Ok(Array::with_elements(realm, result_vec)?.into_value());
+            }
+
+            // 5. Set p to e.
+            p = e;
+
+            // 6-9. Add captured groups
+            let result_length = result_obj.get("length", realm)?.to_number(realm)? as usize;
+            let n_captures = result_length.saturating_sub(1);
+
+            for i in 1..=n_captures {
+                let cap = result_obj.get(i.to_string(), realm)?;
+                result_vec.push(cap);
+
+                if result_vec.len() >= lim {
+                    return Ok(Array::with_elements(realm, result_vec)?.into_value());
+                }
+            }
+
+            // 10. Set q to p.
+            q = p;
+        }
+
+        // 20. Let T be the substring of S from p to size.
+        let p_byte = utf16_index_to_byte_offset(s, p);
+        let substring = &s[p_byte..];
+        result_vec.push(YSString::from_ref(substring).into());
+
+        // 21. Return A.
+        Ok(Array::with_elements(realm, result_vec)?.into_value())
     }
 
     #[prop("toString")]
@@ -475,6 +825,31 @@ impl RegExp {
     }
 }
 
+impl RegExp {
+    /// RegExpExec abstract operation (21.2.5.2.1)
+    /// Calls the user-defined exec method if present, otherwise uses the built-in exec.
+    fn regexp_exec(&self, this: &Value, string: YSString, realm: &mut Realm) -> ValueResult {
+        let this_obj = this.as_object()?;
+
+        // Step 1-2: Let exec be ? Get(R, "exec"). If IsCallable(exec) is true...
+        let exec_prop = this_obj.get("exec", realm)?;
+        if exec_prop.is_callable() {
+            // Call the user-defined exec method
+            let result = exec_prop.call(realm, vec![string.into()], this.clone())?;
+
+            // Step 2.d: If result is not null and not an object, throw TypeError
+            if !result.is_null() && !result.is_object() {
+                return Err(Error::ty("RegExp exec must return an object or null"));
+            }
+
+            return Ok(result);
+        }
+
+        // Step 3: Use built-in exec
+        self.exec(this, string, realm)
+    }
+}
+
 impl PrettyObjectOverride for RegExp {
     fn pretty_inline(
         &self,
@@ -522,8 +897,184 @@ fn escape_pattern(source: &YSString) -> YSString {
     YSString::from(escaped)
 }
 
-const fn advance_string_index(_input: &YSString, index: usize, _unicode: bool) -> usize {
+fn advance_string_index(input: &YSString, index: usize, unicode: bool) -> usize {
+    let s = input.as_str();
+    let len = s.len();
+
+    if index >= len {
+        return index.saturating_add(1);
+    }
+
+    if !unicode {
+        // Even in non-unicode mode, we need to advance to a valid UTF-8 boundary
+        // to avoid slicing in the middle of a multi-byte character
+        let mut next = index + 1;
+        while next < len && !s.is_char_boundary(next) {
+            next += 1;
+        }
+        return next;
+    }
+
+    // In Unicode mode, we need to advance past surrogate pairs
+    // We need to find the character at byte position `index`
+    // and advance by the appropriate amount
+
+    // First, verify we're at a char boundary
+    if !s.is_char_boundary(index) {
+        // We're in the middle of a character, find the next boundary
+        let mut next = index + 1;
+        while next < len && !s.is_char_boundary(next) {
+            next += 1;
+        }
+        return next;
+    }
+
+    // Get the character at this position
+    if let Some(ch) = s[index..].chars().next() {
+        // Advance by the byte length of this character
+        // In unicode mode, if it's an astral character (takes 2 UTF-16 code units),
+        // we advance by its full UTF-8 byte length
+        return index + ch.len_utf8();
+    }
+
     index.saturating_add(1)
+}
+
+/// Convert a UTF-16 code unit index to a UTF-8 byte offset
+fn utf16_index_to_byte_offset(s: &str, utf16_index: usize) -> usize {
+    let mut byte_offset = 0;
+    let mut code_unit_pos = 0;
+
+    for ch in s.chars() {
+        if code_unit_pos >= utf16_index {
+            break;
+        }
+        byte_offset += ch.len_utf8();
+        code_unit_pos += ch.len_utf16();
+    }
+
+    byte_offset
+}
+
+/// GetSubstitution as per ECMA-262 section 22.1.3.17.1
+fn get_substitution(
+    matched: &YSString,
+    str: &str,
+    position: usize,
+    captures: &[Value],
+    named_captures: &Value,
+    replacement_template: &YSString,
+    realm: &mut Realm,
+) -> Res<YSString> {
+    let string_length = str.len();
+    let mut result = String::new();
+    let template = replacement_template.as_str();
+    let mut chars = template.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c != '$' {
+            result.push(c);
+            continue;
+        }
+
+        // Look at next character
+        match chars.peek() {
+            Some('$') => {
+                chars.next();
+                result.push('$');
+            }
+            Some('`') => {
+                chars.next();
+                // Substring before match
+                result.push_str(&str[..position]);
+            }
+            Some('&') => {
+                chars.next();
+                // The matched substring
+                result.push_str(matched.as_str());
+            }
+            Some('\'') => {
+                chars.next();
+                // Substring after match
+                let match_length = matched.len();
+                let tail_pos = (position + match_length).min(string_length);
+                result.push_str(&str[tail_pos..]);
+            }
+            Some(c) if c.is_ascii_digit() => {
+                // $1 through $99
+                let first_digit = chars.next().ok_or_else(|| {
+                    Error::syn("Unexpected end of replacement template after $")
+                })?;
+                let mut index = (first_digit as usize) - ('0' as usize);
+
+                // Check for second digit
+                if let Some(&second) = chars.peek() {
+                    if second.is_ascii_digit() {
+                        let two_digit_index = index * 10 + (second as usize) - ('0' as usize);
+                        // Only use the two-digit form if it's a valid index (1 <= nn <= m)
+                        // $00 and $nn where nn > m should not consume the second digit
+                        if two_digit_index >= 1 && two_digit_index <= captures.len() {
+                            chars.next();
+                            index = two_digit_index;
+                        }
+                    }
+                }
+
+                if index >= 1 && index <= captures.len() {
+                    let capture = &captures[index - 1];
+                    if !capture.is_undefined() {
+                        let cap_str = capture.to_string(realm)?;
+                        result.push_str(cap_str.as_str());
+                    }
+                    // If undefined, append empty string (do nothing)
+                } else {
+                    // Not a valid index, keep literal
+                    result.push('$');
+                    result.push(first_digit);
+                }
+            }
+            Some('<') => {
+                chars.next();
+                // Named capture group
+                let mut group_name = String::new();
+                let mut found_close = false;
+
+                while let Some(&c) = chars.peek() {
+                    if c == '>' {
+                        chars.next();
+                        found_close = true;
+                        break;
+                    }
+                    group_name.push(chars.next().ok_or_else(|| {
+                        Error::syn("Unexpected end of replacement template in named capture")
+                    })?);
+                }
+
+                if !found_close || named_captures.is_undefined() {
+                    // No closing > or no named captures, keep literal $<
+                    result.push_str("$<");
+                    result.push_str(&group_name);
+                } else {
+                    // Get the named capture - use get_property_opt to avoid throwing
+                    // when the group name doesn't exist
+                    let capture = named_captures.get_property_opt(group_name, realm)?;
+                    if let Some(cap) = capture {
+                        if !cap.is_undefined() {
+                            let cap_str = cap.to_string(realm)?;
+                            result.push_str(cap_str.as_str());
+                        }
+                    }
+                    // If property doesn't exist or is undefined, append empty string
+                }
+            }
+            _ => {
+                // Just a $ followed by something else, keep literal $
+                result.push('$');
+            }
+        }
+    }
+
+    Ok(YSString::from(result))
 }
 
 #[must_use]
@@ -562,4 +1113,130 @@ pub const fn is_meta_character(c: char) -> bool {
             | '-'
             | '~'
     )
+}
+
+// ============================================================================
+// RegExpStringIterator - 22.2.9
+// ============================================================================
+
+#[object(name)]
+#[derive(Debug)]
+pub struct RegExpStringIterator {
+    matcher: ObjectHandle,
+    string: YSString,
+    global: bool,
+    unicode: bool,
+    done: Cell<bool>,
+}
+
+impl crate::value::CustomName for RegExpStringIterator {
+    fn custom_name(&self) -> String {
+        "RegExp String Iterator".to_owned()
+    }
+}
+
+impl RegExpStringIterator {
+    pub fn new(
+        matcher: ObjectHandle,
+        string: YSString,
+        global: bool,
+        unicode: bool,
+        realm: &mut Realm,
+    ) -> Res<Self> {
+        let proto = realm
+            .intrinsics
+            .clone_public()
+            .regexp_string_iter
+            .get(realm)?
+            .clone();
+        Ok(Self {
+            matcher,
+            string,
+            global,
+            unicode,
+            done: Cell::new(false),
+            inner: RefCell::new(MutableRegExpStringIterator {
+                object: MutObject::with_proto(proto),
+            }),
+        })
+    }
+}
+
+#[properties]
+impl RegExpStringIterator {
+    #[prop]
+    pub fn next(&self, _args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+        // 22.2.9.2.1 %RegExpStringIteratorPrototype%.next ( )
+
+        // If done, return { value: undefined, done: true }
+        if self.done.get() {
+            return Ok(create_iter_result_object(Value::Undefined, true, realm)?.into_value());
+        }
+
+        // i. Let match be ? RegExpExec(R, S).
+        let exec_prop = self.matcher.get("exec", realm)?;
+        let match_result = exec_prop.call(
+            realm,
+            vec![self.string.clone().into()],
+            Value::from(self.matcher.clone()),
+        )?;
+
+        // ii. If match is null, then
+        if match_result.is_null() {
+            // 1. Set done to true
+            self.done.set(true);
+            // 2. Return CreateIterResultObject(undefined, true)
+            return Ok(create_iter_result_object(Value::Undefined, true, realm)?.into_value());
+        }
+
+        // iii. If global is false, then
+        if !self.global {
+            // 1. Set done to true
+            self.done.set(true);
+            // 2. Return CreateIterResultObject(match, false)
+            return Ok(create_iter_result_object(match_result, false, realm)?.into_value());
+        }
+
+        // iv. Else (global is true),
+        let match_obj = match_result.as_object()?;
+
+        // 1. Let matchStr be ? ToString(? Get(match, "0")).
+        let match_str = match_obj.get("0", realm)?.to_string(realm)?;
+
+        // 2. If matchStr is the empty String, then
+        if match_str.is_empty() {
+            // a. Let thisIndex be ? ToLength(? Get(R, "lastIndex")).
+            let this_index = self.matcher.get("lastIndex", realm)?.to_number(realm)? as usize;
+
+            // b. Let nextIndex be AdvanceStringIndex(S, thisIndex, fullUnicode).
+            let next_index = advance_string_index(&self.string, this_index, self.unicode);
+
+            // c. Perform ? Set(R, "lastIndex", nextIndex, true).
+            self.matcher
+                .define_property("lastIndex".into(), next_index.into(), realm)?;
+        }
+
+        // 3. Return CreateIterResultObject(match, false)
+        Ok(create_iter_result_object(match_result, false, realm)?.into_value())
+    }
+}
+
+impl Intrinsic for RegExpStringIterator {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        let iter_proto = Iterator::get_intrinsic(realm)?;
+        Self::initialize_proto(
+            Object::raw_with_proto(iter_proto),
+            realm.intrinsics.func.clone(),
+            realm,
+        )
+    }
+
+    fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(realm
+            .intrinsics
+            .clone_public()
+            .regexp_string_iter
+            .get(realm)?
+            .clone())
+    }
 }
