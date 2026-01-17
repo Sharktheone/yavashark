@@ -13,8 +13,8 @@ const (
 	DefaultRunnerPath       = "../runner"
 	DefaultPort             = 1215
 	DefaultMCPEnabled       = true
-	DefaultScriptTimeout    = 10    // seconds
-	DefaultMaxScriptTimeout = 30    // seconds
+	DefaultScriptTimeout    = 30    // seconds
+	DefaultMaxScriptTimeout = 300    // seconds
 	DefaultMaxOutputChars   = 25000 // characters - reasonable default for LLM context
 	DefaultOutputOffset     = 0
 	DefaultOutputMode       = "head" // "head" or "tail"
