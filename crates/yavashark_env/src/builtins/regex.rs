@@ -1,6 +1,6 @@
 use crate::array::Array;
-use crate::builtins::iterator::{create_iter_result_object, Iterator};
 use crate::builtins::NumberConstructor;
+use crate::builtins::iterator::{Iterator, create_iter_result_object};
 use crate::console::print::PrettyObjectOverride;
 use crate::realm::Intrinsic;
 use crate::value::{DefinePropertyResult, IntoValue, Obj, Symbol};
@@ -200,7 +200,7 @@ impl RegExp {
             return Err(Error::ty("RegExp.escape requires a string argument"));
         };
 
-        Ok(escape_for_regexp(&s.as_str_lossy()))
+        Ok(escape_for_regexp(&s))
     }
 
     pub fn exec(
@@ -1094,69 +1094,97 @@ fn get_substitution(
 
 /// EncodeForRegExpEscape as per ECMA-262
 /// Escapes a string so it can be safely used as a literal pattern in a regular expression
-fn escape_for_regexp(text: &str) -> YSString {
-    let mut buf = String::with_capacity(text.len() * 2);
+fn escape_for_regexp(text: &YSString) -> YSString {
+    use yavashark_string::CodePoint;
 
-    for (index, c) in text.chars().enumerate() {
-        let code = c as u32;
+    let mut buf: Vec<u16> = Vec::with_capacity(text.len() * 2);
 
-        // 4.a. If escaped is the empty String and c is matched by either DecimalDigit or AsciiLetter
-        if index == 0 && (c.is_ascii_digit() || c.is_ascii_alphabetic()) {
-            // Use \xXX format for initial digit/letter
-            buf.push_str(&format!("\\x{code:02x}"));
-            continue;
-        }
-
-        // EncodeForRegExpEscape step 1: SyntaxCharacter or U+002F (SOLIDUS)
-        if matches!(
-            c,
-            '^' | '$'
-                | '\\'
-                | '.'
-                | '*'
-                | '+'
-                | '?'
-                | '('
-                | ')'
-                | '['
-                | ']'
-                | '{'
-                | '}'
-                | '|'
-                | '/'
-        ) {
-            buf.push('\\');
-            buf.push(c);
-        }
-        // Step 2: ControlEscape characters (Table 64)
-        else if c == '\x09' {
-            buf.push_str("\\t");
-        } else if c == '\x0A' {
-            buf.push_str("\\n");
-        } else if c == '\x0B' {
-            buf.push_str("\\v");
-        } else if c == '\x0C' {
-            buf.push_str("\\f");
-        } else if c == '\x0D' {
-            buf.push_str("\\r");
-        }
-        // Step 3-5: otherPunctuators or WhiteSpace or LineTerminator
-        else if is_other_punctuator(c) || is_whitespace(c) || is_line_terminator(c) {
-            if code <= 0xFF {
-                // Use \xXX format
-                buf.push_str(&format!("\\x{code:02x}"));
-            } else {
-                // Use \uXXXX format
-                buf.push_str(&format!("\\u{code:04x}"));
+    for (index, cp) in text.code_points().enumerate() {
+        match cp {
+            CodePoint::UnpairedSurrogate(surrogate) => {
+                // Escape unpaired surrogates as \uXXXX
+                for c in format!("\\u{surrogate:04x}").encode_utf16() {
+                    buf.push(c);
+                }
             }
-        }
-        // Step 6: All other Unicode characters
-        else {
-            buf.push(c);
+            CodePoint::Unicode(c) => {
+                let code = c as u32;
+
+                // 4.a. If escaped is the empty String and c is matched by either DecimalDigit or AsciiLetter
+                if index == 0 && (c.is_ascii_digit() || c.is_ascii_alphabetic()) {
+                    // Use \xXX format for initial digit/letter
+                    for ch in format!("\\x{code:02x}").encode_utf16() {
+                        buf.push(ch);
+                    }
+                    continue;
+                }
+
+                // EncodeForRegExpEscape step 1: SyntaxCharacter or U+002F (SOLIDUS)
+                if matches!(
+                    c,
+                    '^' | '$'
+                        | '\\'
+                        | '.'
+                        | '*'
+                        | '+'
+                        | '?'
+                        | '('
+                        | ')'
+                        | '['
+                        | ']'
+                        | '{'
+                        | '}'
+                        | '|'
+                        | '/'
+                ) {
+                    buf.push(b'\\' as u16);
+                    buf.push(c as u16);
+                }
+                // Step 2: ControlEscape characters (Table 64)
+                else if c == '\x09' {
+                    buf.push(b'\\' as u16);
+                    buf.push(b't' as u16);
+                } else if c == '\x0A' {
+                    buf.push(b'\\' as u16);
+                    buf.push(b'n' as u16);
+                } else if c == '\x0B' {
+                    buf.push(b'\\' as u16);
+                    buf.push(b'v' as u16);
+                } else if c == '\x0C' {
+                    buf.push(b'\\' as u16);
+                    buf.push(b'f' as u16);
+                } else if c == '\x0D' {
+                    buf.push(b'\\' as u16);
+                    buf.push(b'r' as u16);
+                }
+                // Step 3-5: otherPunctuators or WhiteSpace or LineTerminator
+                else if is_other_punctuator(c) || is_whitespace(c) || is_line_terminator(c) {
+                    if code <= 0xFF {
+                        // Use \xXX format
+                        for ch in format!("\\x{code:02x}").encode_utf16() {
+                            buf.push(ch);
+                        }
+                    } else {
+                        // Use \uXXXX format
+                        for ch in format!("\\u{code:04x}").encode_utf16() {
+                            buf.push(ch);
+                        }
+                    }
+                }
+                // Step 6: All other Unicode characters
+                else {
+                    // Encode the character to UTF-16
+                    let mut utf16_buf = [0u16; 2];
+                    let encoded = c.encode_utf16(&mut utf16_buf);
+                    for unit in encoded {
+                        buf.push(*unit);
+                    }
+                }
+            }
         }
     }
 
-    YSString::from(buf)
+    YSString::from_utf16(&buf)
 }
 
 /// Check if character is an "otherPunctuator" for RegExp.escape
