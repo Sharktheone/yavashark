@@ -1,5 +1,5 @@
 use crate::builtins::iterator::Iterator;
-use crate::builtins::{Map, NumberConstructor, Proxy, Set};
+use crate::builtins::{to_integer_or_infinity, Map, NumberConstructor, Proxy, Set};
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::conversion::TryIntoValue;
 use crate::object::Object;
@@ -2360,17 +2360,6 @@ impl Array {
         // Note: We check args.len() to distinguish between "not provided" and "provided as undefined"
         let start_present = !args.is_empty();
         let delete_count_present = args.len() >= 2;
-
-        // Helper to apply ToIntegerOrInfinity
-        fn to_integer_or_infinity(n: f64) -> f64 {
-            if n.is_nan() {
-                0.0
-            } else if n == 0.0 || n.is_infinite() {
-                n
-            } else {
-                n.trunc()
-            }
-        }
 
         // 3-6. Compute actualStart
         let actual_start = if start_present {

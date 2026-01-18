@@ -21,6 +21,7 @@ use crate::{
 };
 use iterator_helper_obj::IteratorHelperObject;
 use yavashark_macro::props;
+use crate::builtins::to_integer_or_infinity;
 
 /// %Iterator% - The Iterator constructor (27.1.3)
 ///
@@ -764,17 +765,6 @@ fn parse_zip_keyed_options(
     };
 
     Ok((mode, padding))
-}
-
-/// 7.1.5 ToIntegerOrInfinity ( argument )
-fn to_integer_or_infinity(num: f64) -> f64 {
-    if num.is_nan() || num == 0.0 {
-        0.0
-    } else if num.is_infinite() {
-        num
-    } else {
-        num.trunc()
-    }
 }
 
 /// Check if obj has proto in its prototype chain

@@ -9,7 +9,7 @@ use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
 
 /// ToIntegerOrInfinity operation
-fn to_integer_or_infinity(n: f64) -> f64 {
+pub fn to_integer_or_infinity(n: f64) -> f64 {
     if n.is_nan() {
         0.0
     } else if n == 0.0 || n.is_infinite() {
