@@ -67,7 +67,7 @@ pub fn call_private_member(
         return Err(Error::ty("Private member name must be a string"));
     };
 
-    let res = get_private_member(vm.get_realm(), base, &name)?;
+    let res = get_private_member(vm.get_realm(), base, &name.as_str_lossy())?;
 
     let args = vm.get_call_args();
 
@@ -89,7 +89,7 @@ pub fn call_private_member_no_output(obj: impl Data, member: impl Data, vm: &mut
         return Err(Error::ty("Private member name must be a string"));
     };
 
-    let res = get_private_member(vm.get_realm(), base, &name)?;
+    let res = get_private_member(vm.get_realm(), base, &name.as_str_lossy())?;
 
     let args = vm.get_call_args();
 

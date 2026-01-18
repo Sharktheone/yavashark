@@ -79,7 +79,7 @@ pub fn load_private_member(
         return Err(Error::ty("Private member name must be a string"));
     };
 
-    let res = get_private_member(vm.get_realm(), base, &name)?.0;
+    let res = get_private_member(vm.get_realm(), base, &name.as_str_lossy())?.0;
 
     output.set(res, vm)
 }
@@ -111,11 +111,11 @@ pub fn store_private_member(
     let obj = base.as_object()?;
 
     if let Some(class) = obj.downcast::<ClassInstance>() {
-        class.update_private_field(&name, value);
+        class.update_private_field(&name.as_str_lossy(), value);
         return Ok(());
     }
     if let Some(class) = obj.downcast::<Class>() {
-        class.update_private_field(&name, value);
+        class.update_private_field(&name.as_str_lossy(), value);
         return Ok(());
     }
 

@@ -17,7 +17,7 @@ pub fn get_escape(realm: &mut Realm) -> ObjectHandle {
 
             let mut result = String::with_capacity(arg.len());
 
-            for c in arg.chars() {
+            for c in arg.as_str_lossy().chars() {
                 // is uTF-16
 
                 if is_ascii_world(c) {
@@ -58,7 +58,7 @@ pub fn get_encode_uri(realm: &mut Realm) -> ObjectHandle {
                 args[0].to_string(realm)?
             };
 
-            encode_impl(&arg, true)
+            encode_impl(&arg.as_str_lossy(), true)
         },
         realm,
         1,
@@ -84,7 +84,7 @@ pub fn get_encode_uri_component(realm: &mut Realm) -> ObjectHandle {
                 args[0].to_string(realm)?
             };
 
-            encode_impl(&arg, false)
+            encode_impl(&arg.as_str_lossy(), false)
         },
         realm,
         1,
@@ -112,7 +112,8 @@ pub fn get_unescape(realm: &mut Realm) -> ObjectHandle {
 
             let mut result = String::with_capacity(arg.len());
 
-            let mut chars = arg.chars();
+            let arg_str = arg.as_str_lossy();
+            let mut chars = arg_str.chars();
 
             while let Some(c) = chars.next() {
                 let char = unescape_char(c, &mut chars);
@@ -146,7 +147,7 @@ pub fn get_decode_uri(realm: &mut Realm) -> ObjectHandle {
             } else {
                 args[0].to_string(realm)?
             };
-            decode_uri_impl(&arg, false)
+            decode_uri_impl(&arg.as_str_lossy(), false)
         },
         realm,
         1,
@@ -171,7 +172,7 @@ pub fn get_decode_uri_component(realm: &mut Realm) -> ObjectHandle {
             } else {
                 args[0].to_string(realm)?
             };
-            decode_uri_impl(&arg, true)
+            decode_uri_impl(&arg.as_str_lossy(), true)
         },
         realm,
         1,

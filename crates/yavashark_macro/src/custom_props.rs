@@ -219,14 +219,14 @@ pub fn match_prop(properties: &[DirectItem], r: Act, config: &Config) -> TokenSt
         if let Some(rename) = &item.rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
-                    stringify!(#rename) => {
+                    Some(stringify!(#rename)) => {
                         #act;
                         return Ok(#define_property_result::Handled);
                     }
                 }
             } else {
                 quote! {
-                    stringify!(#rename) => {
+                    Some(stringify!(#rename)) => {
                         return Ok(#act);
                     }
                 }
@@ -237,7 +237,7 @@ pub fn match_prop(properties: &[DirectItem], r: Act, config: &Config) -> TokenSt
         }
 
         let expanded = quote! {
-            stringify!(#field) =>  {
+            Some(stringify!(#field)) =>  {
                 return Ok(#act);
             }
         };

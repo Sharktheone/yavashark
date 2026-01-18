@@ -48,7 +48,7 @@ pub fn generate_contains_property(props: &[Property], config: &Config) -> proc_m
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
-                    #s => {
+                    Some(#s) => {
                         #value_expr
                     }
                 });

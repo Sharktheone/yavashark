@@ -109,7 +109,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
-                    #s => {
+                    Some(#s) => {
                         #value_expr
                     }
                 });

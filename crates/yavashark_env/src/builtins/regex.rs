@@ -1,5 +1,6 @@
 use crate::array::Array;
-use crate::builtins::iterator::{Iterator, create_iter_result_object};
+use crate::builtins::iterator::{create_iter_result_object, Iterator};
+use crate::builtins::NumberConstructor;
 use crate::console::print::PrettyObjectOverride;
 use crate::realm::Intrinsic;
 use crate::value::{DefinePropertyResult, IntoValue, Obj, Symbol};
@@ -9,7 +10,6 @@ use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use yavashark_macro::{object, properties, props};
 use yavashark_string::YSString;
-use crate::builtins::NumberConstructor;
 
 #[object()]
 #[derive(Debug)]
@@ -204,7 +204,7 @@ impl RegExp {
         inp: YSString,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let input = inp.as_str();
+        let input = inp.as_str_lossy();
         let input_len = input.len();
 
         // Let lastIndex be ? ToLength(? Get(R, "lastIndex")).
@@ -231,7 +231,7 @@ impl RegExp {
             return Ok(Value::Null);
         }
 
-        let Some(matched) = self.regex.find_from(input, last_index).next() else {
+        let Some(matched) = self.regex.find_from(&input, last_index).next() else {
             if self.flags.global || self.flags.sticky {
                 self.set_last_index_value(this, 0, realm)?;
             }
@@ -345,7 +345,6 @@ impl RegExp {
 
     pub fn compile(&self, _a: Value, _b: Value) {}
 
-
     #[prop(Symbol::MATCH)]
     pub fn symbol_match(
         &self,
@@ -439,12 +438,15 @@ impl RegExp {
 
         // 5. Let flags be ? ToString(? Get(R, "flags")).
         let flags = this_obj.get("flags", realm)?.to_string(realm)?;
-        let flags_str = flags.as_str();
+        let flags_str = flags.as_str_lossy();
 
         // 6. Let matcher be ? Construct(C, « R, flags »).
         // Create a copy of the regexp
-        let matcher =
-            RegExp::new_from_str_with_flags(realm, self.original_source.as_str(), flags_str)?;
+        let matcher = RegExp::new_from_str_with_flags(
+            realm,
+            &self.original_source.as_str_lossy(),
+            &flags_str,
+        )?;
         let matcher_handle: ObjectHandle = Obj::into_object(matcher);
 
         // 7. Let lastIndex be ? ToLength(? Get(R, "lastIndex")).
@@ -471,7 +473,7 @@ impl RegExp {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // Convert to owned String to avoid borrow issues with as_str() during exec calls
-        let s: String = string.as_str().to_string();
+        let s: String = string.as_str_lossy().to_string();
         let length_s = s.len();
 
         let functional_replace = replace_value.is_callable();
@@ -591,7 +593,7 @@ impl RegExp {
 
             if position >= next_source_position {
                 accumulated_result.push_str(&s[next_source_position..position]);
-                accumulated_result.push_str(replacement_string.as_str());
+                accumulated_result.push_str(&replacement_string.as_str_lossy());
                 next_source_position = position + match_length;
             }
         }
@@ -612,12 +614,12 @@ impl RegExp {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // 21.2.5.13 RegExp.prototype [ @@split ] ( string, limit )
-        let s = string.as_str();
+        let s = string.as_str_lossy();
         // size is the length in UTF-16 code units (not bytes)
         let size: usize = s.chars().map(|c| c.len_utf16()).sum();
 
         // 5. Let flags be ? ToString(? Get(rx, "flags")).
-        let flags = self.original_flags.as_str();
+        let flags = self.original_flags.as_str_lossy();
 
         // 6-7. unicodeMatching
         let full_unicode = flags.contains('u') || flags.contains('v');
@@ -631,8 +633,11 @@ impl RegExp {
 
         // 10. Let splitter be ? Construct(C, « rx, newFlags »).
         // Create a new RegExp with the sticky flag
-        let splitter =
-            RegExp::new_from_str_with_flags(realm, self.original_source.as_str(), &new_flags)?;
+        let splitter = RegExp::new_from_str_with_flags(
+            realm,
+            &self.original_source.as_str_lossy(),
+            &new_flags,
+        )?;
         let splitter_value: Value = splitter.into_value();
         let splitter_obj = splitter_value.as_object()?;
 
@@ -713,8 +718,8 @@ impl RegExp {
             // iv. Else,
             // 1. Let T be the substring of S from p to q.
             // Convert UTF-16 indices to byte offsets for slicing
-            let p_byte = utf16_index_to_byte_offset(s, p);
-            let q_byte = utf16_index_to_byte_offset(s, q);
+            let p_byte = utf16_index_to_byte_offset(&s, p);
+            let q_byte = utf16_index_to_byte_offset(&s, q);
             let substring = &s[p_byte..q_byte];
             result_vec.push(YSString::from_ref(substring).into());
 
@@ -744,7 +749,7 @@ impl RegExp {
         }
 
         // 20. Let T be the substring of S from p to size.
-        let p_byte = utf16_index_to_byte_offset(s, p);
+        let p_byte = utf16_index_to_byte_offset(&s, p);
         let substring = &s[p_byte..];
         result_vec.push(YSString::from_ref(substring).into());
 
@@ -757,9 +762,9 @@ impl RegExp {
         let escaped = escape_pattern(&self.original_source);
         let mut result = String::new();
         result.push('/');
-        result.push_str(escaped.as_str());
+        result.push_str(&escaped.as_str_lossy());
         result.push('/');
-        result.push_str(self.original_flags.as_str());
+        result.push_str(&self.original_flags.as_str_lossy());
 
         YSString::from_ref(&result)
     }
@@ -860,9 +865,9 @@ impl PrettyObjectOverride for RegExp {
         let mut s = String::new();
         s.push('/');
         let escaped = escape_pattern(&self.original_source);
-        s.push_str(escaped.as_str());
+        s.push_str(&escaped.as_str_lossy());
         s.push('/');
-        s.push_str(self.original_flags.as_str());
+        s.push_str(&self.original_flags.as_str_lossy());
         Some(s)
     }
 
@@ -883,7 +888,7 @@ fn escape_pattern(source: &YSString) -> YSString {
 
     let mut escaped = String::with_capacity(source.len());
 
-    for ch in source.as_str().chars() {
+    for ch in source.as_str_lossy().chars() {
         match ch {
             '/' => escaped.push_str("\\/"),
             '\n' => escaped.push_str("\\n"),
@@ -898,7 +903,7 @@ fn escape_pattern(source: &YSString) -> YSString {
 }
 
 fn advance_string_index(input: &YSString, index: usize, unicode: bool) -> usize {
-    let s = input.as_str();
+    let s = input.as_str_lossy();
     let len = s.len();
 
     if index >= len {
@@ -968,7 +973,7 @@ fn get_substitution(
 ) -> Res<YSString> {
     let string_length = str.len();
     let mut result = String::new();
-    let template = replacement_template.as_str();
+    let template = replacement_template.as_str_lossy();
     let mut chars = template.chars().peekable();
 
     while let Some(c) = chars.next() {
@@ -991,7 +996,7 @@ fn get_substitution(
             Some('&') => {
                 chars.next();
                 // The matched substring
-                result.push_str(matched.as_str());
+                result.push_str(&matched.as_str_lossy());
             }
             Some('\'') => {
                 chars.next();
@@ -1002,9 +1007,9 @@ fn get_substitution(
             }
             Some(c) if c.is_ascii_digit() => {
                 // $1 through $99
-                let first_digit = chars.next().ok_or_else(|| {
-                    Error::syn("Unexpected end of replacement template after $")
-                })?;
+                let first_digit = chars
+                    .next()
+                    .ok_or_else(|| Error::syn("Unexpected end of replacement template after $"))?;
                 let mut index = (first_digit as usize) - ('0' as usize);
 
                 // Check for second digit
@@ -1024,7 +1029,7 @@ fn get_substitution(
                     let capture = &captures[index - 1];
                     if !capture.is_undefined() {
                         let cap_str = capture.to_string(realm)?;
-                        result.push_str(cap_str.as_str());
+                        result.push_str(&cap_str.as_str_lossy());
                     }
                     // If undefined, append empty string (do nothing)
                 } else {
@@ -1061,7 +1066,7 @@ fn get_substitution(
                     if let Some(cap) = capture {
                         if !cap.is_undefined() {
                             let cap_str = cap.to_string(realm)?;
-                            result.push_str(cap_str.as_str());
+                            result.push_str(&cap_str.as_str_lossy());
                         }
                     }
                     // If property doesn't exist or is undefined, append empty string

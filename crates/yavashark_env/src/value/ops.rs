@@ -135,7 +135,7 @@ impl Value {
             Self::Undefined => f64::NAN,
             Self::Null => 0.0,
             Self::Boolean(b) => b.num(),
-            Self::String(s) => s.as_str().num(),
+            Self::String(s) => (&*s.as_str_lossy()).num(),
             Self::Object(_) => {
                 let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
@@ -151,14 +151,14 @@ impl Value {
             Self::Undefined => f64::NAN,
             Self::Null => 0.0,
             Self::Boolean(b) => b.num(),
-            Self::String(s) => s.as_str().num(),
+            Self::String(s) => (&*s.as_str_lossy()).num(),
             Self::Object(_) => {
                 let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
                 return v.to_number(realm);
             }
             Self::Symbol(_) | Self::BigInt(_) => {
-                return Err(Error::ty("Cannot convert BigInt or Symbol to number"))
+                return Err(Error::ty("Cannot convert BigInt or Symbol to number"));
             }
         })
     }
@@ -181,7 +181,7 @@ impl Value {
                 }
             }
             // String -> StringToBigInt(prim) - throws SyntaxError for invalid strings
-            Self::String(s) => parse_big_int(&s)?,
+            Self::String(s) => parse_big_int(&s.as_str_lossy())?,
             Self::BigInt(b) => (*b).clone(),
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
             Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
@@ -208,7 +208,7 @@ impl Value {
             }
             Self::BigInt(b) => (*b).clone(),
             Self::Number(_) => return Err(Error::ty("Cannot convert Number to BigInt")),
-            Self::String(s) => parse_big_int(&s)
+            Self::String(s) => parse_big_int(&s.as_str_lossy())
                 .map_err(|_| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))?,
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
             Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
@@ -606,13 +606,16 @@ impl PartialOrd for Value {
                 a.partial_cmp(&0.0)
             }
             (Self::String(a), Self::Number(b)) => a.parse::<f64>().ok()?.partial_cmp(b),
-            (Self::String(a), Self::String(b)) => a.as_str().partial_cmp(b.as_str()),
+            (Self::String(a), Self::String(b)) => a
+                .as_str_lossy()
+                .as_ref()
+                .partial_cmp(b.as_str_lossy().as_ref()),
             (Self::String(a), Self::Boolean(b)) => {
                 let a = a.parse::<f64>().ok()?;
                 a.partial_cmp(&b.num())
             }
             (Self::String(a), Self::Object(_)) => {
-                if a.as_str() == "[object Object]" {
+                if &*a.as_str_lossy() == "[object Object]" {
                     Some(Ordering::Equal)
                 } else {
                     None
@@ -636,7 +639,7 @@ impl PartialOrd for Value {
             (Self::BigInt(a), Self::Number(b)) => a.to_f64().unwrap_or(f64::NAN).partial_cmp(b),
 
             (Self::String(a), Self::BigInt(b)) | (Self::BigInt(b), Self::String(a)) => {
-                let a = BigInt::from_str(a).unwrap_or(BigInt::zero());
+                let a = a.parse().unwrap_or(BigInt::zero());
 
                 a.partial_cmp(b)
             }
@@ -936,7 +939,7 @@ impl Value {
                     return Ok(true);
                 }
 
-                a.to_string() == *b
+                a.to_string() == b.to_string()
             }
 
             (Self::Number(a), Self::Boolean(b)) | (Self::Boolean(b), Self::Number(a)) => {
@@ -950,15 +953,15 @@ impl Value {
                     return Ok(true);
                 }
 
-                a.to_string() == *b
+                a.to_string() == b
             }
 
             (Self::String(a), Self::Object(b)) | (Self::Object(b), Self::String(a)) => {
-                *a == format!("{b}")
+                a.to_string() == format!("{b}")
             }
 
             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
-                *a == b.num().to_string()
+                a.to_string() == b.num().to_string()
             }
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
@@ -972,7 +975,7 @@ impl Value {
             }
 
             (Self::BigInt(a), Self::String(b)) | (Self::String(b), Self::BigInt(a)) => {
-                a.to_string() == *b
+                a.to_string() == b.to_string()
             }
 
             _ => false,

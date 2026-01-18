@@ -8,7 +8,6 @@ use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::fields::CalendarFields;
 use temporal_rs::partial::PartialYearMonth;
 use temporal_rs::Calendar;
@@ -317,9 +316,7 @@ pub fn value_to_plain_year_month(
             temporal_rs::PlainYearMonth::from_partial(partial, overflow)
                 .map_err(Error::from_temporal)
         }
-        Value::String(str) => {
-            temporal_rs::PlainYearMonth::from_str(str.as_str()).map_err(Error::from_temporal)
-        }
+        Value::String(str) => str.parse().map_err(Error::from_temporal),
 
         _ => Err(Error::ty("Expected object or string")),
     }

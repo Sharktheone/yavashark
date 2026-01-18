@@ -143,7 +143,7 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 #[allow(unused)]
 fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
     let Some(body) = args.pop() else {
-        return Ok(NativeFunction::new("anonymous", |_, _, _| Ok(Value::Undefined), realm).into());
+        return Ok(NativeFunction::new("anonymous", |_, _, _| Ok(Value::Undefined), realm));
     };
 
     let mut buf = "function anonymous(".to_owned();
@@ -153,12 +153,12 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
             buf.push(',');
         }
 
-        buf.push_str(&arg.to_string(realm)?);
+        buf.push_str(&arg.to_string(realm)?.as_str_lossy());
     }
 
     buf.push_str(") {\n ");
 
-    buf.push_str(&body.to_string(realm)?);
+    buf.push_str(&body.to_string(realm)?.as_str_lossy());
 
     buf.push_str("\n }");
 
@@ -168,9 +168,9 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         return Err(Error::new("eval is not defined"));
     };
 
-    Ok(eval
+    eval
         .call(vec![Value::String(buf.into())], Value::Undefined, realm)?
-        .to_object()?)
+        .to_object()
 }
 
 fn to_string(_args: Vec<Value>, this: Value, _realm: &mut Realm) -> ValueResult {

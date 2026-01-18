@@ -8,6 +8,6 @@ impl FromValueOutput for TimeZone {
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         let tz_str = value.to_string(realm)?;
 
-        Self::try_from_str(&tz_str).map_err(Error::from_temporal)
+        Self::try_from_str(&tz_str.as_str_lossy()).map_err(Error::from_temporal)
     }
 }

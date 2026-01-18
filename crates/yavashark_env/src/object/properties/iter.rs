@@ -36,7 +36,9 @@ impl<'a> Iterator for ObjectPropertiesIter<'a> {
                 let (key, prop) = iter.next()?;
 
                 let key = match key {
-                    PropertyKey::String(s) => BorrowedInternalPropertyKey::String(s.as_str()),
+                    PropertyKey::String(s) => {
+                        BorrowedInternalPropertyKey::String(s.as_str().unwrap_or_default())
+                    }
                     PropertyKey::Symbol(s) => BorrowedInternalPropertyKey::Symbol(s),
                 };
 
@@ -112,7 +114,9 @@ impl<'a> Iterator for ObjectPropertiesKeysIter<'a> {
             InnerObjectPropertiesKeysIter::Object(iter) => {
                 let key = iter.next()?;
                 match key {
-                    PropertyKey::String(s) => Some(BorrowedInternalPropertyKey::String(s.as_str())),
+                    PropertyKey::String(s) => Some(BorrowedInternalPropertyKey::String(
+                        s.as_str().unwrap_or_default(),
+                    )),
                     PropertyKey::Symbol(s) => Some(BorrowedInternalPropertyKey::Symbol(s)),
                 }
             }

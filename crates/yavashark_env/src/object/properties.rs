@@ -74,7 +74,7 @@ impl ObjectProperties {
         match key {
             InternalPropertyKey::String(s) => self
                 .properties
-                .get(&BorrowedPropertyKey::String(s.as_str())),
+                .get(&BorrowedPropertyKey::String(&s.as_str_lossy())),
             InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
             InternalPropertyKey::Index(idx) => self.array.get(*idx),
         }
@@ -88,7 +88,7 @@ impl ObjectProperties {
             }
             InternalPropertyKey::String(s) => {
                 self.properties
-                    .shift_remove(&BorrowedPropertyKey::String(s.as_str()));
+                    .shift_remove(&BorrowedPropertyKey::String(&s.as_str_lossy()));
                 Ok(())
             }
             InternalPropertyKey::Symbol(s) => {
@@ -104,7 +104,7 @@ impl ObjectProperties {
             InternalPropertyKey::Index(idx) => self.array.contains_key(*idx),
             InternalPropertyKey::String(s) => self
                 .properties
-                .contains_key(&BorrowedPropertyKey::String(s.as_str())),
+                .contains_key(&BorrowedPropertyKey::String(&s.as_str_lossy())),
             InternalPropertyKey::Symbol(s) => self
                 .properties
                 .contains_key(&BorrowedPropertyKey::Symbol(s)),

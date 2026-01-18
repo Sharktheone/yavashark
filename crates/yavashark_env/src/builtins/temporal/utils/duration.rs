@@ -2,7 +2,6 @@ use crate::builtins::Duration;
 use crate::conversion::FromValueOutput;
 use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
-use std::str::FromStr;
 
 impl FromValueOutput for temporal_rs::Duration {
     type Output = Self;
@@ -71,7 +70,7 @@ impl FromValueOutput for temporal_rs::Duration {
                 )
                 .map_err(Error::from_temporal)
             }
-            Value::String(s) => Self::from_str(&s).map_err(Error::from_temporal),
+            Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
                 "Duration value must be a string or a Duration-like object",
             )),

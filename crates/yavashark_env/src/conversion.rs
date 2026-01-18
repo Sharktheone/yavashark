@@ -138,9 +138,9 @@ impl FromValueOutput for YSString {
 }
 
 impl FromValueOutput for &str {
-    type Output = YSString;
+    type Output = String;
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
-        YSString::from_value_out(value, realm)
+        Ok(YSString::from_value_out(value, realm)?.to_string())
     }
 }
 
@@ -327,14 +327,28 @@ impl FromValueOutput for Stringable {
                 if let Some(p) = o.primitive(realm)? {
                     return Self::from_value_out(p.into(), realm);
                 }
+                Ok(Self(value.to_string(realm)?.to_string()))
             }
-            Value::String(s) => return Ok(Self(s.to_string())),
-            Value::Number(n) => return Ok(Self(fmt_num(n).to_string())),
-            Value::Boolean(b) => return Ok(Self(b.to_string())),
-            _ => {}
+            Value::String(s) => Ok(Self(s.to_string())),
+            Value::Number(n) => Ok(Self(fmt_num(n).to_string())),
+            Value::Boolean(b) => Ok(Self(b.to_string())),
+            Value::Undefined => {
+                Err(Error::ty(
+                    "Cannot convert undefined to stringable",
+                ))
+            }
+            Value::Null => {
+                Err(Error::ty(
+                    "Cannot convert null to stringable",
+                ))
+            }
+            Value::Symbol(_) => {
+                Err(Error::ty_error(
+                    "Cannot convert a Symbol value to a string".to_string(),
+                ))
+            }
+            Value::BigInt(bi) => Ok(Self(bi.to_string())),
         }
-
-        Err(Error::ty_error(format!("Expected string, found {value:?}")))
     }
 }
 
@@ -452,7 +466,7 @@ macro_rules! impl_from_value_output {
                 fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
-                        Value::String(ref s) => Ok(s.as_str().num() as $t),
+                        Value::String(ref s) => Ok((&*s.as_str_lossy()).num() as $t),
                         Value::Boolean(b) => Ok(b.into()),
                         #[allow(clippy::cast_lossless)]
                         Value::Undefined => Ok(0 as $t),
@@ -480,7 +494,7 @@ macro_rules! impl_from_value_float_output {
                 fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
-                        Value::String(ref s) => Ok(s.as_str().num() as $t),
+                        Value::String(ref s) => Ok((&*s.as_str_lossy()).num() as $t),
                         Value::Boolean(b) => Ok(b.into()),
                         Value::Undefined => Ok(<$t>::NAN),
                         Value::Object(_) => {
@@ -513,7 +527,7 @@ macro_rules! impl_from_value_output_nonfract {
                             Ok(NonFract(n as $t))
                         },
                         Value::String(ref s) => {
-                            let n = s.as_str().num();
+                            let n = (&*s.as_str_lossy()).num();
                             if n.fract() != 0.0 {
                                 return Err(Error::range("Expected integer, found a float"));
                             }
@@ -554,7 +568,7 @@ macro_rules! impl_from_value_float_output_nonfract {
                             Ok(NonFract(n as $t))
                         },
                         Value::String(ref s) => {
-                            let n = s.as_str().num();
+                            let n = (&*s.as_str_lossy()).num();
                             if n.fract() != 0.0 {
                                 return Err(Error::range("Expected integer, found a float"));
                             }

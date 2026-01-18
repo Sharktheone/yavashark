@@ -2,7 +2,6 @@ use crate::builtins::PlainDateTime;
 use crate::conversion::FromValueOutput;
 use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::Calendar;
 
 impl FromValueOutput for temporal_rs::PlainDateTime {
@@ -35,7 +34,7 @@ impl FromValueOutput for temporal_rs::PlainDateTime {
                                 if s.is_empty() {
                                     None
                                 } else {
-                                    s.as_str()[1..].parse::<u8>().ok()
+                                    s.as_str_lossy()[1..].parse::<u8>().ok()
                                 }
                             })
                             .unwrap_or(0)
@@ -88,7 +87,7 @@ impl FromValueOutput for temporal_rs::PlainDateTime {
                     "PlainDateTime object must have date fields (year, month/monthCode, day)",
                 ))
             }
-            Value::String(s) => Self::from_str(&s).map_err(Error::from_temporal),
+            Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
                 "PlainDateTime value must be a string or a PlainDateTime-like object",
             )),

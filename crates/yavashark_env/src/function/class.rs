@@ -76,7 +76,7 @@ impl Obj for Class {
         value: Value,
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             *self.prototype.borrow_mut() = value.to_object()?;
             Ok(DefinePropertyResult::Handled)
         } else {
@@ -90,7 +90,7 @@ impl Obj for Class {
         value: Variable,
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             *self.prototype.borrow_mut() = value.value.to_object()?;
 
             Ok(DefinePropertyResult::Handled)
@@ -104,7 +104,7 @@ impl Obj for Class {
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
         } else {
@@ -117,7 +117,7 @@ impl Obj for Class {
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
         } else {
@@ -131,7 +131,7 @@ impl Obj for Class {
         value: ObjectHandle,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 
@@ -145,7 +145,7 @@ impl Obj for Class {
         attributes: Attributes,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 
@@ -159,7 +159,7 @@ impl Obj for Class {
         value: ObjectHandle,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 
@@ -173,7 +173,7 @@ impl Obj for Class {
         attributes: Attributes,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 
@@ -187,7 +187,7 @@ impl Obj for Class {
         attributes: Attributes,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 
@@ -199,7 +199,7 @@ impl Obj for Class {
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             return Ok(None);
         }
 
@@ -207,7 +207,7 @@ impl Obj for Class {
     }
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             Ok(true)
         } else {
             self.inner.contains_own_key(name, realm)
@@ -215,7 +215,7 @@ impl Obj for Class {
     }
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             Ok(true)
         } else {
             self.inner.contains_key(name, realm)

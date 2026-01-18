@@ -128,7 +128,7 @@ pub fn generate_get_descriptor(props: &[Property], config: &Config) -> proc_macr
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
-                    #s => {
+                    Some(#s) => {
                         #descriptor_expr
                     }
                 });

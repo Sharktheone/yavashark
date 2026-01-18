@@ -102,7 +102,7 @@ pub fn data_enum(mut e: syn::ItemEnum, args: DataObjectArgs) -> syn::Result<Toke
             fn from_value_out(value: #value, realm: &mut #realm) -> #res<Self::Output> {
                 let s = value.to_string(realm)?;
 
-                <Self as std::str::FromStr>::from_str(&s)
+                s.parse()
             }
         }
     })

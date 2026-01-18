@@ -1,7 +1,6 @@
 use crate::builtins::{PlainDate, PlainDateTime, PlainMonthDay, PlainYearMonth, ZonedDateTime};
 use crate::conversion::FromValueOutput;
 use crate::{Error, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::Calendar;
 
 impl FromValueOutput for Calendar {
@@ -34,7 +33,7 @@ impl FromValueOutput for Calendar {
                     "Calendar object must be a 'calendar like' Temporal object",
                 ))
             }
-            Value::String(s) => Self::from_str(&s).map_err(Error::from_temporal),
+            Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
                 "Calendar value must be a string or a 'calendar like' value",
             )),

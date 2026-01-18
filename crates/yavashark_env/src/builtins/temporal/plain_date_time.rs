@@ -10,7 +10,6 @@ use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::partial::PartialDateTime;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::props;
@@ -419,7 +418,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
     }
 
     if let Value::String(str) = &info {
-        return temporal_rs::PlainDateTime::from_str(str.as_str()).map_err(Error::from_temporal);
+        return str.parse().map_err(Error::from_temporal);
     }
 
     let obj = info.to_object()?;

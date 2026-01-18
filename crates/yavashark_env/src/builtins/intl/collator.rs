@@ -236,7 +236,7 @@ impl Collator {
                 let collator = IcuCollator::try_new(config.prefs, config.opts)
                     .map_err(|e| Error::ty_error(format!("Failed to create Collator: {e}")))?;
 
-                let result = match collator.compare(x.as_str(), y.as_str()) {
+                let result = match collator.compare(&x.as_str_lossy(), &y.as_str_lossy()) {
                     Ordering::Less => -1,
                     Ordering::Equal => 0,
                     Ordering::Greater => 1,

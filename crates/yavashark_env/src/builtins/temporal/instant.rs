@@ -11,7 +11,6 @@ use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use std::str::FromStr;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::{Temporal, TimeZone};
@@ -37,7 +36,7 @@ impl Instant {
 
         let str = value.to_string(realm)?;
 
-        temporal_rs::Instant::from_str(str.as_str())
+        str.parse()
             .map_err(Error::from_temporal)
             .and_then(|dt| Self::from_stamp(dt, realm))
     }
@@ -172,7 +171,7 @@ impl Instant {
                 None
             } else {
                 let tz_str = tz_val.to_string(realm)?;
-                Some(TimeZone::try_from_str(&tz_str).map_err(Error::from_temporal)?)
+                Some(TimeZone::try_from_str(&tz_str.as_str_lossy()).map_err(Error::from_temporal)?)
             }
         } else {
             None
@@ -262,12 +261,10 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
 
                 let str = obj.to_string(realm)?;
 
-                temporal_rs::Instant::from_str(str.as_str()).map_err(Error::from_temporal)
+                str.parse().map_err(Error::from_temporal)
             }
         }
-        Value::String(s) => {
-            temporal_rs::Instant::from_str(s.as_str()).map_err(Error::from_temporal)
-        }
+        Value::String(s) => s.parse().map_err(Error::from_temporal),
         _ => Err(Error::ty("Expected a Temporal.Instant object")),
     }
 }

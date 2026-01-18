@@ -8,7 +8,6 @@ use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::props;
@@ -224,7 +223,7 @@ impl PlainTime {
 pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainTime> {
     match info {
         Value::String(str) => {
-            let time = temporal_rs::PlainTime::from_str(&str).map_err(Error::from_temporal)?;
+            let time = str.parse().map_err(Error::from_temporal)?;
 
             Ok(time)
         }

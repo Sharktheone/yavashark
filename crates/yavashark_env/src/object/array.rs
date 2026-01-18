@@ -420,7 +420,7 @@ impl Array {
         let array_like = match array_like {
             Value::Object(obj) => obj,
             Value::String(s) => {
-                return Self::from_string(realm, &s);
+                return Self::from_string(realm, &s.as_str_lossy());
             }
             _ => {
                 return Err(Error::ty_error(format!(
@@ -1391,7 +1391,7 @@ impl Array {
         for k in 0..len {
             // 7.a. If k > 0, set R to the string-concatenation of R and sep.
             if k > 0 {
-                r.push_str(&sep);
+                r.push_str(&sep.as_str_lossy());
             }
 
             // 7.b. Let element be ? Get(O, ! ToString(𝔽(k))).
@@ -1401,7 +1401,7 @@ impl Array {
             if !element.is_undefined() && !element.is_null() {
                 // 7.c.i. Let S be ? ToString(element).
                 // 7.c.ii. Set R to the string-concatenation of R and S.
-                r.push_str(&element.to_string(realm)?);
+                r.push_str(&element.to_string(realm)?.as_str_lossy());
             }
             // 7.d. Set k to k + 1.
         }
@@ -1460,7 +1460,7 @@ impl Array {
                 let s_str = s.to_string(realm)?;
 
                 // 6.c.ii. Set R to the string-concatenation of R and S.
-                r.push_str(&s_str);
+                r.push_str(&s_str.as_str_lossy());
             }
             // 6.d. Set k to k + 1.
         }
@@ -3127,7 +3127,7 @@ impl ArrayConstructor {
         #[this] this: Value,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
-            return Ok(Array::from_string_this(realm, str, this)?);
+            return Array::from_string_this(realm, &str.as_str_lossy(), this);
         }
 
         if let Value::Object(obj) = &items {

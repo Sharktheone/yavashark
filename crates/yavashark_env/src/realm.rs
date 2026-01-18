@@ -105,7 +105,7 @@ impl Realm {
                     scope.state_set_function()?;
                 }
 
-                eval.eval(&code, realm, &mut scope)
+                eval.eval(&code.as_str_lossy(), realm, &mut scope)
             },
             self,
             1,

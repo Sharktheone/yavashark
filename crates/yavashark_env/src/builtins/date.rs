@@ -1140,10 +1140,10 @@ impl Date {
                 let arg = &args[0];
 
                 match arg {
-                    Value::String(s) => match parse_date_string(s) {
+                    Value::String(s) => match parse_date_string(&s.as_str_lossy()) {
                         ParseResult::Parsed(dt) => Some(dt),
                         ParseResult::Invalid => None,
-                        ParseResult::NotMatched => DateTime::from_str(s).ok(),
+                        ParseResult::NotMatched => DateTime::from_str(&s.as_str_lossy()).ok(),
                     },
                     Value::Number(time) => {
                         let time = *time;
@@ -1164,10 +1164,12 @@ impl Date {
                             let prim = obj.to_primitive(Hint::None, realm)?;
 
                             match prim {
-                                Value::String(s) => match parse_date_string(&s) {
+                                Value::String(s) => match parse_date_string(&s.as_str_lossy()) {
                                     ParseResult::Parsed(dt) => Some(dt),
                                     ParseResult::Invalid => None,
-                                    ParseResult::NotMatched => DateTime::from_str(&s).ok(),
+                                    ParseResult::NotMatched => {
+                                        DateTime::from_str(&s.as_str_lossy()).ok()
+                                    }
                                 },
                                 Value::Symbol(_) => {
                                     return Err(crate::Error::ty(

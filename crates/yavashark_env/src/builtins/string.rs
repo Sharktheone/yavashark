@@ -79,8 +79,8 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr =
-                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+            let chr = Self::get_single_str(&*inner.string.as_str_lossy(), index)
+                .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -98,8 +98,8 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr =
-                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+            let chr = Self::get_single_str(&*inner.string.as_str_lossy(), index)
+                .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -246,7 +246,7 @@ impl StringConstructor {
             //b. Let nextLiteral be ? ToString(nextLiteralVal).
             let next_literal = next_literal_val.to_string(realm)?;
             // c. Set R to the string-concatenation of R and nextLiteral.
-            r.push_str(&next_literal);
+            r.push_str(&*next_literal.as_str_lossy());
 
             //d. If nextIndex + 1 = literalCount, return R.
             if next_index + 1 == literal_count {
@@ -262,7 +262,7 @@ impl StringConstructor {
                 let next_sub = next_sub_val.to_string(realm)?;
 
                 //iii. Set R to the string-concatenation of R and nextSub.
-                r.push_str(&next_sub);
+                r.push_str(&*next_sub.as_str_lossy());
             }
 
             //f. Set nextIndex to nextIndex + 1.
@@ -384,7 +384,7 @@ impl StringObj {
         self.inner.borrow().string.len()
     }
 
-    pub fn anchor(#[this] string: &Stringable, name: &str) -> ValueResult {
+    pub fn anchor(#[this] string: &Stringable, name: &Stringable) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), string,).into())
     }
 
@@ -434,16 +434,31 @@ impl StringObj {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         for arg in args {
-            string.push_str(&arg.to_string(realm)?);
+            string.push_str(&*arg.to_string(realm)?.as_str_lossy());
         }
 
         Ok(string.into())
     }
 
     #[prop("endsWith")]
-    #[must_use]
-    pub fn ends_with(#[this] str: &Stringable, search: &str) -> Value {
-        str.ends_with(&search).into()
+    pub fn ends_with(
+        #[this] str: &Stringable,
+        search: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 1. If searchString is a RegExp, throw a TypeError
+        if let Ok(obj) = search.as_object() {
+            let match_prop = obj.get(Symbol::MATCH, realm)?;
+            let is_regexp = match_prop.is_truthy() || obj.downcast::<RegExp>().is_some();
+            if is_regexp {
+                return Err(Error::ty(
+                    "First argument to String.prototype.endsWith must not be a regular expression",
+                ));
+            }
+        }
+        // 2. Let searchStr be ? ToString(searchString)
+        let search_str = search.to_string(realm)?;
+        Ok(str.ends_with(&*search_str.as_str_lossy()).into())
     }
 
     #[prop("fixed")]
@@ -452,24 +467,39 @@ impl StringObj {
     }
 
     #[prop("fontcolor")]
-    pub fn font_color(#[this] str: &Stringable, color: &str) -> ValueResult {
+    pub fn font_color(#[this] str: &Stringable, color: &Stringable) -> ValueResult {
         Ok(format!("<font color=\"{color}\">{str}</font>",).into())
     }
 
     #[prop("fontsize")]
-    pub fn font_size(#[this] str: &Stringable, size: &str) -> ValueResult {
+    pub fn font_size(#[this] str: &Stringable, size: &Stringable) -> ValueResult {
         Ok(format!("<font size=\"{size}\">{str}</font>",).into())
     }
 
     #[prop("includes")]
-    #[must_use]
-    pub fn includes(#[this] str: &Stringable, search: &str) -> bool {
-        str.contains(search)
+    pub fn includes(
+        #[this] str: &Stringable,
+        search: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 1. If searchString is a RegExp, throw a TypeError
+        if let Ok(obj) = search.as_object() {
+            let match_prop = obj.get(Symbol::MATCH, realm)?;
+            let is_regexp = match_prop.is_truthy() || obj.downcast::<RegExp>().is_some();
+            if is_regexp {
+                return Err(Error::ty(
+                    "First argument to String.prototype.includes must not be a regular expression",
+                ));
+            }
+        }
+        // 2. Let searchStr be ? ToString(searchString)
+        let search_str = search.to_string(realm)?;
+        Ok(str.contains(&*search_str.as_str_lossy()).into())
     }
 
     #[prop("indexOf")]
     #[must_use]
-    pub fn index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
+    pub fn index_of(#[this] str: &Stringable, search: &Stringable, from: Option<isize>) -> isize {
         let from = from.unwrap_or(0);
 
         let from = if from < 0 {
@@ -479,7 +509,7 @@ impl StringObj {
         };
 
         str.get(from..)
-            .and_then(|s| s.find(search))
+            .and_then(|s| s.find(&**search))
             .map_or(-1, |i| i as isize + from as isize)
     }
 
@@ -497,7 +527,11 @@ impl StringObj {
 
     #[prop("lastIndexOf")]
     #[must_use]
-    pub fn last_index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
+    pub fn last_index_of(
+        #[this] str: &Stringable,
+        search: &Stringable,
+        from: Option<isize>,
+    ) -> isize {
         let from = from.unwrap_or(-1);
 
         let from = if from < 0 {
@@ -506,11 +540,11 @@ impl StringObj {
             from as usize
         };
 
-        str[..from].rfind(&search).map_or(-1, |i| i as isize)
+        str[..from].rfind(&**search).map_or(-1, |i| i as isize)
     }
 
     #[prop("link")]
-    pub fn link(#[this] str: &Stringable, url: &str) -> ValueResult {
+    pub fn link(#[this] str: &Stringable, url: &Stringable) -> ValueResult {
         Ok(format!("<a href=\"{url}\">{str}</a>").into())
     }
 
@@ -576,7 +610,7 @@ impl StringObj {
                     // i. Let flags be ? Get(regexp, "flags").
                     let flags = obj.get("flags", realm)?.to_string(realm)?;
                     // ii. If flags does not contain "g", throw a TypeError.
-                    if !flags.as_str().contains('g') {
+                    if !flags.as_str_lossy().contains('g') {
                         return Err(Error::ty(
                             "matchAll called with a non-global RegExp argument",
                         ));
@@ -615,8 +649,14 @@ impl StringObj {
         }
     }
 
-    pub fn normalize(#[this] str: &Stringable, form: &str) -> ValueResult {
-        let form = match form {
+    pub fn normalize(
+        #[this] str: &Stringable,
+        form: Option<Stringable>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let form_str = form.as_ref().map_or("NFC", |form| form.as_str());
+
+        let normalized = match form_str {
             "NFC" => str.nfc().to_string(),
             "NFD" => str.nfd().to_string(),
             "NFKC" => str.nfkc().to_string(),
@@ -624,7 +664,7 @@ impl StringObj {
             _ => return Err(Error::range("Invalid normalization form")),
         };
 
-        Ok(form.into())
+        Ok(normalized.into())
     }
 
     #[prop("padEnd")]
@@ -747,7 +787,7 @@ impl StringObj {
                     // i. Let flags be ? Get(searchValue, "flags").
                     let flags = obj.get("flags", realm)?.to_string(realm)?;
                     // ii. If flags does not contain "g", throw a TypeError.
-                    if !flags.as_str().contains('g') {
+                    if !flags.as_str_lossy().contains('g') {
                         return Err(Error::ty(
                             "replaceAll called with a non-global RegExp argument",
                         ));
@@ -978,9 +1018,24 @@ impl StringObj {
     }
 
     #[prop("startsWith")]
-    #[must_use]
-    pub fn starts_with(#[this] str: &Stringable, search: &str) -> bool {
-        str.starts_with(search)
+    pub fn starts_with(
+        #[this] str: &Stringable,
+        search: &Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        // 1. If searchString is a RegExp, throw a TypeError
+        if let Ok(obj) = search.as_object() {
+            let match_prop = obj.get(Symbol::MATCH, realm)?;
+            let is_regexp = match_prop.is_truthy() || obj.downcast::<RegExp>().is_some();
+            if is_regexp {
+                return Err(Error::ty(
+                    "First argument to String.prototype.startsWith must not be a regular expression",
+                ));
+            }
+        }
+        // 2. Let searchStr be ? ToString(searchString)
+        let search_str = search.to_string(realm)?;
+        Ok(str.starts_with(&*search_str.as_str_lossy()).into())
     }
 
     pub fn strike(#[this] str: &Stringable) -> ValueResult {

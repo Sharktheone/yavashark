@@ -137,7 +137,7 @@ impl JSON {
         let str = str.to_primitive(Hint::String, realm)?;
         let str = str.to_string(realm)?;
 
-        let value: serde_json::Value = match serde_json::from_str(&str) {
+        let value: serde_json::Value = match serde_json::from_str(&str.as_str_lossy()) {
             Ok(value) => value,
             Err(error) => return Err(Error::syn_error(error.to_string())),
         };

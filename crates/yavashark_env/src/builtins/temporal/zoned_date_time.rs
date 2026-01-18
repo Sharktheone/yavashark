@@ -15,11 +15,10 @@ use crate::value::{IntoValue, Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use std::str::FromStr;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
-use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
+use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr};
 use yavashark_macro::props;
 use yavashark_string::YSString;
 
@@ -487,7 +486,7 @@ pub fn value_to_zoned_date_time(
             _ = overflow_options_opt(options.as_ref(), realm)?;
 
             temporal_rs::ZonedDateTime::from_utf8(
-                str.as_str().as_bytes(),
+                str.as_str_lossy().as_bytes(),
                 disambiguation,
                 offset_disambiguation,
             )
@@ -504,7 +503,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let Value::String(offset) = offset else {
             return Err(Error::ty("Expected offset to be a string"));
         };
-        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
+        let offset = offset.parse().map_err(Error::from_temporal)?;
 
         partial.fields.offset = Some(offset);
     }
@@ -517,7 +516,8 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(ns) = obj.get_opt("era", realm)? {
         let era = ns.to_string(realm)?;
-        let era = TinyAsciiStr::try_from_str(&era).map_err(|_| Error::ty("Invalid era string"))?;
+        let era = TinyAsciiStr::try_from_str(&era.as_str_lossy())
+            .map_err(|_| Error::ty("Invalid era string"))?;
 
         partial.fields.calendar_fields.era = Some(era);
         has_year = true;
@@ -558,8 +558,8 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
     if let Some(month_code) = obj.get_opt("monthCode", realm)? {
         let month_code = month_code.to_string(realm)?;
 
-        let month_code =
-            MonthCode::from_str(&month_code).map_err(|_| Error::ty("Invalid month code"))?;
+        let month_code = MonthCode::try_from_utf8(month_code.as_str_lossy().as_bytes())
+            .map_err(|_| Error::ty("Invalid month code"))?;
 
         partial.fields.calendar_fields.month_code = Some(month_code);
         has_month = true;

@@ -11,7 +11,6 @@ mod timezone;
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::value_to_zoned_date_time;
 use crate::{builtins, Error, ObjectHandle, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::fields::{
     CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
 };
@@ -23,7 +22,6 @@ use temporal_rs::options::{
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
-use temporal_rs::UtcOffset;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -50,7 +48,7 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
             Some(RelativeTo::ZonedDateTime(zdt))
         }
         Value::String(str) => {
-            Some(RelativeTo::try_from_str(str.as_str()).map_err(Error::from_temporal)?)
+            Some(RelativeTo::try_from_str(&*str.as_str_lossy()).map_err(Error::from_temporal)?)
         }
 
         _ => None,
@@ -72,7 +70,8 @@ pub fn string_rounding_mode_opts(
             let smallest = smallest.to_string(realm)?;
 
             Some(
-                Unit::from_str(smallest.as_str())
+                smallest
+                    .parse()
                     .map_err(|_| Error::range("Invalid unit for Duration.toString"))?,
             )
         };
@@ -85,7 +84,7 @@ pub fn string_rounding_mode_opts(
             let rm = rm.to_string(realm)?;
 
             Some(
-                temporal_rs::options::RoundingMode::from_str(rm.as_str())
+                rm.parse()
                     .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
             )
         };
@@ -93,7 +92,7 @@ pub fn string_rounding_mode_opts(
         let digits = obj.get("fractionalSecondDigits", realm)?;
 
         let digits = if digits.is_undefined()
-            | matches!(&digits, Value::String(s) if s.as_str() == "auto")
+            | matches!(&digits, Value::String(s) if s.as_str() == Some("auto"))
         {
             None
         } else {
@@ -139,7 +138,7 @@ pub fn rounding_options(
     let mut rel = None;
 
     if let Value::String(s) = unit {
-        let smallest = Unit::from_str(s.as_str()).map_err(|_| Error::range("Invalid unit"))?;
+        let smallest = s.parse().map_err(|_| Error::range("Invalid unit"))?;
 
         opts.smallest_unit = Some(smallest);
     } else if let Value::Object(obj) = unit {
@@ -150,7 +149,7 @@ pub fn rounding_options(
         } else {
             let smallest = smallest.to_string(realm)?;
 
-            Some(Unit::from_str(smallest.as_str()).map_err(|_| Error::range("Invalid unit"))?)
+            Some(smallest.parse().map_err(|_| Error::range("Invalid unit"))?)
         };
 
         let largest = obj.get("largestUnit", realm)?;
@@ -158,7 +157,9 @@ pub fn rounding_options(
             None
         } else {
             Some(
-                Unit::from_str(largest.to_string(realm)?.as_str())
+                largest
+                    .to_string(realm)?
+                    .parse()
                     .map_err(|_| Error::range("Invalid unit"))?,
             )
         };
@@ -181,7 +182,8 @@ pub fn rounding_options(
             let rounding_mode = rounding_mode.to_string(realm)?;
 
             Some(
-                temporal_rs::options::RoundingMode::from_str(rounding_mode.as_str())
+                rounding_mode
+                    .parse()
                     .map_err(|_| Error::range("Invalid rounding mode"))?,
             )
         };
@@ -195,7 +197,7 @@ pub fn rounding_options(
                 Some(RelativeTo::PlainDate(plain_date))
             }
             Some(Value::String(str)) => {
-                Some(RelativeTo::try_from_str(str.as_str()).map_err(Error::from_temporal)?)
+                Some(RelativeTo::try_from_str(&str.as_str_lossy()).map_err(Error::from_temporal)?)
             }
 
             _ => None,
@@ -217,7 +219,7 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
     } else {
         let smallest = smallest.to_string(realm)?;
 
-        Some(Unit::from_str(smallest.as_str()).map_err(|_| Error::range("Invalid unit"))?)
+        Some(smallest.parse().map_err(|_| Error::range("Invalid unit"))?)
     };
 
     let largest = obj.get("largestUnit", realm)?;
@@ -225,7 +227,9 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
         None
     } else {
         Some(
-            Unit::from_str(largest.to_string(realm)?.as_str())
+            largest
+                .to_string(realm)?
+                .parse()
                 .map_err(|_| Error::range("Invalid unit"))?,
         )
     };
@@ -238,7 +242,7 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
         let rm = rm.to_string(realm)?;
 
         Some(
-            temporal_rs::options::RoundingMode::from_str(rm.as_str())
+            rm.parse()
                 .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
         )
     };
@@ -269,7 +273,7 @@ pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Ove
 
     let overflow = overflow.to_string(realm)?;
 
-    let overflow = match overflow.as_str() {
+    let overflow = match &*overflow.as_str_lossy() {
         "constrain" => Overflow::Constrain,
         "reject" => Overflow::Reject,
         _ => return Err(Error::range("Invalid overflow option")),
@@ -301,7 +305,7 @@ pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Di
 
     let cal = cal.to_string(realm)?;
 
-    DisplayCalendar::from_str(&cal).map_err(Error::from_temporal)
+    cal.parse().map_err(Error::from_temporal)
 }
 
 pub fn display_offset(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayOffset> {
@@ -317,7 +321,7 @@ pub fn display_offset(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Disp
 
     let display_offset = display_offset.to_string(realm)?;
 
-    let display_offset = DisplayOffset::from_str(&display_offset).map_err(Error::from_temporal)?;
+    let display_offset = display_offset.parse().map_err(Error::from_temporal)?;
 
     Ok(display_offset)
 }
@@ -335,8 +339,7 @@ pub fn display_timezone(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Di
 
     let display_timezone = display_timezone.to_string(realm)?;
 
-    let display_timezone =
-        DisplayTimeZone::from_str(&display_timezone).map_err(Error::from_temporal)?;
+    let display_timezone = display_timezone.parse().map_err(Error::from_temporal)?;
 
     Ok(display_timezone)
 }
@@ -357,9 +360,9 @@ pub fn disambiguation_opt(
 
     let disambiguation = disambiguation.to_string(realm)?;
 
-    Ok(Some(Disambiguation::from_str(&disambiguation).map_err(
-        |_| Error::range("Invalid disambiguation option"),
-    )?))
+    Ok(Some(disambiguation.parse().map_err(|_| {
+        Error::range("Invalid disambiguation option")
+    })?))
 }
 
 pub fn offset_disambiguation_opt(
@@ -378,10 +381,9 @@ pub fn offset_disambiguation_opt(
 
     let disambiguation = disambiguation.to_string(realm)?;
 
-    Ok(Some(
-        OffsetDisambiguation::from_str(&disambiguation)
-            .map_err(|_| Error::range("Invalid offsetDisambiguation option"))?,
-    ))
+    Ok(Some(disambiguation.parse().map_err(|_| {
+        Error::range("Invalid offsetDisambiguation option")
+    })?))
 }
 
 pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDirection> {
@@ -390,10 +392,12 @@ pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDir
             let direction = obj.get("direction", realm)?;
             let direction = direction.to_string(realm)?;
 
-            TransitionDirection::from_str(&direction)
+            direction
+                .parse()
                 .map_err(|_| Error::range("Invalid transition direction"))
         }
-        Value::String(s) => TransitionDirection::from_str(s.as_str())
+        Value::String(s) => s
+            .parse()
             .map_err(|_| Error::range("Invalid transition direction")),
         _ => Err(Error::ty(
             "Expected an object or string for transition direction",
@@ -427,7 +431,7 @@ pub fn value_to_calendar_fields(
     if let Some(era) = value.get_opt("era", realm)? {
         let era = era.to_string(realm)?;
 
-        let str = FromStr::from_str(&era)?;
+        let str = era.parse()?;
 
         fields = fields.with_era(Some(str));
         had_fields = true;
@@ -457,7 +461,8 @@ pub fn value_to_calendar_fields(
     if let Some(month_code) = value.get_opt("monthCode", realm)? {
         let month_code = month_code.to_string(realm)?;
 
-        let month_code = temporal_rs::MonthCode::from_str(&month_code)
+        let month_code = month_code
+            .parse()
             .map_err(|_| Error::range("Invalid month code"))?;
 
         fields = fields.with_month_code(month_code);
@@ -577,7 +582,7 @@ pub fn value_to_year_month_fields(
     if let Some(era) = value.get_opt("era", realm)? {
         let era = era.to_string(realm)?;
 
-        let str = FromStr::from_str(&era)?;
+        let str = era.parse()?;
 
         fields = fields.with_era(Some(str));
         had_fields = true;
@@ -607,7 +612,8 @@ pub fn value_to_year_month_fields(
     if let Some(month_code) = value.get_opt("monthCode", realm)? {
         let month_code = month_code.to_string(realm)?;
 
-        let month_code = temporal_rs::MonthCode::from_str(&month_code)
+        let month_code = month_code
+            .parse()
             .map_err(|_| Error::range("Invalid month code"))?;
 
         fields = fields.with_month_code(month_code);
@@ -631,7 +637,7 @@ pub fn value_to_zoned_date_time_fields(
 
     let offset = if let Some(offset) = value.get_opt("offset", realm)? {
         let offset = offset.to_string(realm)?;
-        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
+        let offset = offset.parse().map_err(Error::from_temporal)?;
 
         Some(offset)
     } else {

@@ -471,7 +471,7 @@ fn parse_use_grouping(value: &Value, default: UseGrouping, realm: &mut Realm) ->
     }
 
     let s = value.to_string(realm)?;
-    match s.as_str() {
+    match &*s.as_str_lossy() {
         "min2" => Ok(UseGrouping::Min2),
         "auto" => Ok(UseGrouping::Auto),
         "always" => Ok(UseGrouping::Always),

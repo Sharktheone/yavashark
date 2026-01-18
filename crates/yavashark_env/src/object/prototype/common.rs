@@ -192,7 +192,7 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
     } else if let Some(to_string_tag) = this.get_opt(Symbol::TO_STRING_TAG, realm)? {
         owned_tag = to_string_tag.to_string(realm)?;
 
-        owned_tag.as_str()
+        &*owned_tag.as_str_lossy()
     } else {
         "Object"
     };

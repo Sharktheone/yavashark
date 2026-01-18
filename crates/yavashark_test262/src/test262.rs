@@ -110,7 +110,8 @@ impl Test262 {
             return Ok(Value::Undefined);
         }
 
-        let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
+        let input_str = input.as_str_lossy();
+        let input = StringInput::new(&input_str, BytePos(0), BytePos(input_str.len() as u32));
 
         let c = EsSyntax {
             jsx: false,

@@ -91,7 +91,7 @@ impl Duration {
             )?));
         } else if let Value::String(s) = info {
             return Ok(RefOrOwned::Owned(
-                temporal_rs::Duration::from_str(s.as_str())
+                s.parse()
                     .map_err(Error::from_temporal)
                     .and_then(|dur| Self::with_duration(realm, dur))?,
             ));
@@ -292,7 +292,7 @@ impl Duration {
             return Err(Error::ty("Invalid unit for Duration.total"));
         };
 
-        let unit = Unit::from_str(unit.as_str())
+        let unit = Unit::from_str(&unit.as_str_lossy())
             .map_err(|_| Error::range("Invalid unit for Duration.total"))?;
 
         let rel = opt_relative_to_wrap(obj, realm)?;

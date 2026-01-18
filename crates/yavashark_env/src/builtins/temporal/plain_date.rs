@@ -13,7 +13,6 @@ use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use std::str::FromStr;
 use temporal_rs::options::DisplayCalendar;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::props;
@@ -309,7 +308,7 @@ impl PlainDate {
     #[prop("toZonedDateTime")]
     pub fn to_zoned_date_time(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let (tz, time) = if let Value::String(tz) = opts {
-            let tz = TimeZone::try_from_str(tz.as_str()).map_err(Error::from_temporal)?;
+            let tz = TimeZone::try_from_str(&tz.as_str_lossy()).map_err(Error::from_temporal)?;
             (tz, None)
         } else if let Value::Object(obj) = opts {
             let Some(tz) = obj.extract_opt::<TimeZone>("timeZone", realm)? else {
@@ -367,7 +366,7 @@ impl PlainDate {
 
 pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {
     if let Value::String(str) = &info {
-        let date = temporal_rs::PlainDate::from_str(str).map_err(Error::from_temporal)?;
+        let date = str.parse().map_err(Error::from_temporal)?;
 
         return Ok(date);
     }

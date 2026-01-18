@@ -18,7 +18,7 @@ impl Interpreter {
 
             if let Some(expr) = stmt.exprs.get(i) {
                 let value = Self::run_expr(realm, expr, expr.span(), scope)?;
-                result.push_str(&value.to_string(realm)?);
+                result.push_str(&value.to_string(realm)?.as_str_lossy());
             }
         }
 

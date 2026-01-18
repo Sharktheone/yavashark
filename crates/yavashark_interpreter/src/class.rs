@@ -381,7 +381,7 @@ fn define_method_on_class(
 
         return Ok(());
     } else if is_static {
-        if matches!(&key, InternalPropertyKey::String(key) if key.as_str() == "prototype") {
+        if matches!(&key, InternalPropertyKey::String(key) if key.as_str() == Some("prototype")) {
             return Err(Error::new(
                 "Classes may not have a static property named 'prototype'",
             ));

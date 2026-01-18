@@ -195,7 +195,6 @@ impl NumberConstructor {
     pub const MIN_SAFE_INTEGER_U: i64 = -9_007_199_254_740_991;
 }
 
-
 #[properties_new(raw)]
 impl NumberConstructor {
     pub const EPSILON: f64 = f64::EPSILON;
@@ -753,7 +752,7 @@ pub fn get_parse_int(realm: &mut Realm) -> ObjectHandle {
                 .and_then(|v| v.to_string(realm).ok())
                 .unwrap_or_default();
 
-            Ok(Value::Number(parse_int(&str, radix)))
+            Ok(Value::Number(parse_int(&str.as_str_lossy(), radix)))
         },
         realm,
         2,
@@ -778,7 +777,7 @@ pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
                 .and_then(|v| v.to_string(realm).ok())
                 .unwrap_or_default();
 
-            Ok(Value::Number(parse_float(&str)))
+            Ok(Value::Number(parse_float(&str.as_str_lossy())))
         },
         realm,
         1,

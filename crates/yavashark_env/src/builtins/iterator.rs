@@ -202,7 +202,7 @@ impl Iterator {
         // 4. For each key, get the iterator
         let mut iterator_records: Vec<(String, IteratorRecord)> = Vec::new();
         for key in &keys {
-            let key_str = key.as_str().to_string();
+            let key_str = key.to_string();
             let iterable = iterables_obj.get(key.clone(), realm)?;
             let iterable_obj = iterable.clone().to_object()?;
             let iter_method = iterable_obj.get(Symbol::ITERATOR, realm)?;
@@ -676,7 +676,7 @@ fn parse_zip_options(
         ZipMode::Shortest
     } else {
         let mode_str = mode_val.to_string(realm)?;
-        match mode_str.as_str() {
+        match &*mode_str.as_str_lossy() {
             "shortest" => ZipMode::Shortest,
             "longest" => ZipMode::Longest,
             "strict" => ZipMode::Strict,
@@ -735,7 +735,7 @@ fn parse_zip_keyed_options(
         ZipMode::Shortest
     } else {
         let mode_str = mode_val.to_string(realm)?;
-        match mode_str.as_str() {
+        match &*mode_str.as_str_lossy() {
             "shortest" => ZipMode::Shortest,
             "longest" => ZipMode::Longest,
             "strict" => ZipMode::Strict,
@@ -751,7 +751,7 @@ fn parse_zip_keyed_options(
             let padding_obj = padding_val.to_object()?;
             let mut padding_list = Vec::new();
             for key in keys {
-                let key_str = key.as_str().to_string();
+                let key_str = key.to_string();
                 let val = padding_obj.get(key.clone(), realm)?;
                 padding_list.push((key_str, val));
             }

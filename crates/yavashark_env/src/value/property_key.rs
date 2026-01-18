@@ -1,7 +1,8 @@
-use crate::value::{fmt_num, Hint, Symbol, Value};
+use crate::value::{Hint, Symbol, Value, fmt_num};
 use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
+use std::hash::{Hash, Hasher};
 use yavashark_string::YSString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -19,10 +20,10 @@ const MAX_INDEX: usize = (1 << 31) - 1;
 const MAX_INDEX: usize = (1 << 15) - 1;
 
 impl PropertyKey {
-    pub fn as_str(&self) -> &str {
+    pub fn as_str(&self) -> Option<&str> {
         match self {
             Self::String(s) => s.as_str(),
-            Self::Symbol(s) => s.as_str(),
+            Self::Symbol(s) => Some(s.as_str()),
         }
     }
 
@@ -43,16 +44,31 @@ impl PropertyKey {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BorrowedPropertyKey<'a> {
     String(&'a str),
     Symbol(&'a Symbol),
 }
 
+impl Hash for BorrowedPropertyKey<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        std::mem::discriminant(self).hash(state);
+        match self {
+            // Hash by UTF-16 code units to match YSString's Hash implementation
+            Self::String(s) => {
+                for unit in s.encode_utf16() {
+                    unit.hash(state);
+                }
+            }
+            Self::Symbol(s) => s.hash(state),
+        }
+    }
+}
+
 impl Equivalent<PropertyKey> for BorrowedPropertyKey<'_> {
     fn equivalent(&self, other: &PropertyKey) -> bool {
         match (self, other) {
-            (Self::String(s), PropertyKey::String(o)) => *s == o.as_str(),
+            (Self::String(s), PropertyKey::String(o)) => o.as_str().is_some_and(|o| *s == o),
             (Self::Symbol(s), PropertyKey::Symbol(o)) => *s == o,
             _ => false,
         }
@@ -74,17 +90,34 @@ pub enum InternalPropertyKey {
     Index(usize),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BorrowedInternalPropertyKey<'a> {
     String(&'a str),
     Symbol(&'a Symbol),
     Index(usize),
 }
 
+impl Hash for BorrowedInternalPropertyKey<'_> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        std::mem::discriminant(self).hash(state);
+        match self {
+            Self::String(s) => {
+                for unit in s.encode_utf16() {
+                    unit.hash(state);
+                }
+            }
+            Self::Symbol(s) => s.hash(state),
+            Self::Index(i) => i.hash(state),
+        }
+    }
+}
+
 impl Equivalent<InternalPropertyKey> for BorrowedInternalPropertyKey<'_> {
     fn equivalent(&self, other: &InternalPropertyKey) -> bool {
         match (self, other) {
-            (Self::String(s), InternalPropertyKey::String(o)) => *s == o.as_str(),
+            (Self::String(s), InternalPropertyKey::String(o)) => {
+                o.as_str().is_some_and(|o| *s == o)
+            }
             (Self::Symbol(s), InternalPropertyKey::Symbol(o)) => *s == o,
             (Self::Index(i), InternalPropertyKey::Index(o)) => *i == *o,
             _ => false,

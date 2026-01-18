@@ -41,7 +41,7 @@ impl DynamicImport {
             }
         };
 
-        Self::new(&specifier, &path, cb, realm)
+        Self::new(&specifier.as_str_lossy(), &path, cb, realm)
     }
 
     pub fn new_throws(

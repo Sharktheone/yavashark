@@ -3,7 +3,6 @@ use crate::builtins::{value_to_partial_date, PlainDate};
 use crate::conversion::FromValueOutput;
 use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
-use std::str::FromStr;
 
 impl FromValueOutput for temporal_rs::PlainDate {
     type Output = Self;
@@ -31,7 +30,7 @@ impl FromValueOutput for temporal_rs::PlainDate {
                     "PlainDate object must have year, month (or monthCode), and day properties",
                 ))
             }
-            Value::String(s) => Self::from_str(&s).map_err(Error::from_temporal),
+            Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
                 "PlainDate value must be a string or a PlainDate-like object",
             )),
