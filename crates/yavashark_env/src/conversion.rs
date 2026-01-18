@@ -1,7 +1,9 @@
 use crate::array::Array;
 use crate::value::ops::BigIntOrNumber;
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
+use crate::value::{
+    fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj, PrimitiveValue,
+};
 use crate::{
     Error, GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value,
     ValueResult,
@@ -133,7 +135,16 @@ impl FromValueOutput for String {
 impl FromValueOutput for YSString {
     type Output = Self;
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
-        value.to_string(realm)
+        match &value {
+            Value::Object(o) => {
+                if let Some(PrimitiveValue::String(s)) = o.primitive(realm)? {
+                    return Ok(s);
+                }
+                value.to_string(realm)
+            }
+            Value::String(s) => Ok(s.clone()),
+            _ => value.to_string(realm),
+        }
     }
 }
 
