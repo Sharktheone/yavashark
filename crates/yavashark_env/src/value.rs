@@ -17,6 +17,7 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::{ToYSString, YSString};
+use crate::builtins::StringObj;
 
 mod constructor;
 mod conversion;
@@ -653,10 +654,27 @@ impl Value {
     }
 
     pub fn iter_no_realm(&self, realm: &mut Realm) -> Result<Iter, Error> {
+        if let Self::String(s) = self {
+            let str_obj = StringObj::with_string(realm, s.clone())?;
+            let iter = Obj::resolve_property(&str_obj, Symbol::ITERATOR.into(), realm)?
+                .ok_or(Error::ty("String is not iterable"))?
+                .into_value(realm)?;
+            let iter_result = iter.call(realm, Vec::new(), self.clone())?;
+            return Ok(Iter {
+                next_obj: iter_result,
+            });
+        }
         self.as_object()?.iter_no_realm(realm)
     }
 
     pub fn get_iter(&self, realm: &mut Realm) -> Result<Self, Error> {
+        if let Self::String(s) = self {
+            let str_obj = StringObj::with_string(realm, s.clone())?;
+            let iter = Obj::resolve_property(&str_obj, Symbol::ITERATOR.into(), realm)?
+                .ok_or(Error::ty("String is not iterable"))?
+                .into_value(realm)?;
+            return iter.call(realm, Vec::new(), self.clone());
+        }
         self.as_object()?.get_iter(realm)
     }
 

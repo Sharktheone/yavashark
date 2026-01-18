@@ -3,8 +3,9 @@
 // This module sets up the shared prototype for all iterator helpers.
 
 use super::Iterator;
-use crate::{Error, ObjectHandle, Realm, Res, Symbol, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::props;
+use crate::value::IntoValue;
 
 /// Trait for iterator helper implementations
 /// Each iterator helper must implement this to provide next/return behavior
@@ -55,4 +56,12 @@ pub fn create_iter_result_object(value: Value, done: bool, realm: &mut Realm) ->
     obj.define_property("value".into(), value, realm)?;
     obj.define_property("done".into(), done.into(), realm)?;
     Ok(obj)
+}
+
+pub fn create_iter_result(
+    value: Value,
+    done: bool,
+    realm: &mut Realm,
+) -> ValueResult {
+    Ok(create_iter_result_object(value, done, realm)?.into_value())
 }

@@ -13,7 +13,11 @@ impl Interpreter {
 
         for i in 0..len {
             if let Some(quasi) = stmt.quasis.get(i) {
-                result.push_str(quasi.raw.as_ref());
+                if let Some(cooked) = &quasi.cooked {
+                    result.push_str(&cooked.to_string_lossy());
+                } else {
+                    result.push_str(quasi.raw.as_ref());
+                }
             }
 
             if let Some(expr) = stmt.exprs.get(i) {

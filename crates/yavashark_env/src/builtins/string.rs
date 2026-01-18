@@ -1,17 +1,19 @@
 use crate::array::Array;
-use crate::builtins::RegExp;
+use crate::builtins::iterator::Iterator;
+use crate::builtins::{create_iter_result, create_iter_result_object, RegExp};
 use crate::conversion::{ActualString, Stringable};
+use crate::realm::Intrinsic;
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj, Property, Symbol};
 use crate::{
     Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
 };
-use std::cell::{RefCell, RefMut};
+use std::cell::{Cell, RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug)]
@@ -1145,6 +1147,13 @@ impl StringObj {
     pub fn value_of(#[this] str: ActualString) -> Value {
         str.into()
     }
+
+    #[prop(crate::Symbol::ITERATOR)]
+    pub fn iterator(#[this] this: &Stringable, #[realm] realm: &mut Realm) -> ValueResult {
+        let string = this.to_string().into();
+        let iter = StringIterator::new(string, realm)?;
+        Ok(iter.into_value())
+    }
 }
 
 fn is_lone_surrogate(c: char) -> bool {
@@ -1583,3 +1592,102 @@ fn replace_substitution(
 //
 //
 // }
+
+// ============================================================================
+// StringIterator - 22.1.5
+// ============================================================================
+
+/// %StringIteratorPrototype% - Iterator for strings
+#[object(name)]
+#[derive(Debug)]
+pub struct StringIterator {
+    string: YSString,
+    /// Current position in UTF-16 code units
+    next_index: Cell<usize>,
+    done: Cell<bool>,
+}
+
+impl CustomName for StringIterator {
+    fn custom_name(&self) -> String {
+        "String Iterator".to_owned()
+    }
+}
+
+impl StringIterator {
+    pub fn new(string: YSString, realm: &mut Realm) -> Res<Self> {
+        let proto = realm
+            .intrinsics
+            .clone_public()
+            .string_iter
+            .get(realm)?
+            .clone();
+        Ok(Self {
+            string,
+            next_index: Cell::new(0),
+            done: Cell::new(false),
+            inner: RefCell::new(MutableStringIterator {
+                object: MutObject::with_proto(proto),
+            }),
+        })
+    }
+}
+
+#[properties]
+impl StringIterator {
+    #[prop]
+    pub fn next(&self, _args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+        // 22.1.5.1 %StringIteratorPrototype%.next ( )
+
+        // 1. Return ? GeneratorResume(this value, empty, "%StringIteratorPrototype%").
+        // Simplified implementation:
+
+        if self.done.get() {
+            return create_iter_result(Value::Undefined, true, realm);
+        }
+
+        let s = self.string.as_str_lossy();
+        let position = self.next_index.get();
+        let len = s.len(); // byte length for iteration
+
+        if position >= len {
+            self.done.set(true);
+            return create_iter_result(Value::Undefined, true, realm);
+        }
+
+        // Get the next code point (handles multi-byte UTF-8)
+        let remaining = &s[position..];
+        let mut chars = remaining.chars();
+        if let Some(cp) = chars.next() {
+            // Advance by the number of bytes this character takes
+            let char_len = cp.len_utf8();
+            self.next_index.set(position + char_len);
+
+            // Return the character as a string
+            let result_string: YSString = cp.to_string().into();
+            create_iter_result(result_string.into(), false, realm)
+        } else {
+            self.done.set(true);
+            create_iter_result(Value::Undefined, true, realm)
+        }
+    }
+}
+
+impl Intrinsic for StringIterator {
+    fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
+        let iterator_proto = Iterator::get_intrinsic(realm)?;
+        Self::initialize_proto(
+            Object::raw_with_proto(iterator_proto),
+            realm.intrinsics.func.clone(),
+            realm,
+        )
+    }
+
+    fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
+        Ok(realm
+            .intrinsics
+            .clone_public()
+            .string_iter
+            .get(realm)?
+            .clone())
+    }
+}

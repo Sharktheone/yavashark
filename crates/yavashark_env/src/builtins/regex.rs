@@ -194,8 +194,13 @@ impl RegExp {
         RegExp::new_from_str_with_flags(realm, &regex, &flags)
     }
 
-    fn escape(value: &str) -> String {
-        escape(value)
+    fn escape(value: Value) -> Res<YSString> {
+        // 1. If S is not a String, throw a TypeError exception.
+        let Value::String(s) = value else {
+            return Err(Error::ty("RegExp.escape requires a string argument"));
+        };
+
+        Ok(escape_for_regexp(&s.as_str_lossy()))
     }
 
     pub fn exec(
@@ -1001,7 +1006,7 @@ fn get_substitution(
             Some('\'') => {
                 chars.next();
                 // Substring after match
-                let match_length = matched.len();
+                let match_length = matched.as_str_lossy().len();
                 let tail_pos = (position + match_length).min(string_length);
                 result.push_str(&str[tail_pos..]);
             }
@@ -1055,10 +1060,15 @@ fn get_substitution(
                     })?);
                 }
 
-                if !found_close || named_captures.is_undefined() {
+                if !found_close {
                     // No closing > or no named captures, keep literal $<
                     result.push_str("$<");
                     result.push_str(&group_name);
+                } else if named_captures.is_undefined() {
+                    // Have closing > but no named captures, output $<name> literally
+                    result.push_str("$<");
+                    result.push_str(&group_name);
+                    result.push('>');
                 } else {
                     // Get the named capture - use get_property_opt to avoid throwing
                     // when the group name doesn't exist
@@ -1080,6 +1090,126 @@ fn get_substitution(
     }
 
     Ok(YSString::from(result))
+}
+
+/// EncodeForRegExpEscape as per ECMA-262
+/// Escapes a string so it can be safely used as a literal pattern in a regular expression
+fn escape_for_regexp(text: &str) -> YSString {
+    let mut buf = String::with_capacity(text.len() * 2);
+
+    for (index, c) in text.chars().enumerate() {
+        let code = c as u32;
+
+        // 4.a. If escaped is the empty String and c is matched by either DecimalDigit or AsciiLetter
+        if index == 0 && (c.is_ascii_digit() || c.is_ascii_alphabetic()) {
+            // Use \xXX format for initial digit/letter
+            buf.push_str(&format!("\\x{code:02x}"));
+            continue;
+        }
+
+        // EncodeForRegExpEscape step 1: SyntaxCharacter or U+002F (SOLIDUS)
+        if matches!(
+            c,
+            '^' | '$'
+                | '\\'
+                | '.'
+                | '*'
+                | '+'
+                | '?'
+                | '('
+                | ')'
+                | '['
+                | ']'
+                | '{'
+                | '}'
+                | '|'
+                | '/'
+        ) {
+            buf.push('\\');
+            buf.push(c);
+        }
+        // Step 2: ControlEscape characters (Table 64)
+        else if c == '\x09' {
+            buf.push_str("\\t");
+        } else if c == '\x0A' {
+            buf.push_str("\\n");
+        } else if c == '\x0B' {
+            buf.push_str("\\v");
+        } else if c == '\x0C' {
+            buf.push_str("\\f");
+        } else if c == '\x0D' {
+            buf.push_str("\\r");
+        }
+        // Step 3-5: otherPunctuators or WhiteSpace or LineTerminator
+        else if is_other_punctuator(c) || is_whitespace(c) || is_line_terminator(c) {
+            if code <= 0xFF {
+                // Use \xXX format
+                buf.push_str(&format!("\\x{code:02x}"));
+            } else {
+                // Use \uXXXX format
+                buf.push_str(&format!("\\u{code:04x}"));
+            }
+        }
+        // Step 6: All other Unicode characters
+        else {
+            buf.push(c);
+        }
+    }
+
+    YSString::from(buf)
+}
+
+/// Check if character is an "otherPunctuator" for RegExp.escape
+const fn is_other_punctuator(c: char) -> bool {
+    matches!(
+        c,
+        ',' | '-'
+            | '='
+            | '<'
+            | '>'
+            | '#'
+            | '&'
+            | '!'
+            | '%'
+            | ':'
+            | ';'
+            | '@'
+            | '~'
+            | '\''
+            | '`'
+            | '"'
+    )
+}
+
+/// Check if character is WhiteSpace for RegExp.escape
+const fn is_whitespace(c: char) -> bool {
+    matches!(
+        c,
+        '\u{0009}' | // <TAB>
+        '\u{000B}' | // <VT>
+        '\u{000C}' | // <FF>
+        '\u{0020}' | // <SP>
+        '\u{00A0}' | // <NBSP>
+        '\u{FEFF}' | // <ZWNBSP>
+        '\u{1680}' | // Ogham Space Mark
+        '\u{2000}' | '\u{2001}' | '\u{2002}' | '\u{2003}' | '\u{2004}' |
+        '\u{2005}' | '\u{2006}' | '\u{2007}' | '\u{2008}' | '\u{2009}' |
+        '\u{200A}' | // Various space separators
+        '\u{202F}' | // Narrow No-Break Space
+        '\u{205F}' | // Medium Mathematical Space
+        '\u{3000}' // Ideographic Space
+    )
+}
+
+/// Check if character is a LineTerminator for RegExp.escape
+const fn is_line_terminator(c: char) -> bool {
+    matches!(
+        c,
+        '\u{000A}' | // <LF>
+        '\u{000D}' | // <CR>
+        '\u{2028}' | // <LS>
+        '\u{2029}' // <PS>
+    )
 }
 
 #[must_use]
