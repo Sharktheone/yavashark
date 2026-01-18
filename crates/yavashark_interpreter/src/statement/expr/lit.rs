@@ -9,11 +9,15 @@ use yavashark_string::YSString;
 impl Interpreter {
     pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
-            Lit::Str(s) => Value::String(YSString::from_ref(
-                s.value
-                    .as_str()
-                    .ok_or(Error::new("Invalid wtf-8 surrogate"))?,
-            )),
+            Lit::Str(s) => {
+                let ys_string = if let Some(str_ref) = s.value.as_str() {
+                    YSString::from_ref(str_ref)
+                } else {
+                    let utf16_units: Vec<u16> = s.value.to_ill_formed_utf16().collect();
+                    YSString::from_utf16(&utf16_units)
+                };
+                Value::String(ys_string)
+            }
             Lit::Bool(b) => Value::Boolean(b.value),
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),

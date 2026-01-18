@@ -206,12 +206,14 @@ impl Interpreter {
     ) -> Res<PropertyKey> {
         Ok(match prop {
             PropName::Ident(ident) => PropertyKey::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => PropertyKey::String(YSString::from_ref(
-                &str_
-                    .value
-                    .as_str()
-                    .ok_or(Error::new("Invalid wtf-8 surrogate"))?,
-            )),
+            PropName::Str(str_) => {
+                if let Some(s) = str_.value.as_str() {
+                    PropertyKey::String(YSString::from_ref(s))
+                } else {
+                    let utf16_units: Vec<u16> = str_.value.to_ill_formed_utf16().collect();
+                    PropertyKey::String(YSString::from_utf16(&utf16_units))
+                }
+            }
             PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
             PropName::Computed(expr) => {
                 Self::run_expr(realm, &expr.expr, expr.span, scope)?.into_property_key(realm)?

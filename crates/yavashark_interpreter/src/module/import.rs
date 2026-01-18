@@ -6,12 +6,7 @@ use yavashark_env::{ControlFlow, Error, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_import(realm: &mut Realm, stmt: &ImportDecl, scope: &mut Scope) -> RuntimeResult {
-        let src = stmt
-            .src
-            .value
-            .as_str()
-            .ok_or(Error::new("Invalid wtf-8 surrogate"))?
-            .to_string();
+        let src = stmt.src.value.to_string_lossy().into_owned();
 
         let module = Self::resolve_module(
             &src,
@@ -27,11 +22,9 @@ impl Interpreter {
                 ImportSpecifier::Named(named) => {
                     let name = match &named.imported {
                         Some(ModuleExportName::Ident(id)) => id.sym.to_string(),
-                        Some(ModuleExportName::Str(str)) => str
-                            .value
-                            .as_str()
-                            .ok_or(Error::new("Invalid wtf-8 surrogate"))?
-                            .to_string(),
+                        Some(ModuleExportName::Str(str)) => {
+                            str.value.to_string_lossy().into_owned()
+                        }
                         None => named.local.to_string(),
                     };
                     let local = named.local.to_string();

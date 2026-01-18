@@ -296,12 +296,14 @@ fn prop_name_to_value(
             Interpreter::run_expr(realm, expr, span, scope)?
         }
         PropName::Num(num) => num.value.to_string().into(),
-        PropName::Str(str) => str
-            .value
-            .as_str()
-            .ok_or(Error::new("Invalid wtf-8 surrogate"))?
-            .to_string()
-            .into(),
+        PropName::Str(str) => {
+            if let Some(s) = str.value.as_str() {
+                s.to_string().into()
+            } else {
+                let utf16_units: Vec<u16> = str.value.to_ill_formed_utf16().collect();
+                Value::String(YSString::from_utf16(&utf16_units))
+            }
+        }
         PropName::BigInt(_) => unimplemented!(),
     })
 }

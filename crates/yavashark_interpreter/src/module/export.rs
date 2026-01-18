@@ -75,9 +75,7 @@ impl Interpreter {
         };
 
         let module = Self::resolve_module(
-            &src.value
-                .as_str()
-                .ok_or(Error::new("Invalid wtf-8 string"))?,
+            &src.value.to_string_lossy(),
             stmt.with.as_deref(),
             &scope.scope.get_current_path()?,
             realm,
@@ -90,19 +88,13 @@ impl Interpreter {
                 ExportSpecifier::Named(named) => {
                     let name = match &named.orig {
                         ModuleExportName::Ident(id) => id.sym.to_string(),
-                        ModuleExportName::Str(str) => str
-                            .value
-                            .as_str()
-                            .ok_or(Error::new("Invalid wtf-8 string"))?
-                            .to_string(),
+                        ModuleExportName::Str(str) => str.value.to_string_lossy().into_owned(),
                     };
                     let export = match &named.exported {
                         Some(ModuleExportName::Ident(id)) => id.sym.to_string(),
-                        Some(ModuleExportName::Str(str)) => str
-                            .value
-                            .as_str()
-                            .ok_or(Error::new("Invalid wtf-8 surrogate"))?
-                            .to_string(),
+                        Some(ModuleExportName::Str(str)) => {
+                            str.value.to_string_lossy().into_owned()
+                        }
                         None => name.clone(),
                     };
 
@@ -138,11 +130,7 @@ impl Interpreter {
                 ExportSpecifier::Namespace(ns) => {
                     let name = match &ns.name {
                         ModuleExportName::Ident(id) => id.sym.to_string(),
-                        ModuleExportName::Str(str) => str
-                            .value
-                            .as_str()
-                            .ok_or(Error::new("Invalid wtf-8 surrogate"))?
-                            .to_string(),
+                        ModuleExportName::Str(str) => str.value.to_string_lossy().into_owned(),
                     };
 
                     scope
@@ -192,7 +180,7 @@ impl Interpreter {
             }
 
             DefaultDecl::TsInterfaceDecl(_) => {
-                return Err(Error::syn("TypeScript is not supported").into())
+                return Err(Error::syn("TypeScript is not supported").into());
             }
         }
 
@@ -205,10 +193,7 @@ impl Interpreter {
         scope: &mut ModuleScope,
     ) -> RuntimeResult {
         let module = Self::resolve_module(
-            stmt.src
-                .value
-                .as_str()
-                .ok_or(Error::new("Invalid wtf-8 string"))?,
+            &stmt.src.value.to_string_lossy(),
             stmt.with.as_deref(),
             &scope.scope.get_current_path()?,
             realm,

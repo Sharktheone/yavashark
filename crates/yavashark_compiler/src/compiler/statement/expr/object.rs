@@ -125,12 +125,7 @@ impl Compiler {
     ) -> Res<DataTypeValue> {
         Ok(match key {
             PropName::Ident(id) => DataTypeValue::String(id.sym.to_string()),
-            PropName::Str(s) => DataTypeValue::String(
-                s.value
-                    .as_str()
-                    .ok_or(anyhow!("Invalid wtf-8 surrogate"))?
-                    .to_string(),
-            ),
+            PropName::Str(s) => DataTypeValue::String(s.value.to_string_lossy().into_owned()),
             PropName::Num(n) => DataTypeValue::Number(n.value),
             PropName::Computed(c) => {
                 let reg = self.alloc_reg_or_stack();
