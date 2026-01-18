@@ -149,6 +149,7 @@ impl<'a> Validator<'a> {
         let mut idx = 0usize;
         let mut in_class = false;
         let mut first_in_class = false;
+        let mut in_negated_class = false;
         let mut class_tokens: Vec<ClassToken> = Vec::new();
         let track_property_ranges = !has_v_flag;
 
@@ -241,7 +242,7 @@ impl<'a> Validator<'a> {
                                 );
                             }
 
-                            if negated {
+                            if negated || in_negated_class {
                                 return Err(
                                     "Unicode string properties cannot be negated".to_string()
                                 );
@@ -279,6 +280,7 @@ impl<'a> Validator<'a> {
                 if first_in_class {
                     if ch == '^' {
                         first_in_class = false;
+                        in_negated_class = true;
                         idx += 1;
                         continue;
                     }
@@ -307,6 +309,7 @@ impl<'a> Validator<'a> {
                         ensure_no_property_ranges(&class_tokens)?;
                     }
                     in_class = false;
+                    in_negated_class = false;
                     if track_property_ranges {
                         class_tokens.clear();
                     }
@@ -330,6 +333,7 @@ impl<'a> Validator<'a> {
             if ch == '[' {
                 in_class = true;
                 first_in_class = true;
+                in_negated_class = false;
                 if track_property_ranges {
                     class_tokens.clear();
                 }
@@ -1104,7 +1108,8 @@ fn is_id_start(ch: char) -> bool {
     // ID_Start includes:
     // - Letters (Unicode categories Lu, Ll, Lt, Lm, Lo, Nl)
     // - $ and _
-    ch == '$' || ch == '_' || ch.is_alphabetic() || matches!(ch, '\u{200C}' | '\u{200D}') // ZWNJ and ZWJ
+    ch == '$' || ch == '_' || ch.is_alphabetic() || matches!(ch, '\u{200C}' | '\u{200D}')
+    // ZWNJ and ZWJ
 }
 
 // Helper function to check if a character is valid in an identifier (after the first char)
