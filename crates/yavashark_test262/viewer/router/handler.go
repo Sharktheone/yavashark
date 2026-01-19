@@ -122,7 +122,7 @@ func rerunAll(c *fiber.Ctx) error {
 		Workers:     conf.Workers,
 		Skips:       true,
 		Timings:     false,
-		Timeout:     30 * time.Second,
+		Timeout:     time.Duration(conf.ScriptTimeout) * time.Second,
 		Interactive: false,
 	}
 
@@ -164,7 +164,7 @@ func rerun(c *fiber.Ctx) error {
 		Workers:     conf.Workers,
 		Skips:       true,
 		Timings:     false,
-		Timeout:     30 * time.Second,
+		Timeout:     time.Duration(conf.ScriptTimeout) * time.Second,
 		Interactive: false,
 	}
 
