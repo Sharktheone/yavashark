@@ -23,7 +23,7 @@ impl WeakRef {
     }
 }
 
-#[props(intrinsic_name = weak_ref)]
+#[props(intrinsic_name = weak_ref, to_string_tag = "WeakRef")]
 impl WeakRef {
     #[constructor]
     pub fn construct(handle: OrSymbol<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
