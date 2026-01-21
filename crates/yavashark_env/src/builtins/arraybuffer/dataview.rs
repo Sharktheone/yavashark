@@ -138,7 +138,7 @@ impl DataView {
     }
 }
 
-#[props(intrinsic_name = data_view)]
+#[props(intrinsic_name = data_view, to_string_tag = "DataView")]
 impl DataView {
     #[constructor]
     fn construct(realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
