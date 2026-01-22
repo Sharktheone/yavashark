@@ -16,7 +16,7 @@ pub struct Map {
     pub map: IndexMap<Value, Value, FxBuildHasher>,
 }
 
-#[props(intrinsic_name = map)]
+#[props(intrinsic_name = map, to_string_tag = "Map")]
 impl Map {
     #[constructor]
     fn construct(realm: &mut Realm, iter: Option<Value>) -> Res<Map> {
