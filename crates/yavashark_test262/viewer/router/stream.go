@@ -213,14 +213,14 @@ func runTestsWithStream(c *fiber.Ctx, testPath string) error {
 	c.Set("Transfer-Encoding", "chunked")
 
 	c.Context().SetBodyStreamWriter(func(w *bufio.Writer) {
-		if !testRun.TryLock() {
+		if !conf.TestRunLock.TryLock() {
 			sendSSE(w, StreamEvent{
 				Type:    "error",
 				Message: "Test is already running",
 			})
 			return
 		}
-		defer testRun.Unlock()
+		defer conf.TestRunLock.Unlock()
 
 		cancelMu.Lock()
 		cancelCtx, cancelFunc = context.WithCancel(context.Background())

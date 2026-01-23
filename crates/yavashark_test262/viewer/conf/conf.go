@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 // Default values
@@ -13,8 +14,8 @@ const (
 	DefaultRunnerPath       = "../runner"
 	DefaultPort             = 1215
 	DefaultMCPEnabled       = true
-	DefaultScriptTimeout    = 300    // seconds
-	DefaultMaxScriptTimeout = 600    // seconds
+	DefaultScriptTimeout    = 300   // seconds
+	DefaultMaxScriptTimeout = 600   // seconds
 	DefaultMaxOutputChars   = 25000 // characters - reasonable default for LLM context
 	DefaultOutputOffset     = 0
 	DefaultOutputMode       = "head" // "head" or "tail"
@@ -35,6 +36,10 @@ var (
 	OutputOffset     int
 	OutputMode       string // "head" or "tail"
 	LastOutputLength int    // Length of the last output before truncation
+
+	// TestRunLock prevents concurrent test runs across HTTP and MCP/scripting API.
+	// Use TryLock() to check if a run can start, Unlock() when done.
+	TestRunLock sync.Mutex
 )
 
 func init() {

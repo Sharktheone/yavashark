@@ -450,6 +450,12 @@ func handleSpecForIntrinsic(params json.RawMessage) (any, error) {
 // runner.* handlers
 
 func handleRunnerRerun(params json.RawMessage) (any, error) {
+	// Acquire the shared test run lock - only one run at a time across HTTP and MCP
+	if !conf.TestRunLock.TryLock() {
+		return nil, fmt.Errorf("a test run is already in progress")
+	}
+	defer conf.TestRunLock.Unlock()
+
 	var opts RerunOptions
 	if err := json.Unmarshal(params, &opts); err != nil {
 		return nil, err

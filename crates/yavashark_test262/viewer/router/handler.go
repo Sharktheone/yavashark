@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 	"viewer/cache"
 	"viewer/conf"
@@ -15,10 +14,6 @@ import (
 	"yavashark_test262_runner/run"
 
 	"github.com/gofiber/fiber/v2"
-)
-
-var (
-	testRun = sync.Mutex{}
 )
 
 type Capabilities struct {
@@ -117,11 +112,11 @@ func rerunAll(c *fiber.Ctx) error {
 		}
 	}
 
-	if !testRun.TryLock() {
+	if !conf.TestRunLock.TryLock() {
 		return fiber.NewError(fiber.StatusTooManyRequests, "Test is already running")
 	}
 
-	defer testRun.Unlock()
+	defer conf.TestRunLock.Unlock()
 
 	runConfig := run.RunConfig{
 		Workers:     conf.Workers,
@@ -152,11 +147,11 @@ func rerun(c *fiber.Ctx) error {
 		}
 	}
 
-	if !testRun.TryLock() {
+	if !conf.TestRunLock.TryLock() {
 		return fiber.NewError(fiber.StatusTooManyRequests, "Test is already running")
 	}
 
-	defer testRun.Unlock()
+	defer conf.TestRunLock.Unlock()
 
 	path, err := filepath.Rel("/api/rerun/", c.Path())
 	if err != nil {
