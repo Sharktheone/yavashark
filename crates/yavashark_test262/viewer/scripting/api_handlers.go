@@ -9,6 +9,7 @@ import (
 	"time"
 	"viewer/cache"
 	"viewer/conf"
+	"viewer/runhistory"
 	"viewer/spec"
 	"yavashark_test262_runner/build"
 	"yavashark_test262_runner/results"
@@ -45,6 +46,7 @@ type RerunOptions struct {
 }
 
 type RerunResult struct {
+	ID       string      `json:"id"`
 	Before   []TestEntry `json:"before"`
 	After    []TestEntry `json:"after"`
 	Diff     DiffResult  `json:"diff"`
@@ -106,6 +108,18 @@ func HandleAPICall(method string, params json.RawMessage) (any, error) {
 		return handleRunnerGetJob(params)
 	case "runner.cancelJob":
 		return handleRunnerCancelJob(params)
+
+	// runner.history.*
+	case "runner.history.list":
+		return handleRunnerHistoryList(params)
+	case "runner.history.get":
+		return handleRunnerHistoryGet(params)
+	case "runner.history.getDetails":
+		return handleRunnerHistoryGetDetails(params)
+	case "runner.history.delete":
+		return handleRunnerHistoryDelete(params)
+	case "runner.history.clear":
+		return handleRunnerHistoryClear(params)
 
 	// output.*
 	case "output.setMaxChars":
@@ -468,6 +482,10 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 		}
 	}
 
+	// Generate run ID for history
+	runID := runhistory.GenerateRunID()
+	startTime := time.Now()
+
 	// Rebuild if requested
 	if opts.Rebuild {
 		if err := build.RebuildEngine(build.Config{
@@ -494,8 +512,6 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 		FailedOnly:  opts.FailedOnly,
 	}
 
-	startTime := time.Now()
-
 	var newResults *results.TestResults
 	var errorPaths []string
 	var pathsToTrack []string // Paths we're actually running (for before/after filtering)
@@ -511,6 +527,7 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 
 		if len(fullPaths) == 0 {
 			return RerunResult{
+				ID:       runID,
 				Before:   []TestEntry{},
 				After:    []TestEntry{},
 				Diff:     DiffResult{Gained: []TestEntry{}, Lost: []TestEntry{}, Changed: []TestEntry{}},
@@ -608,7 +625,68 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 	// Compute diff
 	diff := computeDiff(beforeEntries, afterEntries)
 
+	// Count status totals from after entries
+	var passed, failed, skipped, crashed, timeout int
+	for _, e := range afterEntries {
+		switch e.Status {
+		case "PASS":
+			passed++
+		case "FAIL":
+			failed++
+		case "SKIP":
+			skipped++
+		case "CRASH":
+			crashed++
+		case "TIMEOUT":
+			timeout++
+		}
+	}
+
+	// Save to history
+	historyEntry := runhistory.RunHistoryEntry{
+		ID:          runID,
+		Path:        opts.Dir,
+		Paths:       opts.Paths,
+		Source:      "mcp",
+		StartedAt:   startTime,
+		CompletedAt: time.Now(),
+		Phase:       "complete",
+		Total:       len(afterEntries),
+		Passed:      passed,
+		Failed:      failed,
+		Skipped:     skipped,
+		Crashed:     crashed,
+		Timeout:     timeout,
+		Gained:      len(diff.Gained),
+		Lost:        len(diff.Lost),
+		FailedOnly:  opts.FailedOnly,
+		Rebuild:     opts.Rebuild,
+		ChangedTests: runhistory.ComputeChangedTests(
+			convertToRunHistoryEntries(beforeEntries),
+			convertToRunHistoryEntries(afterEntries),
+		),
+	}
+
+	runDetails := &runhistory.RunDetails{
+		ID:       runID,
+		Before:   convertToRunHistoryEntries(beforeEntries),
+		After:    convertToRunHistoryEntries(afterEntries),
+		Diff:     convertDiffToRunHistory(diff),
+		Duration: float64(duration.Milliseconds()),
+		Status:   "complete",
+		Options: runhistory.RunOptions{
+			Paths:      opts.Paths,
+			Dir:        opts.Dir,
+			FailedOnly: opts.FailedOnly,
+			Rebuild:    opts.Rebuild,
+		},
+	}
+
+	// Save to history (ignore errors - shouldn't fail the run)
+	_ = runhistory.SaveRun(historyEntry, runDetails)
+
 	result := RerunResult{
+		ID:       runID,
 		Before:   beforeEntries,
 		After:    afterEntries,
 		Diff:     diff,
@@ -851,4 +929,86 @@ func computeDiff(before, after []TestEntry) DiffResult {
 func ResetEdits() {
 	testCodeEdits = make(map[string]string)
 	harnessCodeEdits = make(map[string]string)
+}
+
+// runner.history.* handlers
+
+func handleRunnerHistoryList(params json.RawMessage) (any, error) {
+	history, err := runhistory.LoadHistory()
+	if err != nil {
+		return nil, err
+	}
+	return history.Runs, nil
+}
+
+func handleRunnerHistoryGet(params json.RawMessage) (any, error) {
+	var p struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+
+	entry, err := runhistory.GetRunEntry(p.ID)
+	if err != nil {
+		return nil, err
+	}
+	return entry, nil
+}
+
+func handleRunnerHistoryGetDetails(params json.RawMessage) (any, error) {
+	var p struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+
+	details, err := runhistory.LoadRunDetails(p.ID)
+	if err != nil {
+		return nil, err
+	}
+	return details, nil
+}
+
+func handleRunnerHistoryDelete(params json.RawMessage) (any, error) {
+	var p struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(params, &p); err != nil {
+		return nil, err
+	}
+
+	if err := runhistory.DeleteRun(p.ID); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func handleRunnerHistoryClear(params json.RawMessage) (any, error) {
+	if err := runhistory.ClearHistory(); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+// Helper functions for converting between local and runhistory types
+
+func convertToRunHistoryEntries(entries []TestEntry) []runhistory.TestEntry {
+	result := make([]runhistory.TestEntry, len(entries))
+	for i, e := range entries {
+		result[i] = runhistory.TestEntry{
+			Path:   e.Path,
+			Status: e.Status,
+		}
+	}
+	return result
+}
+
+func convertDiffToRunHistory(diff DiffResult) runhistory.DiffResult {
+	return runhistory.DiffResult{
+		Gained:  convertToRunHistoryEntries(diff.Gained),
+		Lost:    convertToRunHistoryEntries(diff.Lost),
+		Changed: convertToRunHistoryEntries(diff.Changed),
+	}
 }

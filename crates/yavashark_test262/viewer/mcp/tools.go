@@ -314,6 +314,51 @@ func getTypeScriptAPIDocs() string {
 		"  dir?: string           // Directory to run (ignored if paths is set)\n" +
 		"  failedOnly?: boolean   // Only run currently-failing tests\n" +
 		"  rebuild?: boolean      // Rebuild engine first\n" +
+		"}\n\n" +
+		"interface RerunResult {\n" +
+		"  id: string             // Unique run ID (saved to history)\n" +
+		"  before: TestEntry[]\n" +
+		"  after: TestEntry[]\n" +
+		"  diff: DiffResult\n" +
+		"  duration: number\n" +
+		"  status: 'complete' | 'timeout' | 'cancelled'\n" +
+		"}\n" +
+		"```\n\n" +
+		"### ys.runner.history - Access run history\n\n" +
+		"All test runs (from MCP and web UI) are saved to a unified history.\n\n" +
+		"```typescript\n" +
+		"// List all runs (newest first, max 50)\n" +
+		"ys.runner.history.list(): Promise<RunHistoryEntry[]>\n\n" +
+		"// Get a specific run by ID\n" +
+		"ys.runner.history.get(id: string): Promise<RunHistoryEntry>\n\n" +
+		"// Get full before/after/diff details for a run\n" +
+		"ys.runner.history.getDetails(id: string): Promise<RunDetails>\n\n" +
+		"// Delete a specific run\n" +
+		"ys.runner.history.delete(id: string): Promise<void>\n\n" +
+		"// Clear all history\n" +
+		"ys.runner.history.clear(): Promise<void>\n\n" +
+		"interface RunHistoryEntry {\n" +
+		"  id: string\n" +
+		"  path: string            // Directory that was run\n" +
+		"  paths?: string[]        // Specific paths (if used)\n" +
+		"  source: string          // 'mcp' | 'http' | 'stream'\n" +
+		"  startedAt: string\n" +
+		"  completedAt?: string\n" +
+		"  phase: string           // 'complete' | 'cancelled' | 'error'\n" +
+		"  total, passed, failed, skipped, crashed, timeout: number\n" +
+		"  gained, lost: number    // Count of improved/regressed tests\n" +
+		"  failedOnly?: boolean\n" +
+		"  rebuild?: boolean\n" +
+		"  changedTests?: ChangedTest[]\n" +
+		"}\n\n" +
+		"interface RunDetails {\n" +
+		"  id: string\n" +
+		"  before: TestEntry[]\n" +
+		"  after: TestEntry[]\n" +
+		"  diff: DiffResult\n" +
+		"  duration: number\n" +
+		"  status: string\n" +
+		"  options: RerunOptions\n" +
 		"}\n" +
 		"```\n\n" +
 		"### ys.session - Persist state between calls\n\n" +
@@ -366,17 +411,15 @@ func getTypeScriptAPIDocs() string {
 		"  message: string\n" +
 		"  duration: number\n" +
 		"}\n\n" +
-		"interface RerunResult {\n" +
-		"  before: TestEntry[]\n" +
-		"  after: TestEntry[]\n" +
-		"  diff: DiffResult\n" +
-		"  duration: number\n" +
-		"  status: 'complete' | 'timeout' | 'cancelled'\n" +
-		"}\n\n" +
 		"interface DiffResult {\n" +
 		"  gained: TestEntry[]   // Now passing\n" +
 		"  lost: TestEntry[]     // Now failing\n" +
 		"  changed: TestEntry[]  // Status changed (any)\n" +
+		"}\n\n" +
+		"interface ChangedTest {\n" +
+		"  path: string\n" +
+		"  oldStatus: string\n" +
+		"  newStatus: string\n" +
 		"}\n" +
 		"```\n"
 }

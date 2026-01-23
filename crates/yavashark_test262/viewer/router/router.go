@@ -39,6 +39,7 @@ func Setup() *fiber.App {
 
 	api.Get("history", getRunHistory)
 	api.Get("history/:id", getRunHistoryEntry)
+	api.Get("history/:id/details", getRunHistoryDetails)
 	api.Delete("history/:id", deleteRunHistoryEntry)
 	api.Delete("history", clearRunHistory)
 

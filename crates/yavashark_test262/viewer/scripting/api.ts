@@ -10,6 +10,8 @@ import type {
   RerunResult,
   RerunJob,
   SpecMatch,
+  RunHistoryEntry,
+  RunDetails,
 } from "./types.ts";
 
 // Session storage (in-memory, persisted per session ID)
@@ -305,6 +307,46 @@ export const ys = {
 
     async cancelJob(jobId: string): Promise<void> {
       await apiCall("runner.cancelJob", { jobId });
+    },
+
+    history: {
+      /**
+       * List all runs in history (newest first).
+       */
+      async list(): Promise<RunHistoryEntry[]> {
+        return await apiCall("runner.history.list", {}) as RunHistoryEntry[];
+      },
+
+      /**
+       * Get a specific run entry by ID.
+       * @param id - The run ID
+       */
+      async get(id: string): Promise<RunHistoryEntry> {
+        return await apiCall("runner.history.get", { id }) as RunHistoryEntry;
+      },
+
+      /**
+       * Get the full details (before/after/diff) for a run.
+       * @param id - The run ID
+       */
+      async getDetails(id: string): Promise<RunDetails> {
+        return await apiCall("runner.history.getDetails", { id }) as RunDetails;
+      },
+
+      /**
+       * Delete a run from history.
+       * @param id - The run ID
+       */
+      async delete(id: string): Promise<void> {
+        await apiCall("runner.history.delete", { id });
+      },
+
+      /**
+       * Clear all run history.
+       */
+      async clear(): Promise<void> {
+        await apiCall("runner.history.clear", {});
+      },
     },
   },
 

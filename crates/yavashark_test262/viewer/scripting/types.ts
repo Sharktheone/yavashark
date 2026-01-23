@@ -35,6 +35,7 @@ export interface RerunOptions {
 }
 
 export interface RerunResult {
+  id: string;
   before: TestEntry[];
   after: TestEntry[];
   diff: DiffResult;
@@ -62,6 +63,48 @@ export interface SpecMatch {
   section: string;
   title: string;
   preview: string;
+}
+
+// Run history types
+
+export interface ChangedTest {
+  path: string;
+  oldStatus: string;
+  newStatus: string;
+}
+
+export interface RunHistoryEntry {
+  id: string;
+  path: string;
+  paths?: string[];
+  profile?: string;
+  source?: string;  // "http", "mcp", "stream"
+  startedAt: string;
+  completedAt?: string;
+  phase: string;
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  crashed: number;
+  timeout: number;
+  gained: number;
+  lost: number;
+  failedOnly?: boolean;
+  rebuild?: boolean;
+  baselineRef?: string;
+  changedTests?: ChangedTest[];
+  buildOutput?: string[];
+}
+
+export interface RunDetails {
+  id: string;
+  before: TestEntry[];
+  after: TestEntry[];
+  diff: DiffResult;
+  duration: number;
+  status: string;
+  options: RerunOptions;
 }
 
 // JSON-RPC types

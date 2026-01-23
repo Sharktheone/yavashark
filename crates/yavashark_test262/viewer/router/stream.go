@@ -3,8 +3,6 @@ package router
 import (
 	"bufio"
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,6 +13,7 @@ import (
 	"sync"
 	"time"
 	"viewer/conf"
+	"viewer/runhistory"
 	"yavashark_test262_runner/build"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
@@ -69,9 +68,7 @@ var (
 )
 
 func generateRunID() string {
-	bytes := make([]byte, 8)
-	rand.Read(bytes)
-	return fmt.Sprintf("run-%d-%s", time.Now().Unix(), hex.EncodeToString(bytes))
+	return runhistory.GenerateRunID()
 }
 
 func sendSSE(w *bufio.Writer, event StreamEvent) error {
@@ -662,12 +659,42 @@ resultLoop:
 		if relPath == "." {
 			relPath = ""
 		}
+
+		// Build before entries from prevResultsMap (filtered to tests we ran)
+		beforeEntries := make([]runhistory.TestEntry, 0)
+		for _, p := range testPaths {
+			if prevStatus, ok := prevResultsMap[p]; ok {
+				relTestPath, _ := filepath.Rel(conf.TestRoot, p)
+				beforeEntries = append(beforeEntries, runhistory.TestEntry{
+					Path:   relTestPath,
+					Status: prevStatus.String(),
+				})
+			}
+		}
+
+		// Build after entries from allResults
+		afterEntries := make([]runhistory.TestEntry, 0, len(allResults))
+		for _, res := range allResults {
+			relTestPath, _ := filepath.Rel(conf.TestRoot, res.Path)
+			afterEntries = append(afterEntries, runhistory.TestEntry{
+				Path:   relTestPath,
+				Status: res.Status.String(),
+			})
+		}
+
+		// Compute diff
+		diff := runhistory.ComputeDiff(beforeEntries, afterEntries)
+
+		completedAt := time.Now()
+		duration := float64(completedAt.Sub(runMeta.StartedAt).Milliseconds())
+
 		historyEntry := RunHistoryEntry{
 			ID:           runMeta.ID,
 			Path:         relPath,
 			Profile:      runMeta.Profile,
+			Source:       "stream",
 			StartedAt:    runMeta.StartedAt,
-			CompletedAt:  time.Now(),
+			CompletedAt:  completedAt,
 			Phase:        phase,
 			Total:        progress.Total,
 			Passed:       progress.Passed,
@@ -680,7 +707,20 @@ resultLoop:
 			ChangedTests: changedTests,
 			BuildOutput:  buildOutput,
 		}
-		AddRunToHistory(historyEntry)
+
+		details := &runhistory.RunDetails{
+			ID:       runMeta.ID,
+			Before:   beforeEntries,
+			After:    afterEntries,
+			Diff:     diff,
+			Duration: duration,
+			Status:   phase,
+			Options: runhistory.RunOptions{
+				Dir: relPath,
+			},
+		}
+
+		runhistory.SaveRun(historyEntry, details)
 	}
 
 	if cancelled {
