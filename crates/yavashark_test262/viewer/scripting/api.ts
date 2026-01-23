@@ -22,12 +22,19 @@ let serverUrl = "http://localhost:1215";
 // Output collection for ys.print()
 let outputLines: string[] = [];
 
+// Abort signal for cancellation (set by runtime)
+let currentAbortSignal: AbortSignal | null = null;
+
 export function setServerUrl(url: string) {
   serverUrl = url;
 }
 
 export function setCurrentSession(sessionId: string | undefined) {
   currentSessionId = sessionId;
+}
+
+export function setAbortSignal(signal: AbortSignal | null) {
+  currentAbortSignal = signal;
 }
 
 // Reset output collection before each script execution
@@ -53,12 +60,18 @@ function getSessionStore(): Map<string, unknown> {
 
 // Make an API call to the Go server via HTTP
 async function apiCall(method: string, params?: unknown): Promise<unknown> {
+  // Check if already aborted before making the request
+  if (currentAbortSignal?.aborted) {
+    throw new DOMException("Script execution was cancelled", "AbortError");
+  }
+
   const response = await fetch(`${serverUrl}/api/script/call`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ method, params }),
+    signal: currentAbortSignal ?? undefined,
   });
 
   if (!response.ok) {

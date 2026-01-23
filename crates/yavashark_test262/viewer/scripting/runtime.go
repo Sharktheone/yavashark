@@ -20,7 +20,8 @@ type Runtime struct {
 	stdin    io.WriteCloser
 	stdout   *bufio.Reader
 	stderr   io.ReadCloser
-	mu       sync.Mutex
+	mu       sync.Mutex // Protects running state and serializes Execute calls
+	writeMu  sync.Mutex // Protects stdin writes (allows cancel during execute)
 	running  bool
 	scriptID int64
 }
@@ -123,6 +124,30 @@ func (r *Runtime) Stop() error {
 	return nil
 }
 
+// sendRequest sends a JSON-RPC request to the Deno runtime (caller must hold writeMu)
+func (r *Runtime) sendRequest(request *RPCRequest) error {
+	reqBytes, err := json.Marshal(request)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	if _, err := r.stdin.Write(append(reqBytes, '\n')); err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+
+	return nil
+}
+
+// sendCancel sends a cancel request for the given execution ID
+func (r *Runtime) sendCancel(executionID int64) error {
+	r.writeMu.Lock()
+	defer r.writeMu.Unlock()
+
+	// Use a unique ID for the cancel request (negative to avoid collision)
+	cancelRequest := NewRPCRequest(-executionID, "cancel", map[string]int64{"id": executionID})
+	return r.sendRequest(cancelRequest)
+}
+
 // Execute runs a TypeScript script and returns the result
 func (r *Runtime) Execute(ctx context.Context, script string, sessionID string, serverURL string) (*ScriptResult, error) {
 	r.mu.Lock()
@@ -136,7 +161,7 @@ func (r *Runtime) Execute(ctx context.Context, script string, sessionID string, 
 	r.scriptID++
 	id := r.scriptID
 
-	// Create request
+	// Create and send request
 	request := NewRPCRequest(id, "execute", ExecuteParams{
 		Script:    script,
 		SessionID: sessionID,
@@ -144,32 +169,92 @@ func (r *Runtime) Execute(ctx context.Context, script string, sessionID string, 
 		ServerURL: serverURL,
 	})
 
-	// Send request
-	reqBytes, err := json.Marshal(request)
+	r.writeMu.Lock()
+	err := r.sendRequest(request)
+	r.writeMu.Unlock()
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
+		return nil, err
 	}
 
-	if _, err := r.stdin.Write(append(reqBytes, '\n')); err != nil {
-		return nil, fmt.Errorf("failed to send request: %w", err)
-	}
-
-	// Read response with context timeout
+	// Read response with context cancellation support
 	responseCh := make(chan []byte, 1)
 	errCh := make(chan error, 1)
 
 	go func() {
-		line, err := r.stdout.ReadBytes('\n')
-		if err != nil {
-			errCh <- err
-			return
+		// Read all responses until we get the one for our execute request
+		// (we might get a cancel response first if cancellation races)
+		for {
+			line, err := r.stdout.ReadBytes('\n')
+			if err != nil {
+				errCh <- err
+				return
+			}
+
+			// Check if this is the response for our execute request
+			var response RPCResponse
+			if err := json.Unmarshal(line, &response); err != nil {
+				errCh <- fmt.Errorf("failed to unmarshal response: %w", err)
+				return
+			}
+
+			// If this is the cancel response (negative ID), discard it
+			if response.ID < 0 {
+				continue
+			}
+
+			// If this matches our execute ID, return it
+			if response.ID == id {
+				responseCh <- line
+				return
+			}
+
+			// Otherwise it's an unexpected response, keep reading
+			// (shouldn't happen in normal operation)
 		}
-		responseCh <- line
+	}()
+
+	// Set up cancellation goroutine
+	cancelDone := make(chan struct{})
+	defer close(cancelDone)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			// Context was cancelled, send cancel request to Deno
+			if err := r.sendCancel(id); err != nil {
+				fmt.Fprintf(os.Stderr, "[runtime] failed to send cancel: %v\n", err)
+			}
+		case <-cancelDone:
+			// Execute completed, no need to cancel
+		}
 	}()
 
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		// Wait a short time for the cancellation to propagate and get a response
+		select {
+		case line := <-responseCh:
+			// Got a response (probably the cancel error response)
+			var response RPCResponse
+			if err := json.Unmarshal(line, &response); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+			}
+			if response.Error != nil {
+				return &ScriptResult{
+					Success: false,
+					Error:   response.Error.Message,
+				}, nil
+			}
+			return &ScriptResult{
+				Success: true,
+				Result:  response.Result,
+			}, nil
+		case <-time.After(500 * time.Millisecond):
+			// Cancellation timed out, return context error
+			return nil, ctx.Err()
+		case err := <-errCh:
+			return nil, fmt.Errorf("failed to read response: %w", err)
+		}
 	case err := <-errCh:
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	case line := <-responseCh:
