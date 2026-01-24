@@ -31,7 +31,7 @@ impl Set {
     }
 }
 
-#[props(intrinsic_name = set)]
+#[props(intrinsic_name = set, to_string_tag = "Set")]
 impl Set {
     #[constructor]
     fn construct(realm: &mut Realm, iter: Option<Value>) -> Res<ObjectHandle> {
