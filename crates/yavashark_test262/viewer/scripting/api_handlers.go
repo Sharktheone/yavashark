@@ -60,6 +60,43 @@ type DiffResult struct {
 	Changed []TestEntry `json:"changed"`
 }
 
+// Compare types
+
+type CompareSource struct {
+	Type  string `json:"type"`            // "current" | "run"
+	RunID string `json:"runId,omitempty"` // For "run" type
+}
+
+type CompareOptions struct {
+	Left  CompareSource `json:"left"`
+	Right CompareSource `json:"right"`
+}
+
+type CompareStats struct {
+	Total   int `json:"total"`
+	Passed  int `json:"passed"`
+	Failed  int `json:"failed"`
+	Skipped int `json:"skipped"`
+	Crashed int `json:"crashed"`
+	Timeout int `json:"timeout"`
+}
+
+type CompareChangedTest struct {
+	Path        string `json:"path"`
+	LeftStatus  string `json:"leftStatus"`
+	RightStatus string `json:"rightStatus"`
+}
+
+type CompareResult struct {
+	Left         CompareStats         `json:"left"`
+	Right        CompareStats         `json:"right"`
+	Gained       int                  `json:"gained"`
+	Lost         int                  `json:"lost"`
+	Changed      int                  `json:"changed"`
+	Unchanged    int                  `json:"unchanged"`
+	ChangedTests []CompareChangedTest `json:"changedTests"`
+}
+
 // In-memory code edits (not persisted to disk)
 var (
 	testCodeEdits    = make(map[string]string)
@@ -108,6 +145,10 @@ func HandleAPICall(method string, params json.RawMessage) (any, error) {
 		return handleRunnerGetJob(params)
 	case "runner.cancelJob":
 		return handleRunnerCancelJob(params)
+
+	// runner.compare
+	case "runner.compare":
+		return handleRunnerCompare(params)
 
 	// runner.history.*
 	case "runner.history.list":
@@ -718,6 +759,171 @@ func handleRunnerGetJob(params json.RawMessage) (any, error) {
 func handleRunnerCancelJob(params json.RawMessage) (any, error) {
 	// TODO: Implement async job system
 	return nil, fmt.Errorf("job system not yet implemented")
+}
+
+// handleRunnerCompare compares test results from two sources
+func handleRunnerCompare(params json.RawMessage) (any, error) {
+	var opts CompareOptions
+	if err := json.Unmarshal(params, &opts); err != nil {
+		return nil, err
+	}
+
+	// Load left and right results
+	leftResults, err := loadResultsForSource(opts.Left)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load left source: %w", err)
+	}
+
+	rightResults, err := loadResultsForSource(opts.Right)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load right source: %w", err)
+	}
+
+	// Calculate stats for each side
+	leftStats := calculateCompareStats(leftResults)
+	rightStats := calculateCompareStats(rightResults)
+
+	// Find changed tests
+	changedTests := []CompareChangedTest{}
+	gained := 0
+	lost := 0
+	unchanged := 0
+
+	// Build map of left results for comparison
+	leftMap := make(map[string]string)
+	for _, e := range leftResults {
+		leftMap[e.Path] = e.Status
+	}
+
+	// Build map of right results
+	rightMap := make(map[string]string)
+	for _, e := range rightResults {
+		rightMap[e.Path] = e.Status
+	}
+
+	// Compare all paths from both sides
+	allPaths := make(map[string]bool)
+	for path := range leftMap {
+		allPaths[path] = true
+	}
+	for path := range rightMap {
+		allPaths[path] = true
+	}
+
+	for path := range allPaths {
+		leftStatus, inLeft := leftMap[path]
+		rightStatus, inRight := rightMap[path]
+
+		// Skip tests that are only in one side
+		if !inLeft || !inRight {
+			continue
+		}
+
+		if leftStatus != rightStatus {
+			changedTests = append(changedTests, CompareChangedTest{
+				Path:        path,
+				LeftStatus:  leftStatus,
+				RightStatus: rightStatus,
+			})
+
+			// Track gains/losses (transitions to/from PASS)
+			if leftStatus != "PASS" && rightStatus == "PASS" {
+				gained++
+			} else if leftStatus == "PASS" && rightStatus != "PASS" {
+				lost++
+			}
+		} else {
+			unchanged++
+		}
+	}
+
+	return CompareResult{
+		Left:         leftStats,
+		Right:        rightStats,
+		Gained:       gained,
+		Lost:         lost,
+		Changed:      len(changedTests),
+		Unchanged:    unchanged,
+		ChangedTests: changedTests,
+	}, nil
+}
+
+// loadResultsForSource loads test results from a compare source
+func loadResultsForSource(source CompareSource) ([]TestEntry, error) {
+	switch source.Type {
+	case "current":
+		return loadCurrentResults()
+	case "run":
+		if source.RunID == "" {
+			return nil, fmt.Errorf("runId is required for 'run' source type")
+		}
+		return loadHistoricalRunResults(source.RunID)
+	default:
+		return nil, fmt.Errorf("unknown source type: %s", source.Type)
+	}
+}
+
+// loadCurrentResults loads the current test results from cache
+func loadCurrentResults() ([]TestEntry, error) {
+	resultsMap, err := cache.GetResultsIndex()
+	if err != nil {
+		return nil, err
+	}
+
+	entries := []TestEntry{}
+	for path, result := range *resultsMap {
+		relPath, err := filepath.Rel(conf.TestRoot, path)
+		if err != nil {
+			relPath = path
+		}
+		entries = append(entries, TestEntry{
+			Path:   relPath,
+			Status: result.Status.String(),
+		})
+	}
+
+	return entries, nil
+}
+
+// loadHistoricalRunResults loads results from a historical run
+func loadHistoricalRunResults(runID string) ([]TestEntry, error) {
+	details, err := runhistory.LoadRunDetails(runID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert runhistory.TestEntry to scripting.TestEntry
+	entries := make([]TestEntry, len(details.After))
+	for i, e := range details.After {
+		entries[i] = TestEntry{
+			Path:   e.Path,
+			Status: e.Status,
+		}
+	}
+
+	return entries, nil
+}
+
+// calculateCompareStats calculates status counts from test entries
+func calculateCompareStats(entries []TestEntry) CompareStats {
+	stats := CompareStats{Total: len(entries)}
+
+	for _, e := range entries {
+		switch e.Status {
+		case "PASS":
+			stats.Passed++
+		case "FAIL":
+			stats.Failed++
+		case "SKIP":
+			stats.Skipped++
+		case "CRASH":
+			stats.Crashed++
+		case "TIMEOUT":
+			stats.Timeout++
+		}
+	}
+
+	return stats
 }
 
 // output.* handlers

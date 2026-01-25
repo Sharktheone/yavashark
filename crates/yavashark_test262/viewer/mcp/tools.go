@@ -361,6 +361,53 @@ func getTypeScriptAPIDocs() string {
 		"  options: RerunOptions\n" +
 		"}\n" +
 		"```\n\n" +
+		"### ys.runner.compare - Compare test results\n\n" +
+		"Compare test results from two sources (current state or historical runs).\n\n" +
+		"```typescript\n" +
+		"// Compare current results with a historical run\n" +
+		"ys.runner.compare({\n" +
+		"  left: { type: 'current' },\n" +
+		"  right: { type: 'run', runId: 'run-1706012345-abc123' }\n" +
+		"})\n\n" +
+		"// Compare two historical runs\n" +
+		"ys.runner.compare({\n" +
+		"  left: { type: 'run', runId: 'run-older' },\n" +
+		"  right: { type: 'run', runId: 'run-newer' }\n" +
+		"})\n" +
+		"```\n\n" +
+		"```typescript\n" +
+		"ys.runner.compare(opts: CompareOptions): Promise<CompareResult>\n\n" +
+		"interface CompareSource {\n" +
+		"  type: 'current' | 'run'   // 'current' = live results, 'run' = historical run\n" +
+		"  runId?: string            // Required when type is 'run'\n" +
+		"}\n\n" +
+		"interface CompareOptions {\n" +
+		"  left: CompareSource\n" +
+		"  right: CompareSource\n" +
+		"}\n\n" +
+		"interface CompareStats {\n" +
+		"  total: number\n" +
+		"  passed: number\n" +
+		"  failed: number\n" +
+		"  skipped: number\n" +
+		"  crashed: number\n" +
+		"  timeout: number\n" +
+		"}\n\n" +
+		"interface CompareChangedTest {\n" +
+		"  path: string\n" +
+		"  leftStatus: string\n" +
+		"  rightStatus: string\n" +
+		"}\n\n" +
+		"interface CompareResult {\n" +
+		"  left: CompareStats         // Stats for left source\n" +
+		"  right: CompareStats        // Stats for right source\n" +
+		"  gained: number             // Tests that went from non-pass to pass\n" +
+		"  lost: number               // Tests that went from pass to non-pass\n" +
+		"  changed: number            // Total tests with different status\n" +
+		"  unchanged: number          // Total tests with same status\n" +
+		"  changedTests: CompareChangedTest[]  // List of changed tests\n" +
+		"}\n" +
+		"```\n\n" +
 		"### ys.session - Persist state between calls\n\n" +
 		"```typescript\n" +
 		"ys.session.get<T>(key: string): T | undefined\n" +
@@ -527,5 +574,29 @@ func getExampleScripts() string {
 		"  ys.print(`Output was ${len} chars, fetching next page...`);\n" +
 		"  await ys.output.setOffset(10000);  // Skip first 10k\n" +
 		"}\n" +
+		"```\n\n" +
+		"### Example 9: Compare results with a previous run\n\n" +
+		"```typescript\n" +
+		"// Get the most recent run from history\n" +
+		"const history = await ys.runner.history.list();\n" +
+		"if (history.length === 0) {\n" +
+		"  return { error: 'No run history available' };\n" +
+		"}\n\n" +
+		"// Compare current state against the last run\n" +
+		"const result = await ys.runner.compare({\n" +
+		"  left: { type: 'run', runId: history[0].id },\n" +
+		"  right: { type: 'current' }\n" +
+		"});\n\n" +
+		"return {\n" +
+		"  gained: result.gained,\n" +
+		"  lost: result.lost,\n" +
+		"  changed: result.changed,\n" +
+		"  // Show first 10 changed tests\n" +
+		"  changedTests: result.changedTests.slice(0, 10).map(t => ({\n" +
+		"    path: t.path,\n" +
+		"    from: t.leftStatus,\n" +
+		"    to: t.rightStatus\n" +
+		"  }))\n" +
+		"};\n" +
 		"```\n"
 }

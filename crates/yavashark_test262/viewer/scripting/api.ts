@@ -12,6 +12,8 @@ import type {
   SpecMatch,
   RunHistoryEntry,
   RunDetails,
+  CompareOptions,
+  CompareResult,
 } from "./types.ts";
 
 // Session storage (in-memory, persisted per session ID)
@@ -307,6 +309,29 @@ export const ys = {
 
     async cancelJob(jobId: string): Promise<void> {
       await apiCall("runner.cancelJob", { jobId });
+    },
+
+    /**
+     * Compare test results from two sources.
+     * @param opts - Compare options specifying left and right sources
+     * @returns Comparison results including stats and changed tests
+     * 
+     * @example
+     * // Compare current results against a historical run
+     * const result = await ys.runner.compare({
+     *   left: { type: 'current' },
+     *   right: { type: 'run', runId: 'run-1706012345-abc123' }
+     * });
+     * 
+     * @example
+     * // Compare two historical runs
+     * const result = await ys.runner.compare({
+     *   left: { type: 'run', runId: 'run-older' },
+     *   right: { type: 'run', runId: 'run-newer' }
+     * });
+     */
+    async compare(opts: CompareOptions): Promise<CompareResult> {
+      return await apiCall("runner.compare", opts) as CompareResult;
     },
 
     history: {

@@ -107,6 +107,43 @@ export interface RunDetails {
   options: RerunOptions;
 }
 
+// Compare types
+
+export interface CompareSource {
+  type: "current" | "run";
+  runId?: string;  // Required when type is "run"
+}
+
+export interface CompareOptions {
+  left: CompareSource;
+  right: CompareSource;
+}
+
+export interface CompareStats {
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  crashed: number;
+  timeout: number;
+}
+
+export interface CompareChangedTest {
+  path: string;
+  leftStatus: string;
+  rightStatus: string;
+}
+
+export interface CompareResult {
+  left: CompareStats;
+  right: CompareStats;
+  gained: number;      // Tests that went from non-pass to pass
+  lost: number;        // Tests that went from pass to non-pass
+  changed: number;     // Total tests with different status
+  unchanged: number;   // Total tests with same status
+  changedTests: CompareChangedTest[];
+}
+
 // JSON-RPC types
 
 export interface RPCRequest {
