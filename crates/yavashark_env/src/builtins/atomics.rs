@@ -18,7 +18,7 @@ impl Atomics {
     }
 }
 
-#[props(intrinsic_name = atomics)]
+#[props(intrinsic_name = atomics, to_string_tag = "Atomics")]
 #[allow(unused)]
 impl Atomics {
     pub fn add(ta: &ObjectHandle, index: usize, value: i32) {}
