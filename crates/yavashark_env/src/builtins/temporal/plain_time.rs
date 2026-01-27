@@ -179,7 +179,7 @@ impl PlainTime {
 
     fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let overflow = overflow_options(other, realm)?;
-        let partial_time = value_to_partial_time(other, false, realm)?;
+        let (partial_time, _) = value_to_partial_time(other, false, realm)?;
 
         let date = self
             .time
