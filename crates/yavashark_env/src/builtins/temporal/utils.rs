@@ -266,9 +266,11 @@ pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Ove
     let Some(overflow) = overflow else {
         return Ok(None);
     };
-
-    if overflow.is_undefined() {
-        return Ok(None);
+    
+    match overflow {
+        Value::Undefined => return Ok(None),
+        Value::Symbol(_) => return Err(Error::ty("Invalid overflow option")),
+        _ => {}
     }
 
     let overflow = overflow.to_string(realm)?;
@@ -410,7 +412,7 @@ pub fn value_to_calendar_fields(
     needs_fields: bool,
     validate: bool,
     realm: &mut Realm,
-) -> Res<CalendarFields> {
+) -> Res<(CalendarFields, bool)> {
     const INVALID_KEYS: [&str; 3] = ["calendar", "timeZone", "months"];
 
     if validate {
@@ -480,14 +482,14 @@ pub fn value_to_calendar_fields(
         return Err(Error::ty("At least one field must be provided"));
     }
 
-    Ok(fields)
+    Ok((fields, had_fields))
 }
 
 pub fn value_to_partial_time(
     value: &ObjectHandle,
     needs_time: bool,
     realm: &mut Realm,
-) -> Res<PartialTime> {
+) -> Res<(PartialTime, bool)> {
     let mut partial_time = PartialTime::new();
     let mut had_time = false;
 
@@ -537,7 +539,7 @@ pub fn value_to_partial_time(
         return Err(Error::ty("At least one time field must be provided"));
     }
 
-    Ok(partial_time)
+    Ok((partial_time, had_time))
 }
 
 pub fn value_to_date_time_fields(
@@ -545,7 +547,17 @@ pub fn value_to_date_time_fields(
     needs_fields: bool,
     realm: &mut Realm,
 ) -> Res<DateTimeFields> {
-    value_to_date_time_fields_inner(other, needs_fields, needs_fields, true, realm)
+    let (calendar_fields, had_calendar_fields) = value_to_calendar_fields(other, false, true, realm)?;
+    let (time, had_time_fields) = value_to_partial_time(other, false, realm)?;
+    
+    if !had_calendar_fields && !had_time_fields && needs_fields {
+        return Err(Error::ty("At least one date or time field must be provided"));
+    }
+
+    Ok(DateTimeFields {
+        calendar_fields,
+        time,
+    })
 }
 
 pub fn value_to_date_time_fields_no_validate(
@@ -563,9 +575,9 @@ fn value_to_date_time_fields_inner(
     validate: bool,
     realm: &mut Realm,
 ) -> Res<DateTimeFields> {
-    let calendar_fields = value_to_calendar_fields(other, needs_date_fields, validate, realm)?;
-    let time = value_to_partial_time(other, needs_time_fields, realm)?;
-
+    let (calendar_fields, _) = value_to_calendar_fields(other, needs_date_fields, validate, realm)?;
+    let (time, _) = value_to_partial_time(other, needs_time_fields, realm)?;
+    
     Ok(DateTimeFields {
         calendar_fields,
         time,
@@ -632,8 +644,8 @@ pub fn value_to_zoned_date_time_fields(
     needs_fields: bool,
     realm: &mut Realm,
 ) -> Res<ZonedDateTimeFields> {
-    let calendar_fields = value_to_calendar_fields(value, needs_fields, true, realm)?;
-    let time = value_to_partial_time(value, needs_fields, realm)?;
+    let (calendar_fields, _) = value_to_calendar_fields(value, needs_fields, true, realm)?;
+    let (time, _) = value_to_partial_time(value, needs_fields, realm)?;
 
     let offset = if let Some(offset) = value.get_opt("offset", realm)? {
         let offset = offset.to_string(realm)?;
