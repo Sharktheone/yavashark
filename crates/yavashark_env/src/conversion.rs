@@ -343,21 +343,11 @@ impl FromValueOutput for Stringable {
             Value::String(s) => Ok(Self(s.to_string())),
             Value::Number(n) => Ok(Self(fmt_num(n).to_string())),
             Value::Boolean(b) => Ok(Self(b.to_string())),
-            Value::Undefined => {
-                Err(Error::ty(
-                    "Cannot convert undefined to stringable",
-                ))
-            }
-            Value::Null => {
-                Err(Error::ty(
-                    "Cannot convert null to stringable",
-                ))
-            }
-            Value::Symbol(_) => {
-                Err(Error::ty_error(
-                    "Cannot convert a Symbol value to a string".to_string(),
-                ))
-            }
+            Value::Undefined => Err(Error::ty("Cannot convert undefined to stringable")),
+            Value::Null => Err(Error::ty("Cannot convert null to stringable")),
+            Value::Symbol(_) => Err(Error::ty_error(
+                "Cannot convert a Symbol value to a string".to_string(),
+            )),
             Value::BigInt(bi) => Ok(Self(bi.to_string())),
         }
     }

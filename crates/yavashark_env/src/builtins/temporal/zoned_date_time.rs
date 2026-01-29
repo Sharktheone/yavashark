@@ -257,7 +257,12 @@ impl ZonedDateTime {
         Err(Error::ty("ZonedDateTime does not support valueOf"))
     }
 
-    pub fn with(&self, info: &ObjectHandle, options: &Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn with(
+        &self,
+        info: &ObjectHandle,
+        options: &Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let overflow = overflow_options_opt(options.as_ref(), realm)?;
         let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
         let offset_disambiguation = offset_disambiguation_opt(options.as_ref(), realm)?;

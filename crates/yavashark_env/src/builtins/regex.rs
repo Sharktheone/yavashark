@@ -1,6 +1,6 @@
 use crate::array::Array;
+use crate::builtins::iterator::{create_iter_result_object, Iterator};
 use crate::builtins::NumberConstructor;
-use crate::builtins::iterator::{Iterator, create_iter_result_object};
 use crate::console::print::PrettyObjectOverride;
 use crate::realm::Intrinsic;
 use crate::value::{DefinePropertyResult, IntoValue, Obj, Symbol};

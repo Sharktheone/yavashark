@@ -1,4 +1,4 @@
-use crate::value::{Hint, Symbol, Value, fmt_num};
+use crate::value::{fmt_num, Hint, Symbol, Value};
 use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;

@@ -2,7 +2,9 @@ use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 use crate::builtins::temporal::utils::{
-    difference_settings, disambiguation_opt, display_calendar, overflow_options, overflow_options_opt, rounding_options, string_rounding_mode_opts, value_to_date_time_fields, value_to_date_time_fields_no_validate
+    difference_settings, disambiguation_opt, display_calendar, overflow_options,
+    overflow_options_opt, rounding_options, string_rounding_mode_opts, value_to_date_time_fields,
+    value_to_date_time_fields_no_validate,
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::native_obj::NativeObject;
@@ -346,11 +348,15 @@ impl PlainDateTime {
         Ok(PlainDate::new(date, realm)?.into_object())
     }
 
-    pub fn with(&self, info: &ObjectHandle, options: &Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn with(
+        &self,
+        info: &ObjectHandle,
+        options: &Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let overflow = overflow_options_opt(options.as_ref(), realm)?;
-        
+
         let fields = value_to_date_time_fields(info, true, realm)?;
-        
 
         let date = self
             .date
