@@ -6,6 +6,9 @@ use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 
 impl Compiler {
     pub fn create_function(&mut self, f: &Function, name: Option<String>) -> Res<ConstIdx> {
+        let name = name
+            .or(self.current_fn_name.take());
+
         let bp = FunctionBlueprint {
             name,
             params: f.params.clone(),

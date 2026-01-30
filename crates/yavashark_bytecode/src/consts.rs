@@ -78,6 +78,7 @@ pub struct FunctionBlueprint {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrowFunctionBlueprint {
+    pub name: Option<String>,
     pub params: Vec<Param>,
     pub code: Rc<BytecodeFunctionCode>,
     pub is_async: bool,

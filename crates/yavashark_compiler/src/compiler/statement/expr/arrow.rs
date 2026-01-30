@@ -37,7 +37,9 @@ impl Compiler {
             ds,
         };
 
+        let name = self.current_fn_name.take();
         let f = self.alloc_const(ConstValue::ArrowFunction(ArrowFunctionBlueprint {
+            name,
             params: expr
                 .params
                 .iter()

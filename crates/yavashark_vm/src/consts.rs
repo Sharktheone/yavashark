@@ -54,7 +54,7 @@ impl ConstIntoValue for ConstValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    String::new(),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -230,7 +230,7 @@ impl ConstIntoValue for DataTypeValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    String::new(),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),

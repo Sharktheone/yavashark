@@ -24,6 +24,7 @@ pub struct Compiler {
     pub stack_ptr: u32,
     pub max_stack_size: u32,
     pub stack_to_deallloc: Vec<Stack>,
+    pub current_fn_name: Option<String>,
 }
 
 impl Compiler {

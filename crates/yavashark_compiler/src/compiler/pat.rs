@@ -1,3 +1,4 @@
+use std::mem;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::path::Component;
@@ -126,7 +127,7 @@ impl Compiler {
                 }
                 ObjectPatProp::Assign(prop) => {
                     if let Some(value) = &prop.value {
-                        let name = self.alloc_var(prop.key.id.as_ref());
+                        let name = self.alloc_var(prop.key.id.sym.as_ref());
                         let key = self.alloc_const(prop.key.sym.as_str());
 
                         if has_rest {
@@ -139,7 +140,13 @@ impl Compiler {
                         let idx = self.instructions.len();
                         self.instructions.push(Instruction::jmp(0));
 
+                        let mut name_restore = None;
+                        if Self::expr_should_be_named(&value) {
+                            name_restore = mem::replace(&mut self.current_fn_name, Some(prop.key.id.sym.to_string()));
+                        }
+
                         self.compile_expr_data_certain(value, Acc);
+                        self.current_fn_name = name_restore;
 
                         self.instructions[idx] =
                             Instruction::jmp_if_not_undefined(Acc, self.instructions.len());
@@ -196,7 +203,21 @@ impl Compiler {
         let idx = self.instructions.len();
         self.instructions.push(Instruction::jmp(0));
 
+        let mut name_restore = None;
+
+        if let Pat::Ident(fn_name) = &*assign.left {
+            if Self::expr_should_be_named(&assign.right) {
+                let name = fn_name.sym.to_string();
+                name_restore = mem::replace(&mut self.current_fn_name, Some(name));
+            }
+        }
+
+
+
         self.compile_expr_data_certain(&assign.right, out)?;
+
+        self.current_fn_name = name_restore;
+
         self.instructions[idx] = Instruction::jmp_if_not_undefined(out, self.instructions.len());
 
         self.compile_pat(&assign.left, out, cb)?;
@@ -249,5 +270,14 @@ impl Compiler {
                 DataType::Const(c)
             }
         })
+    }
+
+    pub fn expr_should_be_named(expr: &Expr) -> bool {
+        match expr {
+            Expr::Fn(_) => true,
+            Expr::Arrow(_) => true,
+            Expr::Paren(paren) => Self::expr_should_be_named(&paren.expr),
+            _ => false,
+        }
     }
 }
