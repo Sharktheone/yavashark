@@ -1,3 +1,4 @@
+use crate::builtins::StringObj;
 use crate::error::Error;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{GCd, ObjectHandle, PropertyKey, Realm, Res};
@@ -17,7 +18,6 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::{ToYSString, YSString};
-use crate::builtins::StringObj;
 
 mod constructor;
 mod conversion;

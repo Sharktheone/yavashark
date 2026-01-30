@@ -548,7 +548,7 @@ func handleRunnerRerun(params json.RawMessage) (any, error) {
 		Workers:     conf.Workers,
 		Skips:       true,
 		Timings:     false,
-		Timeout:     30 * time.Second,
+		Timeout:     time.Duration(conf.ScriptTimeout) * time.Second,
 		Interactive: false,
 		FailedOnly:  opts.FailedOnly,
 	}

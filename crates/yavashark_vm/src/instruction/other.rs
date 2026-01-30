@@ -205,7 +205,7 @@ pub fn yield_star(data: impl Data, vm: &mut impl VM) -> ControlResult {
     Err(ControlFlow::YieldStar(result.to_object()?))
 }
 
-pub const fn yield_undefined(_: &impl VM) -> ControlResult {
+pub const fn yield_no_value(_: &impl VM) -> ControlResult {
     Err(ControlFlow::Yield(Value::Undefined))
 }
 

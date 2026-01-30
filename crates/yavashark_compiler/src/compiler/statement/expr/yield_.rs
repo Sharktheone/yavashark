@@ -16,7 +16,7 @@ impl Compiler {
         } else if expr.delegate {
             self.instructions.push(Instruction::yield_star(Undefined));
         } else {
-            self.instructions.push(Instruction::yield_undefined());
+            self.instructions.push(Instruction::yield_no_value());
         }
 
         Ok(())

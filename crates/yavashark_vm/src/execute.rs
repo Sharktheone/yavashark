@@ -57864,7 +57864,7 @@ impl Execute for Instruction {
             Self::YieldStarBool(arg0) => instruction::yield_star(arg0, vm)?,
             Self::YieldStarNull(arg0) => instruction::yield_star(arg0, vm)?,
             Self::YieldStarUndefined(arg0) => instruction::yield_star(arg0, vm)?,
-            Self::YieldUndefined => instruction::yield_undefined(vm)?,
+            Self::YieldNoValue => instruction::yield_no_value(vm)?,
             Self::AwaitVarToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitRegToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitAccToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
@@ -62260,7 +62260,7 @@ impl Execute for Instruction {
             }
             Self::Yield(arg0) => instruction::yield_(arg0, vm)?,
             Self::YieldStar(arg0) => instruction::yield_star(arg0, vm)?,
-            Self::YieldUndefined => instruction::yield_undefined(vm)?,
+            Self::YieldNoValue => instruction::yield_no_value(vm)?,
             Self::Await(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitNoOutput(arg0) => instruction::await_no_output(arg0, vm)?,
             Self::Debugger => instruction::debugger(vm)?,

@@ -73198,8 +73198,8 @@ impl Instruction {
         }
     }
     #[must_use]
-    pub fn yield_undefined() -> Self {
-        Self::YieldUndefined
+    pub fn yield_no_value() -> Self {
+        Self::YieldNoValue
     }
     #[must_use]
     pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {
@@ -78415,8 +78415,8 @@ impl Instruction {
         Self::YieldStar(arg0.data_type())
     }
     #[must_use]
-    pub fn yield_undefined() -> Self {
-        Self::YieldUndefined
+    pub fn yield_no_value() -> Self {
+        Self::YieldNoValue
     }
     #[must_use]
     pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {

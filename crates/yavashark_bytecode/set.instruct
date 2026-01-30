@@ -120,7 +120,7 @@ LoadSuperConstructor => Data
 
 Yield(Data)
 YieldStar(Data)
-YieldUndefined
+YieldNoValue
 Await(Data) => Data
 AwaitNoOutput(Data) 
 

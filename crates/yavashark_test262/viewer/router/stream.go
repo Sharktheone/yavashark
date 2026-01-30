@@ -305,7 +305,7 @@ func runTestsWithStream(c *fiber.Ctx, testPath string) error {
 				Workers:     conf.Workers,
 				Skips:       true,
 				Timings:     false,
-				Timeout:     30 * time.Second,
+				Timeout:     time.Duration(conf.ScriptTimeout) * time.Second,
 				Interactive: false,
 			}
 
@@ -347,7 +347,7 @@ func runTestsWithStream(c *fiber.Ctx, testPath string) error {
 				Workers:     conf.Workers,
 				Skips:       true,
 				Timings:     false,
-				Timeout:     30 * time.Second,
+				Timeout:     time.Duration(conf.ScriptTimeout) * time.Second,
 				Interactive: false,
 			}
 

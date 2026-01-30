@@ -165,7 +165,7 @@ func (r *Runtime) Execute(ctx context.Context, script string, sessionID string, 
 	request := NewRPCRequest(id, "execute", ExecuteParams{
 		Script:    script,
 		SessionID: sessionID,
-		Timeout:   conf.ScriptTimeout,
+		Timeout:   min(conf.ScriptTimeout, conf.MaxScriptTimeout),
 		ServerURL: serverURL,
 	})
 

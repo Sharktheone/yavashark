@@ -12,6 +12,7 @@ pub use helper::*;
 pub use iterator_prototype::*;
 pub use record::*;
 
+use crate::builtins::to_integer_or_infinity;
 use crate::native_obj::NativeObject;
 use crate::realm::Intrinsic;
 use crate::value::IntoValue;
@@ -21,7 +22,6 @@ use crate::{
 };
 use iterator_helper_obj::IteratorHelperObject;
 use yavashark_macro::props;
-use crate::builtins::to_integer_or_infinity;
 
 /// %Iterator% - The Iterator constructor (27.1.3)
 ///

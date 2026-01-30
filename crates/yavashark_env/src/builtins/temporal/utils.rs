@@ -266,7 +266,7 @@ pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Ove
     let Some(overflow) = overflow else {
         return Ok(None);
     };
-    
+
     match overflow {
         Value::Undefined => return Ok(None),
         Value::Symbol(_) => return Err(Error::ty("Invalid overflow option")),
@@ -547,11 +547,14 @@ pub fn value_to_date_time_fields(
     needs_fields: bool,
     realm: &mut Realm,
 ) -> Res<DateTimeFields> {
-    let (calendar_fields, had_calendar_fields) = value_to_calendar_fields(other, false, true, realm)?;
+    let (calendar_fields, had_calendar_fields) =
+        value_to_calendar_fields(other, false, true, realm)?;
     let (time, had_time_fields) = value_to_partial_time(other, false, realm)?;
-    
+
     if !had_calendar_fields && !had_time_fields && needs_fields {
-        return Err(Error::ty("At least one date or time field must be provided"));
+        return Err(Error::ty(
+            "At least one date or time field must be provided",
+        ));
     }
 
     Ok(DateTimeFields {
@@ -577,7 +580,7 @@ fn value_to_date_time_fields_inner(
 ) -> Res<DateTimeFields> {
     let (calendar_fields, _) = value_to_calendar_fields(other, needs_date_fields, validate, realm)?;
     let (time, _) = value_to_partial_time(other, needs_time_fields, realm)?;
-    
+
     Ok(DateTimeFields {
         calendar_fields,
         time,
