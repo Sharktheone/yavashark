@@ -69,7 +69,7 @@ impl OptimFunction {
                 prototype: prototype.clone().into(),
             }),
             raw: RawOptimFunction {
-                name,
+                name: name.clone(),
                 params,
                 block,
                 scope,
@@ -78,7 +78,7 @@ impl OptimFunction {
 
         let handle = ObjectHandle::new(this);
 
-        handle.define_property("name".into(), handle.clone().into(), realm)?;
+        handle.define_property("name".into(), name.clone().into(), realm)?;
         handle.define_property("length".into(), len.into(), realm)?;
         prototype.define_property("constructor".into(), handle.clone().into(), realm)?;
 
