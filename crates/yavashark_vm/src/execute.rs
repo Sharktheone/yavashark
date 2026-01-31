@@ -60706,6 +60706,17 @@ impl Execute for Instruction {
             Self::IterCollectUndefinedToStack(arg0, output) => {
                 instruction::iter_collect(arg0, output, vm)?
             }
+            Self::IterCloseVar(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseReg(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseAcc(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseStack(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseConst(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseF32(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseI32(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseU32(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseBool(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseNull(arg0) => instruction::iter_close(arg0, vm)?,
+            Self::IterCloseUndefined(arg0) => instruction::iter_close(arg0, vm)?,
             Self::PushAsyncIterVarToVar(arg0, output) => {
                 instruction::push_async_iter(arg0, output, vm)?
             }
@@ -62315,6 +62326,7 @@ impl Execute for Instruction {
             Self::IterCollect(arg0, output) => {
                 instruction::iter_collect(arg0, output, vm)?
             }
+            Self::IterClose(arg0) => instruction::iter_close(arg0, vm)?,
             Self::PushAsyncIter(arg0, output) => {
                 instruction::push_async_iter(arg0, output, vm)?
             }

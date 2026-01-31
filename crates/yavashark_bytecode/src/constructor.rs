@@ -76403,6 +76403,22 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn iter_close(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::IterCloseAcc(arg0),
+            DataType::Const(arg0) => Self::IterCloseConst(arg0),
+            DataType::Reg(arg0) => Self::IterCloseReg(arg0),
+            DataType::Stack(arg0) => Self::IterCloseStack(arg0),
+            DataType::Var(arg0) => Self::IterCloseVar(arg0),
+            DataType::F32(arg0) => Self::IterCloseF32(arg0),
+            DataType::I32(arg0) => Self::IterCloseI32(arg0),
+            DataType::U32(arg0) => Self::IterCloseU32(arg0),
+            DataType::Boolean(arg0) => Self::IterCloseBool(arg0),
+            DataType::Null(arg0) => Self::IterCloseNull(arg0),
+            DataType::Undefined(arg0) => Self::IterCloseUndefined(arg0),
+        }
+    }
+    #[must_use]
     pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
@@ -78565,6 +78581,10 @@ impl Instruction {
     #[must_use]
     pub fn iter_collect(arg0: impl Data, output: impl OutputData) -> Self {
         Self::IterCollect(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn iter_close(arg0: impl Data) -> Self {
+        Self::IterClose(arg0.data_type())
     }
     #[must_use]
     pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
