@@ -378,6 +378,14 @@ pub fn iter_collect(iter: impl Data, out: impl OutputData, vm: &mut impl VM) -> 
     Ok(())
 }
 
+pub fn iter_close(iter: impl Data, vm: &mut impl VM) -> Res {
+    let iter = iter.get(vm)?;
+
+    iter.iter_close(vm.get_realm())?;
+
+    Ok(())
+}
+
 pub fn push_async_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let iter = iter.get(vm)?;
 
