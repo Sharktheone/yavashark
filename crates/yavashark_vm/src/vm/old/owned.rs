@@ -352,7 +352,7 @@ impl VM for OldOwnedVM {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties(&mut self.realm)? {
+        for (name, value) in obj.enum_properties(&mut self.realm)? {
             if !not.contains(&name) {
                 props.push((name, value));
             }

@@ -620,7 +620,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties(self.get_realm())? {
+        for (name, value) in obj.enum_properties(self.get_realm())? {
             if !not.contains(&name) {
                 props.push((name, value));
             }

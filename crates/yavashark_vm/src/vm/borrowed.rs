@@ -338,7 +338,7 @@ impl VM for BorrowedVM<'_> {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties(self.realm)? {
+        for (name, value) in obj.enum_properties(self.realm)? {
             if !not.contains(&name) {
                 props.push((name, value));
             }
