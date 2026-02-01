@@ -134,8 +134,8 @@ impl AsyncGeneratorFunction {
 }
 
 impl Func for AsyncGeneratorFunction {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        let scope = &mut Scope::with_parent(&self.scope)?;
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+        let scope = &mut Scope::with_parent_this(&self.scope, this)?;
         scope.state_set_returnable()?;
         scope.set_strict_mode()?;
 
