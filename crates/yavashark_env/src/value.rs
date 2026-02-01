@@ -633,7 +633,7 @@ impl Object {
     pub fn get_iter(&self, realm: &mut Realm) -> Result<Value, Error> {
         let iter = self
             .resolve_property(Symbol::ITERATOR, realm)?
-            .ok_or(Error::reference("Object is not iterable"))?;
+            .ok_or(Error::ty("Object is not iterable"))?;
 
         iter.call(realm, Vec::new(), self.clone().into())
     }
