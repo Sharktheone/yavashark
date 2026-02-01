@@ -140,16 +140,6 @@ impl PlainTime {
             .map_err(Error::from_temporal)
     }
 
-    #[prop("toPlainDateTime")]
-    pub fn to_plain_date_time(&self, date: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let date = value_to_plain_date(date, realm)?;
-
-        let plain_date_time = temporal_rs::PlainDateTime::from_date_and_time(date, self.time)
-            .map_err(Error::from_temporal)?;
-
-        Ok(PlainDateTime::new(plain_date_time, realm)?.into_object())
-    }
-
     pub fn until(
         &self,
         other: Value,
