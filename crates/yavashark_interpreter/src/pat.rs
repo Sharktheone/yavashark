@@ -166,7 +166,7 @@ impl Interpreter {
                         ObjectPatProp::Rest(rest) => {
                             let mut rest_props = Vec::new();
 
-                            for (name, value) in object.properties(realm)? {
+                            for (name, value) in object.as_object()?.enum_properties(realm)? {
                                 if !rest_not_props.contains(&name) {
                                     rest_props.push((name, value));
                                 }
