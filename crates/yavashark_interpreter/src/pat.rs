@@ -1,6 +1,6 @@
 use std::iter;
 use swc_common::{Span, DUMMY_SP};
-use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
+use swc_ecma_ast::{Expr, ObjectPatProp, Pat, PropName};
 
 use crate::function::JSFunction;
 use crate::statement::expr::ArrowFunction;
@@ -25,7 +25,7 @@ impl Interpreter {
         value: &mut impl Iterator<Item = Value>,
         mut cb: &mut impl FnMut(&mut Scope, String, Value, &mut Realm) -> Res,
     ) -> Res {
-        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, cb)
+        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, true, cb)
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
@@ -35,13 +35,16 @@ impl Interpreter {
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
         span: Span,
+        name: bool,
         mut cb: &mut impl FnMut(&mut Scope, String, Value, &mut Realm) -> Res,
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
                 let value = value.next().unwrap_or(Value::Undefined);
 
-                set_value_name(id.id.sym.as_str(), &value, realm)?;
+                if name {
+                    set_value_name(id.id.sym.as_str(), &value, realm)?;
+                }
 
                 cb(scope, id.id.sym.to_string(), value, realm)?;
             }
@@ -149,8 +152,13 @@ impl Interpreter {
                                 if value.is_undefined() {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
                                 }
+
+                                let should_be_named = Self::expr_should_be_named(val_expr);
+
+                                if should_be_named {
+                                    set_value_name(&key, &value, realm)?;
+                                }
                             }
-                            set_value_name(&key, &value, realm)?;
 
                             cb(scope, key.clone(), value, realm)?;
                             rest_not_props.push(key.into());
@@ -186,7 +194,9 @@ impl Interpreter {
                     val
                 };
 
-                Self::run_pat(realm, &assign.left, scope, &mut iter::once(val), cb)?;
+                let should_be_named = Self::expr_should_be_named(&assign.right);
+
+                Self::run_pat_internal(realm, &assign.left, scope, &mut iter::once(val), DUMMY_SP, should_be_named, cb)?;
             }
             Pat::Expr(expr) => {
                 Self::assign_expr(realm, expr, value.next().unwrap_or(Value::Undefined), scope)?;
@@ -220,6 +230,16 @@ impl Interpreter {
             }
             PropName::BigInt(_) => todo!(),
         })
+    }
+
+    pub fn expr_should_be_named(expr: &Expr) -> bool {
+        match expr {
+            Expr::Fn(_) => true,
+            Expr::Arrow(_) => true,
+            Expr::Class(_) => true,
+            Expr::Paren(paren) => Self::expr_should_be_named(&paren.expr),
+            _ => false,
+        }
     }
 }
 

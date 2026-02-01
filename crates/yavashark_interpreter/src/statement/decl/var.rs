@@ -64,12 +64,15 @@ impl Interpreter {
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
 
+                        let named = Self::expr_should_be_named(init);
+
                         Self::run_pat_internal(
                             realm,
                             &decl.name,
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
+                            named,
                             &mut |scope, name, value, realm| {
                                 let var = Variable::Var(name, value);
 
@@ -83,6 +86,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
+                            false,
                             &mut |scope, name, value, realm| {
                                 let var = Variable::Var(name, value);
 
@@ -99,12 +103,16 @@ impl Interpreter {
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
+
+                        let named = Self::expr_should_be_named(init);
+
                         Self::run_pat_internal(
                             realm,
                             &decl.name,
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
+                            named,
                             &mut |scope, name, value, realm| {
                                 let var = Variable::Let(name, value);
 
@@ -118,6 +126,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
+                            false,
                             &mut |scope, name, value, realm| {
                                 let var = Variable::Let(name, value);
 
@@ -133,12 +142,16 @@ impl Interpreter {
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
+
+                        let named = Self::expr_should_be_named(init);
+
                         Self::run_pat_internal(
                             realm,
                             &decl.name,
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
+                            named,
                             &mut |scope, name, value, realm| {
                                 let var = Variable::Const(name, value);
 
