@@ -4,7 +4,7 @@ use anyhow::anyhow;
 use std::path::Component;
 use std::rc::Rc;
 use swc_ecma_ast::{ArrayPat, AssignPat, Expr, ObjectPat, ObjectPatProp, Pat, PropName};
-use yavashark_bytecode::data::{Acc, Data, DataType, F32, OutputDataType, VarName};
+use yavashark_bytecode::data::{Acc, Data, DataType, F32, OutputDataType, VarName, Undefined};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstValue, DataTypeValue};
 
@@ -67,6 +67,13 @@ impl Compiler {
         self.instructions.push(Instruction::push_iter(source, iter));
 
         let out = self.alloc_reg_or_stack();
+        let mut close = true;
+
+        let mut patch_insn = Vec::new();
+
+        let dbg_from = self.instructions.len();
+
+
         for (i, elem) in array.elems.iter().enumerate() {
             if let Some(elem) = elem {
                 if let Pat::Rest(rest) = elem {
@@ -74,15 +81,49 @@ impl Compiler {
                     self.instructions
                         .push(Instruction::iter_collect(iter, rest_out));
 
+                    close = false;
+
                     self.compile_pat(&rest.arg, rest_out, cb)?;
                 } else {
+                    patch_insn.push((self.instructions.len(), true, Some(elem)));
                     self.instructions.push(Instruction::iter_next(iter, out));
                     self.compile_pat(elem, out, cb)?;
                 }
             } else {
+                patch_insn.push((self.instructions.len(), false, None));
                 self.instructions
                     .push(Instruction::iter_next_no_output(iter));
             }
+        }
+
+        if close || !patch_insn.is_empty() {
+            self.instructions.push(Instruction::iter_close(iter));
+        }
+
+
+
+        let idx = self.instructions.len();
+        self.instructions.push(Instruction::jmp(0));
+        let mut emitted = false;
+
+        for (idx, capture_output, pat) in patch_insn {
+            let jmp_target = self.instructions.len();
+            self.instructions[idx] = if capture_output {
+                Instruction::iter_next_jmp(iter, jmp_target, out)
+            } else {
+                Instruction::iter_next_no_output_jmp(iter, jmp_target)
+            };
+
+            if let Some(pat) = pat {
+                emitted = true;
+                self.compile_pat(pat,  Undefined, cb)?;
+            }
+        }
+
+        if emitted {
+            self.instructions[idx] = Instruction::jmp(self.instructions.len());
+        } else {
+            self.instructions.pop();
         }
 
         self.dealloc(iter);
@@ -230,6 +271,86 @@ impl Compiler {
         self.compile_assign_expr(expr, source)?;
 
         Ok(())
+    }
+
+    pub fn compile_define_pat_variables(&mut self, pat: &Pat, cb: &mut impl FnMut(&mut Self, DataType, VarName)) -> Res {
+        match pat {
+            Pat::Ident(id) => {
+                let var_name = self.alloc_var(id.sym.as_str());
+
+                cb(self, DataType::Undefined(Undefined), var_name);
+            }
+            Pat::Array(array) => {
+                for elem in &array.elems {
+                    if let Some(pat) = elem {
+                        self.compile_define_pat_variables(pat, cb)?;
+                    }
+                }
+            }
+            Pat::Rest(rest) => {
+                //TODO: this should probably just be an empty array
+                self.compile_define_pat_variables(&rest.arg, cb)?;
+            }
+            Pat::Object(object) => {
+                for prop in &object.props {
+
+                match prop {
+                    ObjectPatProp::KeyValue(kv) => {
+                        self.compile_define_pat_variables(&kv.value, cb)?;
+                    }
+                    ObjectPatProp::Assign(assign) => {
+                        let var_name = self.alloc_var(assign.key.sym.as_str());
+
+                        let dt = if let Some(expr) = &assign.value {
+                            let mut name_restore = None;
+                            if Self::expr_should_be_named(&expr) {
+                                name_restore = mem::replace(&mut self.current_fn_name, Some(assign.key.id.sym.to_string()));
+                            }
+
+                            self.compile_expr_data_certain(expr, Acc);
+                            self.current_fn_name = name_restore;
+
+                            DataType::Acc(Acc)
+                        } else {
+                            DataType::Undefined(Undefined)
+                        };
+
+                        cb(self, dt, var_name);
+                    }
+                    ObjectPatProp::Rest(rest) => {
+                        self.compile_define_pat_variables(&rest.arg, cb)?;
+                    }
+
+                }
+                }
+
+            }
+            Pat::Assign(assign) => {
+                let mut name_restore = None;
+
+                if let Pat::Ident(fn_name) = &*assign.left {
+                    if Self::expr_should_be_named(&assign.right) {
+                        let name = fn_name.sym.to_string();
+                        name_restore = mem::replace(&mut self.current_fn_name, Some(name));
+                    }
+                }
+
+
+
+                self.compile_expr_data_certain(&assign.right, Acc)?;
+
+                self.current_fn_name = name_restore;
+
+                self.compile_pat(&assign.left, Acc, cb)?;
+            }
+
+            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
+            Pat::Expr(expr) => self.compile_expr_pat(expr, Undefined)?,
+        }
+
+
+        Ok(())
+
     }
 
     pub fn convert_pat_prop_name(
