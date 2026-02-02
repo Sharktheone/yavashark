@@ -14,7 +14,10 @@ impl Compiler {
             return Ok(None);
         };
 
-        let f = self.create_function(&expr.function, expr.ident.as_ref().map(|id| id.sym.to_string()))?;
+        let f = self.create_function(
+            &expr.function,
+            expr.ident.as_ref().map(|id| id.sym.to_string()),
+        )?;
 
         Ok(Some(MoveOptimization::new(
             f,

@@ -196,7 +196,15 @@ impl Interpreter {
 
                 let should_be_named = Self::expr_should_be_named(&assign.right);
 
-                Self::run_pat_internal(realm, &assign.left, scope, &mut iter::once(val), DUMMY_SP, should_be_named, cb)?;
+                Self::run_pat_internal(
+                    realm,
+                    &assign.left,
+                    scope,
+                    &mut iter::once(val),
+                    DUMMY_SP,
+                    should_be_named,
+                    cb,
+                )?;
             }
             Pat::Expr(expr) => {
                 Self::assign_expr(realm, expr, value.next().unwrap_or(Value::Undefined), scope)?;

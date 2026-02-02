@@ -1,10 +1,10 @@
-use std::mem;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
+use std::mem;
 use std::path::Component;
 use std::rc::Rc;
 use swc_ecma_ast::{ArrayPat, AssignPat, Expr, ObjectPat, ObjectPatProp, Pat, PropName};
-use yavashark_bytecode::data::{Acc, Data, DataType, F32, OutputDataType, VarName, Undefined};
+use yavashark_bytecode::data::{Acc, Data, DataType, F32, OutputDataType, Undefined, VarName};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstValue, DataTypeValue};
 
@@ -73,7 +73,6 @@ impl Compiler {
 
         let dbg_from = self.instructions.len();
 
-
         for (i, elem) in array.elems.iter().enumerate() {
             if let Some(elem) = elem {
                 if let Pat::Rest(rest) = elem {
@@ -100,8 +99,6 @@ impl Compiler {
             self.instructions.push(Instruction::iter_close(iter));
         }
 
-
-
         let idx = self.instructions.len();
         self.instructions.push(Instruction::jmp(0));
         let mut emitted = false;
@@ -116,7 +113,7 @@ impl Compiler {
 
             if let Some(pat) = pat {
                 emitted = true;
-                self.compile_pat(pat,  Undefined, cb)?;
+                self.compile_pat(pat, Undefined, cb)?;
             }
         }
 
@@ -183,7 +180,10 @@ impl Compiler {
 
                         let mut name_restore = None;
                         if Self::expr_should_be_named(&value) {
-                            name_restore = mem::replace(&mut self.current_fn_name, Some(prop.key.id.sym.to_string()));
+                            name_restore = mem::replace(
+                                &mut self.current_fn_name,
+                                Some(prop.key.id.sym.to_string()),
+                            );
                         }
 
                         self.compile_expr_data_certain(value, Acc);
@@ -253,8 +253,6 @@ impl Compiler {
             }
         }
 
-
-
         self.compile_expr_data_certain(&assign.right, out)?;
 
         self.current_fn_name = name_restore;
@@ -273,7 +271,11 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn compile_define_pat_variables(&mut self, pat: &Pat, cb: &mut impl FnMut(&mut Self, DataType, VarName)) -> Res {
+    pub fn compile_define_pat_variables(
+        &mut self,
+        pat: &Pat,
+        cb: &mut impl FnMut(&mut Self, DataType, VarName),
+    ) -> Res {
         match pat {
             Pat::Ident(id) => {
                 let var_name = self.alloc_var(id.sym.as_str());
@@ -293,37 +295,37 @@ impl Compiler {
             }
             Pat::Object(object) => {
                 for prop in &object.props {
+                    match prop {
+                        ObjectPatProp::KeyValue(kv) => {
+                            self.compile_define_pat_variables(&kv.value, cb)?;
+                        }
+                        ObjectPatProp::Assign(assign) => {
+                            let var_name = self.alloc_var(assign.key.sym.as_str());
 
-                match prop {
-                    ObjectPatProp::KeyValue(kv) => {
-                        self.compile_define_pat_variables(&kv.value, cb)?;
+                            let dt = if let Some(expr) = &assign.value {
+                                let mut name_restore = None;
+                                if Self::expr_should_be_named(&expr) {
+                                    name_restore = mem::replace(
+                                        &mut self.current_fn_name,
+                                        Some(assign.key.id.sym.to_string()),
+                                    );
+                                }
+
+                                self.compile_expr_data_certain(expr, Acc);
+                                self.current_fn_name = name_restore;
+
+                                DataType::Acc(Acc)
+                            } else {
+                                DataType::Undefined(Undefined)
+                            };
+
+                            cb(self, dt, var_name);
+                        }
+                        ObjectPatProp::Rest(rest) => {
+                            self.compile_define_pat_variables(&rest.arg, cb)?;
+                        }
                     }
-                    ObjectPatProp::Assign(assign) => {
-                        let var_name = self.alloc_var(assign.key.sym.as_str());
-
-                        let dt = if let Some(expr) = &assign.value {
-                            let mut name_restore = None;
-                            if Self::expr_should_be_named(&expr) {
-                                name_restore = mem::replace(&mut self.current_fn_name, Some(assign.key.id.sym.to_string()));
-                            }
-
-                            self.compile_expr_data_certain(expr, Acc);
-                            self.current_fn_name = name_restore;
-
-                            DataType::Acc(Acc)
-                        } else {
-                            DataType::Undefined(Undefined)
-                        };
-
-                        cb(self, dt, var_name);
-                    }
-                    ObjectPatProp::Rest(rest) => {
-                        self.compile_define_pat_variables(&rest.arg, cb)?;
-                    }
-
                 }
-                }
-
             }
             Pat::Assign(assign) => {
                 let mut name_restore = None;
@@ -334,8 +336,6 @@ impl Compiler {
                         name_restore = mem::replace(&mut self.current_fn_name, Some(name));
                     }
                 }
-
-
 
                 self.compile_expr_data_certain(&assign.right, Acc)?;
 
@@ -348,9 +348,7 @@ impl Compiler {
             Pat::Expr(expr) => self.compile_expr_pat(expr, Undefined)?,
         }
 
-
         Ok(())
-
     }
 
     pub fn convert_pat_prop_name(
