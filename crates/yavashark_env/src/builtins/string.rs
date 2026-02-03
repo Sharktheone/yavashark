@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::builtins::iterator::Iterator;
-use crate::builtins::{create_iter_result, create_iter_result_object, RegExp};
+use crate::builtins::{create_iter_result, RegExp};
 use crate::conversion::{ActualString, Stringable};
 use crate::realm::Intrinsic;
 use crate::utils::{ArrayLike, ProtoDefault};
@@ -654,7 +654,6 @@ impl StringObj {
     pub fn normalize(
         #[this] str: &Stringable,
         form: Option<Stringable>,
-        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let form_str = form.as_ref().map_or("NFC", |form| form.as_str());
 
