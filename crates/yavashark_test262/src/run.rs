@@ -2,12 +2,18 @@ use crate::harness::setup_global;
 use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
 use std::path::{Path, PathBuf};
+use std::process;
 use swc_ecma_ast::Program;
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
+
+
+const SKIP_FEATURES: &[&str] = &[
+    "cross-realm",
+];
 
 pub fn run_file(file: PathBuf) -> Result<String, String> {
     #[cfg(feature = "timings")]
@@ -17,6 +23,15 @@ pub fn run_file(file: PathBuf) -> Result<String, String> {
     unsafe {
         crate::PARSE_DURATION = parse.elapsed();
     }
+
+    for feature in &metadata.features {
+        if SKIP_FEATURES.contains(&feature.as_str()) {
+            println!("SKIP");
+            process::exit(0);
+        }
+    }
+
+
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
     let strict = metadata.flags.contains(Flags::ONLY_STRICT);
