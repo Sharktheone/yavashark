@@ -1,5 +1,4 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
-use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{
     difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
