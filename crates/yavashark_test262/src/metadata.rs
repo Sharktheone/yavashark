@@ -9,6 +9,7 @@ pub struct Metadata {
     pub includes: Vec<String>,
     pub flags: Flags,
     pub locale: Vec<String>,
+    pub features: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -102,11 +103,27 @@ impl Metadata {
             Vec::new()
         };
 
+        let features = if let Yaml::Array(features) = yaml.index("features") {
+            features
+                .iter()
+                .filter_map(|v| {
+                    if let Yaml::String(v) = v {
+                        Some(v.clone())
+                    } else {
+                        None
+                    }
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
+
         Self {
             negative,
             flags,
             includes,
             locale,
+            features,
         }
     }
 }
