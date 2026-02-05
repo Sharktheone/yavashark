@@ -14,6 +14,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+          fetch-depth: 0
 
       - name: Checkout test262 repository
         uses: actions/checkout@v4
@@ -51,6 +52,42 @@ jobs:
         run: |
           ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --workers 256 --noskip
 
+      - name: Get commit info
+        id: commit_info
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+        run: |
+          # Get all commits in this push and write to file
+          git log --reverse --pretty=format:"%H" "$BEFORE_SHA".."$AFTER_SHA" 2>/dev/null > /tmp/commit_list.txt || echo "$AFTER_SHA" > /tmp/commit_list.txt
+          COMMIT_COUNT=$(wc -l < /tmp/commit_list.txt)
+          
+          # Get HEAD commit for title
+          HEAD_MSG=$(git log -1 --pretty=format:"%s" "$AFTER_SHA")
+          
+          # Build detailed commit list file
+          echo "" > /tmp/commit_details.txt
+          while read -r commit_sha; do
+            if [ -n "$commit_sha" ]; then
+              echo "Commit: $commit_sha" >> /tmp/commit_details.txt
+              git log -1 --pretty=format:"Title: %s" "$commit_sha" >> /tmp/commit_details.txt
+              echo "" >> /tmp/commit_details.txt
+              echo "Description:" >> /tmp/commit_details.txt
+              git log -1 --pretty=format:"%b" "$commit_sha" >> /tmp/commit_details.txt
+              echo "" >> /tmp/commit_details.txt
+              echo "---" >> /tmp/commit_details.txt
+              echo "" >> /tmp/commit_details.txt
+            fi
+          done < /tmp/commit_list.txt
+          
+          # Calculate checksums
+          cd data
+          git ls-files --others --exclude-standard | xargs sha256sum > /tmp/checksums.txt 2>/dev/null || echo "No new files" > /tmp/checksums.txt
+          
+          echo "title=$HEAD_MSG" >> "$GITHUB_OUTPUT"
+          echo "sha=$AFTER_SHA" >> "$GITHUB_OUTPUT"
+          echo "count=$COMMIT_COUNT" >> "$GITHUB_OUTPUT"
+
       - name: Update results
         working-directory: data
         run: |
@@ -58,8 +95,26 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add .
-          git commit -m "Update test262 results"
+          
+          # Build commit message
+          COMMIT_TITLE='${{ steps.commit_info.outputs.title }}'
+          COMMIT_SHA='${{ steps.commit_info.outputs.sha }}'
+          COMMIT_COUNT='${{ steps.commit_info.outputs.count }}'
+          
+          # Create commit message file
+          {
+            echo "$COMMIT_TITLE"
+            echo ""
+            echo "Source commit range: $COMMIT_SHA ($COMMIT_COUNT commit(s))"
+            echo ""
+            echo "Commit details:"
+            echo ""
+            cat /tmp/commit_details.txt
+            echo ""
+            echo "Checksums of added/modified files:"
+            cat /tmp/checksums.txt
+          } > /tmp/commit_msg.txt
+          
+          git commit -F /tmp/commit_msg.txt
           git push
-
-
 
