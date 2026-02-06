@@ -2,11 +2,12 @@ use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::Hint;
 use crate::value::Obj;
-use crate::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike, Utc};
 use std::cell::RefCell;
 use std::str::FromStr;
 use yavashark_macro::{object, props};
+use crate::builtins::Instant;
 
 #[object]
 #[derive(Debug)]
@@ -1059,6 +1060,19 @@ impl Date {
                 .to_string()
                 .into()),
             None => Ok(Value::Null),
+        }
+    }
+
+    #[prop("toTemporalInstant")]
+    pub fn to_temporal_instant(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        match self.date() {
+            Some(d) => {
+                let stamp = temporal_rs::Instant::from_epoch_milliseconds(d.timestamp_millis())
+                    .map_err(Error::from_temporal)?;
+
+                Ok(Instant::from_stamp(stamp, realm)?.into_object())
+            }
+            None => Err(crate::Error::range("Invalid time value")),
         }
     }
 
