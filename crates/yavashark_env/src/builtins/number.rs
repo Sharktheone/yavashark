@@ -303,6 +303,7 @@ impl NumberObj {
 )]
 impl NumberObj {
     #[prop("toString")]
+    #[length(1)]
     fn to_string(&self, radix: Option<u32>) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
 
