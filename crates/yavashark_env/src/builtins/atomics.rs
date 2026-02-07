@@ -1,4 +1,4 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -18,9 +18,12 @@ impl Atomics {
     }
 }
 
-#[props(intrinsic_name = atomics, to_string_tag = "Atomics")]
+#[props(intrinsic_name = atomics)]
 #[allow(unused)]
 impl Atomics {
+    #[prop(Symbol::TO_STRING_TAG)]
+    const TO_STRING_TAG: &'static str = "Atomics";
+
     pub fn add(ta: &ObjectHandle, index: usize, value: i32) {}
 
     pub fn and(ta: &ObjectHandle, index: usize, value: i32) {}
