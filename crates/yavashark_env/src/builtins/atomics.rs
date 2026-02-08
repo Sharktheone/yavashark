@@ -22,6 +22,7 @@ impl Atomics {
 #[allow(unused)]
 impl Atomics {
     #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
     const TO_STRING_TAG: &'static str = "Atomics";
 
     pub fn add(ta: &ObjectHandle, index: usize, value: i32) {}
