@@ -102,6 +102,7 @@ impl AsyncGeneratorFunction {
     const LENGTH: usize = 0;
 
     #[constructor]
+    #[call_constructor]
     pub fn construct(#[realm] realm: &mut Realm, mut args: Vec<Value>) -> ValueResult {
         let Some(code) = args.pop() else {
             return Ok(Self::empty(realm)?.into_value());
