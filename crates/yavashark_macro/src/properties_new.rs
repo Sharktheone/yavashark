@@ -349,6 +349,7 @@ fn init_constructor(
 
     let value = &config.value;
     let error = &config.error;
+    let value_result = &config.value_result;
     let mut_obj = &config.mut_object;
     let object_handle = &config.object_handle;
     let realm = &config.realm;
@@ -395,7 +396,7 @@ fn init_constructor(
 
         constructor_tokens.extend(quote! {
             impl #env::value::Func for #name {
-                fn call(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>, this: #value) -> crate::ValueResult {
+                fn call(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>, this: #value) -> #value_result {
                     use #env::value::{Obj, IntoValue, FromValue};
                     use #try_into_value;
 
