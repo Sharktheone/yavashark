@@ -10,10 +10,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 
-
-const SKIP_FEATURES: &[&str] = &[
-    "cross-realm",
-];
+const SKIP_FEATURES: &[&str] = &["cross-realm"];
 
 pub fn run_file(file: PathBuf) -> Result<String, String> {
     #[cfg(feature = "timings")]
@@ -30,7 +27,6 @@ pub fn run_file(file: PathBuf) -> Result<String, String> {
             process::exit(0);
         }
     }
-
 
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);

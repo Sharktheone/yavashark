@@ -1,3 +1,4 @@
+use crate::builtins::Instant;
 use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::Hint;
@@ -7,7 +8,6 @@ use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike,
 use std::cell::RefCell;
 use std::str::FromStr;
 use yavashark_macro::{object, props};
-use crate::builtins::Instant;
 
 #[object]
 #[derive(Debug)]

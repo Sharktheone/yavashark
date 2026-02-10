@@ -651,10 +651,7 @@ impl StringObj {
         }
     }
 
-    pub fn normalize(
-        #[this] str: &Stringable,
-        form: Option<Stringable>,
-    ) -> ValueResult {
+    pub fn normalize(#[this] str: &Stringable, form: Option<Stringable>) -> ValueResult {
         let form_str = form.as_ref().map_or("NFC", |form| form.as_str());
 
         let normalized = match form_str {
