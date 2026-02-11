@@ -20,6 +20,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 const TEST262_ROOT: &str = "../../test262";
 
+const ROOT_DIRS: &[&str] = &["harness/", "language/", "built-ins/", "annexB/", "intl402/", "staging/"];
+
 fn main() {
     #[cfg(feature = "timings")]
     let now = std::time::Instant::now();
@@ -57,6 +59,8 @@ fn run() {
 
     let path = if f.starts_with("test/") {
         PathBuf::from(TEST262_ROOT).join(f)
+    } else if ROOT_DIRS.iter().any(|d| f.starts_with(d)) {
+        PathBuf::from(TEST262_ROOT).join("test").join(f)
     } else {
         PathBuf::from(f)
     };
