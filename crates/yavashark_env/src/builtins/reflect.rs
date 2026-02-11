@@ -2,10 +2,7 @@ use crate::constructor::ObjectConstructor;
 use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
 use crate::value::{DefinePropertyDescriptor, Obj, Property};
-use crate::{
-    Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
-    ValueResult,
-};
+use crate::{Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 
@@ -30,6 +27,10 @@ impl Reflect {
 
 #[properties_new(raw)]
 impl Reflect {
+    #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "Reflect";
+
     //28.1.1 Reflect.apply ( target, thisArgument, argumentsList ), https://tc39.es/ecma262/#sec-reflection
     pub fn apply(
         target: &Value,
