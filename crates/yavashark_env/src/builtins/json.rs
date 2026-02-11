@@ -2,7 +2,7 @@ use crate::array::Array;
 use crate::partial_init::Initializer;
 use crate::realm::Intrinsic;
 use crate::value::{Hint, IntoValue, Obj};
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -133,6 +133,10 @@ impl JSON {
 
 #[properties_new(raw)]
 impl JSON {
+    #[prop(Symbol::TO_STRING_TAG)]
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "JSON";
+
     fn parse(str: &Value, #[realm] realm: &mut Realm) -> Res<Value> {
         let str = str.to_primitive(Hint::String, realm)?;
         let str = str.to_string(realm)?;
