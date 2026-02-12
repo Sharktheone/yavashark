@@ -488,11 +488,33 @@ impl Array {
     pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner
-            .array
-            .iter()
-            .filter_map(|(_, v)| inner.values.get(*v).map(|p| p.value.clone()))
-            .collect())
+
+        let len = self.length.get();
+
+        let mut vec = Vec::with_capacity(len);
+
+        let mut last = 0;
+
+        for (idx, value) in &inner.array {
+            while last < *idx {
+                vec.push(Value::Undefined);
+                last += 1;
+            }
+            let Some(value) = inner.values.get(*value) else {
+                vec.push(Value::Undefined);
+                last += 1;
+                continue;
+            };
+            vec.push(value.value.clone());
+            last += 1;
+        }
+
+        while last < len {
+            vec.push(Value::Undefined);
+            last += 1;
+        }
+
+        Ok(vec)
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
