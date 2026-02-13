@@ -488,7 +488,6 @@ impl Array {
     pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-
         let len = self.length.get();
 
         let mut vec = Vec::with_capacity(len);

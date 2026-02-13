@@ -20,7 +20,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 const TEST262_ROOT: &str = "../../test262";
 
-const ROOT_DIRS: &[&str] = &["harness/", "language/", "built-ins/", "annexB/", "intl402/", "staging/"];
+const ROOT_DIRS: &[&str] = &[
+    "harness/",
+    "language/",
+    "built-ins/",
+    "annexB/",
+    "intl402/",
+    "staging/",
+];
 
 fn main() {
     #[cfg(feature = "timings")]

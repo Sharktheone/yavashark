@@ -2,7 +2,10 @@ use crate::constructor::ObjectConstructor;
 use crate::partial_init::Initializer;
 use crate::utils::ArrayLike;
 use crate::value::{DefinePropertyDescriptor, Obj, Property};
-use crate::{Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Symbol, Value, ValueResult};
+use crate::{
+    Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Symbol, Value,
+    ValueResult,
+};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 
