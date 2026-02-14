@@ -17,10 +17,7 @@ use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::value::{self, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor};
-use crate::{
-    Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value,
-    ValueResult, Variable,
-};
+use crate::{Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, ValueResult, Variable};
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
 use half::f16;
@@ -1636,6 +1633,25 @@ impl TypedArray {
         let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
+    }
+
+
+    #[get(Symbol::TO_STRING_TAG)]
+    fn to_string_tag(&self) -> &'static str {
+        match self.ty {
+            Type::U8C => "Uint8ClampedArray",
+            Type::U8 => "Uint8Array",
+            Type::U16 => "Uint16Array",
+            Type::U32 => "Uint32Array",
+            Type::U64 => "BigUint64Array",
+            Type::I8 => "Int8Array",
+            Type::I16 => "Int16Array",
+            Type::I32 => "Int32Array",
+            Type::I64 => "BigInt64Array",
+            Type::F16 => "Float16Array",
+            Type::F32 => "Float32Array",
+            Type::F64 => "Float64Array",
+        }
     }
 }
 
