@@ -31,6 +31,7 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
+mod nan_boxed;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
