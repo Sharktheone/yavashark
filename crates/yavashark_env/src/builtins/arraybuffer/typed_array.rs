@@ -597,7 +597,7 @@ impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
 
     #[call_constructor]
-    pub fn construct() -> Res {
+    pub const fn construct() -> Res {
         Err(Error::ty(
             "Abstract class TypedArray not directly constructable",
         ))
