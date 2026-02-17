@@ -12,7 +12,7 @@ use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
 
 #[allow(clippy::unwrap_used)]
-pub(crate) fn main() {
+pub fn main() {
     let matches = clap::Command::new("yavashark")
         .version("0.1.0")
         .about("A JavaScript interpreter written in Rust")

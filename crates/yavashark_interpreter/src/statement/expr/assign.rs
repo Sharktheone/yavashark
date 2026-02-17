@@ -90,7 +90,7 @@ impl Interpreter {
                         let this_value = Value::Object(obj.clone());
 
                         Self::write_private_member_on_instance(
-                            realm, &*class, name, member, value, this_value,
+                            realm, &class, name, member, value, this_value,
                         )?;
 
                         return Ok(());
@@ -104,7 +104,7 @@ impl Interpreter {
                         let this_value = Value::Object(obj.clone());
 
                         Self::write_private_member_on_class(
-                            realm, &*class, name, member, value, this_value,
+                            realm, &class, name, member, value, this_value,
                         )?;
 
                         return Ok(());
@@ -344,7 +344,7 @@ impl Interpreter {
 
                         Self::write_private_member_on_instance(
                             realm,
-                            &*class,
+                            &class,
                             name,
                             member,
                             value.copy(),
@@ -376,7 +376,7 @@ impl Interpreter {
 
                         Self::write_private_member_on_class(
                             realm,
-                            &*class,
+                            &class,
                             name,
                             member,
                             value.copy(),

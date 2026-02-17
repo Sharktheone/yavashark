@@ -105,8 +105,7 @@ pub fn create_class(
                 let is_strict = constructor
                     .body
                     .as_ref()
-                    .map(|b| Interpreter::is_strict(&b.stmts))
-                    .unwrap_or(false);
+                    .is_some_and(|b| Interpreter::is_strict(&b.stmts));
 
                 let raw_fn = RawJSFunction {
                     name: RefCell::new("constructor".into()),
@@ -390,11 +389,11 @@ fn define_method_on_class(
         }
 
         match kind {
-            MethodKind::Getter => class.define_getter(key.into(), value.to_object()?, realm),
-            MethodKind::Setter => class.define_setter(key.into(), value.to_object()?, realm),
+            MethodKind::Getter => class.define_getter(key, value.to_object()?, realm),
+            MethodKind::Setter => class.define_setter(key, value.to_object()?, realm),
             MethodKind::Method => {
                 class.define_property_attributes(
-                    key.into(),
+                    key,
                     Variable::write_config(value),
                     realm,
                 )?;
@@ -404,11 +403,11 @@ fn define_method_on_class(
         };
     } else {
         match kind {
-            MethodKind::Getter => proto.define_getter(key.into(), value.to_object()?, realm),
-            MethodKind::Setter => proto.define_setter(key.into(), value.to_object()?, realm),
+            MethodKind::Getter => proto.define_getter(key, value.to_object()?, realm),
+            MethodKind::Setter => proto.define_setter(key, value.to_object()?, realm),
             MethodKind::Method => {
                 proto.define_property_attributes(
-                    key.into(),
+                    key,
                     Variable::write_config(value),
                     realm,
                 )?;

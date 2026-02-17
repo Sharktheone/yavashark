@@ -1,4 +1,4 @@
-//! Iterators for YSString code units and code points.
+//! Iterators for `YSString` code units and code points.
 
 use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, CodePoint};
 
@@ -11,7 +11,7 @@ pub enum CodeUnits<'a> {
     Utf16(std::iter::Copied<std::slice::Iter<'a, u16>>),
 }
 
-impl<'a> Iterator for CodeUnits<'a> {
+impl Iterator for CodeUnits<'_> {
     type Item = u16;
 
     #[inline]
@@ -65,7 +65,7 @@ pub struct CodePoints<'a> {
 impl<'a> CodePoints<'a> {
     /// Creates a new code points iterator from a code units iterator.
     #[inline]
-    pub fn new(inner: CodeUnits<'a>) -> Self {
+    pub const fn new(inner: CodeUnits<'a>) -> Self {
         Self {
             inner,
             peeked: None,
@@ -98,7 +98,7 @@ impl Iterator for CodePoints<'_> {
             // BMP character (not a surrogate)
             // SAFETY: unit is not a surrogate, so it's a valid char
             Some(CodePoint::Unicode(unsafe {
-                char::from_u32_unchecked(unit as u32)
+                char::from_u32_unchecked(u32::from(unit))
             }))
         }
     }

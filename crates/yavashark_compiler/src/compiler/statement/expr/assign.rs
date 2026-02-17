@@ -52,12 +52,12 @@ impl Compiler {
                 match pat {
                     AssignTargetPat::Object(obj) => {
                         self.compile_object_pat(obj, val, &mut |compiler, dtype, name| {
-                            compiler.instructions.push(Instruction::move_(dtype, name))
+                            compiler.instructions.push(Instruction::move_(dtype, name));
                         })?;
                     }
                     AssignTargetPat::Array(array) => {
                         self.compile_array_pat(array, val, &mut |compiler, dtype, name| {
-                            compiler.instructions.push(Instruction::move_(dtype, name))
+                            compiler.instructions.push(Instruction::move_(dtype, name));
                         })?;
                     }
                     AssignTargetPat::Invalid(_) => {

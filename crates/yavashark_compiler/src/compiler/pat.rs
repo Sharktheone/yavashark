@@ -48,7 +48,7 @@ impl Compiler {
             }
             Pat::Assign(assign) => self.compile_assign_pat(assign, source, cb)?,
             Pat::Object(obj) => self.compile_object_pat(obj, source, cb)?,
-            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
+            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {invalid:?}"))?,
             Pat::Expr(expr) => self.compile_expr_pat(expr, source)?,
             Pat::Rest(_) => todo!(),
         }
@@ -179,11 +179,8 @@ impl Compiler {
                         self.instructions.push(Instruction::jmp(0));
 
                         let mut name_restore = None;
-                        if Self::expr_should_be_named(&value) {
-                            name_restore = mem::replace(
-                                &mut self.current_fn_name,
-                                Some(prop.key.id.sym.to_string()),
-                            );
+                        if Self::expr_should_be_named(value) {
+                            name_restore = self.current_fn_name.replace(prop.key.id.sym.to_string());
                         }
 
                         self.compile_expr_data_certain(value, Acc);
@@ -246,12 +243,11 @@ impl Compiler {
 
         let mut name_restore = None;
 
-        if let Pat::Ident(fn_name) = &*assign.left {
-            if Self::expr_should_be_named(&assign.right) {
+        if let Pat::Ident(fn_name) = &*assign.left
+            && Self::expr_should_be_named(&assign.right) {
                 let name = fn_name.sym.to_string();
-                name_restore = mem::replace(&mut self.current_fn_name, Some(name));
+                name_restore = self.current_fn_name.replace(name);
             }
-        }
 
         self.compile_expr_data_certain(&assign.right, out)?;
 
@@ -283,10 +279,8 @@ impl Compiler {
                 cb(self, DataType::Undefined(Undefined), var_name);
             }
             Pat::Array(array) => {
-                for elem in &array.elems {
-                    if let Some(pat) = elem {
-                        self.compile_define_pat_variables(pat, cb)?;
-                    }
+                for pat in array.elems.iter().flatten() {
+                    self.compile_define_pat_variables(pat, cb)?;
                 }
             }
             Pat::Rest(rest) => {
@@ -304,11 +298,8 @@ impl Compiler {
 
                             let dt = if let Some(expr) = &assign.value {
                                 let mut name_restore = None;
-                                if Self::expr_should_be_named(&expr) {
-                                    name_restore = mem::replace(
-                                        &mut self.current_fn_name,
-                                        Some(assign.key.id.sym.to_string()),
-                                    );
+                                if Self::expr_should_be_named(expr) {
+                                    name_restore = self.current_fn_name.replace(assign.key.id.sym.to_string());
                                 }
 
                                 self.compile_expr_data_certain(expr, Acc);
@@ -330,12 +321,11 @@ impl Compiler {
             Pat::Assign(assign) => {
                 let mut name_restore = None;
 
-                if let Pat::Ident(fn_name) = &*assign.left {
-                    if Self::expr_should_be_named(&assign.right) {
+                if let Pat::Ident(fn_name) = &*assign.left
+                    && Self::expr_should_be_named(&assign.right) {
                         let name = fn_name.sym.to_string();
-                        name_restore = mem::replace(&mut self.current_fn_name, Some(name));
+                        name_restore = self.current_fn_name.replace(name);
                     }
-                }
 
                 self.compile_expr_data_certain(&assign.right, Acc)?;
 
@@ -344,7 +334,7 @@ impl Compiler {
                 self.compile_pat(&assign.left, Acc, cb)?;
             }
 
-            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
+            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {invalid:?}"))?,
             Pat::Expr(expr) => self.compile_expr_pat(expr, Undefined)?,
         }
 
@@ -391,7 +381,7 @@ impl Compiler {
         })
     }
 
-    pub fn expr_should_be_named(expr: &Expr) -> bool {
+    #[must_use] pub fn expr_should_be_named(expr: &Expr) -> bool {
         match expr {
             Expr::Fn(_) => true,
             Expr::Arrow(_) => true,

@@ -560,7 +560,7 @@ impl<T: Collectable> Weak<T> {
         }
     }
 
-    pub fn as_ptr(&self) -> *mut T {
+    #[must_use] pub fn as_ptr(&self) -> *mut T {
         unsafe { (*self.inner.as_ptr()).value.as_ptr() }
     }
 }
@@ -1376,9 +1376,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     drop(refs);
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
-                }
-
-                return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
+                }// if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
                         //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
@@ -1698,7 +1696,7 @@ mod tests {
 
             let left = unsafe { NODES_LEFT };
 
-            info!("{:?}", left);
+            info!("{left:?}");
 
             assert_eq!(unsafe { NODES_LEFT }, 101); //root, x, y
 

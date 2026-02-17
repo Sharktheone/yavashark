@@ -9,8 +9,8 @@ impl<'a> Validator<'a> {
         for prop in &object.props {
             match prop {
                 PropOrSpread::Prop(p) => {
-                    if let Prop::KeyValue(kv) = &**p {
-                        if is_proto_property_name(&kv.key) {
+                    if let Prop::KeyValue(kv) = &**p
+                        && is_proto_property_name(&kv.key) {
                             if has_proto {
                                 return Err(
                                     "Duplicate __proto__ fields are not allowed in object literals"
@@ -19,7 +19,6 @@ impl<'a> Validator<'a> {
                             }
                             has_proto = true;
                         }
-                    }
 
                     self.validate_prop(p)?;
                 }

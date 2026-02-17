@@ -11,9 +11,9 @@ pub enum MemberKey {
 }
 
 impl MemberKey {
-    pub fn data_type(&self) -> DataType {
+    pub const fn data_type(&self) -> DataType {
         match self {
-            MemberKey::Public(dt) | MemberKey::Private(dt) => *dt,
+            Self::Public(dt) | Self::Private(dt) => *dt,
         }
     }
 }

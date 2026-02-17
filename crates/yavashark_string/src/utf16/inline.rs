@@ -60,7 +60,7 @@ impl InlineUtf16String {
     /// Returns `None` if the char requires a surrogate pair and would exceed capacity.
     #[inline]
     #[must_use]
-    pub fn from_char(c: char) -> Self {
+    pub const fn from_char(c: char) -> Self {
         let mut data = [0u16; INLINE_UTF16_CAPACITY];
         let encoded = c.encode_utf16(&mut data);
         Self {
@@ -101,7 +101,7 @@ impl InlineUtf16String {
     /// Gets the code unit at the given index.
     #[inline]
     #[must_use]
-    pub fn get(&self, index: usize) -> Option<u16> {
+    pub const fn get(&self, index: usize) -> Option<u16> {
         if index < self.len as usize {
             Some(self.data[index])
         } else {
@@ -113,7 +113,7 @@ impl InlineUtf16String {
     ///
     /// Returns `false` if the string is full.
     #[inline]
-    pub fn push(&mut self, unit: u16) -> bool {
+    pub const fn push(&mut self, unit: u16) -> bool {
         if (self.len as usize) < INLINE_UTF16_CAPACITY {
             self.data[self.len as usize] = unit;
             self.len += 1;

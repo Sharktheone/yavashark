@@ -23,7 +23,7 @@ impl ByteCodegen {
             .iter()
             .rev()
             .find(|(n, _)| n == name)
-            .ok_or(anyhow!("Label {} not found", name))?
+            .ok_or(anyhow!("Label {name} not found"))?
             .1;
 
         self.instructions.push(Instruction::Jmp(target));

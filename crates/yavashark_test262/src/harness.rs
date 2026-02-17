@@ -85,7 +85,7 @@ pub fn setup_global(
         find_test_root_from_test(&p).unwrap_or_else(|| Path::new(TEST262_FALLBACK_DIR));
 
     if !raw {
-        run_harness_in_realm(&mut r, &mut s, &harness_dir)?;
+        run_harness_in_realm(&mut r, &mut s, harness_dir)?;
 
         if async_ {
             run_async_in_realm(&mut r, &mut s, harness_dir)?;

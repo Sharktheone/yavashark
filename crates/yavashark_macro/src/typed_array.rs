@@ -13,7 +13,7 @@ pub fn typed_array_run(input: TokenStream) -> TokenStream {
     let mut cases = TokenStream::new();
 
     for (ty, t) in RUST_TYPES.iter().zip(TYPES.iter()) {
-        let t = Ident::new(&t, proc_macro2::Span::call_site());
+        let t = Ident::new(t, proc_macro2::Span::call_site());
         let ty = Ident::new(ty, proc_macro2::Span::call_site());
 
         cases.extend(quote! {
@@ -43,7 +43,7 @@ pub fn typed_array_run_mut(input: TokenStream) -> TokenStream {
     let mut cases = TokenStream::new();
 
     for (ty, t) in RUST_TYPES.iter().zip(TYPES.iter()) {
-        let t = Ident::new(&t, proc_macro2::Span::call_site());
+        let t = Ident::new(t, proc_macro2::Span::call_site());
         let ty = Ident::new(ty, proc_macro2::Span::call_site());
 
         cases.extend(quote! {

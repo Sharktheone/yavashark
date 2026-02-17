@@ -23,7 +23,7 @@ impl CodePoint {
     /// Low surrogate range end (U+DFFF)
     pub const LOW_SURROGATE_END: u16 = 0xDFFF;
 
-    /// Creates a CodePoint from a UTF-16 code unit.
+    /// Creates a `CodePoint` from a UTF-16 code unit.
     ///
     /// If the code unit is a surrogate, it becomes an `UnpairedSurrogate`.
     /// Otherwise, it becomes a `Unicode` char.
@@ -38,7 +38,7 @@ impl CodePoint {
         }
     }
 
-    /// Creates a CodePoint from a u32 value.
+    /// Creates a `CodePoint` from a u32 value.
     ///
     /// Returns `None` if the value is not a valid Unicode code point (> 0x10FFFF).
     #[inline]

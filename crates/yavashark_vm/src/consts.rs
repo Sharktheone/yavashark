@@ -108,7 +108,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                     obj.define_getter(
                         key.into_value(vm)?
                             .into_internal_property_key(vm.get_realm())?,
-                        optim.into(),
+                        optim,
                         vm.get_realm(),
                     )?;
 
@@ -134,7 +134,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                     obj.define_setter(
                         key.into_value(vm)?
                             .into_internal_property_key(vm.get_realm())?,
-                        optim.into(),
+                        optim,
                         vm.get_realm(),
                     )?;
 

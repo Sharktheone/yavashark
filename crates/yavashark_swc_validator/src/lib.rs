@@ -39,7 +39,7 @@ pub struct Validator<'a> {
 }
 
 impl<'a> Validator<'a> {
-    pub fn new() -> Self {
+    #[must_use] pub fn new() -> Self {
         Self::default()
     }
 
@@ -125,7 +125,7 @@ impl<'a> Validator<'a> {
         result
     }
 
-    pub fn validate_module_decl(&mut self, _decl: &ModuleDecl) -> Result<(), String> {
+    pub const fn validate_module_decl(&mut self, _decl: &ModuleDecl) -> Result<(), String> {
         Ok(())
     }
 }

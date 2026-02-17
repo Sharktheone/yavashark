@@ -24,7 +24,7 @@ enum AssertionType {
     NegativeLookbehind,
 }
 
-impl<'a> Validator<'a> {
+impl Validator<'_> {
     pub fn validate_lit(&mut self, lit: &Lit) -> Result<(), String> {
         match lit {
             Lit::Regex(regex) => Self::validate_regex_lit(regex),
@@ -34,7 +34,7 @@ impl<'a> Validator<'a> {
     }
 
     fn validate_num_lit(&self, num: &swc_ecma_ast::Number) -> Result<(), String> {
-        let raw = num.raw.as_ref().map(|a| a.as_ref());
+        let raw = num.raw.as_ref().map(std::convert::AsRef::as_ref);
 
         if let Some(raw_str) = raw {
             if raw_str.starts_with('0') && raw_str.len() >= 2 {
@@ -80,20 +80,18 @@ impl<'a> Validator<'a> {
                 }
             }
 
-            if self.in_strict_mode() {
-                if raw_str.len() >= 2 && raw_str.starts_with('0') {
+            if self.in_strict_mode()
+                && raw_str.len() >= 2 && raw_str.starts_with('0') {
                     let Some(second_char) = raw_str.chars().nth(1) else {
                         return Ok(());
                     };
 
-                    if second_char.is_ascii_digit() && second_char != '8' && second_char != '9' {
-                        if second_char != '.' {
+                    if second_char.is_ascii_digit() && second_char != '8' && second_char != '9'
+                        && second_char != '.' {
                             return Err(format!(
-                                "Legacy octal literals are not allowed in strict mode: {}",
-                                raw_str
+                                "Legacy octal literals are not allowed in strict mode: {raw_str}"
                             ));
                         }
-                    }
 
                     if raw_str.starts_with('0') && raw_str.len() >= 2 {
                         let chars: Vec<char> = raw_str.chars().collect();
@@ -107,8 +105,7 @@ impl<'a> Validator<'a> {
                                         && !before.contains('E')
                                     {
                                         return Err(format!(
-                                            "Non-octal decimal integer literals are not allowed in strict mode: {}",
-                                            raw_str
+                                            "Non-octal decimal integer literals are not allowed in strict mode: {raw_str}"
                                         ));
                                     }
                                 }
@@ -122,7 +119,6 @@ impl<'a> Validator<'a> {
                         }
                     }
                 }
-            }
         }
 
         Ok(())
@@ -224,7 +220,7 @@ impl<'a> Validator<'a> {
                         return Err("Unicode property escape cannot be empty".to_string());
                     }
 
-                    if content.chars().any(|c| c.is_whitespace()) {
+                    if content.chars().any(char::is_whitespace) {
                         return Err("Unicode property escape cannot contain whitespace".to_string());
                     }
 
@@ -388,8 +384,7 @@ impl<'a> Validator<'a> {
 
                     if !is_allowed_escape {
                         return Err(format!(
-                            "Invalid escape sequence '\\{}' in unicode mode",
-                            next
+                            "Invalid escape sequence '\\{next}' in unicode mode"
                         ));
                     }
                 }
@@ -406,8 +401,7 @@ impl<'a> Validator<'a> {
                         let control_char = pattern[idx + 1];
                         if !control_char.is_ascii_alphabetic() {
                             return Err(format!(
-                                "Control escape requires a letter, got '{}' in unicode mode",
-                                control_char
+                                "Control escape requires a letter, got '{control_char}' in unicode mode"
                             ));
                         }
                     }
@@ -487,8 +481,8 @@ impl<'a> Validator<'a> {
                             assertion_type_for_this_group = Some(AssertionType::Lookahead);
                         } else if next == '!' {
                             assertion_type_for_this_group = Some(AssertionType::NegativeLookahead);
-                        } else if next == '<' {
-                            if idx + 1 < pattern.len() {
+                        } else if next == '<'
+                            && idx + 1 < pattern.len() {
                                 let lookahead_char = pattern[idx + 1];
                                 if lookahead_char == '=' {
                                     assertion_type_for_this_group = Some(AssertionType::Lookbehind);
@@ -497,7 +491,6 @@ impl<'a> Validator<'a> {
                                         Some(AssertionType::NegativeLookbehind);
                                 }
                             }
-                        }
 
                         // Check for named groups: (?<name>...)
                         if next == '<' {
@@ -534,8 +527,7 @@ impl<'a> Validator<'a> {
                                     .ok_or("Named group name cannot be empty")?;
                                 if !is_id_start(first_char) {
                                     return Err(format!(
-                                        "Invalid character '{}' at start of group name",
-                                        first_char
+                                        "Invalid character '{first_char}' at start of group name"
                                     ));
                                 }
 
@@ -543,8 +535,7 @@ impl<'a> Validator<'a> {
                                 for ch in group_name.chars().skip(1) {
                                     if !is_id_continue(ch) {
                                         return Err(format!(
-                                            "Invalid character '{}' in group name",
-                                            ch
+                                            "Invalid character '{ch}' in group name"
                                         ));
                                     }
                                 }
@@ -552,8 +543,7 @@ impl<'a> Validator<'a> {
                                 // Check for duplicate group names
                                 if !named_groups.insert(group_name.clone()) {
                                     return Err(format!(
-                                        "Duplicate capture group name '{}'",
-                                        group_name
+                                        "Duplicate capture group name '{group_name}'"
                                     ));
                                 }
 
@@ -598,8 +588,7 @@ impl<'a> Validator<'a> {
                                 // Only i, m, s are allowed in modifiers (not g, d, u, y, v)
                                 if !matches!(flag_ch, 'i' | 'm' | 's') {
                                     return Err(format!(
-                                        "Invalid flag '{}' in regexp modifiers (only i, m, s are allowed)",
-                                        flag_ch
+                                        "Invalid flag '{flag_ch}' in regexp modifiers (only i, m, s are allowed)"
                                     ));
                                 }
 
@@ -623,8 +612,7 @@ impl<'a> Validator<'a> {
                                 for flag in add_flags.chars() {
                                     if remove_flags.contains(flag) {
                                         return Err(format!(
-                                            "Flag '{}' appears in both add and remove sets",
-                                            flag
+                                            "Flag '{flag}' appears in both add and remove sets"
                                         ));
                                     }
                                 }
@@ -633,8 +621,7 @@ impl<'a> Validator<'a> {
                                 for flag in add_flags.chars().chain(remove_flags.chars()) {
                                     if !seen.insert(flag) {
                                         return Err(format!(
-                                            "Duplicate flag '{}' in modifiers",
-                                            flag
+                                            "Duplicate flag '{flag}' in modifiers"
                                         ));
                                     }
                                 }
@@ -682,19 +669,19 @@ impl<'a> Validator<'a> {
                         if idx > 0 && pattern[idx - 1] == ')' {
                             return Err("Assertions cannot be quantified".to_string());
                         }
-                        return Err(format!("Nothing to repeat at position {}", idx));
+                        return Err(format!("Nothing to repeat at position {idx}"));
                     }
                     can_quantify = false;
                     idx += 1;
                     continue;
                 }
                 '{' => {
-                    if pattern.get(idx + 1).map_or(false, |c| c.is_ascii_digit()) {
+                    if pattern.get(idx + 1).is_some_and(char::is_ascii_digit) {
                         if !can_quantify {
                             if idx > 0 && pattern[idx - 1] == ')' {
                                 return Err("Assertions cannot be quantified".to_string());
                             }
-                            return Err(format!("Nothing to repeat at position {}", idx));
+                            return Err(format!("Nothing to repeat at position {idx}"));
                         }
                         can_quantify = false;
                     } else {
@@ -733,8 +720,7 @@ impl<'a> Validator<'a> {
         for ref_name in group_references {
             if !named_groups.contains(&ref_name) {
                 return Err(format!(
-                    "Invalid group backreference: group '{}' does not exist",
-                    ref_name
+                    "Invalid group backreference: group '{ref_name}' does not exist"
                 ));
             }
         }
@@ -759,7 +745,7 @@ enum OperatorAction {
 }
 
 impl<'a> VFlagValidator<'a> {
-    fn new(pattern: &'a [char]) -> Self {
+    const fn new(pattern: &'a [char]) -> Self {
         Self { pattern, idx: 0 }
     }
 
@@ -1041,7 +1027,7 @@ impl<'a> VFlagValidator<'a> {
     }
 }
 
-fn split_property_content<'a>(content: &'a str) -> Result<(&'a str, Option<&'a str>), String> {
+fn split_property_content(content: &str) -> Result<(&str, Option<&str>), String> {
     if let Some(eq_idx) = content.find('=') {
         let (name, rest) = content.split_at(eq_idx);
         let value = &rest[1..];
@@ -1096,7 +1082,7 @@ fn is_valid_property_with_value(name: &str, value: &str) -> bool {
     PROPERTY_VALUE_PAIRS
         .iter()
         .find(|(prop, _)| *prop == name)
-        .map_or(false, |(_, values)| contains(values, value))
+        .is_some_and(|(_, values)| contains(values, value))
 }
 
 fn contains(collection: &[&str], value: &str) -> bool {

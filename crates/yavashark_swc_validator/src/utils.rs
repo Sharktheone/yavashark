@@ -56,25 +56,25 @@ impl BlockScopeGuard {
 }
 
 impl AwaitRestrictionGuard {
-    pub fn exit(self, validator: &mut Validator<'_>) {
+    pub const fn exit(self, validator: &mut Validator<'_>) {
         validator.await_restriction_depth = validator.await_restriction_depth.saturating_sub(1);
     }
 }
 
 impl SuperPropertyScopeGuard {
-    pub fn exit(self, validator: &mut Validator<'_>) {
+    pub const fn exit(self, validator: &mut Validator<'_>) {
         validator.super_property_scope = validator.super_property_scope.saturating_sub(1);
     }
 }
 
 impl SuperCallScopeGuard {
-    pub fn exit(self, validator: &mut Validator<'_>) {
+    pub const fn exit(self, validator: &mut Validator<'_>) {
         validator.super_call_scope = validator.super_call_scope.saturating_sub(1);
     }
 }
 
 impl RelaxedAwaitGuard {
-    pub fn exit(self, validator: &mut Validator<'_>) {
+    pub const fn exit(self, validator: &mut Validator<'_>) {
         validator.await_relax_depth = validator.await_relax_depth.saturating_sub(1);
     }
 }
@@ -95,7 +95,7 @@ impl<'a> Validator<'a> {
             || self
                 .function_ctx
                 .as_ref()
-                .map_or(false, |ctx| ctx.await_restricted);
+                .is_some_and(|ctx| ctx.await_restricted);
         let (allow_super_property, allow_super_call) =
             self.function_ctx.as_ref().map_or((false, false), |ctx| {
                 (ctx.allow_super_property, ctx.allow_super_call)
@@ -123,27 +123,27 @@ impl<'a> Validator<'a> {
         BlockScopeGuard
     }
 
-    pub fn enter_await_restriction(&mut self) -> AwaitRestrictionGuard {
+    pub const fn enter_await_restriction(&mut self) -> AwaitRestrictionGuard {
         self.await_restriction_depth += 1;
         AwaitRestrictionGuard
     }
 
-    pub fn enter_super_property_scope(&mut self) -> SuperPropertyScopeGuard {
+    pub const fn enter_super_property_scope(&mut self) -> SuperPropertyScopeGuard {
         self.super_property_scope += 1;
         SuperPropertyScopeGuard
     }
 
-    pub fn enter_super_call_scope(&mut self) -> SuperCallScopeGuard {
+    pub const fn enter_super_call_scope(&mut self) -> SuperCallScopeGuard {
         self.super_call_scope += 1;
         SuperCallScopeGuard
     }
 
-    pub fn enter_relaxed_await_scope(&mut self) -> RelaxedAwaitGuard {
+    pub const fn enter_relaxed_await_scope(&mut self) -> RelaxedAwaitGuard {
         self.await_relax_depth += 1;
         RelaxedAwaitGuard
     }
 
-    fn current_function_context(&self) -> Option<&FunctionContext> {
+    const fn current_function_context(&self) -> Option<&FunctionContext> {
         self.function_ctx.as_ref()
     }
 
@@ -152,29 +152,29 @@ impl<'a> Validator<'a> {
         (self.await_restriction_depth > 0 && self.await_relax_depth == 0)
             || self
                 .current_function_context()
-                .map_or(false, |ctx| ctx.await_restricted)
+                .is_some_and(|ctx| ctx.await_restricted)
     }
 
     #[must_use]
     pub fn is_yield_restricted(&self) -> bool {
         self.current_function_context()
-            .map_or(false, |ctx| ctx.is_generator)
+            .is_some_and(|ctx| ctx.is_generator)
     }
 
     #[must_use]
     pub fn in_async_function(&self) -> bool {
         self.current_function_context()
-            .map_or(false, |ctx| ctx.is_async)
+            .is_some_and(|ctx| ctx.is_async)
     }
 
     #[must_use]
     pub fn in_generator_function(&self) -> bool {
         self.current_function_context()
-            .map_or(false, |ctx| ctx.is_generator)
+            .is_some_and(|ctx| ctx.is_generator)
     }
 
     #[must_use]
-    pub fn in_function_context(&self) -> bool {
+    pub const fn in_function_context(&self) -> bool {
         self.function_ctx.is_some()
     }
 
@@ -192,10 +192,10 @@ impl<'a> Validator<'a> {
         }
     }
 
-    pub fn is_function_param_name(&self, name: &str) -> bool {
+    #[must_use] pub fn is_function_param_name(&self, name: &str) -> bool {
         self.function_ctx
             .as_ref()
-            .map_or(false, |ctx| ctx.param_names.contains(name))
+            .is_some_and(|ctx| ctx.param_names.contains(name))
     }
 
     pub fn ensure_not_function_param(&self, name: &str) -> Result<(), String> {
@@ -210,7 +210,7 @@ impl<'a> Validator<'a> {
         }
     }
 
-    pub fn set_current_function_strict(&mut self) {
+    pub const fn set_current_function_strict(&mut self) {
         if let Some(ctx) = self.function_ctx.as_mut() {
             ctx.is_strict = true;
         }
@@ -229,7 +229,7 @@ impl<'a> Validator<'a> {
             || self
                 .function_ctx
                 .as_ref()
-                .map_or(false, |ctx| ctx.allow_super_property)
+                .is_some_and(|ctx| ctx.allow_super_property)
     }
 
     #[must_use]
@@ -238,16 +238,16 @@ impl<'a> Validator<'a> {
             || self
                 .function_ctx
                 .as_ref()
-                .map_or(false, |ctx| ctx.allow_super_call)
+                .is_some_and(|ctx| ctx.allow_super_call)
     }
 
-    pub fn set_super_property_allowed(&mut self, allowed: bool) {
+    pub const fn set_super_property_allowed(&mut self, allowed: bool) {
         if let Some(ctx) = self.function_ctx.as_mut() {
             ctx.allow_super_property = allowed;
         }
     }
 
-    pub fn set_super_call_allowed(&mut self, allowed: bool) {
+    pub const fn set_super_call_allowed(&mut self, allowed: bool) {
         if let Some(ctx) = self.function_ctx.as_mut() {
             ctx.allow_super_call = allowed;
         }
@@ -342,14 +342,12 @@ pub fn check_async_generator_fn_decl(stmt: &Stmt, context: &str) -> Result<(), S
     if let Stmt::Decl(Decl::Fn(fn_decl)) = stmt {
         if fn_decl.function.is_async {
             return Err(format!(
-                "Async function declaration is not allowed as the body of {}",
-                context
+                "Async function declaration is not allowed as the body of {context}"
             ));
         }
         if fn_decl.function.is_generator {
             return Err(format!(
-                "Generator function declaration is not allowed as the body of {}",
-                context
+                "Generator function declaration is not allowed as the body of {context}"
             ));
         }
     }
@@ -411,7 +409,7 @@ pub fn is_reserved_word(value: &str) -> bool {
 }
 
 /// Returns `true` for code points listed in ECMA-262 `Other_ID_Start`.
-fn is_other_id_start(ch: char) -> bool {
+const fn is_other_id_start(ch: char) -> bool {
     matches!(
         ch,
         '\u{1885}' | '\u{1886}' | '\u{2118}' | '\u{212E}' | '\u{309B}' | '\u{309C}'

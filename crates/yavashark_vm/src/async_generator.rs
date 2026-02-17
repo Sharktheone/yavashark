@@ -252,7 +252,7 @@ impl AsyncGenerator {
 
         let ResumableVM { state, .. } = vm;
 
-        Ok(AsyncGeneratorTask::new(realm, Some(state), this)?.into())
+        AsyncGeneratorTask::new(realm, Some(state), this)
     }
 
     #[prop(Symbol::ITERATOR)]

@@ -38,7 +38,7 @@ impl Interpreter {
         })
     }
 
-    pub fn is_strict(stmts: &[Stmt]) -> bool {
+    #[must_use] pub fn is_strict(stmts: &[Stmt]) -> bool {
         for stmt in stmts {
             match stmt {
                 Stmt::Empty(_) => continue,

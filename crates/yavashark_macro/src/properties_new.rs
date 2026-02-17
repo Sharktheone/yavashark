@@ -410,7 +410,7 @@ fn init_constructor(
         }
     }
 
-    let constructor_length = constructor_length.unwrap_or_else(|| calculated_length as u32);
+    let constructor_length = constructor_length.unwrap_or(calculated_length as u32);
 
     {
         let init = init_props(static_props, config, Some(ty.to_token_stream()));

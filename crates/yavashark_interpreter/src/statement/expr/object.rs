@@ -110,8 +110,7 @@ impl Interpreter {
                                 set.body.clone(),
                                 fn_scope,
                                 realm,
-                            )?
-                            .into();
+                            )?;
 
                             obj.define_setter(key, func, realm)?;
                         }
@@ -129,8 +128,7 @@ impl Interpreter {
                                 get.body.clone(),
                                 fn_scope,
                                 realm,
-                            )?
-                            .into();
+                            )?;
 
                             obj.define_getter(key, func, realm)?;
                         }

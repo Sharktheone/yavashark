@@ -75,8 +75,8 @@ impl<'a> Validator<'a> {
                     self.validate_pat_internal(&kv.value, idents)?;
                 }
                 ObjectPatProp::Assign(assign) => {
-                    if let Some(idents) = idents {
-                        if assign.key.as_ref() != "_" {
+                    if let Some(idents) = idents
+                        && assign.key.as_ref() != "_" {
                             if idents.contains(&&*assign.key.sym) {
                                 return Err(format!(
                                     "Identifier '{}' has already been declared",
@@ -86,7 +86,6 @@ impl<'a> Validator<'a> {
 
                             idents.push(&assign.key.sym);
                         }
-                    }
 
                     self.validate_ident(&assign.key)?;
                     if self.in_strict_mode()
@@ -141,10 +140,8 @@ pub fn collect_bound_names<'a>(pat: &'a Pat, out: &mut Vec<&'a str>) {
     match pat {
         Pat::Ident(ident) => out.push(&ident.id.sym),
         Pat::Array(array) => {
-            for elem in &array.elems {
-                if let Some(elem) = elem {
-                    collect_bound_names(elem, out);
-                }
+            for elem in array.elems.iter().flatten() {
+                collect_bound_names(elem, out);
             }
         }
         Pat::Rest(rest) => collect_bound_names(&rest.arg, out),

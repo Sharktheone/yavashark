@@ -567,7 +567,7 @@ pub fn get_import_meta(output: impl OutputData, vm: &mut impl VM) -> Res {
     output.set(obj.into(), vm)
 }
 
-pub(crate) fn resolve_private_member(
+pub fn resolve_private_member(
     realm: &mut Realm,
     member: PrivateMember,
     base: Value,
@@ -596,7 +596,7 @@ pub fn get_private_member(
 
     if let Some(class) = obj.downcast::<ClassInstance>() {
         let member = class
-            .get_private_prop(&&name, realm)?
+            .get_private_prop(name, realm)?
             .ok_or_else(|| ControlFlow::error_type(format!("Private name {name} not found")))?;
 
         return resolve_private_member(realm, member, base.copy());
@@ -604,7 +604,7 @@ pub fn get_private_member(
 
     if let Some(class) = obj.downcast::<Class>() {
         let member = class
-            .get_private_prop(&name)
+            .get_private_prop(name)
             .ok_or_else(|| ControlFlow::error_type(format!("Private name {name} not found")))?;
 
         return resolve_private_member(realm, member, base.copy());

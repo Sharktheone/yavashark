@@ -82,7 +82,7 @@ impl JSFunction {
         let is_strict = scope.is_strict_mode()?
             || block
                 .as_ref()
-                .map_or(false, |b| Interpreter::is_strict(&b.stmts));
+                .is_some_and(|b| Interpreter::is_strict(&b.stmts));
 
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
@@ -237,7 +237,7 @@ impl Constructor for JSFunction {
         let this = self.new_instance(realm)?;
 
         if let Value::Object(obj) = self.raw.call(realm, args, this.copy())? {
-            return Ok(obj.into());
+            return Ok(obj);
         }
 
         this.to_object()

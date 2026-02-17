@@ -2,14 +2,14 @@ use crate::Validator;
 use crate::utils::{ensure_valid_identifier, is_reserved_word};
 use swc_ecma_ast::{Ident, IdentName};
 
-impl<'a> Validator<'a> {
+impl Validator<'_> {
     pub fn validate_ident(&mut self, ident: &Ident) -> Result<(), String> {
         let sym = ident.sym.as_str();
 
         ensure_valid_identifier(sym)?;
 
         if is_reserved_word(sym) {
-            return Err(format!("Identifier '{}' is a reserved word", sym));
+            return Err(format!("Identifier '{sym}' is a reserved word"));
         }
 
         if sym == "await" && self.is_await_restricted() {
@@ -33,7 +33,7 @@ impl<'a> Validator<'a> {
                     | "static"
             )
         {
-            return Err(format!("Identifier '{}' is reserved in strict mode", sym));
+            return Err(format!("Identifier '{sym}' is reserved in strict mode"));
         }
 
         if self.in_strict_mode() && sym == "yield" {

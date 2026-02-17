@@ -1,4 +1,4 @@
-//! YSString - A JavaScript-compatible string type with dual UTF-8/UTF-16 storage.
+//! `YSString` - A JavaScript-compatible string type with dual UTF-8/UTF-16 storage.
 //!
 //! This module provides a string type that supports WTF-16 semantics (JavaScript strings),
 //! while optimizing memory usage for ASCII-only strings by storing them as UTF-8.
@@ -71,9 +71,9 @@ impl Hash for YSString {
     }
 }
 
-/// Internal storage for YSString.
+/// Internal storage for `YSString`.
 ///
-/// Uses UTF-8 storage for ASCII-only strings (byte_len == utf16_len),
+/// Uses UTF-8 storage for ASCII-only strings (`byte_len` == `utf16_len`),
 /// and UTF-16 storage for everything else.
 enum InnerString {
     // UTF-8 variants (ASCII-only, byte_len == utf16_len)
@@ -219,7 +219,7 @@ impl InlineString {
         Some(Self { len, data })
     }
 
-    fn push_ascii(&mut self, ch: u8) -> bool {
+    const fn push_ascii(&mut self, ch: u8) -> bool {
         let prev_len = self.len();
         if let Some(len) = InlineLen::from_usize(prev_len + 1) {
             self.data[prev_len] = ch;
@@ -500,7 +500,7 @@ impl YSString {
 
     /// Creates a string from a single UTF-16 code unit.
     #[must_use]
-    pub fn from_code_unit(unit: u16) -> Self {
+    pub const fn from_code_unit(unit: u16) -> Self {
         if unit < 128 {
             // ASCII
             let mut data = [0u8; 23];
@@ -520,9 +520,9 @@ impl YSString {
         }
     }
 
-    /// Creates a string from a CodePoint.
+    /// Creates a string from a `CodePoint`.
     #[must_use]
-    pub fn from_code_point(cp: CodePoint) -> Self {
+    pub const fn from_code_point(cp: CodePoint) -> Self {
         match cp {
             CodePoint::Unicode(c) => {
                 if c.is_ascii() {
@@ -614,7 +614,7 @@ impl YSString {
     /// Returns the number of UTF-16 code units in the string.
     ///
     /// This is O(1) for all storage variants because:
-    /// - UTF-8 storage is only used for ASCII strings where byte_len == utf16_len
+    /// - UTF-8 storage is only used for ASCII strings where `byte_len` == `utf16_len`
     /// - UTF-16 storage directly stores code units
     #[must_use]
     pub fn len(&self) -> usize {
@@ -777,7 +777,7 @@ impl YSString {
         } else {
             // BMP character
             Some(CodePoint::Unicode(unsafe {
-                char::from_u32_unchecked(unit as u32)
+                char::from_u32_unchecked(u32::from(unit))
             }))
         }
     }
@@ -894,7 +894,7 @@ impl YSString {
                     }
                 }
                 InnerString::Static(s) => {
-                    let mut string = s.to_string();
+                    let mut string = (**s).to_string();
                     string.push(ch);
                     match SmallString::from_string(string) {
                         Ok(small) => *inner = InnerString::OwnedUtf8(small),
@@ -966,7 +966,7 @@ impl YSString {
             }),
         );
 
-        let left = YSString {
+        let left = Self {
             inner: UnsafeCell::new(left),
         };
 
@@ -1082,7 +1082,7 @@ impl YSString {
         index <= self.len()
     }
 
-    /// Parse the string into a type that implements FromStr.
+    /// Parse the string into a type that implements `FromStr`.
     pub fn parse<F: std::str::FromStr>(&self) -> Result<F, F::Err> {
         self.as_str_lossy().parse()
     }
@@ -1231,7 +1231,7 @@ impl<T: Into<Self>> AddAssign<T> for YSString {
 // ToYSString trait
 // =============================================================================
 
-/// Trait for converting types to YSString.
+/// Trait for converting types to `YSString`.
 pub trait ToYSString {
     fn to_ys_string(&self) -> YSString;
 }

@@ -100,7 +100,7 @@ impl Func for BytecodeFunction {
 
         let ds = self.code.data_section();
 
-        let mut vm = BorrowedVM::with_scope(&self.code.instructions, &ds, realm, scope);
+        let mut vm = BorrowedVM::with_scope(&self.code.instructions, ds, realm, scope);
 
         match vm.run() {
             Ok(()) => {}

@@ -22,7 +22,7 @@ impl<'a> Validator<'a> {
             Expr::Seq(seq) => seq
                 .exprs
                 .last()
-                .map_or(false, |e| Self::delete_target_contains_private(e)),
+                .is_some_and(|e| Self::delete_target_contains_private(e)),
             Expr::Member(member) => matches!(member.prop, MemberProp::PrivateName(_)),
             Expr::OptChain(opt_chain) => {
                 if let OptChainBase::Member(member) = &*opt_chain.base {
@@ -43,7 +43,7 @@ impl<'a> Validator<'a> {
             Expr::Seq(seq) => seq
                 .exprs
                 .last()
-                .map_or(false, |e| Self::delete_target_is_identifier(e)),
+                .is_some_and(|e| Self::delete_target_is_identifier(e)),
             _ => false,
         }
     }
