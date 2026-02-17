@@ -1,0 +1,64 @@
+{
+  "profiles": {
+    "fast": {
+      "test_root": "../../test262/test/",
+      "noskip": true,
+      "workers": 2048,
+      "timeout": "15s"
+    },
+    "interactive": {
+      "test_root": "../../test262/test/",
+      "interactive": true,
+      "workers": 1024,
+      "timeout": "30s"
+    },
+    "ci": {
+      "test_root": "test262/test",
+      "ci": true,
+      "workers": 1024,
+      "timeout": "30s",
+      "noskip": false
+    },
+    "debug": {
+      "test_root": "../../test262/test/",
+      "workers": 64,
+      "timeout": "120s",
+      "show_stats": true,
+      "timings": true,
+      "verbose": true
+    },
+    "rebuild": {
+      "test_root": "../../test262/test/",
+      "rebuild": true,
+      "build_mode": "release",
+      "build_compiler": "llvm",
+      "workers": 1024,
+      "timeout": "30s"
+    },
+    "rfast": {
+      "test_root": "../../test262/test/",
+      "rebuild": true,
+      "noskip": true,
+      "build_mode": "release",
+      "build_compiler": "cranelift",
+      "workers": 1024,
+      "timeout": "10s"
+    },
+    "rebuild-cranelift": {
+      "test_root": "../../test262/test/",
+      "rebuild": true,
+      "build_mode": "release",
+      "build_compiler": "cranelift",
+      "workers": 1024,
+      "timeout": "30s"
+    },
+    "rebuild-debug": {
+      "test_root": "../../test262/test/",
+      "rebuild": true,
+      "build_mode": "debug",
+      "build_compiler": "llvm",
+      "workers": 512,
+      "timeout": "60s"
+    }
+  }
+}
