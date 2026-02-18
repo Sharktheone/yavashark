@@ -1,5 +1,4 @@
-
-
+use std::ptr::NonNull;
 
 
 // we have 1 sign bit and 52 exponent bits to store data.
@@ -17,3 +16,16 @@
 // int32
 
 pub struct ValueInner(u64);
+
+pub enum ValueVariant {
+    Number(f64),
+    Null,
+    Undefined,
+    Bool(bool),
+    InlineString([u8; 6]),
+    String(NonNull<()>),
+    Symbol(NonNull<()>),
+    Object(NonNull<()>),
+    BigInt(NonNull<()>),
+    Integer(i32),
+}
