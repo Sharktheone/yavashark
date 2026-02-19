@@ -62,14 +62,7 @@ pub trait Object: Debug + Any + 'static {
     }
 
     fn prototype(&self) -> Value;
-    fn set_prototype(&self, proto: Value) -> Res;
-
-    // /// # Safety
-    // /// This function should only return references that are actually in the object!
-    // /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
-    // unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-    //     Vec::new()
-    // }
+    fn set_prototype(&self, proto: Value) -> Res
 
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
