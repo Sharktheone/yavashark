@@ -62,7 +62,7 @@ pub trait Object: Debug + Any + 'static {
     }
 
     fn prototype(&self) -> Value;
-    fn set_prototype(&self, proto: Value) -> Res
+    fn set_prototype(&self, proto: Value) -> Res;
 
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
