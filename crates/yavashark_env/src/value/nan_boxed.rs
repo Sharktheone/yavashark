@@ -44,3 +44,47 @@ pub enum ValueVariant {
     BigInt(NonNull<()>),
     Integer(i32),
 }
+
+
+mod bits {
+    const MASK_NAN: u64 = 0x7FF8000000000000;
+
+    const MASK_KIND: u64 = MASK_NAN | 0xF_0000_0000_0000;
+    const MASK_KIND_OTHER: u64 = MASK_KIND | 0xF_C000_0000_0000;
+    const MASK_STRING: u64 = MASK_NAN | 0xE_0000_0000_0000;
+
+
+    const TAG_INF: u64 = 0x0_0000_0000_0000;
+    const TAG_NAN: u64 = 0x8_0000_0000_0000;
+    const TAG_INT32: u64 = 0x9_0000_0000_0000;
+    const TAG_BOOLEAN: u64 = 0x9_4000_0000_0000;
+    const TAG_NULL_UNDEF: u64 = 0x9_8000_0000_0000;
+    const TAG_INLINE_STRING: u64 = 0xA_0000_0000_0000;
+    const TAG_STRING_OWNED: u64 = 0xB_0000_0000_0000;
+    const TAG_OBJECT: u64 = 0xC_0000_0000_0000;
+    const TAG_SYMBOL: u64 = 0xD_0000_0000_0000;
+    const TAG_BIGINT: u64 = 0xE_0000_0000_0000;
+
+
+    const MASK_INT32: u64 = MASK_NAN | TAG_INT32;
+    const MASK_BOOLEAN: u64 = MASK_NAN | TAG_BOOLEAN;
+    const MASK_NULL_UNDEF: u64 = MASK_NAN | TAG_NULL_UNDEF;
+    const MASK_INLINE_STRING: u64 = MASK_NAN | TAG_INLINE_STRING;
+    const MASK_STRING_OWNED: u64 = MASK_NAN | TAG_STRING_OWNED;
+    const MASK_OBJECT: u64 = MASK_NAN | TAG_OBJECT;
+    const MASK_SYMBOL: u64 = MASK_NAN | TAG_SYMBOL;
+    const MASK_BIGINT: u64 = MASK_NAN | TAG_BIGINT;
+
+
+}
+
+
+fn a() {
+    let a = Some(0);
+
+    if let Some(a) = a {
+        println!("a is {}", a);
+    } else {
+        println!("a is None");
+    }
+}
