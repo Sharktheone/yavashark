@@ -30,7 +30,14 @@ use std::ptr::NonNull;
 /// BigInt     0111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// Float64    Any other value.
 
-pub struct ValueInner(u64);
+#[repr(C)]
+pub struct ValueInner {
+    #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
+    half: u32,
+    #[cfg(target_pointer_width = "16")]
+    ptr_pad: u16,
+    ptr: *const (),
+}
 
 pub enum ValueVariant {
     Number(f64),
