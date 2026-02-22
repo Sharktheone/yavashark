@@ -1,6 +1,5 @@
 use std::ptr::NonNull;
 
-
 /// we have 1 sign bit and 52 exponent bits to store data.
 /// We need to have the following values:
 /// f64 - default
@@ -52,14 +51,14 @@ pub enum ValueVariant {
     Integer(i32),
 }
 
-
 mod bits {
-    const MASK_NAN: u64 = 0x7FF8000000000000;
+    use std::ptr::NonNull;
+
+    const MASK_NAN: u64 = 0x7FF8_0000_0000_0000;
 
     const MASK_KIND: u64 = MASK_NAN | 0xF_0000_0000_0000;
-    const MASK_KIND_OTHER: u64 = MASK_KIND | 0xF_C000_0000_0000;
+    const MASK_KIND_OTHER: u64 = MASK_NAN | 0xF_C000_0000_0000;
     const MASK_STRING: u64 = MASK_NAN | 0xE_0000_0000_0000;
-
 
     const TAG_INF: u64 = 0x0_0000_0000_0000;
     const TAG_NAN: u64 = 0x8_0000_0000_0000;
@@ -72,7 +71,6 @@ mod bits {
     const TAG_SYMBOL: u64 = 0xD_0000_0000_0000;
     const TAG_BIGINT: u64 = 0xE_0000_0000_0000;
 
-
     const MASK_INT32: u64 = MASK_NAN | TAG_INT32;
     const MASK_BOOLEAN: u64 = MASK_NAN | TAG_BOOLEAN;
     const MASK_NULL_UNDEF: u64 = MASK_NAN | TAG_NULL_UNDEF;
@@ -82,16 +80,103 @@ mod bits {
     const MASK_SYMBOL: u64 = MASK_NAN | TAG_SYMBOL;
     const MASK_BIGINT: u64 = MASK_NAN | TAG_BIGINT;
 
+    const MASK_INT32_VALUE: u64 = 0x0000_0000_FFFF_FFFF;
+    const MASK_BOOLEAN_VALUE: u64 = 0x0000_0000_0000_0001;
+    const MASK_48BIT_VALUE: u64 = 0x0000_FFFF_FFFF_FFFF;
 
-}
+    const VALUE_NULL: u64 = TAG_NULL_UNDEF;
+    const VALUE_UNDEFINED: u64 = TAG_NULL_UNDEF | 0x1;
+    const VALUE_FALSE: u64 = TAG_BOOLEAN;
+    const VALUE_TRUE: u64 = TAG_BOOLEAN | 0x1;
 
+    const fn is_int32(value: u64) -> bool {
+        (value & MASK_KIND_OTHER) == TAG_INT32
+    }
 
-fn a() {
-    let a = Some(0);
+    const fn is_boolean(value: u64) -> bool {
+        (value & MASK_BOOLEAN) == TAG_BOOLEAN
+    }
 
-    if let Some(a) = a {
-        println!("a is {}", a);
-    } else {
-        println!("a is None");
+    const fn is_null_or_undefined(value: u64) -> bool {
+        (value & MASK_NULL_UNDEF) == TAG_NULL_UNDEF
+    }
+
+    const fn is_null(value: u64) -> bool {
+        value == VALUE_NULL
+    }
+
+    const fn is_undefined(value: u64) -> bool {
+        value == VALUE_UNDEFINED
+    }
+
+    const fn is_inline_string(value: u64) -> bool {
+        (value & MASK_KIND) == TAG_INLINE_STRING
+    }
+
+    const fn is_string_owned(value: u64) -> bool {
+        (value & MASK_KIND) == TAG_STRING_OWNED
+    }
+
+    const fn is_string(value: u64) -> bool {
+        (value & MASK_STRING) == TAG_INLINE_STRING
+    }
+
+    const fn is_object(value: u64) -> bool {
+        (value & MASK_KIND) == TAG_OBJECT
+    }
+
+    const fn is_symbol(value: u64) -> bool {
+        (value & MASK_KIND) == TAG_SYMBOL
+    }
+
+    const fn is_bigint(value: u64) -> bool {
+        (value & MASK_KIND) == TAG_BIGINT
+    }
+
+    const fn is_number(value: u64) -> bool {
+        (value & MASK_NAN) != MASK_NAN || (value & MASK_KIND) == TAG_INF || (value & MASK_KIND) == TAG_NAN
+    }
+
+    const fn encode_int32(value: i32) -> u64 {
+        (value as u64) | TAG_INT32
+    }
+
+    const fn encode_boolean(value: bool) -> u64 {
+        value as u64 | TAG_BOOLEAN
+    }
+
+    const fn encode_f64(value: f64) -> u64 {
+        if value.is_nan() {
+            f64::NAN.to_bits()
+        } else {
+            value.to_bits()
+        }
+    }
+
+    fn encode_pointer(ptr: NonNull<()>, tag: u64) -> u64 {
+        let value = ptr.addr().get() as u64;
+        (value & MASK_48BIT_VALUE) | tag
+    }
+
+    fn encode_inline_string(bytes: [u8; 6]) -> u64 {
+        let mut padded = [0; 8];
+
+        padded[2..8].copy_from_slice(&bytes);
+
+        let value = u64::from_le_bytes(padded);
+
+        value | TAG_INLINE_STRING
+    }
+
+    const fn decode_pointer(value: u64) -> usize {
+        (value & MASK_48BIT_VALUE) as usize
+    }
+
+    const fn decode_int32(value: u64) -> i32 {
+        value as i32
+    }
+
+    const fn decode_boolean(value: u64) -> bool {
+        (value & MASK_BOOLEAN_VALUE) != 0
     }
 }
