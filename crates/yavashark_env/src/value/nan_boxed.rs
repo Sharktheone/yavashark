@@ -89,63 +89,63 @@ mod bits {
     const VALUE_FALSE: u64 = TAG_BOOLEAN;
     const VALUE_TRUE: u64 = TAG_BOOLEAN | 0x1;
 
-    const fn is_int32(value: u64) -> bool {
+    pub const fn is_int32(value: u64) -> bool {
         (value & MASK_KIND_OTHER) == TAG_INT32
     }
 
-    const fn is_boolean(value: u64) -> bool {
+    pub const fn is_boolean(value: u64) -> bool {
         (value & MASK_BOOLEAN) == TAG_BOOLEAN
     }
 
-    const fn is_null_or_undefined(value: u64) -> bool {
+    pub const fn is_null_or_undefined(value: u64) -> bool {
         (value & MASK_NULL_UNDEF) == TAG_NULL_UNDEF
     }
 
-    const fn is_null(value: u64) -> bool {
+    pub const fn is_null(value: u64) -> bool {
         value == VALUE_NULL
     }
 
-    const fn is_undefined(value: u64) -> bool {
+    pub const fn is_undefined(value: u64) -> bool {
         value == VALUE_UNDEFINED
     }
 
-    const fn is_inline_string(value: u64) -> bool {
+    pub const fn is_inline_string(value: u64) -> bool {
         (value & MASK_KIND) == TAG_INLINE_STRING
     }
 
-    const fn is_string_owned(value: u64) -> bool {
+    pub const fn is_string_owned(value: u64) -> bool {
         (value & MASK_KIND) == TAG_STRING_OWNED
     }
 
-    const fn is_string(value: u64) -> bool {
+    pub const fn is_string(value: u64) -> bool {
         (value & MASK_STRING) == TAG_INLINE_STRING
     }
 
-    const fn is_object(value: u64) -> bool {
+    pub const fn is_object(value: u64) -> bool {
         (value & MASK_KIND) == TAG_OBJECT
     }
 
-    const fn is_symbol(value: u64) -> bool {
+    pub const fn is_symbol(value: u64) -> bool {
         (value & MASK_KIND) == TAG_SYMBOL
     }
 
-    const fn is_bigint(value: u64) -> bool {
+    pub const fn is_bigint(value: u64) -> bool {
         (value & MASK_KIND) == TAG_BIGINT
     }
 
-    const fn is_number(value: u64) -> bool {
+    pub const fn is_number(value: u64) -> bool {
         (value & MASK_NAN) != MASK_NAN || (value & MASK_KIND) == TAG_INF || (value & MASK_KIND) == TAG_NAN
     }
 
-    const fn encode_int32(value: i32) -> u64 {
+    pub const fn encode_int32(value: i32) -> u64 {
         (value as u64) | TAG_INT32
     }
 
-    const fn encode_boolean(value: bool) -> u64 {
+    pub const fn encode_boolean(value: bool) -> u64 {
         value as u64 | TAG_BOOLEAN
     }
 
-    const fn encode_f64(value: f64) -> u64 {
+    pub const fn encode_f64(value: f64) -> u64 {
         if value.is_nan() {
             f64::NAN.to_bits()
         } else {
@@ -153,12 +153,12 @@ mod bits {
         }
     }
 
-    fn encode_pointer(ptr: NonNull<()>, tag: u64) -> u64 {
+    pub fn encode_pointer(ptr: NonNull<()>, tag: u64) -> u64 {
         let value = ptr.addr().get() as u64;
         (value & MASK_48BIT_VALUE) | tag
     }
 
-    fn encode_inline_string(bytes: [u8; 6]) -> u64 {
+    pub fn encode_inline_string(bytes: [u8; 6]) -> u64 {
         let mut padded = [0; 8];
 
         padded[2..8].copy_from_slice(&bytes);
@@ -168,15 +168,15 @@ mod bits {
         value | TAG_INLINE_STRING
     }
 
-    const fn decode_pointer(value: u64) -> usize {
+    pub const fn decode_pointer(value: u64) -> usize {
         (value & MASK_48BIT_VALUE) as usize
     }
 
-    const fn decode_int32(value: u64) -> i32 {
+    pub const fn decode_int32(value: u64) -> i32 {
         value as i32
     }
 
-    const fn decode_boolean(value: u64) -> bool {
+    pub const fn decode_boolean(value: u64) -> bool {
         (value & MASK_BOOLEAN_VALUE) != 0
     }
 }
