@@ -1635,24 +1635,24 @@ impl TypedArray {
         Ok(iter.into())
     }
 
-    //
-    // #[get(Symbol::TO_STRING_TAG)]
-    // fn to_string_tag(&self) -> &'static str {
-    //     match self.ty {
-    //         Type::U8C => "Uint8ClampedArray",
-    //         Type::U8 => "Uint8Array",
-    //         Type::U16 => "Uint16Array",
-    //         Type::U32 => "Uint32Array",
-    //         Type::U64 => "BigUint64Array",
-    //         Type::I8 => "Int8Array",
-    //         Type::I16 => "Int16Array",
-    //         Type::I32 => "Int32Array",
-    //         Type::I64 => "BigInt64Array",
-    //         Type::F16 => "Float16Array",
-    //         Type::F32 => "Float32Array",
-    //         Type::F64 => "Float64Array",
-    //     }
-    // }
+
+    #[get(Symbol::TO_STRING_TAG)]
+    fn to_string_tag(&self) -> &'static str {
+        match self.ty {
+            Type::U8C => "Uint8ClampedArray",
+            Type::U8 => "Uint8Array",
+            Type::U16 => "Uint16Array",
+            Type::U32 => "Uint32Array",
+            Type::U64 => "BigUint64Array",
+            Type::I8 => "Int8Array",
+            Type::I16 => "Int16Array",
+            Type::I32 => "Int32Array",
+            Type::I64 => "BigInt64Array",
+            Type::F16 => "Float16Array",
+            Type::F32 => "Float32Array",
+            Type::F64 => "Float64Array",
+        }
+    }
 }
 
 fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
