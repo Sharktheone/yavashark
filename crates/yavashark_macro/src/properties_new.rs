@@ -250,7 +250,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
                 #intrinsic_get
             }
 
-            fn get_global(realm: &mut Realm) -> #res<#object_handle> {
+            fn get_global(realm: &mut #realm) -> #res<#object_handle> {
                 let this = Self::get_intrinsic(realm)?;
 
                 this.get("constructor", realm)?
