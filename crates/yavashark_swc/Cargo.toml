@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-swc_common = "18.0.1"
-swc_ecma_parser = "33.0.0"
+swc_common = "19.0.0"
+swc_ecma_parser = "35.0.0"
 rand = "0.9.0"

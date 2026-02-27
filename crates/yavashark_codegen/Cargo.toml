@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 yavashark_bytecode = { path = "../yavashark_bytecode" }
-swc_ecma_parser = "33.0.0"
-swc_ecma_ast = "20.0.0"
-swc_common = "18.0.1"
+swc_ecma_parser = "35.0.0"
+swc_ecma_ast = "21.0.0"
+swc_common = "19.0.0"
 anyhow = "1.0.86"
 log = "0.4.22"
 

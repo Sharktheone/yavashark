@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-swc_common = "18.0.1"
-swc_ecma_ast = "20.0.0"
-swc_ecma_visit = "20.0.0"
+swc_common = "19.0.0"
+swc_ecma_ast = "21.0.0"
+swc_ecma_visit = "21.0.0"
 unicode-ident = "1.0.19"
 
 [dev-dependencies]
-swc_ecma_parser = "33.0.0"
+swc_ecma_parser = "35.0.0"
 
 [lints]
 workspace = true
