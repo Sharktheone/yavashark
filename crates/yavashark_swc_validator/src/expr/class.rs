@@ -156,9 +156,10 @@ impl<'a> Validator<'a> {
 
                 if method.is_static
                     && let Some(name) = prop_name_to_string(&method.key)?
-                        && name == "prototype" {
-                            return Err("Static method cannot be named 'prototype'".to_string());
-                        }
+                    && name == "prototype"
+                {
+                    return Err("Static method cannot be named 'prototype'".to_string());
+                }
 
                 let allow_super_property = is_derived || method.is_static;
                 self.validate_function(&method.function, None, allow_super_property, false)?;
@@ -177,9 +178,10 @@ impl<'a> Validator<'a> {
                 self.validate_prop_name(&prop.key)?;
                 if prop.is_static
                     && let Some(name) = prop_name_to_string(&prop.key)?
-                        && matches!(name.as_str(), "prototype" | "constructor") {
-                            return Err(format!("Static field cannot be named '{name}'"));
-                        }
+                    && matches!(name.as_str(), "prototype" | "constructor")
+                {
+                    return Err(format!("Static field cannot be named '{name}'"));
+                }
 
                 if let Some(value) = &prop.value {
                     validate_field_initializer(value)?;

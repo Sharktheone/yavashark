@@ -17,7 +17,10 @@ use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::value::{self, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor};
-use crate::{Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, ValueResult, Variable};
+use crate::{
+    Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Symbol,
+    Value, ValueResult, Variable,
+};
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
 use half::f16;
@@ -1634,7 +1637,6 @@ impl TypedArray {
 
         Ok(iter.into())
     }
-
 
     #[get(Symbol::TO_STRING_TAG)]
     fn to_string_tag(&self) -> &'static str {

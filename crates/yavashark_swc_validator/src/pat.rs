@@ -76,16 +76,17 @@ impl<'a> Validator<'a> {
                 }
                 ObjectPatProp::Assign(assign) => {
                     if let Some(idents) = idents
-                        && assign.key.as_ref() != "_" {
-                            if idents.contains(&&*assign.key.sym) {
-                                return Err(format!(
-                                    "Identifier '{}' has already been declared",
-                                    assign.key.sym
-                                ));
-                            }
-
-                            idents.push(&assign.key.sym);
+                        && assign.key.as_ref() != "_"
+                    {
+                        if idents.contains(&&*assign.key.sym) {
+                            return Err(format!(
+                                "Identifier '{}' has already been declared",
+                                assign.key.sym
+                            ));
                         }
+
+                        idents.push(&assign.key.sym);
+                    }
 
                     self.validate_ident(&assign.key)?;
                     if self.in_strict_mode()

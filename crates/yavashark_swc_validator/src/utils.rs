@@ -192,7 +192,8 @@ impl<'a> Validator<'a> {
         }
     }
 
-    #[must_use] pub fn is_function_param_name(&self, name: &str) -> bool {
+    #[must_use]
+    pub fn is_function_param_name(&self, name: &str) -> bool {
         self.function_ctx
             .as_ref()
             .is_some_and(|ctx| ctx.param_names.contains(name))

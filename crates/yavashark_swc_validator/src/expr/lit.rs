@@ -80,45 +80,47 @@ impl Validator<'_> {
                 }
             }
 
-            if self.in_strict_mode()
-                && raw_str.len() >= 2 && raw_str.starts_with('0') {
-                    let Some(second_char) = raw_str.chars().nth(1) else {
-                        return Ok(());
-                    };
+            if self.in_strict_mode() && raw_str.len() >= 2 && raw_str.starts_with('0') {
+                let Some(second_char) = raw_str.chars().nth(1) else {
+                    return Ok(());
+                };
 
-                    if second_char.is_ascii_digit() && second_char != '8' && second_char != '9'
-                        && second_char != '.' {
-                            return Err(format!(
-                                "Legacy octal literals are not allowed in strict mode: {raw_str}"
-                            ));
-                        }
+                if second_char.is_ascii_digit()
+                    && second_char != '8'
+                    && second_char != '9'
+                    && second_char != '.'
+                {
+                    return Err(format!(
+                        "Legacy octal literals are not allowed in strict mode: {raw_str}"
+                    ));
+                }
 
-                    if raw_str.starts_with('0') && raw_str.len() >= 2 {
-                        let chars: Vec<char> = raw_str.chars().collect();
-                        if chars[1].is_ascii_digit() {
-                            for i in 1..chars.len() {
-                                let ch = chars[i];
-                                if ch == '8' || ch == '9' {
-                                    let before = &raw_str[..i];
-                                    if !before.contains('.')
-                                        && !before.contains('e')
-                                        && !before.contains('E')
-                                    {
-                                        return Err(format!(
-                                            "Non-octal decimal integer literals are not allowed in strict mode: {raw_str}"
-                                        ));
-                                    }
+                if raw_str.starts_with('0') && raw_str.len() >= 2 {
+                    let chars: Vec<char> = raw_str.chars().collect();
+                    if chars[1].is_ascii_digit() {
+                        for i in 1..chars.len() {
+                            let ch = chars[i];
+                            if ch == '8' || ch == '9' {
+                                let before = &raw_str[..i];
+                                if !before.contains('.')
+                                    && !before.contains('e')
+                                    && !before.contains('E')
+                                {
+                                    return Err(format!(
+                                        "Non-octal decimal integer literals are not allowed in strict mode: {raw_str}"
+                                    ));
                                 }
-                                if ch == '.' || ch == 'e' || ch == 'E' {
-                                    break;
-                                }
-                                if !ch.is_ascii_digit() && ch != '_' {
-                                    break;
-                                }
+                            }
+                            if ch == '.' || ch == 'e' || ch == 'E' {
+                                break;
+                            }
+                            if !ch.is_ascii_digit() && ch != '_' {
+                                break;
                             }
                         }
                     }
                 }
+            }
         }
 
         Ok(())
@@ -481,16 +483,15 @@ impl Validator<'_> {
                             assertion_type_for_this_group = Some(AssertionType::Lookahead);
                         } else if next == '!' {
                             assertion_type_for_this_group = Some(AssertionType::NegativeLookahead);
-                        } else if next == '<'
-                            && idx + 1 < pattern.len() {
-                                let lookahead_char = pattern[idx + 1];
-                                if lookahead_char == '=' {
-                                    assertion_type_for_this_group = Some(AssertionType::Lookbehind);
-                                } else if lookahead_char == '!' {
-                                    assertion_type_for_this_group =
-                                        Some(AssertionType::NegativeLookbehind);
-                                }
+                        } else if next == '<' && idx + 1 < pattern.len() {
+                            let lookahead_char = pattern[idx + 1];
+                            if lookahead_char == '=' {
+                                assertion_type_for_this_group = Some(AssertionType::Lookbehind);
+                            } else if lookahead_char == '!' {
+                                assertion_type_for_this_group =
+                                    Some(AssertionType::NegativeLookbehind);
                             }
+                        }
 
                         // Check for named groups: (?<name>...)
                         if next == '<' {

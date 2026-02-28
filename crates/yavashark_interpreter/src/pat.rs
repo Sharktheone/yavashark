@@ -240,7 +240,8 @@ impl Interpreter {
         })
     }
 
-    #[must_use] pub fn expr_should_be_named(expr: &Expr) -> bool {
+    #[must_use]
+    pub fn expr_should_be_named(expr: &Expr) -> bool {
         match expr {
             Expr::Fn(_) => true,
             Expr::Arrow(_) => true,

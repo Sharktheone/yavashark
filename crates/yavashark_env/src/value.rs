@@ -23,6 +23,7 @@ mod constructor;
 mod conversion;
 mod function;
 mod name;
+mod nan_boxed;
 mod obj;
 mod object;
 mod object_impl;
@@ -31,7 +32,6 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
-mod nan_boxed;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {

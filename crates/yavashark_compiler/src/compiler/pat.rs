@@ -180,7 +180,8 @@ impl Compiler {
 
                         let mut name_restore = None;
                         if Self::expr_should_be_named(value) {
-                            name_restore = self.current_fn_name.replace(prop.key.id.sym.to_string());
+                            name_restore =
+                                self.current_fn_name.replace(prop.key.id.sym.to_string());
                         }
 
                         self.compile_expr_data_certain(value, Acc);
@@ -244,10 +245,11 @@ impl Compiler {
         let mut name_restore = None;
 
         if let Pat::Ident(fn_name) = &*assign.left
-            && Self::expr_should_be_named(&assign.right) {
-                let name = fn_name.sym.to_string();
-                name_restore = self.current_fn_name.replace(name);
-            }
+            && Self::expr_should_be_named(&assign.right)
+        {
+            let name = fn_name.sym.to_string();
+            name_restore = self.current_fn_name.replace(name);
+        }
 
         self.compile_expr_data_certain(&assign.right, out)?;
 
@@ -299,7 +301,8 @@ impl Compiler {
                             let dt = if let Some(expr) = &assign.value {
                                 let mut name_restore = None;
                                 if Self::expr_should_be_named(expr) {
-                                    name_restore = self.current_fn_name.replace(assign.key.id.sym.to_string());
+                                    name_restore =
+                                        self.current_fn_name.replace(assign.key.id.sym.to_string());
                                 }
 
                                 self.compile_expr_data_certain(expr, Acc);
@@ -322,10 +325,11 @@ impl Compiler {
                 let mut name_restore = None;
 
                 if let Pat::Ident(fn_name) = &*assign.left
-                    && Self::expr_should_be_named(&assign.right) {
-                        let name = fn_name.sym.to_string();
-                        name_restore = self.current_fn_name.replace(name);
-                    }
+                    && Self::expr_should_be_named(&assign.right)
+                {
+                    let name = fn_name.sym.to_string();
+                    name_restore = self.current_fn_name.replace(name);
+                }
 
                 self.compile_expr_data_certain(&assign.right, Acc)?;
 
@@ -381,7 +385,8 @@ impl Compiler {
         })
     }
 
-    #[must_use] pub fn expr_should_be_named(expr: &Expr) -> bool {
+    #[must_use]
+    pub fn expr_should_be_named(expr: &Expr) -> bool {
         match expr {
             Expr::Fn(_) => true,
             Expr::Arrow(_) => true,

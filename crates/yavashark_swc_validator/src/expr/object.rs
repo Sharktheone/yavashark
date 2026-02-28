@@ -10,15 +10,16 @@ impl<'a> Validator<'a> {
             match prop {
                 PropOrSpread::Prop(p) => {
                     if let Prop::KeyValue(kv) = &**p
-                        && is_proto_property_name(&kv.key) {
-                            if has_proto {
-                                return Err(
-                                    "Duplicate __proto__ fields are not allowed in object literals"
-                                        .to_string(),
-                                );
-                            }
-                            has_proto = true;
+                        && is_proto_property_name(&kv.key)
+                    {
+                        if has_proto {
+                            return Err(
+                                "Duplicate __proto__ fields are not allowed in object literals"
+                                    .to_string(),
+                            );
                         }
+                        has_proto = true;
+                    }
 
                     self.validate_prop(p)?;
                 }

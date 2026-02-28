@@ -39,7 +39,8 @@ pub struct Validator<'a> {
 }
 
 impl<'a> Validator<'a> {
-    #[must_use] pub fn new() -> Self {
+    #[must_use]
+    pub fn new() -> Self {
         Self::default()
     }
 

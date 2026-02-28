@@ -7,9 +7,10 @@ impl<'a> Validator<'a> {
         let scope = self.enter_function_context(arrow.is_async, false);
 
         if let BlockStmtOrExpr::BlockStmt(block) = &*arrow.body
-            && block_has_use_strict(block) {
-                self.set_current_function_strict();
-            }
+            && block_has_use_strict(block)
+        {
+            self.set_current_function_strict();
+        }
 
         let mut seen_params = Some(Vec::new());
 

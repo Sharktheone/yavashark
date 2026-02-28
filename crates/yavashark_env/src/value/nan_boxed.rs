@@ -134,7 +134,9 @@ mod bits {
     }
 
     pub const fn is_number(value: u64) -> bool {
-        (value & MASK_NAN) != MASK_NAN || (value & MASK_KIND) == TAG_INF || (value & MASK_KIND) == TAG_NAN
+        (value & MASK_NAN) != MASK_NAN
+            || (value & MASK_KIND) == TAG_INF
+            || (value & MASK_KIND) == TAG_NAN
     }
 
     pub const fn encode_int32(value: i32) -> u64 {

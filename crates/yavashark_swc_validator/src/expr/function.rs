@@ -25,9 +25,10 @@ impl<'a> Validator<'a> {
         self.set_super_call_allowed(allow_super_call);
 
         if let Some(body) = &function.body
-            && block_has_use_strict(body) {
-                self.set_current_function_strict();
-            }
+            && block_has_use_strict(body)
+        {
+            self.set_current_function_strict();
+        }
 
         let relaxed_await = if !function.is_async && self.await_restriction_depth > 0 {
             Some(self.enter_relaxed_await_scope())
@@ -72,26 +73,29 @@ impl<'a> Validator<'a> {
         }
 
         if let Some(body) = &function.body
-            && let Err(e) = self.validate_block_with_shadow(body, false) {
-                if let Some(relax) = relaxed_await {
-                    relax.exit(self);
-                }
-                ctx.exit(self);
-
-                return Err(e);
+            && let Err(e) = self.validate_block_with_shadow(body, false)
+        {
+            if let Some(relax) = relaxed_await {
+                relax.exit(self);
             }
+            ctx.exit(self);
+
+            return Err(e);
+        }
 
         if let Some(name) = name
-            && self.in_strict_mode() && matches!(name.sym.as_ref(), "eval" | "arguments") {
-                if let Some(relax) = relaxed_await {
-                    relax.exit(self);
-                }
-                ctx.exit(self);
-                return Err(format!(
-                    "Identifier '{}' is not allowed in strict mode",
-                    name.sym
-                ));
+            && self.in_strict_mode()
+            && matches!(name.sym.as_ref(), "eval" | "arguments")
+        {
+            if let Some(relax) = relaxed_await {
+                relax.exit(self);
             }
+            ctx.exit(self);
+            return Err(format!(
+                "Identifier '{}' is not allowed in strict mode",
+                name.sym
+            ));
+        }
 
         if let Some(relax) = relaxed_await {
             relax.exit(self);

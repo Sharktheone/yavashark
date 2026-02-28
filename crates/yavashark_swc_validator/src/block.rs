@@ -54,29 +54,32 @@ pub fn collect_var_declared_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
         Stmt::For(for_stmt) => {
             if let Some(init) = &for_stmt.init
                 && let VarDeclOrExpr::VarDecl(var_decl) = init
-                    && var_decl.kind == VarDeclKind::Var {
-                        for decl in &var_decl.decls {
-                            collect_pat_idents(&decl.name, out);
-                        }
-                    }
+                && var_decl.kind == VarDeclKind::Var
+            {
+                for decl in &var_decl.decls {
+                    collect_pat_idents(&decl.name, out);
+                }
+            }
             collect_var_declared_names(&for_stmt.body, out);
         }
         Stmt::ForIn(for_in) => {
             if let ForHead::VarDecl(var_decl) = &for_in.left
-                && var_decl.kind == VarDeclKind::Var {
-                    for decl in &var_decl.decls {
-                        collect_pat_idents(&decl.name, out);
-                    }
+                && var_decl.kind == VarDeclKind::Var
+            {
+                for decl in &var_decl.decls {
+                    collect_pat_idents(&decl.name, out);
                 }
+            }
             collect_var_declared_names(&for_in.body, out);
         }
         Stmt::ForOf(for_of) => {
             if let ForHead::VarDecl(var_decl) = &for_of.left
-                && var_decl.kind == VarDeclKind::Var {
-                    for decl in &var_decl.decls {
-                        collect_pat_idents(&decl.name, out);
-                    }
+                && var_decl.kind == VarDeclKind::Var
+            {
+                for decl in &var_decl.decls {
+                    collect_pat_idents(&decl.name, out);
                 }
+            }
             collect_var_declared_names(&for_of.body, out);
         }
         Stmt::Switch(switch_stmt) => {

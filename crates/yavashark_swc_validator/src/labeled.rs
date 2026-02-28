@@ -9,12 +9,13 @@ impl<'a> Validator<'a> {
         check_async_generator_fn_decl(&labeled.body, "a labeled statement")?;
 
         if self.in_strict_mode()
-            && let Stmt::Decl(Decl::Fn(_)) = &*labeled.body {
-                return Err(
-                    "In strict mode, function declarations are not allowed in labelled statements"
-                        .to_string(),
-                );
-            }
+            && let Stmt::Decl(Decl::Fn(_)) = &*labeled.body
+        {
+            return Err(
+                "In strict mode, function declarations are not allowed in labelled statements"
+                    .to_string(),
+            );
+        }
 
         self.validate_statement(&labeled.body)
     }

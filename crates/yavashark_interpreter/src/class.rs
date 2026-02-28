@@ -392,11 +392,7 @@ fn define_method_on_class(
             MethodKind::Getter => class.define_getter(key, value.to_object()?, realm),
             MethodKind::Setter => class.define_setter(key, value.to_object()?, realm),
             MethodKind::Method => {
-                class.define_property_attributes(
-                    key,
-                    Variable::write_config(value),
-                    realm,
-                )?;
+                class.define_property_attributes(key, Variable::write_config(value), realm)?;
 
                 Ok(())
             }
@@ -406,11 +402,7 @@ fn define_method_on_class(
             MethodKind::Getter => proto.define_getter(key, value.to_object()?, realm),
             MethodKind::Setter => proto.define_setter(key, value.to_object()?, realm),
             MethodKind::Method => {
-                proto.define_property_attributes(
-                    key,
-                    Variable::write_config(value),
-                    realm,
-                )?;
+                proto.define_property_attributes(key, Variable::write_config(value), realm)?;
 
                 Ok(())
             }
