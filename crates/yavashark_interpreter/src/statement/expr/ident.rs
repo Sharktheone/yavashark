@@ -9,13 +9,9 @@ impl Interpreter {
         let value = scope.resolve(&ident, realm)?;
         value.map_or_else(
             || {
-                if scope.is_strict_mode()? {
-                    Err(ControlFlow::error_reference(format!(
-                        "{ident} is not defined"
-                    )))
-                } else {
-                    Ok(yavashark_env::Value::Undefined)
-                }
+                Err(ControlFlow::error_reference(format!(
+                    "{ident} is not defined"
+                )))
             },
             Ok,
         )
