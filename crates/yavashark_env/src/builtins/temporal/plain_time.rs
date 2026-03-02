@@ -10,6 +10,7 @@ use crate::{Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::props;
+use yavashark_string::YSString;
 
 #[derive(Debug)]
 pub struct PlainTime {
@@ -133,9 +134,11 @@ impl PlainTime {
     }
 
     #[prop("toLocaleString")]
-    pub fn to_locale_string(&self) -> Res<String> {
+    pub fn to_locale_string(&self, _locale: Option<YSString>, opts: Option<ObjectHandle>, realm: &mut Realm) -> Res<String> {
+        let opts = string_rounding_mode_opts(opts, realm)?;
+
         self.time
-            .to_ixdtf_string(ToStringRoundingOptions::default())
+            .to_ixdtf_string(opts)
             .map_err(Error::from_temporal)
     }
 
