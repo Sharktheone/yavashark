@@ -1,13 +1,11 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{
-    difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
-};
+use crate::builtins::temporal::utils::{difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time, OverflowOptions};
 use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use temporal_rs::options::ToStringRoundingOptions;
+use temporal_rs::options::{Overflow, ToStringRoundingOptions};
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -63,8 +61,12 @@ impl PlainTime {
         Ok(result as i8)
     }
 
-    pub fn from(value: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let time = value_to_plain_time(value, realm)?;
+    pub fn from(value: Value, options: &Option<OverflowOptions>,  #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow = options
+            .as_ref()
+            .map_or(Overflow::Constrain, |o| o.overflow.unwrap_or_default().into());
+
+        let time = value_to_plain_time_overflow(value, realm, overflow)?;
 
         Ok(Self::new(time, realm)?.into_object())
     }
@@ -213,6 +215,10 @@ impl PlainTime {
 }
 
 pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainTime> {
+    value_to_plain_time_overflow(info, realm, Overflow::Constrain)
+}
+
+pub fn value_to_plain_time_overflow(info: Value, realm: &mut Realm, overflow: Overflow) -> Res<temporal_rs::PlainTime> {
     match info {
         Value::String(str) => {
             let time = str.parse().map_err(Error::from_temporal)?;
@@ -246,7 +252,7 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
                 .get("nanosecond", realm)
                 .and_then(|v| v.to_number(realm))? as u16;
 
-            temporal_rs::PlainTime::new(hour, minute, second, millisecond, microsecond, nanosecond)
+            temporal_rs::PlainTime::new_with_overflow(hour, minute, second, millisecond, microsecond, nanosecond, overflow)
                 .map_err(Error::from_temporal)
         }
 

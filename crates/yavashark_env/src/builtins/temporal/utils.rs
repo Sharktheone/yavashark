@@ -22,6 +22,7 @@ use temporal_rs::options::{
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
+use yavashark_macro::data_object;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -664,4 +665,9 @@ pub fn value_to_zoned_date_time_fields(
         time,
         offset,
     })
+}
+
+#[data_object]
+pub struct OverflowOptions {
+    pub overflow: Option<options::Overflow>,
 }
