@@ -33,7 +33,7 @@ impl ZonedDateTime {
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::ZonedDateTime> {
-        Temporal::now()
+        Temporal::local_now()
             .zoned_date_time_iso(tz)
             .map_err(Error::from_temporal)
     }

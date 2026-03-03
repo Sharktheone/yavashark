@@ -21,7 +21,7 @@ impl PlainTime {
     }
 
     pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
-        Temporal::now()
+        Temporal::local_now()
             .plain_time_iso(tz)
             .map_err(Error::from_temporal)
     }

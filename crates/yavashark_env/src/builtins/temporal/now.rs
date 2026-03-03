@@ -41,7 +41,7 @@ impl Now {
 
     #[prop("timeZoneId")]
     fn time_zone_id() -> Res<String> {
-        Temporal::now()
+        Temporal::local_now()
             .time_zone()
             .map_err(Error::from_temporal)?
             .identifier()

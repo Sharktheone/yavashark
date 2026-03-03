@@ -29,7 +29,7 @@ impl PlainDate {
     }
 
     fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
-        Temporal::now()
+        Temporal::local_now()
             .plain_date_iso(tz)
             .map_err(Error::from_temporal)
     }
