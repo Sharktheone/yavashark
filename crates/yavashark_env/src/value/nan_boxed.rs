@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::ptr::NonNull;
 
 /// we have 1 sign bit and 52 exponent bits to store data.
