@@ -157,6 +157,8 @@ impl CustomName for ErrorObj {
 #[props(intrinsic_name = error)]
 impl ErrorObj {
     #[prop("name")]
+    #[configurable]
+    #[writable]
     #[both]
     const NAME: &'static str = "Error";
 
