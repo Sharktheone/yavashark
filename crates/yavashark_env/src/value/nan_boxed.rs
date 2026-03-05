@@ -1,4 +1,6 @@
 #![allow(unused)]
+
+use std::ptr;
 use std::ptr::NonNull;
 
 /// we have 1 sign bit and 52 exponent bits to store data.
@@ -31,6 +33,7 @@ use std::ptr::NonNull;
 /// Float64    Any other value.
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct ValueInner {
     #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
     half: u32,
@@ -85,8 +88,8 @@ mod bits {
     const MASK_BOOLEAN_VALUE: u64 = 0x0000_0000_0000_0001;
     const MASK_48BIT_VALUE: u64 = 0x0000_FFFF_FFFF_FFFF;
 
-    const VALUE_NULL: u64 = TAG_NULL_UNDEF;
-    const VALUE_UNDEFINED: u64 = TAG_NULL_UNDEF | 0x1;
+    pub(crate) const VALUE_NULL: u64 = TAG_NULL_UNDEF;
+    pub(crate) const VALUE_UNDEFINED: u64 = TAG_NULL_UNDEF | 0x1;
     const VALUE_FALSE: u64 = TAG_BOOLEAN;
     const VALUE_TRUE: u64 = TAG_BOOLEAN | 0x1;
 
@@ -183,3 +186,164 @@ mod bits {
         (value & MASK_BOOLEAN_VALUE) != 0
     }
 }
+
+
+impl ValueInner {
+    const fn from_bits(bits: u64) -> Self {
+        Self {
+            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
+            half: (bits >> 32) as u32,
+            #[cfg(target_pointer_width = "16")]
+            ptr_pad: (bits >> 48) as u16,
+            ptr: ptr::without_provenance_mut(bits as usize),
+        }
+    }
+
+    fn with_provenance(ptr: NonNull<()>, addr: u64) -> Self {
+        Self {
+            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
+            half: (addr >> 32) as u32,
+            #[cfg(target_pointer_width = "16")]
+            ptr_pad: (addr >> 48) as u16,
+            ptr: ptr.cast::<()>().as_ptr().with_addr(addr as usize)
+        }
+    }
+
+    fn value(self) -> u64 {
+        //TODO: should this be a transmute?
+        let mut bits = self.ptr.addr() as u64;
+
+        #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
+        {
+            bits |= (self.half as u64) << 32;
+        }
+
+        #[cfg(target_pointer_width = "16")]
+        {
+            bits |= (self.ptr_pad as u64) << 48;
+        }
+
+
+        bits
+    }
+
+    pub const fn from_f64(value: f64) -> Self {
+        let bits = bits::encode_f64(value);
+
+        Self::from_bits(bits)
+
+    }
+
+    pub const fn from_int32(value: i32) -> Self {
+        let bits = bits::encode_int32(value);
+
+        Self::from_bits(bits)
+    }
+
+    pub const fn from_bool(value: bool) -> Self {
+        let bits = bits::encode_boolean(value);
+
+        Self::from_bits(bits)
+    }
+
+    pub const fn null() -> Self {
+        Self::from_bits(bits::VALUE_NULL)
+    }
+
+    pub const fn undefined() -> Self {
+        Self::from_bits(bits::VALUE_UNDEFINED)
+    }
+
+    pub fn from_inline_string(bytes: [u8; 6]) -> Self {
+        let bits = bits::encode_inline_string(bytes);
+
+        Self::from_bits(bits)
+    }
+
+    pub fn is_f64(self) -> bool {
+        bits::is_number(self.value())
+    }
+
+    pub fn is_int32(self) -> bool {
+        bits::is_int32(self.value())
+    }
+
+    pub fn is_bool(self) -> bool {
+        bits::is_boolean(self.value())
+    }
+
+    pub fn is_null(self) -> bool {
+        bits::is_null(self.value())
+    }
+
+    pub fn is_undefined(self) -> bool {
+        bits::is_undefined(self.value())
+    }
+
+    pub fn is_inline_string(self) -> bool {
+        bits::is_inline_string(self.value())
+    }
+
+    pub fn is_string_owned(self) -> bool {
+        bits::is_string_owned(self.value())
+    }
+
+    pub fn is_string(self) -> bool {
+        bits::is_string(self.value())
+    }
+
+    pub fn is_object(self) -> bool {
+        bits::is_object(self.value())
+    }
+
+    pub fn is_symbol(self) -> bool {
+        bits::is_symbol(self.value())
+    }
+
+    pub fn is_bigint(self) -> bool {
+        bits::is_bigint(self.value())
+    }
+
+    pub fn as_f64(self) -> Option<f64> {
+        if self.is_f64() {
+            Some(f64::from_bits(self.value()))
+        } else {
+            None
+        }
+    }
+
+    pub fn as_int32(self) -> Option<i32> {
+        if self.is_int32() {
+            Some(bits::decode_int32(self.value()))
+        } else {
+            None
+        }
+    }
+
+    pub fn as_bool(self) -> Option<bool> {
+        if self.is_bool() {
+            Some(bits::decode_boolean(self.value()))
+        } else {
+            None
+        }
+    }
+
+    pub fn as_inline_string(self) -> Option<[u8; 6]> {
+        if self.is_inline_string() {
+            let bits = self.value();
+            let bytes = bits.to_le_bytes();
+            let mut result = [0; 6];
+            result.copy_from_slice(&bytes[2..8]);
+            Some(result)
+        } else {
+            None
+        }
+    }
+
+
+
+
+
+
+}
+
