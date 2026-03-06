@@ -1,6 +1,9 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time, OverflowOptions};
+use crate::builtins::temporal::utils::{
+    difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
+    OverflowOptions,
+};
 use crate::native_obj::NativeObject;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::{Obj, Object};
@@ -61,10 +64,14 @@ impl PlainTime {
         Ok(result as i8)
     }
 
-    pub fn from(value: Value, options: &Option<OverflowOptions>,  #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow = options
-            .as_ref()
-            .map_or(Overflow::Constrain, |o| o.overflow.unwrap_or_default().into());
+    pub fn from(
+        value: Value,
+        options: &Option<OverflowOptions>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let overflow = options.as_ref().map_or(Overflow::Constrain, |o| {
+            o.overflow.unwrap_or_default().into()
+        });
 
         let time = value_to_plain_time_overflow(value, realm, overflow)?;
 
@@ -136,7 +143,12 @@ impl PlainTime {
     }
 
     #[prop("toLocaleString")]
-    pub fn to_locale_string(&self, _locale: Option<YSString>, opts: Option<ObjectHandle>, realm: &mut Realm) -> Res<String> {
+    pub fn to_locale_string(
+        &self,
+        _locale: Option<YSString>,
+        opts: Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<String> {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.time
@@ -218,7 +230,11 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
     value_to_plain_time_overflow(info, realm, Overflow::Constrain)
 }
 
-pub fn value_to_plain_time_overflow(info: Value, realm: &mut Realm, overflow: Overflow) -> Res<temporal_rs::PlainTime> {
+pub fn value_to_plain_time_overflow(
+    info: Value,
+    realm: &mut Realm,
+    overflow: Overflow,
+) -> Res<temporal_rs::PlainTime> {
     match info {
         Value::String(str) => {
             let time = str.parse().map_err(Error::from_temporal)?;
@@ -252,8 +268,16 @@ pub fn value_to_plain_time_overflow(info: Value, realm: &mut Realm, overflow: Ov
                 .get("nanosecond", realm)
                 .and_then(|v| v.to_number(realm))? as u16;
 
-            temporal_rs::PlainTime::new_with_overflow(hour, minute, second, millisecond, microsecond, nanosecond, overflow)
-                .map_err(Error::from_temporal)
+            temporal_rs::PlainTime::new_with_overflow(
+                hour,
+                minute,
+                second,
+                millisecond,
+                microsecond,
+                nanosecond,
+                overflow,
+            )
+            .map_err(Error::from_temporal)
         }
 
         _ => Err(Error::ty(

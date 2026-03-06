@@ -42,7 +42,9 @@ impl Instant {
     }
 
     pub fn now() -> Res<temporal_rs::Instant> {
-        Temporal::local_now().instant().map_err(Error::from_temporal)
+        Temporal::local_now()
+            .instant()
+            .map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &mut Realm) -> Res<NativeObject<Self>> {

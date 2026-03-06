@@ -187,7 +187,6 @@ mod bits {
     }
 }
 
-
 impl ValueInner {
     const fn from_bits(bits: u64) -> Self {
         Self {
@@ -205,7 +204,7 @@ impl ValueInner {
             half: (addr >> 32) as u32,
             #[cfg(target_pointer_width = "16")]
             ptr_pad: (addr >> 48) as u16,
-            ptr: ptr.cast::<()>().as_ptr().with_addr(addr as usize)
+            ptr: ptr.cast::<()>().as_ptr().with_addr(addr as usize),
         }
     }
 
@@ -223,7 +222,6 @@ impl ValueInner {
             bits |= (self.ptr_pad as u64) << 48;
         }
 
-
         bits
     }
 
@@ -231,7 +229,6 @@ impl ValueInner {
         let bits = bits::encode_f64(value);
 
         Self::from_bits(bits)
-
     }
 
     pub const fn from_int32(value: i32) -> Self {
@@ -339,11 +336,4 @@ impl ValueInner {
             None
         }
     }
-
-
-
-
-
-
 }
-
