@@ -336,4 +336,37 @@ impl ValueInner {
             None
         }
     }
+
+    pub fn as_string_owned(self) -> Option<NonNull<()>> {
+        if self.is_string_owned() {
+            Some(NonNull::new(bits::decode_pointer(self.value()) as *mut ()).unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn as_object(self) -> Option<NonNull<()>> {
+        if self.is_object() {
+            Some(NonNull::new(bits::decode_pointer(self.value()) as *mut ()).unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn as_symbol(self) -> Option<NonNull<()>> {
+        if self.is_symbol() {
+            Some(NonNull::new(bits::decode_pointer(self.value()) as *mut ()).unwrap())
+        } else {
+            None
+        }
+    }
+
+    pub fn as_bigint(self) -> Option<NonNull<()>> {
+        if self.is_bigint() {
+            Some(NonNull::new(bits::decode_pointer(self.value()) as *mut ()).unwrap())
+        } else {
+            None
+        }
+    }
+
 }
