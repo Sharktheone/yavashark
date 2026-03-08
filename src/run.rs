@@ -258,14 +258,15 @@ fn run_code(
 
     #[cfg(feature = "vm")]
     if bytecode {
+        use yavashark_vm::yavashark_bytecode::data::DataSection;
+        use yavashark_vm::{OwnedVM, VM};
+
         let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
 
         if instructions {
             println!("{bc:#?}");
         }
 
-        use yavashark_vm::yavashark_bytecode::data::DataSection;
-        use yavashark_vm::{OwnedVM, VM};
         let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
         let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
