@@ -325,6 +325,13 @@ impl ValueInner {
         }
     }
 
+    pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
+        let addr = bits::decode_pointer(self.value());
+        unsafe {
+            NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _)
+        }
+    }
+
     pub fn as_inline_string(self) -> Option<[u8; 6]> {
         if self.is_inline_string() {
             let bits = self.value();
@@ -339,10 +346,7 @@ impl ValueInner {
 
     pub fn as_string_owned(self) -> Option<NonNull<()>> {
         if self.is_string_owned() {
-            let addr = bits::decode_pointer(self.value());
-            unsafe {
-                Some(NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _))
-            }
+            unsafe { Some(self.as_pointer_unchecked()) }
         } else {
             None
         }
@@ -350,10 +354,7 @@ impl ValueInner {
 
     pub fn as_object(self) -> Option<NonNull<()>> {
         if self.is_object() {
-            let addr = bits::decode_pointer(self.value());
-            unsafe {
-                Some(NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _))
-            }
+            unsafe { Some(self.as_pointer_unchecked()) }
         } else {
             None
         }
@@ -361,10 +362,7 @@ impl ValueInner {
 
     pub fn as_symbol(self) -> Option<NonNull<()>> {
         if self.is_symbol() {
-            let addr = bits::decode_pointer(self.value());
-            unsafe {
-                Some(NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _))
-            }
+            unsafe { Some(self.as_pointer_unchecked()) }
         } else {
             None
         }
@@ -372,10 +370,7 @@ impl ValueInner {
 
     pub fn as_bigint(self) -> Option<NonNull<()>> {
         if self.is_bigint() {
-            let addr = bits::decode_pointer(self.value());
-            unsafe {
-                Some(NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _))
-            }
+            unsafe { Some(self.as_pointer_unchecked()) }
         } else {
             None
         }
