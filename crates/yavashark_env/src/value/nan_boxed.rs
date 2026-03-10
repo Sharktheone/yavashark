@@ -25,6 +25,7 @@ use std::ptr::NonNull;
 /// True       0111 1111 1111 1001 0100 0000 0000 0000 0000 .. 0001
 /// Null       0111 1111 1111 1001 1000 0000 0000 0000 0000 .. 0000
 /// Undefined  0111 1111 1111 1001 1000 0000 0000 0000 0000 .. 0001
+/// TheHole    0111 1111 1111 1001 1100 0000 0000 0000 0000 .. 0000
 /// String     0111 1111 1111 1010 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// InlineStr  0111 1111 1111 1011 DDDD DDDD DDDD DDDD DDDD .. DDDD
 /// Object     0111 1111 1111 1100 PPPP PPPP PPPP PPPP PPPP .. PPPP
@@ -69,6 +70,7 @@ mod bits {
     const TAG_INT32: u64 = 0x9_0000_0000_0000;
     const TAG_BOOLEAN: u64 = 0x9_4000_0000_0000;
     const TAG_NULL_UNDEF: u64 = 0x9_8000_0000_0000;
+    const TAG_HOLE: u64 = 0x9_C000_0000_0000;
     const TAG_INLINE_STRING: u64 = 0xA_0000_0000_0000;
     const TAG_STRING_OWNED: u64 = 0xB_0000_0000_0000;
     const TAG_OBJECT: u64 = 0xC_0000_0000_0000;
@@ -90,8 +92,10 @@ mod bits {
 
     pub(crate) const VALUE_NULL: u64 = TAG_NULL_UNDEF;
     pub(crate) const VALUE_UNDEFINED: u64 = TAG_NULL_UNDEF | 0x1;
-    const VALUE_FALSE: u64 = TAG_BOOLEAN;
-    const VALUE_TRUE: u64 = TAG_BOOLEAN | 0x1;
+    pub(crate) const VALUE_FALSE: u64 = TAG_BOOLEAN;
+    pub(crate) const VALUE_TRUE: u64 = TAG_BOOLEAN | 0x1;
+
+    pub(crate) const VALUE_HOLE: u64 = TAG_HOLE;
 
     pub const fn is_int32(value: u64) -> bool {
         (value & MASK_KIND_OTHER) == TAG_INT32
@@ -141,6 +145,10 @@ mod bits {
         (value & MASK_NAN) != MASK_NAN
             || (value & MASK_KIND) == TAG_INF
             || (value & MASK_KIND) == TAG_NAN
+    }
+
+    pub const fn is_hole(value: u64) -> bool {
+        value == VALUE_HOLE
     }
 
     pub const fn encode_int32(value: i32) -> u64 {
@@ -251,6 +259,10 @@ impl ValueInner {
         Self::from_bits(bits::VALUE_UNDEFINED)
     }
 
+    pub const unsafe fn hole() -> Self {
+        Self::from_bits(bits::VALUE_HOLE)
+    }
+
     pub fn from_inline_string(bytes: [u8; 6]) -> Self {
         let bits = bits::encode_inline_string(bytes);
 
@@ -285,6 +297,10 @@ impl ValueInner {
 
     pub fn is_undefined(self) -> bool {
         bits::is_undefined(self.value())
+    }
+
+    pub fn is_hole(self) -> bool {
+        bits::is_hole(self.value())
     }
 
     pub fn is_inline_string(self) -> bool {
