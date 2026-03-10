@@ -257,6 +257,16 @@ impl ValueInner {
         Self::from_bits(bits)
     }
 
+    pub unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
+        Self {
+            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
+            half: 0,
+            #[cfg(target_pointer_width = "16")]
+            ptr_pad: 0,
+            ptr: ptr.as_ptr(),
+        }
+    }
+
     pub fn is_f64(self) -> bool {
         bits::is_number(self.value())
     }
@@ -323,6 +333,10 @@ impl ValueInner {
         } else {
             None
         }
+    }
+
+    pub unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
+        NonNull::new_unchecked(self.ptr as *mut ())
     }
 
     pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
