@@ -23,7 +23,7 @@ mod constructor;
 mod conversion;
 mod function;
 mod name;
-mod nan_boxed;
+pub mod nan_boxed;
 mod obj;
 mod object;
 mod object_impl;
