@@ -327,9 +327,7 @@ impl ValueInner {
 
     pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
         let addr = bits::decode_pointer(self.value());
-        unsafe {
-            NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _)
-        }
+        unsafe { NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _) }
     }
 
     pub fn as_inline_string(self) -> Option<[u8; 6]> {
@@ -375,5 +373,4 @@ impl ValueInner {
             None
         }
     }
-
 }
