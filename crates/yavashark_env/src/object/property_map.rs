@@ -6,8 +6,14 @@ use crate::object::inline::{ButterFly, Value};
 #[repr(C)]
 pub struct PropertyMap<T: ?Sized> {
     _marker: std::marker::PhantomData<T>,
-    size: TaggedSize,
+    state: MapState,
     data: [u8],
+}
+
+struct MapState {
+    size: u32,
+    extensible: bool,
+    has_butterfly: bool,
 }
 
 impl<T> PropertyMap<T> {
@@ -16,7 +22,7 @@ impl<T> PropertyMap<T> {
     }
 
     pub fn get_native_ptr(&self) -> *mut T {
-        let properties_size = align(self.size.get() as usize * size_of::<T>(), align_of::<T>());
+        let properties_size = align(self.state.size as usize * size_of::<T>(), align_of::<T>());
 
         unsafe { self.data.as_ptr().add(properties_size) as *mut T }
     }
@@ -30,7 +36,13 @@ impl<T> PropertyMap<T> {
     }
 
     pub unsafe fn initialize(this: *mut Self, size: u32, native: T) {
-        (*this).size = TaggedSize::new(size, false);
+        let state = MapState {
+            size,
+            extensible: true,
+            has_butterfly: false,
+        };
+
+        (*this).state = state;
 
         (*this).get_uninitialized_properties().fill(MaybeUninit::new(Value::hole()));
 
@@ -46,26 +58,26 @@ impl<T> PropertyMap<T> {
 impl<T: ?Sized> PropertyMap<T> {
     fn get_uninitialized_properties(&mut self) -> &mut [MaybeUninit<Value>] {
         unsafe {
-            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut MaybeUninit<Value>, self.size.get() as usize)
+            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut MaybeUninit<Value>, self.state.size as usize)
         }
     }
 
     pub fn get_properties_mut(&mut self) -> &mut [Value] {
         unsafe {
-            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut Value, self.size.get() as usize)
+            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut Value, self.state.size as usize)
         }
     }
 
     pub fn get_properties(&self) -> &[Value] {
         unsafe {
-            std::slice::from_raw_parts(self.data.as_ptr() as *const Value, self.size.get() as usize)
+            std::slice::from_raw_parts(self.data.as_ptr() as *const Value, self.state.size as usize)
         }
     }
 
     pub fn get_butterfly(&self) -> Option<NonNull<ButterFly>> {
-        if self.size.is_tagged() {
+        if self.state.has_butterfly {
             let ptr = unsafe {
-                self.get_unchecked(self.size.get())
+                self.get_unchecked(self.state.size)
                     .unsafe_assume_pointer()
                     .cast::<ButterFly>()
             };
@@ -85,15 +97,18 @@ impl<T: ?Sized> PropertyMap<T> {
             .0
     }
 
-
-
     pub unsafe fn initialize_unsized(this: *mut Self, size: u32) {
-        (*this).size.set_size(size);
-        //TODO
+        let state = MapState {
+            size,
+            extensible: true,
+            has_butterfly: false,
+        };
+
+        (*this).state = state;
     }
 
     pub fn get(&self, index: u32) -> Option<&Value> {
-        if index < self.size.get() {
+        if index < self.state.size {
             Some(self.get_unchecked(index))
         } else {
             None
@@ -101,13 +116,13 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     pub fn get_mut(&mut self, index: u32) -> Option<&mut Value> {
-        if index < self.size.get() {
+        if index < self.state.size {
             Some(self.get_unchecked_mut(index))
         } else {
             None
         }
     }
-    
+
     pub fn get_unchecked(&self, index: u32) -> &Value {
         unsafe {
             self.get_ptr(index).as_ref()
