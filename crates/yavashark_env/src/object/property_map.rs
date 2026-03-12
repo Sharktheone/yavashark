@@ -143,42 +143,7 @@ impl<T: ?Sized> PropertyMap<T> {
 }
 
 
-// Uses the most significant bit as a tag
-struct TaggedSize(u32);
-
-
-impl TaggedSize {
-    const MAX_SIZE: u32 = 0x7FFF_FFFF; // 31 bits for size
-
-    fn new(size: u32, tag: bool) -> Self {
-        assert!(size <= Self::MAX_SIZE, "Size exceeds maximum allowed");
-        let tagged = if tag { size | 0x8000_0000 } else { size };
-        TaggedSize(tagged)
-    }
-
-    fn get(&self) -> u32 {
-        self.0 & Self::MAX_SIZE
-    }
-
-    fn is_tagged(&self) -> bool {
-        (self.0 & 0x8000_0000) != 0
-    }
-
-    fn set_tag(&mut self, tag: bool) {
-        if tag {
-            self.0 |= 0x8000_0000;
-        } else {
-            self.0 &= 0x7FFF_FFFF;
-        }
-    }
-
-    fn set_size(&mut self, size: u32) {
-        assert!(size <= Self::MAX_SIZE, "Size exceeds maximum allowed");
-        self.0 = (self.0 & 0x8000_0000) | size;
-    }
-}
-
-fn align(size: usize, align: usize) -> usize {
+const fn align(size: usize, align: usize) -> usize {
     (size + align - 1) & !(align - 1)
 }
 
