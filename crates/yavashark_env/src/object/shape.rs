@@ -1,7 +1,1 @@
-
-
-
-
-pub struct Shape {
-    
-}
+pub struct Shape {}

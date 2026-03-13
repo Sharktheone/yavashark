@@ -1,7 +1,7 @@
+use crate::object::inline::{ButterFly, Value};
 use std::alloc::Layout;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
-use crate::object::inline::{ButterFly, Value};
 
 #[repr(C)]
 pub struct PropertyMap<T: ?Sized> {
@@ -44,27 +44,32 @@ impl<T> PropertyMap<T> {
 
         (*this).state = state;
 
-        (*this).get_uninitialized_properties().fill(MaybeUninit::new(Value::hole()));
+        (*this)
+            .get_uninitialized_properties()
+            .fill(MaybeUninit::new(Value::hole()));
 
         let native_ptr = (*this).get_native_ptr();
 
         std::ptr::write(native_ptr, native);
     }
-
-
-
 }
 
 impl<T: ?Sized> PropertyMap<T> {
     fn get_uninitialized_properties(&mut self) -> &mut [MaybeUninit<Value>] {
         unsafe {
-            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut MaybeUninit<Value>, self.state.size as usize)
+            std::slice::from_raw_parts_mut(
+                self.data.as_mut_ptr() as *mut MaybeUninit<Value>,
+                self.state.size as usize,
+            )
         }
     }
 
     pub fn get_properties_mut(&mut self) -> &mut [Value] {
         unsafe {
-            std::slice::from_raw_parts_mut(self.data.as_mut_ptr() as *mut Value, self.state.size as usize)
+            std::slice::from_raw_parts_mut(
+                self.data.as_mut_ptr() as *mut Value,
+                self.state.size as usize,
+            )
         }
     }
 
@@ -89,10 +94,11 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     pub fn unsized_layout(size: u32, native: Layout) -> std::alloc::Layout {
-        let properties = Layout::array::<Value>(size as usize)
-            .expect("Invalid layout for property map");
+        let properties =
+            Layout::array::<Value>(size as usize).expect("Invalid layout for property map");
 
-        properties.extend(native)
+        properties
+            .extend(native)
             .expect("Invalid layout for property map")
             .0
     }
@@ -124,26 +130,20 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     pub fn get_unchecked(&self, index: u32) -> &Value {
-        unsafe {
-            self.get_ptr(index).as_ref()
-        }
+        unsafe { self.get_ptr(index).as_ref() }
     }
 
     pub fn get_unchecked_mut(&mut self, index: u32) -> &mut Value {
-        unsafe {
-            self.get_ptr(index).as_mut()
-        }
+        unsafe { self.get_ptr(index).as_mut() }
     }
 
     unsafe fn get_ptr(&self, index: u32) -> NonNull<Value> {
-        let ptr  = self.data.as_ptr().add(index as usize * size_of::<Value>()) as *mut Value;
+        let ptr = self.data.as_ptr().add(index as usize * size_of::<Value>()) as *mut Value;
 
         NonNull::new_unchecked(ptr)
     }
 }
 
-
 const fn align(size: usize, align: usize) -> usize {
     (size + align - 1) & !(align - 1)
 }
-
