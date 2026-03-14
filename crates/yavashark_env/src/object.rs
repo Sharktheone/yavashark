@@ -18,9 +18,12 @@ use yavashark_garbage::GcRef;
 pub mod array;
 pub mod constructor;
 
+mod inline;
 mod prealloc;
 mod properties;
+mod property_map;
 pub mod prototype;
+mod shape;
 
 #[derive(Debug)]
 pub struct Object {
