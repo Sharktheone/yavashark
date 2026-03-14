@@ -36,7 +36,7 @@ impl PlainTime {
     }
 }
 
-#[props(intrinsic_name = temporal_plain_time, to_string_tag = "Temporal.PlainTime", constructor_length = 1)]
+#[props(intrinsic_name = temporal_plain_time, to_string_tag = "Temporal.PlainTime", constructor_length = 0)]
 impl PlainTime {
     #[constructor]
     pub fn construct(
