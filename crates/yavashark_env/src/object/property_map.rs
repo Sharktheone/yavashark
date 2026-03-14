@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::object::inline::{ButterFly, Value};
 use std::alloc::Layout;
 use std::mem::MaybeUninit;

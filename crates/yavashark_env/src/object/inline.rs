@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::object::property_map::PropertyMap;
 use crate::value::nan_boxed::ValueInner;
 
