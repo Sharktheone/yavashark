@@ -4,24 +4,47 @@ use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
 #[repr(C)]
+#[repr(align(8))]
 pub struct PropertyMap<T: ?Sized> {
     _marker: std::marker::PhantomData<T>,
     state: MapState,
-    data: [u8],
+    data: OpaqueData,
 }
 
+#[repr(align(8))]
+pub struct OpaqueData;
+
+
+#[repr(align(8))]
+pub struct Data([u8]);
+
+#[repr(align(8))]
 struct MapState {
     size: u32,
     extensible: bool,
     has_butterfly: bool,
+    _pad: [u8; 2],
 }
+
+
+
+
 
 impl<T> PropertyMap<T> {
     pub fn sized_layout(size: u32) -> Layout {
         Self::unsized_layout(size, Layout::new::<T>())
     }
 
-    pub const fn get_native_ptr(&self) -> *mut T {
+    pub const fn size_from_alloc_bytes(bytes: usize) -> u32 {
+        let header = size_of::<Self>();
+
+        let native_size = size_of::<T>();
+        let native_align = align_of::<T>();
+
+        0
+    }
+
+    pub const fn get_native_ptr(&self) -> NonNull<T> {
         let properties_size = align(self.state.size as usize * size_of::<T>(), align_of::<T>());
 
         unsafe { NonNull::from_ref(&self.data).byte_add(properties_size).cast::<T>() }
@@ -35,11 +58,13 @@ impl<T> PropertyMap<T> {
         unsafe { self.get_native_ptr().as_mut() }
     }
 
-    pub unsafe fn initialize(this: *mut Self, size: u32, native: T) {
+    pub unsafe fn initialize(this: *mut MaybeUninit<Self>, size: u32, native: T) {
+        let this = (*this).as_mut_ptr();
         let state = MapState {
             size,
             extensible: true,
             has_butterfly: false,
+                _pad: [0; _],
         };
 
         (*this).state = state;
@@ -93,11 +118,12 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub fn unsized_layout(size: u32, native: Layout) -> std::alloc::Layout {
-        let properties =
-            Layout::array::<Value>(size as usize).expect("Invalid layout for property map");
+    pub fn unsized_layout(size: u32, native: Layout) -> Layout {
+        let layout = Layout::new::<Self>();
 
-        properties
+        layout.extend(Layout::array::<Value>(size as usize).expect("Invalid layout for property map"))
+            .expect("Invalid layout for property map")
+            .0
             .extend(native)
             .expect("Invalid layout for property map")
             .0
@@ -108,6 +134,7 @@ impl<T: ?Sized> PropertyMap<T> {
             size,
             extensible: true,
             has_butterfly: false,
+            _pad: [0; _],
         };
 
         (*this).state = state;
