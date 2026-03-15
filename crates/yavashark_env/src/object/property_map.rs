@@ -24,15 +24,15 @@ impl<T> PropertyMap<T> {
     pub const fn get_native_ptr(&self) -> *mut T {
         let properties_size = align(self.state.size as usize * size_of::<T>(), align_of::<T>());
 
-        unsafe { self.data.as_ptr().add(properties_size) as *mut T }
+        unsafe { NonNull::from_ref(&self.data).byte_add(properties_size).cast::<T>() }
     }
 
     pub const fn get_native(&self) -> &T {
-        unsafe { &*self.get_native_ptr() }
+        unsafe { self.get_native_ptr().as_ref() }
     }
 
     pub const fn get_native_mut(&mut self) -> &mut T {
-        unsafe { &mut *self.get_native_ptr() }
+        unsafe { self.get_native_ptr().as_mut() }
     }
 
     pub unsafe fn initialize(this: *mut Self, size: u32, native: T) {
@@ -50,7 +50,7 @@ impl<T> PropertyMap<T> {
 
         let native_ptr = (*this).get_native_ptr();
 
-        std::ptr::write(native_ptr, native);
+        std::ptr::write(native_ptr.as_ptr(), native);
     }
 }
 
@@ -58,7 +58,7 @@ impl<T: ?Sized> PropertyMap<T> {
     const fn get_uninitialized_properties(&mut self) -> &mut [MaybeUninit<Value>] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                self.data.as_mut_ptr() as *mut MaybeUninit<Value>,
+                (&raw mut self.data).cast::<MaybeUninit<Value>>(),
                 self.state.size as usize,
             )
         }
@@ -67,7 +67,7 @@ impl<T: ?Sized> PropertyMap<T> {
     pub const fn get_properties_mut(&mut self) -> &mut [Value] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                self.data.as_mut_ptr() as *mut Value,
+                (&raw mut self.data).cast::<Value>(),
                 self.state.size as usize,
             )
         }
@@ -75,7 +75,7 @@ impl<T: ?Sized> PropertyMap<T> {
 
     pub const fn get_properties(&self) -> &[Value] {
         unsafe {
-            std::slice::from_raw_parts(self.data.as_ptr() as *const Value, self.state.size as usize)
+            std::slice::from_raw_parts((&raw const self.data).cast::<Value>(), self.state.size as usize)
         }
     }
 
@@ -138,9 +138,9 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     const unsafe fn get_ptr(&self, index: u32) -> NonNull<Value> {
-        let ptr = self.data.as_ptr().add(index as usize * size_of::<Value>()) as *mut Value;
-
-        NonNull::new_unchecked(ptr)
+        NonNull::from_ref(&self.data)
+            .byte_add(index as usize * size_of::<Value>())
+            .cast()
     }
 }
 
