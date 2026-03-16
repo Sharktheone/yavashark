@@ -48,7 +48,9 @@ impl<T> PropertyMap<T> {
     pub const fn get_native_ptr(&self) -> NonNull<T> {
         let properties_size = align(self.state.size as usize * size_of::<T>(), align_of::<T>());
 
-        unsafe { NonNull::from_ref(&self.data).byte_add(properties_size).cast::<T>() }
+        let ptr = NonNull::from_ref(&self.data).cast::<u8>();
+
+        unsafe { ptr.byte_add(properties_size).cast::<T>() }
     }
 
     pub const fn get_native(&self) -> &T {
@@ -77,6 +79,24 @@ impl<T> PropertyMap<T> {
         let native_ptr = (*this).get_native_ptr();
 
         std::ptr::write(native_ptr.as_ptr(), native);
+    }
+
+    pub unsafe fn initialize_native_cb(this: NonNull<Self>, size: u32, native: impl FnOnce(NonNull<T>)) {
+        let state = MapState {
+            size,
+            extensible: true,
+            has_butterfly: false,
+        };
+
+        (*this.as_ptr()).state = state;
+
+        (*this.as_ptr())
+            .get_uninitialized_properties()
+            .fill(MaybeUninit::new(Value::hole()));
+
+        let native_ptr = (*this.as_ptr()).get_native_ptr();
+
+        native(native_ptr);
     }
 }
 
