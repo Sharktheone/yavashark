@@ -5,42 +5,67 @@ use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
 #[repr(C)]
+#[repr(align(8))]
 pub struct PropertyMap<T: ?Sized> {
     _marker: std::marker::PhantomData<T>,
     state: MapState,
-    data: [u8],
+    data: OpaqueData,
 }
 
+#[repr(align(8))]
+pub struct OpaqueData;
+
+
+#[repr(align(8))]
+pub struct Data([u8]);
+
+#[repr(align(8))]
 struct MapState {
     size: u32,
     extensible: bool,
     has_butterfly: bool,
+    _pad: [u8; 2],
 }
+
+
+
+
 
 impl<T> PropertyMap<T> {
     pub fn sized_layout(size: u32) -> Layout {
         Self::unsized_layout(size, Layout::new::<T>())
     }
 
-    pub fn get_native_ptr(&self) -> *mut T {
+    pub const fn size_from_alloc_bytes(bytes: usize) -> u32 {
+        let header = size_of::<Self>();
+
+        let native_size = size_of::<T>();
+        let native_align = align_of::<T>();
+
+        0
+    }
+
+    pub const fn get_native_ptr(&self) -> NonNull<T> {
         let properties_size = align(self.state.size as usize * size_of::<T>(), align_of::<T>());
 
-        unsafe { self.data.as_ptr().add(properties_size) as *mut T }
+        unsafe { NonNull::from_ref(&self.data).byte_add(properties_size).cast::<T>() }
     }
 
-    pub fn get_native(&self) -> &T {
-        unsafe { &*self.get_native_ptr() }
+    pub const fn get_native(&self) -> &T {
+        unsafe { self.get_native_ptr().as_ref() }
     }
 
-    pub fn get_native_mut(&mut self) -> &mut T {
-        unsafe { &mut *self.get_native_ptr() }
+    pub const fn get_native_mut(&mut self) -> &mut T {
+        unsafe { self.get_native_ptr().as_mut() }
     }
 
-    pub unsafe fn initialize(this: *mut Self, size: u32, native: T) {
+    pub unsafe fn initialize(this: *mut MaybeUninit<Self>, size: u32, native: T) {
+        let this = (*this).as_mut_ptr();
         let state = MapState {
             size,
             extensible: true,
             has_butterfly: false,
+                _pad: [0; _],
         };
 
         (*this).state = state;
@@ -51,36 +76,36 @@ impl<T> PropertyMap<T> {
 
         let native_ptr = (*this).get_native_ptr();
 
-        std::ptr::write(native_ptr, native);
+        std::ptr::write(native_ptr.as_ptr(), native);
     }
 }
 
 impl<T: ?Sized> PropertyMap<T> {
-    fn get_uninitialized_properties(&mut self) -> &mut [MaybeUninit<Value>] {
+    const fn get_uninitialized_properties(&mut self) -> &mut [MaybeUninit<Value>] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                self.data.as_mut_ptr() as *mut MaybeUninit<Value>,
+                (&raw mut self.data).cast::<MaybeUninit<Value>>(),
                 self.state.size as usize,
             )
         }
     }
 
-    pub fn get_properties_mut(&mut self) -> &mut [Value] {
+    pub const fn get_properties_mut(&mut self) -> &mut [Value] {
         unsafe {
             std::slice::from_raw_parts_mut(
-                self.data.as_mut_ptr() as *mut Value,
+                (&raw mut self.data).cast::<Value>(),
                 self.state.size as usize,
             )
         }
     }
 
-    pub fn get_properties(&self) -> &[Value] {
+    pub const fn get_properties(&self) -> &[Value] {
         unsafe {
-            std::slice::from_raw_parts(self.data.as_ptr() as *const Value, self.state.size as usize)
+            std::slice::from_raw_parts((&raw const self.data).cast::<Value>(), self.state.size as usize)
         }
     }
 
-    pub fn get_butterfly(&self) -> Option<NonNull<ButterFly>> {
+    pub const fn get_butterfly(&self) -> Option<NonNull<ButterFly>> {
         if self.state.has_butterfly {
             let ptr = unsafe {
                 self.get_unchecked(self.state.size)
@@ -94,27 +119,29 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub fn unsized_layout(size: u32, native: Layout) -> std::alloc::Layout {
-        let properties =
-            Layout::array::<Value>(size as usize).expect("Invalid layout for property map");
+    pub fn unsized_layout(size: u32, native: Layout) -> Layout {
+        let layout = Layout::new::<Self>();
 
-        properties
+        layout.extend(Layout::array::<Value>(size as usize).expect("Invalid layout for property map"))
+            .expect("Invalid layout for property map")
+            .0
             .extend(native)
             .expect("Invalid layout for property map")
             .0
     }
 
-    pub unsafe fn initialize_unsized(this: *mut Self, size: u32) {
+    pub const unsafe fn initialize_unsized(this: *mut Self, size: u32) {
         let state = MapState {
             size,
             extensible: true,
             has_butterfly: false,
+            _pad: [0; _],
         };
 
         (*this).state = state;
     }
 
-    pub fn get(&self, index: u32) -> Option<&Value> {
+    pub const fn get(&self, index: u32) -> Option<&Value> {
         if index < self.state.size {
             Some(self.get_unchecked(index))
         } else {
@@ -122,7 +149,7 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub fn get_mut(&mut self, index: u32) -> Option<&mut Value> {
+    pub const fn get_mut(&mut self, index: u32) -> Option<&mut Value> {
         if index < self.state.size {
             Some(self.get_unchecked_mut(index))
         } else {
@@ -130,18 +157,18 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub fn get_unchecked(&self, index: u32) -> &Value {
+    pub const fn get_unchecked(&self, index: u32) -> &Value {
         unsafe { self.get_ptr(index).as_ref() }
     }
 
-    pub fn get_unchecked_mut(&mut self, index: u32) -> &mut Value {
+    pub const fn get_unchecked_mut(&mut self, index: u32) -> &mut Value {
         unsafe { self.get_ptr(index).as_mut() }
     }
 
-    unsafe fn get_ptr(&self, index: u32) -> NonNull<Value> {
-        let ptr = self.data.as_ptr().add(index as usize * size_of::<Value>()) as *mut Value;
-
-        NonNull::new_unchecked(ptr)
+    const unsafe fn get_ptr(&self, index: u32) -> NonNull<Value> {
+        NonNull::from_ref(&self.data)
+            .byte_add(index as usize * size_of::<Value>())
+            .cast()
     }
 }
 
