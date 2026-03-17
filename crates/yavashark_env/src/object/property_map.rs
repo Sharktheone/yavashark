@@ -86,6 +86,7 @@ impl<T> PropertyMap<T> {
             size,
             extensible: true,
             has_butterfly: false,
+            _pad: [0; _],
         };
 
         (*this.as_ptr()).state = state;

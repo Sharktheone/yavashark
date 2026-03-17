@@ -351,7 +351,7 @@ impl ValueInner {
         }
     }
 
-    pub unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
+    pub const unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
         NonNull::new_unchecked(self.ptr as *mut ())
     }
 
