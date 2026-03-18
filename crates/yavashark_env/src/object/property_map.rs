@@ -15,7 +15,6 @@ pub struct PropertyMap<T: ?Sized> {
 #[repr(align(8))]
 pub struct OpaqueData;
 
-
 #[repr(align(8))]
 pub struct Data([u8]);
 
@@ -26,10 +25,6 @@ struct MapState {
     has_butterfly: bool,
     _pad: [u8; 2],
 }
-
-
-
-
 
 impl<T> PropertyMap<T> {
     pub fn sized_layout(size: u32) -> Layout {
@@ -67,7 +62,7 @@ impl<T> PropertyMap<T> {
             size,
             extensible: true,
             has_butterfly: false,
-                _pad: [0; _],
+            _pad: [0; _],
         };
 
         (*this).state = state;
@@ -81,7 +76,11 @@ impl<T> PropertyMap<T> {
         std::ptr::write(native_ptr.as_ptr(), native);
     }
 
-    pub unsafe fn initialize_native_cb(this: NonNull<Self>, size: u32, native: impl FnOnce(NonNull<T>)) {
+    pub unsafe fn initialize_native_cb(
+        this: NonNull<Self>,
+        size: u32,
+        native: impl FnOnce(NonNull<T>),
+    ) {
         let state = MapState {
             size,
             extensible: true,
@@ -122,7 +121,10 @@ impl<T: ?Sized> PropertyMap<T> {
 
     pub const fn get_properties(&self) -> &[Value] {
         unsafe {
-            std::slice::from_raw_parts((&raw const self.data).cast::<Value>(), self.state.size as usize)
+            std::slice::from_raw_parts(
+                (&raw const self.data).cast::<Value>(),
+                self.state.size as usize,
+            )
         }
     }
 
@@ -143,7 +145,8 @@ impl<T: ?Sized> PropertyMap<T> {
     pub fn unsized_layout(size: u32, native: Layout) -> Layout {
         let layout = Layout::new::<Self>();
 
-        layout.extend(Layout::array::<Value>(size as usize).expect("Invalid layout for property map"))
+        layout
+            .extend(Layout::array::<Value>(size as usize).expect("Invalid layout for property map"))
             .expect("Invalid layout for property map")
             .0
             .extend(native)
