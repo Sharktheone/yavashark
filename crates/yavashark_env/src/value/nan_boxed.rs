@@ -172,10 +172,11 @@ mod bits {
         (value & MASK_48BIT_VALUE) | tag
     }
 
-    pub fn encode_inline_string(bytes: [u8; 6]) -> u64 {
-        let mut padded = [0; 8];
-
-        padded[2..8].copy_from_slice(&bytes);
+    pub const fn encode_inline_string(bytes: [u8; 6]) -> u64 {
+        let padded = [
+            0, 0,
+            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5],
+        ];
 
         let value = u64::from_le_bytes(padded);
 
@@ -263,13 +264,13 @@ impl ValueInner {
         Self::from_bits(bits::VALUE_HOLE)
     }
 
-    pub fn from_inline_string(bytes: [u8; 6]) -> Self {
+    pub const fn from_inline_string(bytes: [u8; 6]) -> Self {
         let bits = bits::encode_inline_string(bytes);
 
         Self::from_bits(bits)
     }
 
-    pub unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
+    pub const unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
         Self {
             #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
             half: 0,
@@ -352,12 +353,12 @@ impl ValueInner {
     }
 
     pub const unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
-        NonNull::new_unchecked(self.ptr as *mut ())
+        NonNull::new_unchecked(self.ptr.cast_mut())
     }
 
     pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
         let addr = bits::decode_pointer(self.value());
-        unsafe { NonNull::new_unchecked(self.ptr.with_addr(addr) as *mut _) }
+        unsafe { NonNull::new_unchecked(self.ptr.with_addr(addr).cast_mut()) }
     }
 
     pub fn as_inline_string(self) -> Option<[u8; 6]> {
