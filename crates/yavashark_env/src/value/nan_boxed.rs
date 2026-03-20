@@ -4,6 +4,7 @@ use std::ptr;
 use std::ptr::NonNull;
 
 /// we have 1 sign bit and 52 exponent bits to store data.
+///
 /// We need to have the following values:
 /// f64 - default
 /// null
@@ -32,7 +33,7 @@ use std::ptr::NonNull;
 /// Symbol     0111 1111 1111 1101 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// BigInt     0111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// Float64    Any other value.
-
+///
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct ValueInner {
@@ -72,10 +73,10 @@ mod bits {
     const TAG_NULL_UNDEF: u64 = 0x9_8000_0000_0000;
     const TAG_HOLE: u64 = 0x9_C000_0000_0000;
     const TAG_INLINE_STRING: u64 = 0xA_0000_0000_0000;
-    const TAG_STRING_OWNED: u64 = 0xB_0000_0000_0000;
-    const TAG_OBJECT: u64 = 0xC_0000_0000_0000;
-    const TAG_SYMBOL: u64 = 0xD_0000_0000_0000;
-    const TAG_BIGINT: u64 = 0xE_0000_0000_0000;
+    pub(crate) const TAG_STRING_OWNED: u64 = 0xB_0000_0000_0000;
+    pub(crate) const TAG_OBJECT: u64 = 0xC_0000_0000_0000;
+    pub(crate) const TAG_SYMBOL: u64 = 0xD_0000_0000_0000;
+    pub(crate) const TAG_BIGINT: u64 = 0xE_0000_0000_0000;
 
     const MASK_INT32: u64 = MASK_NAN | TAG_INT32;
     const MASK_BOOLEAN: u64 = MASK_NAN | TAG_BOOLEAN;
@@ -279,6 +280,29 @@ impl ValueInner {
             ptr: ptr.as_ptr(),
         }
     }
+
+    pub unsafe fn from_object_raw(ptr: NonNull<()>) -> Self {
+        let bits = bits::encode_pointer(ptr, bits::TAG_OBJECT);
+        Self::from_bits(bits)
+    }
+
+    pub unsafe fn from_symbol_raw(ptr: NonNull<()>) -> Self {
+        let bits = bits::encode_pointer(ptr, bits::TAG_SYMBOL);
+        Self::from_bits(bits)
+    }
+
+    pub unsafe fn from_bigint_raw(ptr: NonNull<()>) -> Self {
+        let bits = bits::encode_pointer(ptr, bits::TAG_BIGINT);
+        Self::from_bits(bits)
+    }
+
+    pub unsafe fn from_string_raw(ptr: NonNull<()>) -> Self {
+        let bits = bits::encode_pointer(ptr, bits::TAG_STRING_OWNED);
+        Self::from_bits(bits)
+    }
+
+
+
 
     pub fn is_f64(self) -> bool {
         bits::is_number(self.value())
