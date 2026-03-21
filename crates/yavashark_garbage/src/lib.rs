@@ -32,6 +32,7 @@ pub(crate) mod tagged_ptr;
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
+mod open;
 
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
