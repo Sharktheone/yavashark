@@ -49,6 +49,18 @@ impl ErrorObj {
                 .uri_error
                 .get(realm)?
                 .clone(),
+            ErrorKind::Aggregate(_) => realm
+                .intrinsics
+                .clone_public()
+                .aggregate_error
+                .get(realm)?
+                .clone(),
+            ErrorKind::Suppressed(_) => realm
+                .intrinsics
+                .clone_public()
+                .suppressed_error
+                .get(realm)?
+                .clone(),
             _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
         };
 
@@ -113,6 +125,18 @@ impl ErrorObj {
                 .intrinsics
                 .clone_public()
                 .uri_error
+                .get(realm)?
+                .clone(),
+            ErrorKind::Aggregate(_) => realm
+                .intrinsics
+                .clone_public()
+                .aggregate_error
+                .get(realm)?
+                .clone(),
+            ErrorKind::Suppressed(_) => realm
+                .intrinsics
+                .clone_public()
+                .suppressed_error
                 .get(realm)?
                 .clone(),
             _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
