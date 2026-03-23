@@ -18,8 +18,8 @@ use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
     intl, iterator, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics,
     BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy,
-    RangeError, ReferenceError, RegExp, Set, StringObj, SymbolObj, SyntaxError, ThrowTypeError,
-    TypeError, URIError, WeakMap, WeakRef, WeakSet,
+    RangeError, ReferenceError, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError,
+    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
@@ -52,7 +52,7 @@ pub struct Intrinsics {
     pub eval_error: PartialIntrinsic<EvalError>,
     pub uri_error: PartialIntrinsic<URIError>,
     pub aggregate_error: PartialIntrinsic<AggregateError>,
-    pub suppressed_error: PartialIntrinsic<AggregateError>,
+    pub suppressed_error: PartialIntrinsic<SuppressedError>,
     pub eval: Option<ObjectHandle>,
     pub arraybuffer: PartialIntrinsic<ArrayBuffer>,
     pub sharedarraybuffer: PartialIntrinsic<SharedArrayBuffer>,
