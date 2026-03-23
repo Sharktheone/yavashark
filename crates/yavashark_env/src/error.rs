@@ -82,7 +82,7 @@ impl Error {
     #[must_use]
     pub fn aggregate_error(error: impl Into<YSString>) -> Self {
         Self {
-            kind: ErrorKind::URI(error.into()),
+            kind: ErrorKind::Aggregate(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
@@ -90,7 +90,7 @@ impl Error {
     #[must_use]
     pub fn suppressed_error(error: impl Into<YSString>) -> Self {
         Self {
-            kind: ErrorKind::URI(error.into()),
+            kind: ErrorKind::Suppressed(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
