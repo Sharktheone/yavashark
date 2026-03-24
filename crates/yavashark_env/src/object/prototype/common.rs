@@ -3,11 +3,11 @@
 use crate::array::Array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
-use crate::realm::Realm;
+use crate::realm::{Intrinsic, Realm};
 use crate::utils::coerce_object;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::Property;
-use crate::{Error, Object, ObjectOrNull, Symbol, Value, ValueResult};
+use crate::{Error, Object, ObjectHandle, ObjectOrNull, Symbol, Value, ValueResult};
 use yavashark_string::YSString;
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -171,23 +171,23 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     let mut owned_tag = YSString::new();
 
-    let mut tag = if this.is_callable() || this.is_constructable() {
+    let tag = if this.is_callable() || this.is_constructable() {
         "Function"
-    } else if this.downcast::<Array>().is_some() {
+    } else if intrinsic_is::<Array>(&this, realm)  {
         "Array"
-    } else if this.downcast::<Arguments>().is_some() {
+    } else if intrinsic_is::<Arguments>(&this, realm) {
         "Arguments"
-    } else if this.downcast::<ErrorObj>().is_some() {
+    } else if intrinsic_is::<ErrorObj>(&this, realm) {
         "Error"
-    } else if this.downcast::<BooleanObj>().is_some() {
+    } else if intrinsic_is::<BooleanObj>(&this, realm) {
         "Boolean"
-    } else if this.downcast::<NumberObj>().is_some() {
+    } else if intrinsic_is::<NumberObj>(&this, realm) {
         "Number"
-    } else if this.downcast::<StringObj>().is_some() {
+    } else if intrinsic_is::<StringObj>(&this, realm) {
         "String"
-    } else if this.downcast::<Date>().is_some() {
+    } else if intrinsic_is::<Date>(&this, realm) {
         "Date"
-    } else if this.downcast::<RegExp>().is_some() {
+    } else if intrinsic_is::<RegExp>(&this, realm) {
         "RegExp"
     } else if let Some(to_string_tag) = this.get_opt(Symbol::TO_STRING_TAG, realm)? {
         owned_tag = to_string_tag.to_string(realm)?;
@@ -199,6 +199,13 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     Ok(format!("[object {tag}]").into())
 }
+
+fn intrinsic_is<T: Intrinsic + 'static>(obj: &ObjectHandle, realm: &mut Realm) -> bool {
+    obj.downcast::<T>().is_some()
+        || T::get_intrinsic(realm).map(|p| p == *obj).unwrap_or(false)
+
+}
+
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     Ok(this)
