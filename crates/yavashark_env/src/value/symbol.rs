@@ -47,9 +47,22 @@ impl AsRef<str> for SymbolInner {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+#[derive(Debug, Eq, Clone)]
 pub struct Symbol {
     inner: SymbolInner,
+    is_registered: bool,
+}
+
+impl PartialEq for Symbol {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+impl std::hash::Hash for Symbol {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.inner.hash(state);
+    }
 }
 
 impl AsRef<str> for Symbol {
@@ -68,6 +81,7 @@ impl From<&'static str> for Symbol {
     fn from(s: &'static str) -> Self {
         Self {
             inner: SymbolInner::Static(s),
+            is_registered: false,
         }
     }
 }
@@ -95,19 +109,34 @@ impl Symbol {
     pub const fn new(s: &'static str) -> Self {
         Self {
             inner: SymbolInner::Static(s),
+            is_registered: false,
         }
     }
+
 
     #[must_use]
     pub fn new_str(s: &str) -> Self {
         Self {
             inner: SymbolInner::Str(Rc::from(s)),
+            is_registered: false,
+        }
+    }
+
+    #[must_use]
+    pub fn new_registered(s: &str) -> Self {
+        Self {
+            inner: SymbolInner::Str(Rc::from(s)),
+            is_registered: true,
         }
     }
 
     #[must_use]
     pub fn as_str(&self) -> &str {
         AsRef::as_ref(self)
+    }
+
+    pub const fn is_registered(&self) -> bool {
+        self.is_registered
     }
 }
 

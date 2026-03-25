@@ -108,7 +108,7 @@ impl SymbolConstructor {
             return sym;
         }
 
-        let new_symbol = Symbol::new_str(key);
+        let new_symbol = Symbol::new_registered(key);
         self.inner.borrow_mut().symbols.push(new_symbol.clone());
 
         new_symbol
