@@ -1,7 +1,9 @@
 use crate::partial_init::Initializer;
 use crate::utils::ProtoDefault;
 use crate::value::{fmt_num, Constructor, Func, Obj};
-use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{
+    MutObject, NativeFunction, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
+};
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
@@ -16,6 +18,28 @@ pub fn to_integer_or_infinity(n: f64) -> f64 {
         n
     } else {
         n.trunc()
+    }
+}
+
+fn this_number_value(this: &Value, realm: &mut Realm) -> Res<f64> {
+    match this {
+        Value::Number(n) => Ok(*n),
+        Value::Object(o) => match o.primitive(realm)? {
+            Some(PrimitiveValue::Number(n)) => Ok(n),
+            _ => {
+                let intrinsics = realm.intrinsics.clone_public();
+                if intrinsics.number.get_opt().map(|p| p == o).unwrap_or(false) {
+                    Ok(0.0)
+                } else {
+                    Err(crate::Error::ty(
+                        "Number.prototype method called on incompatible receiver",
+                    ))
+                }
+            }
+        },
+        _ => Err(crate::Error::ty(
+            "Number.prototype method called on incompatible receiver",
+        )),
     }
 }
 
@@ -438,9 +462,8 @@ impl NumberObj {
 
     #[prop("toPrecision")]
     #[length(1)]
-    fn to_precision(&self, precision: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
-        let inner = self.inner.try_borrow()?;
-        let num = inner.number;
+    fn to_precision(#[this] this: Value, precision: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         if precision.is_undefined() {
             return Ok(fmt_num(num));
