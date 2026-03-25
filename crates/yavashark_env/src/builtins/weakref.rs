@@ -1,6 +1,6 @@
 use crate::or_symbol::OrSymbol;
 use crate::value::Obj;
-use crate::{MutObject, ObjectHandle, Realm, Res, Value, WeakObjectHandle};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, WeakObjectHandle};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 
@@ -27,6 +27,14 @@ impl WeakRef {
 impl WeakRef {
     #[constructor]
     pub fn construct(handle: OrSymbol<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
+        if let OrSymbol::Symbol(ref sym) = handle {
+            if sym.is_registered() {
+                return Err(Error::ty_error(
+                    "WeakRef target must not be a registered symbol".to_string(),
+                ));
+            }
+        }
+
         let handle = handle.map(|h| h.downgrade());
 
         Ok(Self::new(handle, realm)?.into_object())
