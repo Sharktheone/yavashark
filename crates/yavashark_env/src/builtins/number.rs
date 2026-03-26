@@ -462,7 +462,11 @@ impl NumberObj {
 
     #[prop("toPrecision")]
     #[length(1)]
-    fn to_precision(#[this] this: Value, precision: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+    fn to_precision(
+        #[this] this: Value,
+        precision: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<YSString> {
         let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         if precision.is_undefined() {

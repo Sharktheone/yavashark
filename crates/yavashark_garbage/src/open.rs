@@ -44,7 +44,6 @@ impl<T> Clone for Handle<T> {
     }
 }
 
-
 impl<'a, T> OpenHandle<'a, &'a T> for Handle<T> {
     fn open(self, _agent: &'a Agent) -> &'a T {
         todo!()
@@ -111,7 +110,6 @@ fn test(handle: Rc<Consumer>, agent: &mut Agent) {
     let consumer = handle.open(agent);
     println!("d: {}", Consumer::d(consumer, agent));
 }
-
 
 fn test_handle(handle: Handle<Consumer>, agent: &mut Agent) {
     let consumer = handle.open(agent);

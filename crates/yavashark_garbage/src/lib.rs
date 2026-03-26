@@ -24,6 +24,7 @@ use crate::trace::{TraceID, TRACER};
 pub(crate) mod spin_lock;
 
 pub mod collectable;
+mod open;
 pub(crate) mod tagged_ptr;
 #[cfg(all(
     any(feature = "easy_debug", feature = "trace"),
@@ -32,7 +33,6 @@ pub(crate) mod tagged_ptr;
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
-mod open;
 
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`

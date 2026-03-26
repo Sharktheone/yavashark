@@ -113,7 +113,6 @@ impl Symbol {
         }
     }
 
-
     #[must_use]
     pub fn new_str(s: &str) -> Self {
         Self {

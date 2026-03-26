@@ -173,7 +173,7 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     let tag = if this.is_callable() || this.is_constructable() {
         "Function"
-    } else if intrinsic_is::<Array>(&this, realm)  {
+    } else if intrinsic_is::<Array>(&this, realm) {
         "Array"
     } else if intrinsic_is::<Arguments>(&this, realm) {
         "Arguments"
@@ -201,11 +201,8 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 }
 
 fn intrinsic_is<T: Intrinsic + 'static>(obj: &ObjectHandle, realm: &mut Realm) -> bool {
-    obj.downcast::<T>().is_some()
-        || T::get_intrinsic(realm).map(|p| p == *obj).unwrap_or(false)
-
+    obj.downcast::<T>().is_some() || T::get_intrinsic(realm).map(|p| p == *obj).unwrap_or(false)
 }
-
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     Ok(this)

@@ -175,8 +175,7 @@ mod bits {
 
     pub const fn encode_inline_string(bytes: [u8; 6]) -> u64 {
         let padded = [
-            0, 0,
-            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5],
+            0, 0, bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5],
         ];
 
         let value = u64::from_le_bytes(padded);
@@ -300,9 +299,6 @@ impl ValueInner {
         let bits = bits::encode_pointer(ptr, bits::TAG_STRING_OWNED);
         Self::from_bits(bits)
     }
-
-
-
 
     pub fn is_f64(self) -> bool {
         bits::is_number(self.value())
