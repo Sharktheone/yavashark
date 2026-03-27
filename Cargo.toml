@@ -26,6 +26,7 @@ yavashark_swc_validator = { path = "crates/yavashark_swc_validator" }
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 swc_ecma_ast = "21.0.0"
 memmap2 = "0.9.9"
+half = "2.7.1"
 
 
 

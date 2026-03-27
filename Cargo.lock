@@ -4170,9 +4170,9 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "regress"
-version = "0.10.5"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2057b2325e68a893284d1538021ab90279adac1139957ca2a74426c6f118fb48"
+checksum = "07948de9abc2e83adbeb7543c061a5ddaf7d944afcafbdd6e6b39aeacd40504b"
 dependencies = [
  "hashbrown 0.16.1",
  "memchr",
@@ -6264,6 +6264,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "getrandom 0.3.4",
+ "half",
  "js-sys",
  "memmap2",
  "rustyline",
