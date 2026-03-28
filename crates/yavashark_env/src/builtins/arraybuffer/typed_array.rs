@@ -15,7 +15,7 @@ use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
 use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
-use crate::utils::ValueIterator;
+use crate::utils::{ArrayLike, ValueIterator};
 use crate::value::{self, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor};
 use crate::{
     Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Symbol,
@@ -380,7 +380,7 @@ impl TypedArray {
         let buf = if let Ok(buf) = downcast_obj::<ArrayBuffer>(buffer.copy()) {
             buf
         } else if buffer.has_key("length", realm).ok().unwrap_or(false) {
-            let iter = ValueIterator::new(&buffer, realm)?;
+            let mut iter = ArrayLike::new(buffer, realm)?;
 
             let mut items = Vec::new();
 
