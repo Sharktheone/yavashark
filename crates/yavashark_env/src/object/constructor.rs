@@ -434,8 +434,10 @@ impl ObjectConstructor {
     }
 
     #[prop("preventExtensions")]
-    fn prevent_extensions(o: &ObjectHandle) -> Res {
-        o.prevent_extensions()
+    fn prevent_extensions(o: ObjectHandle) -> Res<ObjectHandle> {
+        o.prevent_extensions()?;
+
+        Ok(o)
     }
 
     #[prop("isExtensible")]
