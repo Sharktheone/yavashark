@@ -961,7 +961,7 @@ impl Value {
             }
 
             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
-                a.to_string() == b.num().to_string()
+                (a.is_empty() && !b) || a.to_string() == b.num().to_string()
             }
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
