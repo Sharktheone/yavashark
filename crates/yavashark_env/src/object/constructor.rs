@@ -3,7 +3,7 @@ use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::conversion::FromValueOutput;
 use crate::object::prototype::common;
 use crate::partial_init::Initializer;
-use crate::utils::coerce_object;
+use crate::utils::{coerce_object, coerce_object_strict};
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::{
     Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj,
@@ -275,9 +275,7 @@ impl ObjectConstructor {
 
     #[prop("getPrototypeOf")]
     fn get_prototype_of(val: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let Value::Object(ref obj) = val else {
-            return Ok(Object::new(realm).into());
-        };
+        let obj = coerce_object_strict(val.clone(), realm)?;
 
         let prop = obj.prototype(realm)?;
 
