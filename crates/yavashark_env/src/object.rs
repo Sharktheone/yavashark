@@ -707,6 +707,10 @@ impl MutObj for MutObject {
 
         if let InternalPropertyKey::String(s) = &name {
             if s == "__proto__" {
+                if !self.extensible {
+                    return Ok(DefinePropertyResult::ReadOnly);
+                }
+
                 self.prototype = ObjectOrNull::try_from(value)?;
                 return Ok(DefinePropertyResult::Handled);
             }
