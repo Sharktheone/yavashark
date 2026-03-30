@@ -446,8 +446,10 @@ impl ObjectConstructor {
     }
 
     #[prop("seal")]
-    fn seal(o: &ObjectHandle) -> Res {
-        o.seal()
+    fn seal(o: ObjectHandle) -> Res<ObjectHandle> {
+        o.seal()?;
+
+        Ok(o)
     }
 
     #[prop("isSealed")]
