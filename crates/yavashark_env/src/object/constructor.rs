@@ -458,8 +458,10 @@ impl ObjectConstructor {
     }
 
     #[prop("freeze")]
-    fn freeze(o: &ObjectHandle) -> Res {
-        o.freeze()
+    fn freeze(o: ObjectHandle) -> Res<ObjectHandle> {
+        o.freeze()?;
+
+        Ok(o)
     }
 
     #[prop("isFrozen")]
