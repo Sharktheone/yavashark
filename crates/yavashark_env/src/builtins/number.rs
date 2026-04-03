@@ -626,6 +626,10 @@ fn parse_float(string: &str) -> f64 {
         return f64::INFINITY;
     }
 
+    if string.starts_with("+Infinity") {
+        return f64::INFINITY;
+    }
+
     if string.starts_with("-Infinity") {
         return f64::NEG_INFINITY;
     }
