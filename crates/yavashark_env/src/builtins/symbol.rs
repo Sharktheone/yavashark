@@ -1,7 +1,7 @@
 use crate::value::{Func, IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, properties_new, props};
 use yavashark_string::ToYSString;
 use crate::conversion::Stringable;
 
@@ -47,6 +47,9 @@ impl SymbolConstructor {
 
 #[properties_new(raw)]
 impl SymbolConstructor {
+    #[prop("name")]
+    const NAME: &'static str = "Symbol";
+
     #[prop("asyncIterator")]
     const ASYNC_ITERATOR: &'static Symbol = Symbol::ASYNC_ITERATOR;
 
