@@ -473,7 +473,7 @@ impl NumberObj {
             return Ok(fmt_num(num));
         }
 
-        let p = to_integer_or_infinity(precision.to_number(realm)?);
+        let p = precision.to_number(realm)?;
 
         if !num.is_finite() {
             if num.is_nan() {
@@ -486,12 +486,12 @@ impl NumberObj {
             });
         }
 
-        if p < 1.0 || p > 100.0 {
+        if p < 1.0 || p > 100.0 || !p.is_finite() {
             return Err(crate::Error::range(
                 "toPrecision() argument must be between 1 and 100",
             ));
         }
-        let p = p as usize;
+        let p = p.trunc() as usize;
 
         let x = num;
         let mut s = String::new();
