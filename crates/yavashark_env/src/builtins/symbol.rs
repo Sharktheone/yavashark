@@ -94,6 +94,10 @@ impl SymbolConstructor {
 
     #[prop("keyFor")]
     fn key_for(symbol: Symbol) -> Value {
+        if !symbol.is_registered() {
+            return Value::Undefined;
+        }
+
         let str = symbol.to_ys_string();
 
         if str.is_empty() {
