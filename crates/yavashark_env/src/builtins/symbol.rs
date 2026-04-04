@@ -3,6 +3,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueRes
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::ToYSString;
+use crate::conversion::Stringable;
 
 #[object]
 #[derive(Debug)]
@@ -103,7 +104,7 @@ impl SymbolConstructor {
     }
 
     #[prop("for")]
-    fn for_(&self, key: &str) -> Symbol {
+    fn for_(&self, key: &Stringable) -> Symbol {
         if let Some(sym) = self.find_symbol(key) {
             return sym;
         }
