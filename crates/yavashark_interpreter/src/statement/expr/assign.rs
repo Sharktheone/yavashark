@@ -5,6 +5,7 @@ use swc_ecma_ast::{
     MemberProp, OptChainBase, OptChainExpr, ParenExpr, Pat, SimpleAssignTarget, SuperProp,
     SuperPropExpr,
 };
+use yavashark_env::utils::{coerce_object, coerce_object_strict};
 
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
@@ -76,66 +77,62 @@ impl Interpreter {
         value: Value,
         scope: &mut Scope,
     ) -> Res {
-        if let Value::Object(obj) = obj {
-            let name = match m {
-                MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-                MemberProp::PrivateName(p) => {
-                    let name = p.name.as_str();
+        let obj = coerce_object_strict(obj, realm)?;
+        
+        let name = match m {
+            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+            MemberProp::PrivateName(p) => {
+                let name = p.name.as_str();
 
-                    if let Some(class) = obj.downcast::<ClassInstance>() {
-                        let member = class
-                            .get_private_prop(name, realm)?
-                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+                if let Some(class) = obj.downcast::<ClassInstance>() {
+                    let member = class
+                        .get_private_prop(name, realm)?
+                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
-                        let this_value = Value::Object(obj.clone());
+                    let this_value = Value::Object(obj.clone());
 
-                        Self::write_private_member_on_instance(
-                            realm, &class, name, member, value, this_value,
-                        )?;
+                    Self::write_private_member_on_instance(
+                        realm, &class, name, member, value, this_value,
+                    )?;
 
-                        return Ok(());
-                    }
-
-                    if let Some(class) = obj.downcast::<Class>() {
-                        let member = class
-                            .get_private_prop(name)
-                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
-
-                        let this_value = Value::Object(obj.clone());
-
-                        Self::write_private_member_on_class(
-                            realm, &class, name, member, value, this_value,
-                        )?;
-
-                        return Ok(());
-                    }
-
-                    return Err(Error::ty_error(format!(
-                        "Private name {name} can only be used in class"
-                    )));
+                    return Ok(());
                 }
-                MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
-            };
 
-            let key = name.into_internal_property_key(realm)?;
+                if let Some(class) = obj.downcast::<Class>() {
+                    let member = class
+                        .get_private_prop(name)
+                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
-            match obj.define_property(key, value, realm)? {
-                DefinePropertyResult::Handled => {}
-                DefinePropertyResult::ReadOnly => {
-                    if scope.is_strict_mode()? {
-                        return Err(Error::ty("Cannot assign to read only property"));
-                    }
+                    let this_value = Value::Object(obj.clone());
+
+                    Self::write_private_member_on_class(
+                        realm, &class, name, member, value, this_value,
+                    )?;
+
+                    return Ok(());
                 }
-                DefinePropertyResult::Setter(setter, value) => {
-                    setter.call(vec![value], obj.clone().into(), realm)?;
+
+                return Err(Error::ty_error(format!(
+                    "Private name {name} can only be used in class"
+                )));
+            }
+            MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
+        };
+
+        let key = name.into_internal_property_key(realm)?;
+
+        match obj.define_property(key, value, realm)? {
+            DefinePropertyResult::Handled => {}
+            DefinePropertyResult::ReadOnly => {
+                if scope.is_strict_mode()? {
+                    return Err(Error::ty("Cannot assign to read only property"));
                 }
             }
-            Ok(())
-        } else {
-            Err(Error::ty_error(format!(
-                "Invalid left-hand side in assignment: {obj}"
-            )))
+            DefinePropertyResult::Setter(setter, value) => {
+                setter.call(vec![value], obj.clone().into(), realm)?;
+            }
         }
+        Ok(())
     }
 
     pub fn assign_super(
