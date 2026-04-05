@@ -52,6 +52,7 @@ impl SymbolConstructor {
     const NAME: &'static str = "Symbol";
 
     #[prop("length")]
+    #[configurable]
     const LENGTH: usize = 0;
 
     #[prop("asyncIterator")]
