@@ -48,6 +48,7 @@ impl SymbolConstructor {
 #[properties_new(raw)]
 impl SymbolConstructor {
     #[prop("name")]
+    #[configurable]
     const NAME: &'static str = "Symbol";
 
     #[prop("length")]
