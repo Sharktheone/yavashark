@@ -2,7 +2,7 @@ use crate::value::{Func, IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new, props};
-use yavashark_string::ToYSString;
+use yavashark_string::{ToYSString, YSString};
 use crate::conversion::Stringable;
 
 #[object]
@@ -171,8 +171,12 @@ impl SymbolObj {
     }
 
     #[get("description")]
-    fn description(&self) -> Value {
-        SymbolConstructor::key_for(self.inner.borrow().symbol.clone())
+    fn description(&self) -> YSString {
+        let inner = self.inner.borrow();
+        
+        let val = inner.symbol.as_str();
+        
+        YSString::from_ref(val)
     }
 
     #[prop("toString")]
