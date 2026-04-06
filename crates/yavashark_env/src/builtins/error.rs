@@ -23,6 +23,11 @@ macro_rules! error {
             )?;
 
             let constr = NativeConstructor::with_proto(
+            proto.define_property_attributes(
+                "message".into(),
+                Variable::new_with_attributes("".into(), true, false, true),
+                realm,
+            )?;
                 stringify!($name).into(),
                 |args, realm| {
                     let msg = args
