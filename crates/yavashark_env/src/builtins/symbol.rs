@@ -1,7 +1,7 @@
 use crate::value::{Func, IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
-use yavashark_macro::{object, properties_new, props};
+use yavashark_macro::{object, properties_new};
 use yavashark_string::{ToYSString, YSString};
 use crate::conversion::Stringable;
 
