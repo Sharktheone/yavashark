@@ -195,7 +195,6 @@ impl SymbolObj {
     }
 
     #[prop(Symbol::TO_STRING_TAG)]
-    fn to_string_tag() -> String {
-        "Symbol".to_string()
-    }
+    #[configurable]
+    const TO_STRING_TAG: &'static str = "Symbol";
 }
