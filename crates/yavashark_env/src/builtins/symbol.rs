@@ -187,6 +187,7 @@ impl SymbolObj {
     }
 
     #[prop(Symbol::TO_PRIMITIVE)]
+    #[length(1)]
     fn to_primitive(&self) -> Symbol {
         let inner = self.inner.borrow();
 
