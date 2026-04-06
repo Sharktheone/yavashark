@@ -1,9 +1,10 @@
-use crate::value::{Func, IntoValue, Obj};
+use crate::value::{Constructor, Func, IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::{ToYSString, YSString};
 use crate::conversion::Stringable;
+use crate::error::Error;
 
 #[object]
 #[derive(Debug)]
@@ -13,7 +14,7 @@ pub struct SymbolObj {
     symbol: Symbol,
 }
 
-#[object(function)]
+#[object(function, constructor)]
 #[derive(Debug)]
 pub struct SymbolConstructor {
     #[mutable]
@@ -143,6 +144,12 @@ impl Func for SymbolConstructor {
         self.inner.borrow_mut().symbols.push(sym.clone());
 
         Ok(sym.into())
+    }
+}
+
+impl Constructor for SymbolConstructor {
+    fn construct(&self, _: &mut Realm, _: Vec<crate::value::Value>) -> Result<ObjectHandle, Error> {
+        Err(Error::ty("Symbol is not a constructor"))
     }
 }
 
