@@ -1,10 +1,10 @@
+use crate::conversion::Stringable;
+use crate::error::Error;
 use crate::value::{Constructor, Func, IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::{ToYSString, YSString};
-use crate::conversion::Stringable;
-use crate::error::Error;
 
 #[object]
 #[derive(Debug)]
@@ -180,9 +180,9 @@ impl SymbolObj {
     #[get("description")]
     fn description(&self) -> YSString {
         let inner = self.inner.borrow();
-        
+
         let val = inner.symbol.as_str();
-        
+
         YSString::from_ref(val)
     }
 

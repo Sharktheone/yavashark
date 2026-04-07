@@ -379,7 +379,9 @@ impl TypedArray {
     ) -> Res<Self> {
         let buf = if let Ok(buf) = downcast_obj::<ArrayBuffer>(buffer.copy()) {
             buf
-        } else if buffer.has_key("length", realm).unwrap_or(false) || buffer.has_key(Symbol::ITERATOR, realm).unwrap_or(false) {
+        } else if buffer.has_key("length", realm).unwrap_or(false)
+            || buffer.has_key(Symbol::ITERATOR, realm).unwrap_or(false)
+        {
             let mut iter = ArrayLike::new(buffer, realm)?;
 
             let mut items = Vec::new();

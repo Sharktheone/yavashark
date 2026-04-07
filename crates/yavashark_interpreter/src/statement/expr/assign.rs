@@ -78,7 +78,7 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Res {
         let obj = coerce_object_strict(obj, realm)?;
-        
+
         let name = match m {
             MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
             MemberProp::PrivateName(p) => {
