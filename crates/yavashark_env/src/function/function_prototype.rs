@@ -143,7 +143,7 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 #[allow(unused)]
 fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
     let Some(body) = args.pop() else {
-        return Ok(NativeFunction::new(
+        return Ok(NativeFunction::special(
             "anonymous",
             |_, _, _| Ok(Value::Undefined),
             realm,
