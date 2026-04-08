@@ -132,12 +132,14 @@ impl WeakMap {
                 if let Some(value) = entry.get().upgrade() {
                     Ok(value)
                 } else {
+                    drop(inner);
+                    let key_weak = key.downgrade();
                     let value = callback.call(vec![key], Value::Undefined, realm)?;
 
-                    if value.is_undefined() {
-                        entry.shift_remove();
-                    } else {
-                        entry.insert(value.downgrade());
+                    let mut inner = self.inner.borrow_mut();
+
+                    if !value.is_undefined() {
+                        inner.map.insert(key_weak, value.downgrade());
                     }
 
                     Ok(value)
@@ -145,10 +147,15 @@ impl WeakMap {
             }
 
             Entry::Vacant(entry) => {
+                let key_weak = entry.into_key();
+
+                drop(inner);
                 let value = callback.call(vec![key], Value::Undefined, realm)?;
 
+                let mut inner = self.inner.borrow_mut();
+
                 if !value.is_undefined() {
-                    entry.insert(value.downgrade());
+                    inner.map.insert(key_weak, value.downgrade());
                 }
 
                 Ok(value)
