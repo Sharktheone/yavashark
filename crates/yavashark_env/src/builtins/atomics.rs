@@ -1,22 +1,10 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value};
-use std::cell::RefCell;
+use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value};
 use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
 pub struct Atomics {}
 
-impl Atomics {
-    pub fn new(realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutableAtomics {
-                object: MutObject::with_proto(
-                    realm.intrinsics.clone_public().atomics.get(realm)?.clone(),
-                ),
-            }),
-        })
-    }
-}
 
 #[props(intrinsic_name = atomics)]
 #[allow(unused)]
