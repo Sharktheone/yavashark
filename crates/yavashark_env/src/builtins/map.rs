@@ -134,10 +134,16 @@ impl Map {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
 
             Entry::Vacant(entry) => {
-                let value = callback.call(vec![entry.key().copy()], Value::Undefined, realm)?;
+                let key = entry.into_key();
+
+                drop(inner);
+
+                let value = callback.call(vec![key.copy()], Value::Undefined, realm)?;
 
                 if !value.is_undefined() {
-                    entry.insert(value.copy());
+                    let mut inner = self.inner.borrow_mut();
+
+                    inner.map.insert(key, value.copy());
                 }
 
                 Ok(value)
