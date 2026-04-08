@@ -140,11 +140,9 @@ impl Map {
 
                 let value = callback.call(vec![key.copy()], Value::Undefined, realm)?;
 
-                if !value.is_undefined() {
-                    let mut inner = self.inner.borrow_mut();
+                let mut inner = self.inner.borrow_mut();
 
-                    inner.map.insert(key, value.copy());
-                }
+                inner.map.insert(key, value.copy());
 
                 Ok(value)
             }
