@@ -10,7 +10,7 @@ use crate::value::{
     Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj,
     Obj, ObjectImpl, ObjectOrNull, Property,
 };
-use crate::MutObject;
+use crate::{MutObject, Symbol};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
@@ -3303,11 +3303,18 @@ impl ArrayIterator {
 impl Intrinsic for ArrayIterator {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         let iterator_proto = Iterator::get_intrinsic(realm)?;
-        Self::initialize_proto(
+        let proto = Self::initialize_proto(
             Object::raw_with_proto(iterator_proto),
             realm.intrinsics.func.clone(),
             realm,
-        )
+        )?;
+
+        //TODO: this is a hack, we need to update everything to the new #[props] macro
+        let val = Variable::config("Array Iterator".into());
+        proto.set(Symbol::TO_STRING_TAG, val, realm)?;
+
+
+        Ok(proto)
     }
 
     fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
