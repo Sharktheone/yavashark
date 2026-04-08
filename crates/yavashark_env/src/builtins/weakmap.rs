@@ -138,9 +138,7 @@ impl WeakMap {
 
                     let mut inner = self.inner.borrow_mut();
 
-                    if !value.is_undefined() {
-                        inner.map.insert(key_weak, value.downgrade());
-                    }
+                    inner.map.insert(key_weak, value.downgrade());
 
                     Ok(value)
                 }
@@ -154,9 +152,7 @@ impl WeakMap {
 
                 let mut inner = self.inner.borrow_mut();
 
-                if !value.is_undefined() {
-                    inner.map.insert(key_weak, value.downgrade());
-                }
+                inner.map.insert(key_weak, value.downgrade());
 
                 Ok(value)
             }
