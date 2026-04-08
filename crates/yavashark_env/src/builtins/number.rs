@@ -681,9 +681,23 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
         return f64::NAN;
     }
 
-    let radix = radix.unwrap_or(10);
+    let radix = if let Some(r) = radix {
+        if r == 1 {
+            return f64::NAN;
+        }
+        r
+    } else if string.starts_with("0x") || string.starts_with("0X") {
+        16
+    } else if string.starts_with("0o") || string.starts_with("0O") {
+        8
+    } else if string.starts_with("0b") || string.starts_with("0B") {
+        2
+    } else {
+        10
+    };
 
     let radix = if (2..=36).contains(&radix) { radix } else { 10 };
+
 
     let string = string.trim();
 
