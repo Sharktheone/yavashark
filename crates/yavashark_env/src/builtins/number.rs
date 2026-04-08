@@ -705,6 +705,19 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
         return f64::NAN;
     }
 
+    if radix == 16 && (string.starts_with("0x") || string.starts_with("0X")) {
+        return parse_int(&string[2..], Some(16));
+    }
+
+    if radix == 8 && (string.starts_with("0o") || string.starts_with("0O")) {
+        return parse_int(&string[2..], Some(8));
+    }
+
+    if radix == 2 && (string.starts_with("0b") || string.starts_with("0B")) {
+        return parse_int(&string[2..], Some(2));
+    }
+
+
     let mut idx = 0;
 
     for c in string.chars() {
