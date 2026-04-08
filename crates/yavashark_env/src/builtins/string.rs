@@ -6,9 +6,7 @@ use crate::realm::Intrinsic;
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj, Property, Symbol};
-use crate::{
-    Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
-};
+use crate::{Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
@@ -1671,11 +1669,18 @@ impl StringIterator {
 impl Intrinsic for StringIterator {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         let iterator_proto = Iterator::get_intrinsic(realm)?;
-        Self::initialize_proto(
+        let proto = Self::initialize_proto(
             Object::raw_with_proto(iterator_proto),
             realm.intrinsics.func.clone(),
             realm,
-        )
+        )?;
+
+        //TODO: this is a hack, we need to update everything to the new #[props] macro
+        let val = Variable::config("String Iterator".into());
+        proto.set(Symbol::TO_STRING_TAG, val, realm)?;
+
+
+        Ok(proto)
     }
 
     fn get_intrinsic(realm: &mut Realm) -> Res<ObjectHandle> {
