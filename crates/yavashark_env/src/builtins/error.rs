@@ -34,6 +34,9 @@ macro_rules! error {
                     let msg = args
                         .first()
                         .map_or(Result::<String, Error>::Ok(String::new()), |x| {
+                            if x.is_symbol() {
+                                return Err(Error::ty("Cannot convert a Symbol value to a string"));
+                            }
                             Ok(x.to_string(realm)?.to_string())
                         })?;
 
