@@ -698,7 +698,6 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
 
     let radix = if (2..=36).contains(&radix) { radix } else { 10 };
 
-
     let string = string.trim();
 
     if string.is_empty() {
@@ -716,7 +715,6 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
     if radix == 2 && (string.starts_with("0b") || string.starts_with("0B")) {
         return parse_int(&string[2..], Some(2));
     }
-
 
     let mut idx = 0;
 

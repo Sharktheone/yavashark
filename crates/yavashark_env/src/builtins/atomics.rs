@@ -5,7 +5,6 @@ use yavashark_macro::{object, props};
 #[derive(Debug)]
 pub struct Atomics {}
 
-
 #[props(intrinsic_name = atomics)]
 #[allow(unused)]
 impl Atomics {

@@ -10,8 +10,8 @@ use crate::value::{
     Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj,
     Obj, ObjectImpl, ObjectOrNull, Property,
 };
-use crate::{MutObject, Symbol};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
+use crate::{MutObject, Symbol};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
@@ -3312,7 +3312,6 @@ impl Intrinsic for ArrayIterator {
         //TODO: this is a hack, we need to update everything to the new #[props] macro
         let val = Variable::config("Array Iterator".into());
         proto.set(Symbol::TO_STRING_TAG, val, realm)?;
-
 
         Ok(proto)
     }
