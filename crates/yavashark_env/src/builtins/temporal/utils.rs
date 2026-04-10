@@ -621,6 +621,10 @@ pub fn value_to_year_month_fields(
     if let Some(month) = value.get_opt("month", realm)? {
         let month = month.to_number(realm)?;
 
+        if !month.is_finite() {
+            return Err(Error::range("Month must be a finite number"));
+        }
+
         fields = fields.with_month(month as u8);
         had_fields = true;
     }
