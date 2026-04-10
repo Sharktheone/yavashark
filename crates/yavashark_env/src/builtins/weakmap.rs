@@ -128,7 +128,7 @@ impl WeakMap {
         }
 
         match inner.map.entry(key.downgrade()) {
-            Entry::Occupied(mut entry) => {
+            Entry::Occupied(entry) => {
                 if let Some(value) = entry.get().upgrade() {
                     Ok(value)
                 } else {
