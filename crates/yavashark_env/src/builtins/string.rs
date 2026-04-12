@@ -551,10 +551,10 @@ impl StringObj {
         Ok(format!("<a href=\"{url}\">{str}</a>").into())
     }
 
-    // #[prop("localeCompare")]
-    // pub fn locale_compare(&self, other: String) -> isize {
-    //TODO: localization
-    // }
+    #[prop("localeCompare")]
+    pub fn locale_compare(#[this] this: &Stringable, other: &str) -> isize {
+        (&***this).cmp(other) as isize
+    }
 
     #[prop("match")]
     pub fn match_(
