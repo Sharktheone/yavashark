@@ -80,7 +80,7 @@ impl Uint8Array {
     }
 
     #[prop("fromHex")]
-    fn from_hex(hex: ActualString, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn from_hex(hex: &ActualString, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let bytes = hex::decode(&**hex).map_err(|e| Error::syn_error(e.to_string()))?;
 
         let array = ArrayBuffer::from_buffer(realm, bytes)?;
