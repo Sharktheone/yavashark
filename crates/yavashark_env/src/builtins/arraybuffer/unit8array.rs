@@ -172,7 +172,7 @@ impl Uint8Array {
             inner_buf.resize(hex.len() * 2, 0);
         }
 
-        hex::encode_to_slice(hex, inner_buf)?;
+        hex::encode_to_slice(&**hex, inner_buf)?;
 
         Ok(())
     }
