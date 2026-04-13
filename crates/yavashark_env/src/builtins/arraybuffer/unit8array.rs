@@ -52,7 +52,7 @@ impl Uint8Array {
 
     #[prop("fromBase64")]
     fn from_base_64(
-        base64: &str,
+        base64: &ActualString,
         options: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
