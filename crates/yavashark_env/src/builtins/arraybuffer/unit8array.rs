@@ -93,7 +93,7 @@ impl Uint8Array {
     #[prop("setFromBase64")]
     fn set_from_base_64(
         &self,
-        base64: &str,
+        base64: &ActualString,
         options: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
@@ -159,7 +159,7 @@ impl Uint8Array {
     }
 
     #[prop("setFromHex")]
-    fn set_from_hex(&self, hex: &str) -> Res<()> {
+    fn set_from_hex(&self, hex: &ActualString) -> Res<()> {
         let buf = &self.extends.buffer;
 
         let mut inner = buf.inner.borrow_mut();
