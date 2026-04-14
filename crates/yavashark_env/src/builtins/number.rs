@@ -422,9 +422,8 @@ impl NumberObj {
 
     #[prop("toFixed")]
     #[length(1)]
-    fn to_fixed(&self, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
-        let inner = self.inner.try_borrow()?;
-        let num = inner.number;
+    fn to_fixed(#[this] this: Value, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         let f = to_integer_or_infinity(fraction_digits.to_number(realm)?);
 
