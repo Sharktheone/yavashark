@@ -357,9 +357,8 @@ impl NumberObj {
 
     #[prop("toExponential")]
     #[length(1)]
-    fn to_exponential(&self, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
-        let inner = self.inner.try_borrow()?;
-        let num = inner.number;
+    fn to_exponential(#[this] this: Value, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         let fraction_digits_undefined = fraction_digits.is_undefined();
         let f = if fraction_digits_undefined {
