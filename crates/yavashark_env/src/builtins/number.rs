@@ -316,23 +316,8 @@ impl NumberObj {
 
         Ok(this.into_object())
     }
-}
 
-#[properties_new(
-    intrinsic_name(number),
-    default_null(number),
-    constructor(NumberConstructor::new),
-    constructor_length = 1,
-    constructor_name(Number)
-)]
-impl NumberObj {
-    #[prop("toString")]
-    #[length(1)]
-    fn to_string(&self, radix: Option<u32>) -> Res<YSString> {
-        let inner = self.inner.try_borrow()?;
-
-        let num = inner.number;
-
+    pub fn fmt_string(num: f64, radix: Option<u32>) -> Res<YSString> {
         if num.is_nan() {
             check_radix_opt(radix)?;
 
@@ -353,6 +338,24 @@ impl NumberObj {
             || Ok(fmt_num(num)),
             |radix| float_to_string_with_radix(num, radix),
         )
+
+    }
+}
+
+#[properties_new(
+    intrinsic_name(number),
+    default_null(number),
+    constructor(NumberConstructor::new),
+    constructor_length = 1,
+    constructor_name(Number)
+)]
+impl NumberObj {
+    #[prop("toString")]
+    #[length(1)]
+    fn js_to_string(#[this] this: Value, radix: Option<u32>, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
+
+        Self::fmt_string(num, radix)
     }
 
     #[prop("toExponential")]
@@ -546,7 +549,9 @@ impl NumberObj {
 
     #[prop("toLocaleString")]
     fn to_locale_string(&self) -> Res<YSString> {
-        self.to_string(None)
+        let num = self.inner.borrow().number;
+
+        Self::fmt_string(num, None)
     }
 }
 
