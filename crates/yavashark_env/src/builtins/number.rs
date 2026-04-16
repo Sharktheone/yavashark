@@ -338,7 +338,6 @@ impl NumberObj {
             || Ok(fmt_num(num)),
             |radix| float_to_string_with_radix(num, radix),
         )
-
     }
 }
 
@@ -352,7 +351,11 @@ impl NumberObj {
 impl NumberObj {
     #[prop("toString")]
     #[length(1)]
-    fn js_to_string(#[this] this: Value, radix: Option<u32>, #[realm] realm: &mut Realm) -> Res<YSString> {
+    fn js_to_string(
+        #[this] this: Value,
+        radix: Option<u32>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<YSString> {
         let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         Self::fmt_string(num, radix)
@@ -360,7 +363,11 @@ impl NumberObj {
 
     #[prop("toExponential")]
     #[length(1)]
-    fn to_exponential(#[this] this: Value, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+    fn to_exponential(
+        #[this] this: Value,
+        fraction_digits: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<YSString> {
         let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         let fraction_digits_undefined = fraction_digits.is_undefined();
@@ -424,7 +431,11 @@ impl NumberObj {
 
     #[prop("toFixed")]
     #[length(1)]
-    fn to_fixed(#[this] this: Value, fraction_digits: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+    fn to_fixed(
+        #[this] this: Value,
+        fraction_digits: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<YSString> {
         let num = this_number_value(&this, realm)?; //TODO: this should be something like `Stringable`
 
         let f = to_integer_or_infinity(fraction_digits.to_number(realm)?);

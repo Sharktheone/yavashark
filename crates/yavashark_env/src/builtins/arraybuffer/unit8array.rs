@@ -1,12 +1,12 @@
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::typed_array::{Type, TypedArray};
+use crate::conversion::ActualString;
 use crate::value::{IntoValue, Obj};
 use crate::{Error, Object, ObjectHandle, Realm, Res, Value};
 use base64::alphabet::{STANDARD, URL_SAFE};
 use base64::{engine, Engine};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use crate::conversion::ActualString;
 
 #[object(extends = TypedArray)]
 #[derive(Debug)]
