@@ -747,9 +747,11 @@ impl YSString {
 
             // Rope - flatten first
             InnerString::Rope(rope) => {
-                // TODO: Could optimize to avoid full flattening
-                let units = rope.to_utf16_vec();
-                units.get(index).copied()
+                if rope.inner.left.len() > index {
+                    rope.inner.left.code_unit_at(index)
+                } else {
+                    rope.inner.right.code_unit_at(index - rope.inner.left.len())
+                }
             }
         }
     }
