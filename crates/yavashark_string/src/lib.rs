@@ -339,6 +339,13 @@ impl From<String> for YSString {
     }
 }
 
+
+enum StrRef<'a> {
+    Utf8(&'a str),
+    Utf16(&'a [u16]),
+    Rope(&'a RopeStr),
+}
+
 impl YSString {
     // -------------------------------------------------------------------------
     // Constructors
@@ -705,6 +712,23 @@ impl YSString {
             InnerString::RcUtf16(v) => Cow::Owned(String::from_utf16_lossy(v)),
 
             InnerString::Rope(rope) => Cow::Owned(rope.to_string()),
+        }
+    }
+
+    #[must_use]
+    fn as_str_no_copy(&self) -> StrRef<'_> {
+        match self.inner() {
+            InnerString::InlineUtf8(inline) => StrRef::Utf8(inline.as_str()),
+            InnerString::Static(s) => StrRef::Utf8(s),
+            InnerString::OwnedUtf8(s) => StrRef::Utf8(s),
+            InnerString::RcUtf8(s) => StrRef::Utf8(s),
+            InnerString::BoxedUtf8(s) => StrRef::Utf8(s),
+
+            InnerString::InlineUtf16(inline) => StrRef::Utf16(inline.as_slice()),
+            InnerString::OwnedUtf16(v) => StrRef::Utf16(v),
+            InnerString::RcUtf16(v) => StrRef::Utf16(v),
+
+            InnerString::Rope(rope) => StrRef::Rope(rope),
         }
     }
 
