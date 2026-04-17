@@ -1063,11 +1063,71 @@ impl YSString {
     /// Returns true if the string starts with the given prefix.
     #[must_use]
     pub fn starts_with(&self, prefix: &str) -> bool {
-        if let Some(s) = self.as_str() {
-            return s.starts_with(prefix);
+        fn utf816_starts_with(a: &str, b: &[u16]) -> bool {
+            for (i, ch) in a.chars().enumerate() {
+                let mut buffer = [0u16; 2];
+                let expected_units = ch.encode_utf16(buffer.as_mut_slice());
+                let expected_len = expected_units.len();
+
+                if b.len() < i + expected_len {
+                    return false; // Not enough units left
+                }
+
+                if &b[i..i + expected_len] != expected_units {
+                    return false; // Mismatch
+                }
+            }
+            true
+        }
+        
+        match self.as_str_no_copy() {
+            StrRef::Utf8(s) => s.starts_with(prefix),
+            StrRef::Utf16(units) => utf816_starts_with(prefix, units),
+            StrRef::Rope(rope) => {
+                let mut rest = prefix;
+                
+                rope.for_each_elem(&mut |elem| {
+                    match elem {
+                        Wtf::Utf8(s) => {
+                            let longest = s.len().min(rest.len());
+
+                            let s_sub = &s[..longest];
+                            let rest_sub = &rest[..longest];
+
+                            if s.starts_with(s_sub) {
+                                rest = &rest[s_sub.len()..];
+                                return None;
+                            }
+
+                            Some(false)
+                        }
+                        Wtf::Utf16(units) => {
+                            let mut offset = 0;
+
+                            for (i, ch) in rest.chars().enumerate() {
+                                let mut buffer = [0u16; 2];
+                                let expected_units = ch.encode_utf16(buffer.as_mut_slice());
+                                let expected_len = expected_units.len();
+
+                                if units.len() < i + expected_len {
+                                    rest = &rest[offset..];
+                                    return None; // Not enough units left
+                                }
+
+                                if &units[i..i + expected_len] != expected_units {
+                                    return Some(false); // Mismatch
+                                }
+
+                                offset += ch.len_utf8();
+                            }
+
+                            Some(true)
+                        }
+                    }
+                }).unwrap_or(false)
+            }
         }
 
-        self.as_str_lossy().starts_with(prefix)
     }
 
     /// Returns true if the string ends with the given suffix.
