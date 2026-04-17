@@ -316,32 +316,44 @@ impl RopeStr {
         }
     }
     
-    pub fn for_each_elem<'a>(&'a self, f: &mut impl FnMut(Wtf<'a>)) {
-        match self.inner.left.as_str_no_copy() {
+    pub fn for_each_elem<'a, R>(&'a self, f: &mut impl FnMut(Wtf<'a>) -> Option<R>) -> Option<R> {
+        if let Some(r) = match self.inner.left.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem(f),
+        } {
+            return Some(r);
         }
         
-        match self.inner.right.as_str_no_copy() {
+        if let Some(r) = match self.inner.right.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem(f),
+        } {
+            return Some(r)
         }
+        
+        None
     }
     
-    pub fn for_each_elem_rev<'a>(&'a self, f: &mut impl FnMut(Wtf<'a>)) {
-        match self.inner.right.as_str_no_copy() {
+    pub fn for_each_elem_rev<'a, R>(&'a self, f: &mut impl FnMut(Wtf<'a>) -> Option<R>) -> Option<R> {
+        if let Some(r) = match self.inner.right.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem_rev(f),
+        } {
+            return Some(r);
         }
         
-        match self.inner.left.as_str_no_copy() {
+        if let Some(r) = match self.inner.left.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem_rev(f),
+        } {
+            return Some(r);
         }
+        
+        None
     }
 }
 
