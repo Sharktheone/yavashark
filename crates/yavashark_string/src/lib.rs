@@ -315,6 +315,22 @@ impl RopeStr {
             inner: Rc::new(RopeStrInner { left, right }),
         }
     }
+    
+    pub fn for_each_elem<'a>(&'a self, f: &mut impl FnMut(Wtf<'a>)) {
+        match self.inner.left.as_str_no_copy() {
+            StrRef::Utf8(s) => f(Wtf::Utf8(s)),
+            StrRef::Utf16(s) => f(Wtf::Utf16(s)),
+            StrRef::Rope(r) => r.for_each_elem(f),
+        }
+        
+        match self.inner.right.as_str_no_copy() {
+            StrRef::Utf8(s) => f(Wtf::Utf8(s)),
+            StrRef::Utf16(s) => f(Wtf::Utf16(s)),
+            StrRef::Rope(r) => r.for_each_elem(f),
+        }
+        
+        
+    }
 }
 
 // =============================================================================
@@ -344,6 +360,11 @@ enum StrRef<'a> {
     Utf8(&'a str),
     Utf16(&'a [u16]),
     Rope(&'a RopeStr),
+}
+
+enum Wtf<'a> {
+    Utf8(&'a str),
+    Utf16(&'a [u16]),
 }
 
 impl YSString {
