@@ -328,8 +328,20 @@ impl RopeStr {
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem(f),
         }
+    }
+    
+    pub fn for_each_elem_rev<'a>(&'a self, f: &mut impl FnMut(Wtf<'a>)) {
+        match self.inner.right.as_str_no_copy() {
+            StrRef::Utf8(s) => f(Wtf::Utf8(s)),
+            StrRef::Utf16(s) => f(Wtf::Utf16(s)),
+            StrRef::Rope(r) => r.for_each_elem_rev(f),
+        }
         
-        
+        match self.inner.left.as_str_no_copy() {
+            StrRef::Utf8(s) => f(Wtf::Utf8(s)),
+            StrRef::Utf16(s) => f(Wtf::Utf16(s)),
+            StrRef::Rope(r) => r.for_each_elem_rev(f),
+        }
     }
 }
 
