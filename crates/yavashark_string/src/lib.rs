@@ -1000,12 +1000,35 @@ impl YSString {
 
         // Convert current contents to UTF-16 if needed
         let mut units: ThinVec<u16> = match inner {
-            InnerString::InlineUtf8(inline) => inline.as_str().encode_utf16().collect(),
+            InnerString::InlineUtf8(inline) => {
+                if ch.is_ascii() && inline.push_ascii(ch as u8) {
+                    return;
+                }
+
+                inline.as_str().encode_utf16().collect()
+            },
             InnerString::Static(s) => s.encode_utf16().collect(),
-            InnerString::OwnedUtf8(s) => s.encode_utf16().collect(),
+            InnerString::OwnedUtf8(s) => {
+                if ch.is_ascii() {
+                    s.push(ch);
+                    return;
+                }
+                s.encode_utf16().collect()
+            },
             InnerString::RcUtf8(s) => s.encode_utf16().collect(),
-            InnerString::BoxedUtf8(s) => s.encode_utf16().collect(),
-            InnerString::InlineUtf16(inline) => inline.as_slice().into(),
+            InnerString::BoxedUtf8(s) => {
+                if ch.is_ascii() {
+                    s.push(ch);
+                    return;
+                }
+                s.encode_utf16().collect()
+            },
+            InnerString::InlineUtf16(inline) => {
+                if inline.remaining_capacity() >= ch.len_utf16() && inline.push_char(ch) != 0 {
+                    return;
+                }
+                inline.as_slice().into()
+            }
             InnerString::OwnedUtf16(v) => std::mem::take(v),
             InnerString::RcUtf16(v) => v.to_vec().into(),
             InnerString::Rope(rope) => rope.to_utf16_vec(),
