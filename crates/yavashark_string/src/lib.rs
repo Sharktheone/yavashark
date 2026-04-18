@@ -20,7 +20,6 @@ pub(crate) mod smallvec;
 mod utf16;
 pub(crate) mod uz;
 
-use std::arch::x86_64::_mm256_mask_expand_epi8;
 use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, is_surrogate};
 use crate::iter::{CodePoints, CodeUnits};
 use crate::smallstring::SmallString;
@@ -1206,6 +1205,7 @@ impl YSString {
     /// Returns a string with leading and trailing whitespace removed.
     #[must_use]
     pub fn trim(&self) -> Cow<'_, str> {
+        //TODO: we should have some slice string type: but we will probably make the string type larger, so we need the new GC system for that.
         if let Some(s) = self.as_str() {
             return Cow::Borrowed(s.trim());
         }
