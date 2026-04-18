@@ -1070,6 +1070,20 @@ impl YSString {
             return;
         }
 
+        match (self.inner_mut(), &s) {
+            (InnerString::InlineUtf8(inline), InnerString::InlineUtf8(s)) => {
+                if inline.push_str(s.as_str()) {
+                    return;
+                }
+            }
+            (InnerString::InlineUtf16(inline), InnerString::InlineUtf16(s)) => {
+                if inline.push_str(s.as_slice()) {
+                    return;
+                }
+            }
+            _ => {}
+        }
+
         let inner = self.inner_mut();
 
         // Create a rope for lazy concatenation
