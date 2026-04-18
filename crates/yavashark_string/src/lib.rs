@@ -31,7 +31,7 @@ use std::cell::UnsafeCell;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::{Add, AddAssign, Deref, DerefMut};
+use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 use thin_vec::ThinVec;
 
@@ -1312,16 +1312,16 @@ impl YSString {
     }
 
     /// Get a substring by byte range (UTF-8 only).
-    pub fn get<R: std::ops::RangeBounds<usize>>(&self, range: R) -> Option<&str> {
+    pub fn get<R: RangeBounds<usize>>(&self, range: R) -> Option<&str> {
         let start = match range.start_bound() {
-            std::ops::Bound::Included(&n) => n,
-            std::ops::Bound::Excluded(&n) => n + 1,
-            std::ops::Bound::Unbounded => 0,
+            Bound::Included(&n) => n,
+            Bound::Excluded(&n) => n + 1,
+            Bound::Unbounded => 0,
         };
         let end = match range.end_bound() {
-            std::ops::Bound::Included(&n) => n + 1,
-            std::ops::Bound::Excluded(&n) => n,
-            std::ops::Bound::Unbounded => self.len(),
+            Bound::Included(&n) => n + 1,
+            Bound::Excluded(&n) => n,
+            Bound::Unbounded => self.len(),
         };
         self.as_str()?.get(start..end)
     }
