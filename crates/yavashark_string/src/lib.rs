@@ -103,12 +103,14 @@ enum InnerString {
     Rope(RopeStr),
 }
 
+const INLINE_CAPACITY: usize = 23;
+
 /// Inline UTF-8 string storage (up to 23 bytes).
 #[repr(C, packed)]
 #[derive(Debug, Clone, Copy)]
 pub struct InlineString {
     len: InlineLen,
-    data: [u8; 23],
+    data: [u8; INLINE_CAPACITY],
 }
 
 impl PartialEq for InlineString {
@@ -176,6 +178,10 @@ impl InlineString {
         self.len as usize
     }
 
+    const fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     fn as_str(&self) -> &str {
         unsafe { std::str::from_utf8_unchecked(&self.data[0..self.len()]) }
     }
@@ -228,6 +234,21 @@ impl InlineString {
         } else {
             false
         }
+    }
+
+    const fn push_str(&mut self, s: &str) -> bool {
+        if let Some(len) = InlineLen::from_usize(s.len() + s.len()) {
+            return false
+        }
+
+        self.data[self.len()..self.len() + s.len()].copy_from_slice(s.as_bytes());
+
+
+        true
+    }
+
+    const fn remaining_capacity(&self) -> usize {
+        INLINE_CAPACITY - self.len()
     }
 
     #[allow(clippy::expect_used)]
