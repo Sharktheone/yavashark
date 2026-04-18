@@ -20,6 +20,7 @@ pub(crate) mod smallvec;
 mod utf16;
 pub(crate) mod uz;
 
+use std::arch::x86_64::_mm256_mask_expand_epi8;
 use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, is_surrogate};
 use crate::iter::{CodePoints, CodeUnits};
 use crate::smallstring::SmallString;
@@ -1133,11 +1134,73 @@ impl YSString {
     /// Returns true if the string ends with the given suffix.
     #[must_use]
     pub fn ends_with(&self, suffix: &str) -> bool {
-        if let Some(s) = self.as_str() {
-            return s.ends_with(suffix);
-        }
+        fn utf816_ends_with(a: &str, b: &[u16]) -> bool {
+            for (i, ch) in a.chars().rev().enumerate() {
+                let mut buffer = [0u16; 2];
+                let expected_units = ch.encode_utf16(buffer.as_mut_slice());
+                let expected_len = expected_units.len();
 
-        self.as_str_lossy().ends_with(suffix)
+                if b.len() < i + expected_len {
+                    return false; // Not enough units left
+                }
+
+                let end = b.len() - (i + 1);
+
+                if &b[end - expected_len..end] != expected_units {
+                    return false; // Mismatch
+                }
+            }
+            true
+        }
+        match self.as_str_no_copy() {
+            StrRef::Utf8(s) => s.starts_with(suffix),
+            StrRef::Utf16(units) => utf816_ends_with(suffix, units),
+            StrRef::Rope(rope) => {
+                let mut rest = suffix;
+
+                rope.for_each_elem_rev(&mut |elem| {
+                    match elem {
+                        Wtf::Utf8(s) => {
+                            let longest = s.len().min(rest.len());
+
+                            let s_sub = &s[s.len()-longest..];
+                            let rest_sub = &rest[rest.len()-longest..];
+
+                            if s.ends_with(s_sub) {
+                                rest = &rest[..rest.len() - longest];
+                                return None;
+                            }
+
+                            Some(false)
+                        }
+                        Wtf::Utf16(units) => {
+                            let mut offset = 0;
+
+                            for (i, ch) in rest.chars().rev().enumerate() {
+                                let mut buffer = [0u16; 2];
+                                let expected_units = ch.encode_utf16(buffer.as_mut_slice());
+                                let expected_len = expected_units.len();
+
+                                if units.len() < i + expected_len {
+                                    rest = &rest[..self.len() - offset];
+                                    return None; // Not enough units left
+                                }
+
+                                let end = units.len() - (i + 1);
+
+                                if &units[end - expected_len..end] != expected_units {
+                                    return Some(false); // Mismatch
+                                }
+
+                                offset += ch.len_utf8();
+                            }
+
+                            Some(true)
+                        }
+                    }
+                }).unwrap_or(false)
+            }
+        }
     }
 
     /// Returns a string with leading and trailing whitespace removed.
