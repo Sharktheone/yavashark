@@ -1301,7 +1301,13 @@ impl YSString {
                 InnerString::OwnedUtf8(s) => s.encode_utf16().collect(),
                 InnerString::RcUtf8(s) => s.encode_utf16().collect(),
                 InnerString::BoxedUtf8(s) => s.encode_utf16().collect(),
-                InnerString::InlineUtf16(inline) => inline.as_slice().into(),
+                InnerString::InlineUtf16(inline) => {
+                    if inline.push(unit) {
+                        return;
+                    }
+
+                    inline.as_slice().into()
+                }
                 InnerString::OwnedUtf16(v) => std::mem::take(v),
                 InnerString::RcUtf16(v) => v.to_vec().into(),
                 InnerString::Rope(rope) => rope.to_utf16_vec(),
