@@ -143,6 +143,19 @@ impl InlineUtf16String {
         }
     }
 
+    #[inline]
+    pub fn push_str(&mut self, units: &[u16]) -> bool {
+        if self.remaining_capacity() < INLINE_UTF16_CAPACITY {
+            return false;
+        }
+
+        self.data[self.len..self.len+units.len()].copy_from_slice(units);
+
+        self.len += units.len();
+
+        true
+    }
+
     /// Returns the remaining capacity.
     #[inline]
     #[must_use]
