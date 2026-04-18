@@ -149,7 +149,7 @@ impl InlineUtf16String {
             return false;
         }
 
-        self.data[self.len..self.len+units.len()].copy_from_slice(units);
+        self.data[self.len..self.len + units.len()].copy_from_slice(units);
 
         self.len += units.len();
 

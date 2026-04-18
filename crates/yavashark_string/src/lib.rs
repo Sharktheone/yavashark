@@ -238,11 +238,10 @@ impl InlineString {
 
     const fn push_str(&mut self, s: &str) -> bool {
         if let Some(len) = InlineLen::from_usize(s.len() + s.len()) {
-            return false
+            return false;
         }
 
         self.data[self.len()..self.len() + s.len()].copy_from_slice(s.as_bytes());
-
 
         true
     }
@@ -336,7 +335,7 @@ impl RopeStr {
             inner: Rc::new(RopeStrInner { left, right }),
         }
     }
-    
+
     pub fn for_each_elem<'a, R>(&'a self, f: &mut impl FnMut(Wtf<'a>) -> Option<R>) -> Option<R> {
         if let Some(r) = match self.inner.left.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
@@ -345,19 +344,22 @@ impl RopeStr {
         } {
             return Some(r);
         }
-        
+
         if let Some(r) = match self.inner.right.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
             StrRef::Rope(r) => r.for_each_elem(f),
         } {
-            return Some(r)
+            return Some(r);
         }
-        
+
         None
     }
-    
-    pub fn for_each_elem_rev<'a, R>(&'a self, f: &mut impl FnMut(Wtf<'a>) -> Option<R>) -> Option<R> {
+
+    pub fn for_each_elem_rev<'a, R>(
+        &'a self,
+        f: &mut impl FnMut(Wtf<'a>) -> Option<R>,
+    ) -> Option<R> {
         if let Some(r) = match self.inner.right.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
@@ -365,7 +367,7 @@ impl RopeStr {
         } {
             return Some(r);
         }
-        
+
         if let Some(r) = match self.inner.left.as_str_no_copy() {
             StrRef::Utf8(s) => f(Wtf::Utf8(s)),
             StrRef::Utf16(s) => f(Wtf::Utf16(s)),
@@ -373,7 +375,7 @@ impl RopeStr {
         } {
             return Some(r);
         }
-        
+
         None
     }
 }
@@ -399,7 +401,6 @@ impl From<String> for YSString {
         Self::from_string(str)
     }
 }
-
 
 enum StrRef<'a> {
     Utf8(&'a str),
@@ -1027,7 +1028,7 @@ impl YSString {
                 }
 
                 inline.as_str().encode_utf16().collect()
-            },
+            }
             InnerString::Static(s) => s.encode_utf16().collect(),
             InnerString::OwnedUtf8(s) => {
                 if ch.is_ascii() {
@@ -1035,7 +1036,7 @@ impl YSString {
                     return;
                 }
                 s.encode_utf16().collect()
-            },
+            }
             InnerString::RcUtf8(s) => s.encode_utf16().collect(),
             InnerString::BoxedUtf8(s) => {
                 if ch.is_ascii() {
@@ -1043,7 +1044,7 @@ impl YSString {
                     return;
                 }
                 s.encode_utf16().collect()
-            },
+            }
             InnerString::InlineUtf16(inline) => {
                 if inline.remaining_capacity() >= ch.len_utf16() && inline.push_char(ch) != 0 {
                     return;
@@ -1137,13 +1138,13 @@ impl YSString {
             }
             true
         }
-        
+
         match self.as_str_no_copy() {
             StrRef::Utf8(s) => s.starts_with(prefix),
             StrRef::Utf16(units) => utf816_starts_with(prefix, units),
             StrRef::Rope(rope) => {
                 let mut rest = prefix;
-                
+
                 rope.for_each_elem(&mut |elem| {
                     match elem {
                         Wtf::Utf8(s) => {
@@ -1182,10 +1183,10 @@ impl YSString {
                             Some(true)
                         }
                     }
-                }).unwrap_or(false)
+                })
+                .unwrap_or(false)
             }
         }
-
     }
 
     /// Returns true if the string ends with the given suffix.
@@ -1220,8 +1221,8 @@ impl YSString {
                         Wtf::Utf8(s) => {
                             let longest = s.len().min(rest.len());
 
-                            let s_sub = &s[s.len()-longest..];
-                            let rest_sub = &rest[rest.len()-longest..];
+                            let s_sub = &s[s.len() - longest..];
+                            let rest_sub = &rest[rest.len() - longest..];
 
                             if s.ends_with(s_sub) {
                                 rest = &rest[..rest.len() - longest];
@@ -1255,7 +1256,8 @@ impl YSString {
                             Some(true)
                         }
                     }
-                }).unwrap_or(false)
+                })
+                .unwrap_or(false)
             }
         }
     }
