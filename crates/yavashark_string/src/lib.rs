@@ -1269,11 +1269,17 @@ impl YSString {
     /// Returns true if the given index is a char boundary (UTF-8 only).
     #[must_use]
     pub fn is_char_boundary(&self, index: usize) -> bool {
-        if let Some(s) = self.as_str() {
-            return s.is_char_boundary(index);
+        match self.as_str_no_copy() {
+            StrRef::Utf8(s) => s.is_char_boundary(index),
+            StrRef::Utf16(s) => index <= s.len(),
+            StrRef::Rope(r) => {
+                if r.inner.left.len() > index {
+                    r.inner.left.is_char_boundary(index)
+                } else {
+                    r.inner.right.is_char_boundary(index)
+                }
+            }
         }
-        // For UTF-16 storage, every index is a valid code unit boundary
-        index <= self.len()
     }
 
     /// Parse the string into a type that implements `FromStr`.
