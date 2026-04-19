@@ -145,7 +145,7 @@ impl InlineUtf16String {
 
     #[inline]
     pub fn push_str(&mut self, units: &[u16]) -> bool {
-        if self.remaining_capacity() < INLINE_UTF16_CAPACITY {
+        if self.remaining_capacity() < units.len() {
             return false;
         }
 
