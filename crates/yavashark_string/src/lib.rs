@@ -1359,10 +1359,11 @@ impl YSString {
             StrRef::Utf8(s) => s.is_char_boundary(index),
             StrRef::Utf16(s) => index <= s.len(),
             StrRef::Rope(r) => {
-                if r.inner.left.len() > index {
+                let left_len = r.inner.left.len();
+                if left_len > index {
                     r.inner.left.is_char_boundary(index)
                 } else {
-                    r.inner.right.is_char_boundary(index)
+                    r.inner.right.is_char_boundary(index - left_len)
                 }
             }
         }
