@@ -237,11 +237,13 @@ impl InlineString {
     }
 
     const fn push_str(&mut self, s: &str) -> bool {
-        if let Some(len) = InlineLen::from_usize(s.len() + s.len()) {
+        let Some(len) = InlineLen::from_usize(s.len() + s.len()) else {
             return false;
-        }
+        };
 
         self.data[self.len()..self.len() + s.len()].copy_from_slice(s.as_bytes());
+
+        self.len = len;
 
         true
     }
