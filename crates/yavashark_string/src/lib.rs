@@ -1125,22 +1125,22 @@ impl YSString {
     #[must_use]
     pub fn starts_with(&self, prefix: &str) -> bool {
         fn utf816_starts_with(a: &str, b: &[u16]) -> bool {
-            let mut offset = 0;
+            let mut i = 0;
 
             for ch in a.chars() {
                 let mut buffer = [0u16; 2];
                 let expected_units = ch.encode_utf16(buffer.as_mut_slice());
                 let expected_len = expected_units.len();
 
-                if b.len() < offset + expected_len {
+                if b.len() < i + expected_len {
                     return false; // Not enough units left
                 }
 
-                if &b[offset..offset + expected_len] != expected_units {
+                if &b[i..i + expected_len] != expected_units {
                     return false; // Mismatch
                 }
 
-                offset += expected_len;
+                i += expected_len;
             }
             true
         }
@@ -1175,8 +1175,9 @@ impl YSString {
                         }
                         Wtf::Utf16(units) => {
                             let mut offset = 0;
+                            let mut i = 0;
 
-                            for (i, ch) in rest.chars().enumerate() {
+                            for ch in rest.chars() {
                                 let mut buffer = [0u16; 2];
                                 let expected_units = ch.encode_utf16(buffer.as_mut_slice());
                                 let expected_len = expected_units.len();
@@ -1191,6 +1192,7 @@ impl YSString {
                                 }
 
                                 offset += ch.len_utf8();
+                                i += expected_len;
                             }
 
                             Some(true)
@@ -1206,24 +1208,24 @@ impl YSString {
     #[must_use]
     pub fn ends_with(&self, suffix: &str) -> bool {
         fn utf816_ends_with(a: &str, b: &[u16]) -> bool {
-            let mut offset = 0;
+            let mut i = 0;
 
             for ch in a.chars().rev() {
                 let mut buffer = [0u16; 2];
                 let expected_units = ch.encode_utf16(buffer.as_mut_slice());
                 let expected_len = expected_units.len();
 
-                if b.len() < offset + expected_len {
+                if b.len() < i + expected_len {
                     return false; // Not enough units left
                 }
 
-                let end = b.len() - (offset + 1);
+                let end = b.len() - i;
 
                 if &b[end - expected_len..end] != expected_units {
                     return false; // Mismatch
                 }
 
-                offset += expected_len;
+                i += expected_len;
             }
             true
         }
@@ -1255,8 +1257,9 @@ impl YSString {
                         }
                         Wtf::Utf16(units) => {
                             let mut offset = 0;
+                            let mut i = 0;
 
-                            for (i, ch) in rest.chars().rev().enumerate() {
+                            for ch in rest.chars().rev() {
                                 let mut buffer = [0u16; 2];
                                 let expected_units = ch.encode_utf16(buffer.as_mut_slice());
                                 let expected_len = expected_units.len();
@@ -1266,13 +1269,14 @@ impl YSString {
                                     return None; // Not enough units left
                                 }
 
-                                let end = units.len() - (i + 1);
+                                let end = units.len() - i;
 
                                 if &units[end - expected_len..end] != expected_units {
                                     return Some(false); // Mismatch
                                 }
 
                                 offset += ch.len_utf8();
+                                i += expected_len;
                             }
 
                             Some(true)
