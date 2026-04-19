@@ -1156,10 +1156,10 @@ impl YSString {
                         Wtf::Utf8(s) => {
                             let longest = s.len().min(rest.len());
 
-                            let s_sub = &s[..longest];
-                            let rest_sub = &rest[..longest];
+                            let s_sub = &s.as_bytes()[..longest];
+                            let rest_sub = &rest.as_bytes()[..longest];
 
-                            if s.starts_with(s_sub) {
+                            if s_sub == rest_sub {
                                 rest = &rest[s_sub.len()..];
 
                                 if rest.is_empty() {
@@ -1240,10 +1240,10 @@ impl YSString {
                         Wtf::Utf8(s) => {
                             let longest = s.len().min(rest.len());
 
-                            let s_sub = &s[s.len() - longest..];
-                            let rest_sub = &rest[rest.len() - longest..];
+                            let s_sub = &s.as_bytes()[s.len() - longest..];
+                            let rest_sub = &rest.as_bytes()[rest.len() - longest..];
 
-                            if s.ends_with(s_sub) {
+                            if s_sub == rest_sub {
                                 rest = &rest[..rest.len() - longest];
 
                                 if rest.is_empty() {
