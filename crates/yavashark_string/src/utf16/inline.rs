@@ -149,9 +149,9 @@ impl InlineUtf16String {
             return false;
         }
 
-        self.data[self.len..self.len + units.len()].copy_from_slice(units);
+        self.data[self.len as usize..self.len as usize + units.len()].copy_from_slice(units);
 
-        self.len += units.len();
+        self.len += units.len() as u8;
 
         true
     }

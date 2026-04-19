@@ -236,12 +236,13 @@ impl InlineString {
         }
     }
 
-    const fn push_str(&mut self, s: &str) -> bool {
+    fn push_str(&mut self, s: &str) -> bool {
         let Some(len) = InlineLen::from_usize(self.len() + s.len()) else {
             return false;
         };
 
-        self.data[self.len()..self.len() + s.len()].copy_from_slice(s.as_bytes());
+        let l = self.len();
+        self.data[l..l + s.len()].copy_from_slice(s.as_bytes());
 
         self.len = len;
 
@@ -1073,7 +1074,7 @@ impl YSString {
             return;
         }
 
-        match (self.inner_mut(), &s) {
+        match (self.inner_mut(), &s.inner()) {
             (InnerString::InlineUtf8(inline), InnerString::InlineUtf8(s)) => {
                 if inline.push_str(s.as_str()) {
                     return;
