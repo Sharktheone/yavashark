@@ -41,7 +41,13 @@ impl Eval for InterpreterEval {
         // let scope = &mut scope.child()?;
         // scope.state_set_function();
 
-        if let Err(e) = Validator::new().validate_statements(&script.body) {
+        let mut validator = Validator::new();
+
+        if scope.is_strict_mode()? {
+            validator.enable_script_strict_mode();
+        }
+
+        if let Err(e) = validator.validate_statements(&script.body) {
             return Err(Error::syn_error(e));
         }
 
