@@ -1157,8 +1157,15 @@ impl YSString {
 
                             if s.starts_with(s_sub) {
                                 rest = &rest[s_sub.len()..];
+
+                                if rest.is_empty() {
+                                    return Some(true);
+                                }
+
                                 return None;
                             }
+
+
 
                             Some(false)
                         }
@@ -1228,6 +1235,11 @@ impl YSString {
 
                             if s.ends_with(s_sub) {
                                 rest = &rest[..rest.len() - longest];
+
+                                if rest.is_empty() {
+                                    return Some(true);
+                                }
+
                                 return None;
                             }
 
@@ -1242,7 +1254,7 @@ impl YSString {
                                 let expected_len = expected_units.len();
 
                                 if units.len() < i + expected_len {
-                                    rest = &rest[..self.len() - offset];
+                                    rest = &rest[..rest.len() - offset];
                                     return None; // Not enough units left
                                 }
 
