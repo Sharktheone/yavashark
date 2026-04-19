@@ -237,7 +237,7 @@ impl InlineString {
     }
 
     const fn push_str(&mut self, s: &str) -> bool {
-        let Some(len) = InlineLen::from_usize(s.len() + s.len()) else {
+        let Some(len) = InlineLen::from_usize(self.len() + s.len()) else {
             return false;
         };
 
