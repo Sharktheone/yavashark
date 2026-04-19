@@ -1211,7 +1211,7 @@ impl YSString {
             true
         }
         match self.as_str_no_copy() {
-            StrRef::Utf8(s) => s.starts_with(suffix),
+            StrRef::Utf8(s) => s.ends_with(suffix),
             StrRef::Utf16(units) => utf816_ends_with(suffix, units),
             StrRef::Rope(rope) => {
                 let mut rest = suffix;
