@@ -1170,8 +1170,6 @@ impl YSString {
                                 return None;
                             }
 
-
-
                             Some(false)
                         }
                         Wtf::Utf16(units) => {
