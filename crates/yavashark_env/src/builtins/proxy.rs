@@ -202,7 +202,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         if self.revoke.get() {
-            return self.inner.delete_property(name, realm);
+            return Err(Error::ty("Cannot perform 'deleteProperty' on a proxy that has been revoked"));
         }
 
         if let Some(delete_property) = self.handler.get_opt("deleteProperty", realm)? {
