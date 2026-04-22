@@ -374,7 +374,7 @@ impl Obj for Proxy {
 
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
         if self.revoke.get() {
-            return self.inner.prototype(realm);
+            return Err(Error::ty("Cannot perform 'getPrototypeOf' on a proxy that has been revoked"));
         }
 
         if let Some(get_prototype) = self.handler.get_opt("getPrototypeOf", realm)? {
@@ -399,7 +399,7 @@ impl Obj for Proxy {
 
     fn set_prototype(&self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
         if self.revoke.get() {
-            return self.inner.set_prototype(proto, realm);
+            return Err(Error::ty("Cannot perform 'setPrototypeOf' on a proxy that has been revoked"));
         }
 
         if let Some(set_prototype) = self.handler.get_opt("setPrototypeOf", realm)? {
