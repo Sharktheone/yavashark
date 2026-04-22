@@ -424,7 +424,7 @@ impl Obj for Proxy {
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
         if self.revoke.get() {
-            return self.inner.construct(args, realm);
+            return Err(Error::ty("Cannot perform 'construct' on a proxy that has been revoked"));
         }
 
         if let Some(construct) = self.handler.get_opt("construct", realm)? {
