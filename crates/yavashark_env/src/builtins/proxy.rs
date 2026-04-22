@@ -231,7 +231,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<bool, Error> {
         if self.revoke.get() {
-            return self.inner.contains_own_key(name, realm);
+            return Err(Error::ty("Cannot perform 'has' on a proxy that has been revoked"));
         }
 
         if let Some(has) = self.handler.get_opt("has", realm)? {
@@ -250,7 +250,7 @@ impl Obj for Proxy {
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         if self.revoke.get() {
-            return self.inner.contains_key(name, realm);
+            return Err(Error::ty("Cannot perform 'has' on a proxy that has been revoked"));
         }
 
         if let Some(has) = self.handler.get_opt("has", realm)? {
