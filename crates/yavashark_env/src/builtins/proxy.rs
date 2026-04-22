@@ -319,7 +319,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<(bool, Option<Value>), Error> {
         if self.revoke.get() {
-            return self.inner.get_array_or_done(index, realm);
+            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
         }
 
         if let Some(get) = self.handler.get_opt("get", realm)? {
