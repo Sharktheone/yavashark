@@ -342,7 +342,7 @@ impl Obj for Proxy {
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<Value, Error> {
         if self.revoke.get() {
-            return self.inner.call(args, this, realm);
+            return Err(Error::ty("Cannot perform 'apply' on a proxy that has been revoked"));
         }
 
         if let Some(apply) = self.handler.get_opt("apply", realm)? {
