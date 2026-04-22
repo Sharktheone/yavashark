@@ -33,7 +33,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
-            return self.inner.define_property(name, value, realm);
+            return Err(Error::ty("Cannot perform 'set' on a proxy that has been revoked"));
         }
 
         if let Some(define_property) = self.handler.get_opt("set", realm)? {
@@ -64,7 +64,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
-            return self.inner.define_property_attributes(name, value, realm);
+            return Err(Error::ty("Cannot perform 'set' on a proxy that has been revoked"));
         }
 
         if let Some(define_property) = self.handler.get_opt("set", realm)? {
