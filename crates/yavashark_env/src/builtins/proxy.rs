@@ -99,7 +99,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
-            return self.inner.deref().resolve_property(name, realm);
+            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
         }
 
         if let Some(get) = self.handler.get_opt("get", realm)? {
@@ -126,7 +126,7 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
-            return self.inner.deref().get_own_property(name, realm);
+            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
         }
 
         if let Some(get_own_property) = self.handler.get_opt("get", realm)? {
