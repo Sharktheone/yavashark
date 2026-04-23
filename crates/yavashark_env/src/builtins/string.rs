@@ -315,7 +315,7 @@ impl StringObj {
         })
     }
 
-    pub fn get(&self, index: isize, to: isize) -> Option<String> {
+    pub fn get(&self, index: isize, to: isize) -> Option<YSString> {
         let inner = self.inner.borrow();
         let len = inner.string.len() as isize;
 
@@ -337,10 +337,10 @@ impl StringObj {
 
         let string = inner.string.get(start..end);
 
-        string.map(ToString::to_string)
+        string.map(YSString::from_ref)
     }
 
-    pub fn get_single(&self, index: isize) -> Option<String> {
+    pub fn get_single(&self, index: isize) -> Option<YSString> {
         let inner = self.inner.borrow();
         let len = inner.string.len() as isize;
 
@@ -350,14 +350,14 @@ impl StringObj {
             index as usize
         };
 
-        let end = start + 1;
 
-        let string = inner.string.get(start..end);
 
-        string.map(ToString::to_string)
+        let cu = inner.string.code_unit_at(start);
+
+        cu.map(YSString::from_code_unit)
     }
 
-    pub fn get_single_str(str: &str, index: isize) -> Option<String> {
+    pub fn get_single_str(str: &str, index: isize) -> Option<YSString> {
         let len = str.len() as isize;
 
         let start = if index < 0 {
@@ -366,11 +366,11 @@ impl StringObj {
             index as usize
         };
 
-        let end = start + 1;
 
-        let string = str.get(start..end);
-
-        string.map(ToString::to_string)
+        str.as_bytes().get(start)
+            .copied()
+            .map(u16::from)
+            .map(YSString::from_code_unit)
     }
 }
 
