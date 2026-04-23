@@ -28,6 +28,7 @@ func Setup() *fiber.App {
 
 	api.Get("current", current)
 	api.Get("info/*", info)
+	app.Get("/test262/*", serveTest262File)
 
 	api.Get("rerun", rerunAll)
 	api.Get("rerun/*", rerun)

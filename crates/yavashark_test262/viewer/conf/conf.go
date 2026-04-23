@@ -2,14 +2,17 @@ package conf
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 )
 
 // Default values
 const (
 	DefaultTestRoot         = "../../test262/test"
+	DefaultTest262Root      = "../../test262"
 	DefaultWorkers          = 256
 	DefaultRunnerPath       = "../runner"
 	DefaultPort             = 1215
@@ -86,4 +89,29 @@ func CheckMCPRequirements() string {
 	}
 
 	return ""
+}
+
+func ResolveTest262Root() (string, error) {
+	candidates := []string{}
+
+	if TestRoot != "" {
+		candidates = append(candidates, filepath.Join(TestRoot, ".."))
+	}
+
+	candidates = append(candidates, DefaultTest262Root)
+
+	for _, candidate := range candidates {
+		cleaned := filepath.Clean(candidate)
+		info, err := os.Stat(cleaned)
+		if err != nil || !info.IsDir() {
+			continue
+		}
+
+		testDir := filepath.Join(cleaned, "test")
+		if testInfo, err := os.Stat(testDir); err == nil && testInfo.IsDir() {
+			return cleaned, nil
+		}
+	}
+
+	return "", fmt.Errorf("could not locate test262 root from test-root %q or default %q", TestRoot, DefaultTest262Root)
 }
