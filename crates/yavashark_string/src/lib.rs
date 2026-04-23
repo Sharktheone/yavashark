@@ -668,6 +668,10 @@ impl YSString {
         unsafe { &mut *self.inner.get() }
     }
 
+    fn segmented_code_units(&self) -> SegmentedCodeUnits<'_> {
+        SegmentedCodeUnits::new(self)
+    }
+
     fn get_utf8_range(&self, start: usize, end: usize) -> Option<&str> {
         if start > end {
             return None;
@@ -1388,6 +1392,8 @@ impl YSString {
             Bound::Unbounded => self.len(),
         };
         self.as_str()?.get(start..end)
+
+        self.get_utf8_range(start, end)
     }
 
     /// Returns true if the given index is a char boundary (UTF-8 only).
