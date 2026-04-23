@@ -1156,6 +1156,11 @@ impl YSString {
     /// Returns true if the string contains the given substring.
     #[must_use]
     pub fn contains(&self, pattern: &str) -> bool {
+        if pattern.is_empty() {
+            return true;
+        }
+
+
         // For ASCII-only strings, use direct str::contains
         if let Some(s) = self.as_str() {
             return s.contains(pattern);
