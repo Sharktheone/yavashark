@@ -405,13 +405,13 @@ impl From<String> for YSString {
     }
 }
 
-enum StrRef<'a> {
+pub enum StrRef<'a> {
     Utf8(&'a str),
     Utf16(&'a [u16]),
     Rope(&'a RopeStr),
 }
 
-enum Wtf<'a> {
+pub enum Wtf<'a> {
     Utf8(&'a str),
     Utf16(&'a [u16]),
 }
@@ -554,7 +554,7 @@ impl YSString {
     }
 
     /// Creates a string from a UTF-16 iterator.
-    fn from_utf16_iter(iter: impl Iterator<Item = u16>) -> Self {
+    pub fn from_utf16_iter(iter: impl Iterator<Item = u16>) -> Self {
         let units: ThinVec<u16> = iter.collect();
 
         // Check if it's ASCII-representable
@@ -786,7 +786,7 @@ impl YSString {
     }
 
     #[must_use]
-    fn as_str_no_copy(&self) -> StrRef<'_> {
+    pub fn as_str_no_copy(&self) -> StrRef<'_> {
         match self.inner() {
             InnerString::InlineUtf8(inline) => StrRef::Utf8(inline.as_str()),
             InnerString::Static(s) => StrRef::Utf8(s),
@@ -1020,7 +1020,7 @@ impl YSString {
     }
 
     /// Push a character using UTF-16 storage.
-    fn push_utf16(&mut self, ch: char) {
+    pub fn push_utf16(&mut self, ch: char) {
         let inner = self.inner_mut();
 
         // Convert current contents to UTF-16 if needed
