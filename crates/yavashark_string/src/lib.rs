@@ -668,6 +668,45 @@ impl YSString {
         unsafe { &mut *self.inner.get() }
     }
 
+    fn get_utf8_range(&self, start: usize, end: usize) -> Option<&str> {
+        if start > end {
+            return None;
+        }
+
+        match self.inner() {
+            InnerString::InlineUtf8(inline) => inline.as_str().get(start..end),
+            InnerString::Static(s) => s.get(start..end),
+            InnerString::OwnedUtf8(s) => s.get(start..end),
+            InnerString::RcUtf8(s) => s.get(start..end),
+            InnerString::BoxedUtf8(s) => s.get(start..end),
+
+            InnerString::InlineUtf16(_) | InnerString::OwnedUtf16(_) | InnerString::RcUtf16(_) => {
+                None
+            }
+
+            InnerString::Rope(rope) => {
+                if !rope.is_utf8() || end > rope.len() {
+                    return None;
+                }
+
+                let left_len = rope.inner.left.len();
+
+                if end <= left_len {
+                    return rope.inner.left.get_utf8_range(start, end);
+                }
+
+                if start >= left_len {
+                    return rope
+                        .inner
+                        .right
+                        .get_utf8_range(start - left_len, end - left_len);
+                }
+
+                self.as_str()?.get(start..end)
+            }
+        }
+    }
+
     /// Returns true if the string is stored as UTF-8.
     #[must_use]
     pub fn is_utf8_storage(&self) -> bool {
