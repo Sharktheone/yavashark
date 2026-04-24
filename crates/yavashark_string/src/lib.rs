@@ -668,10 +668,6 @@ impl YSString {
         unsafe { &mut *self.inner.get() }
     }
 
-    fn segmented_code_units(&self) -> SegmentedCodeUnits<'_> {
-        SegmentedCodeUnits::new(self)
-    }
-
     fn get_utf8_range(&self, start: usize, end: usize) -> Option<&str> {
         if start > end {
             return None;
@@ -1160,12 +1156,6 @@ impl YSString {
             return true;
         }
 
-
-        // For ASCII-only strings, use direct str::contains
-        if let Some(s) = self.as_str() {
-            return s.contains(pattern);
-        }
-
         // For UTF-16, convert to string and check
         self.as_str_lossy().contains(pattern)
     }
@@ -1396,7 +1386,6 @@ impl YSString {
             Bound::Excluded(&n) => n,
             Bound::Unbounded => self.len(),
         };
-        self.as_str()?.get(start..end)
 
         self.get_utf8_range(start, end)
     }
