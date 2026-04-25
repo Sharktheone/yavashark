@@ -153,7 +153,7 @@ pub enum InlineLen {
 
 /// Rope string for lazy concatenation.
 #[derive(Clone)]
-struct RopeStr {
+pub struct RopeStr {
     inner: Rc<RopeStrInner>,
 }
 
