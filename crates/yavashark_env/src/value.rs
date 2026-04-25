@@ -521,6 +521,53 @@ impl Value {
         matches!(self, Self::BigInt(_))
     }
 
+
+
+    pub const fn as_string(&self) -> Result<&YSString, Error> {
+        let Self::String(s) = self else {
+            return Err(Error::ty("Value is not a string"));
+        };
+
+        Ok(s)
+    }
+
+    pub const fn as_boolean(&self) -> Result<bool, Error> {
+        let Self::Boolean(b) = self else {
+            return Err(Error::ty("Value is not a boolean"));
+        };
+
+        Ok(*b)
+    }
+
+    pub const fn as_symbol(&self) -> Result<&Symbol, Error> {
+        let Self::Symbol(s) = self else {
+            return Err(Error::ty("Value is not a symbol"));
+        };
+
+        Ok(s)
+    }
+
+    pub const fn as_bigint(&self) -> Result<&Rc<BigInt>, Error> {
+        let Self::BigInt(b) = self else {
+            return Err(Error::ty("Value is not a bigint"));
+        };
+
+        Ok(b)
+    }
+
+    pub const fn is_primitive(&self) -> bool {
+        !matches!(self, Self::Object(_))
+    }
+
+    pub const fn is_object_or_null(&self) -> bool {
+        matches!(self, Self::Object(_) | Self::Null)
+    }
+
+    pub const fn is_undefined_or_null(&self) -> bool {
+        matches!(self, Self::Undefined | Self::Null)
+    }
+
+
     #[must_use]
     pub fn is_callable(&self) -> bool {
         matches!(self, Self::Object(o) if o.is_callable())
@@ -835,6 +882,7 @@ impl Value {
             Self::BigInt(b) => b.to_string().into(),
         })
     }
+
 }
 
 #[must_use]
