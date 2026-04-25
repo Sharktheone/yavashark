@@ -350,8 +350,6 @@ impl StringObj {
             index as usize
         };
 
-
-
         let cu = inner.string.code_unit_at(start);
 
         cu.map(YSString::from_code_unit)
@@ -366,8 +364,8 @@ impl StringObj {
             index as usize
         };
 
-
-        str.as_bytes().get(start)
+        str.as_bytes()
+            .get(start)
             .copied()
             .map(u16::from)
             .map(YSString::from_code_unit)

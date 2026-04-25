@@ -24,6 +24,5 @@ impl SWCTranslator {
         );
 
         let out = parser.parse_program().expect("Failed to parse SWC code");
-
     }
 }

@@ -33,7 +33,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'set' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'set' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(define_property) = self.handler.get_opt("set", realm)? {
@@ -64,7 +66,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'set' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'set' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(define_property) = self.handler.get_opt("set", realm)? {
@@ -99,7 +103,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'get' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(get) = self.handler.get_opt("get", realm)? {
@@ -126,7 +132,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'get' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(get_own_property) = self.handler.get_opt("get", realm)? {
@@ -202,7 +210,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'deleteProperty' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'deleteProperty' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(delete_property) = self.handler.get_opt("deleteProperty", realm)? {
@@ -231,7 +241,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<bool, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'has' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'has' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(has) = self.handler.get_opt("has", realm)? {
@@ -250,7 +262,9 @@ impl Obj for Proxy {
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'has' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'has' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(has) = self.handler.get_opt("has", realm)? {
@@ -319,7 +333,9 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Result<(bool, Option<Value>), Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'get' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'get' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(get) = self.handler.get_opt("get", realm)? {
@@ -342,7 +358,9 @@ impl Obj for Proxy {
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<Value, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'apply' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'apply' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(apply) = self.handler.get_opt("apply", realm)? {
@@ -374,7 +392,9 @@ impl Obj for Proxy {
 
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'getPrototypeOf' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'getPrototypeOf' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(get_prototype) = self.handler.get_opt("getPrototypeOf", realm)? {
@@ -399,7 +419,9 @@ impl Obj for Proxy {
 
     fn set_prototype(&self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'setPrototypeOf' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'setPrototypeOf' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(set_prototype) = self.handler.get_opt("setPrototypeOf", realm)? {
@@ -424,7 +446,9 @@ impl Obj for Proxy {
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
         if self.revoke.get() {
-            return Err(Error::ty("Cannot perform 'construct' on a proxy that has been revoked"));
+            return Err(Error::ty(
+                "Cannot perform 'construct' on a proxy that has been revoked",
+            ));
         }
 
         if let Some(construct) = self.handler.get_opt("construct", realm)? {
