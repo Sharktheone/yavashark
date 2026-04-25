@@ -271,6 +271,10 @@ impl Obj for Object {
         self.inner.borrow().is_sealed()
     }
 
+    fn seal(&self) -> Res {
+        self.inner.borrow_mut().seal()
+    }
+
     fn get_property_descriptor(
         &self,
         name: InternalPropertyKey,
