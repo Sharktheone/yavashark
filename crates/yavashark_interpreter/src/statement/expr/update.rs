@@ -45,7 +45,7 @@ impl Interpreter {
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
-                scope.update(&name, up.0, realm);
+                scope.update(&name, up.0, realm)?;
 
                 Ok(ret)
             }
@@ -56,7 +56,7 @@ impl Interpreter {
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
-                Self::assign_member(realm, m, up.0, scope);
+                Self::assign_member(realm, m, up.0, scope)?;
                 Ok(ret)
             }
 
