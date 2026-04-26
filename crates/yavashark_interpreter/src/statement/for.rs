@@ -35,6 +35,9 @@ impl Interpreter {
                     ControlFlow::Break(l) if label.as_ref() == l.as_ref() => {
                         break Ok(Value::Undefined);
                     }
+                    ControlFlow::Break(None) => {
+                        break Ok(Value::Undefined);
+                    }
                     ControlFlow::Continue(l) if label.as_ref() == l.as_ref() => {
                         if let Some(update) = &stmt.update {
                             Self::run_expr(realm, update, stmt.span, scope)?;
