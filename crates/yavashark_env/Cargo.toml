@@ -39,7 +39,7 @@ writeable = "0.6.0"
 
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-getrandom = { version = "0.3.1", features = ["wasm_js"] }
+getrandom = { version = "0.4.2", features = ["wasm_js"] }
 tokio = { version = "1.47.1", default-features = false, features = ["sync"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
