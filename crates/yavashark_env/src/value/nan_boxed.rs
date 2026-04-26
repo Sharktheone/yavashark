@@ -34,6 +34,8 @@ use std::ptr::NonNull;
 /// BigInt     0111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// Float64    Any other value.
 ///
+/// TODO: We want to move the THE_HOLE value to the Null / Undefined 2bit tag, so we can have one more value that being BigInt46 which stores a 46bit bigint directly in the value without needing to allocate.
+///
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct ValueInner {
