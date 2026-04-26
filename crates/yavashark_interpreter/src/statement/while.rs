@@ -26,6 +26,9 @@ impl Interpreter {
                     ControlFlow::Break(l) if *l == label => {
                         break Ok(Value::Undefined);
                     }
+                    ControlFlow::Break(None) => {
+                        break Ok(Value::Undefined);
+                    }
                     ControlFlow::Continue(l) if *l == label => {}
                     _ => return Err(e),
                 },
