@@ -627,7 +627,7 @@ impl ScopeInternal {
                 if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
-                        return Ok(false);
+                        return Err(Error::ty("Assignment to constant variable"));
                     }
 
                     obj.define_property_attributes(
@@ -641,7 +641,7 @@ impl ScopeInternal {
             ObjectOrVariables::Variables(ref mut v) => {
                 if let Some(var) = v.get_mut(name) {
                     if !var.get(realm).properties.is_writable() {
-                        return Ok(false);
+                        return Err(Error::ty("Assignment to constant variable"));
                     }
 
                     var.update(value, realm)?;
@@ -665,11 +665,7 @@ impl ScopeInternal {
                 return match obj.define_property(name, value, realm)? {
                     DefinePropertyResult::Handled => Ok(()),
                     DefinePropertyResult::ReadOnly => {
-                        if self.state.is_strict_mode() {
-                            Err(Error::ty("Assignment to constant variable"))
-                        } else {
-                            Ok(())
-                        }
+                        Err(Error::ty("Assignment to constant variable"))
                     }
                     DefinePropertyResult::Setter(_, _) => Ok(()),
                 };
@@ -677,11 +673,7 @@ impl ScopeInternal {
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
                     if !var.get(realm).properties.is_writable() {
-                        if self.state.is_strict_mode() {
-                            return Err(Error::ty("Assignment to constant variable"));
-                        } else {
-                            return Ok(());
-                        }
+                        return Err(Error::ty("Assignment to constant variable"));
                     }
 
                     var.update(value, realm)?;
