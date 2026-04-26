@@ -45,7 +45,7 @@ impl Interpreter {
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
-                scope.update_or_define(name, up.0, realm);
+                scope.update(&name, up.0, realm);
 
                 Ok(ret)
             }
