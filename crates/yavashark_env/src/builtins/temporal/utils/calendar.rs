@@ -33,7 +33,7 @@ impl FromValueOutput for Calendar {
                     "Calendar object must be a 'calendar like' Temporal object",
                 ))
             }
-            Value::String(s) => Self::try_from_utf8(s.as_str_lossy().as_bytes()).map_err(Error::from_temporal),
+            Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
                 "Calendar value must be a string or a 'calendar like' value",
             )),
