@@ -262,7 +262,9 @@ impl ObjectOrVariables {
     fn insert_opt(&mut self, name: String, variable: Variable, realm: &mut Realm) -> Res {
         match self {
             Self::Object(o) => {
-                o.define_property_attributes(name.into(), variable, realm)?;
+                if !o.contains_key(name.clone().into(), realm)? {
+                    o.define_property_attributes(name.into(), variable, realm)?;
+                }
             }
             Self::Variables(v) => {
                 let entry = v.entry(name);
