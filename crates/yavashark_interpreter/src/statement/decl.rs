@@ -70,7 +70,7 @@ impl Interpreter {
 
         if var.kind == VarDeclKind::Var {
             for decl in decls {
-                scope.declare_global_var(decl, Value::Undefined, realm)?;
+                scope.hoist_global_var(decl, realm)?;
             }
         } else {
             for decl in decls {

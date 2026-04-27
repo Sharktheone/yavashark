@@ -512,6 +512,37 @@ impl ScopeInternal {
         Ok(())
     }
 
+    pub fn hoist_global_var(&mut self, name: String, realm: &mut Realm) -> Res {
+        #[allow(clippy::if_same_then_else)]
+        if let ObjectOrVariables::Object(obj) = &mut self.variables {
+            if obj.contains_key(name.clone().into(), realm)? {
+                return Ok(());
+            }
+
+            obj.define_property(name.into(), Value::Undefined, realm)?;
+        } else if self.state.is_function() {
+            self.variables
+                .insert_opt(name, Variable::new(Value::Undefined), realm)?;
+        } else {
+            if self.variables.contains_key(&name, realm) {
+                return Ok(());
+            }
+
+            match &self.parent {
+                Some(p) => {
+                    p.borrow_mut()?
+                        .hoist_global_var(name, realm)?;
+                }
+                None => {
+                    self.variables
+                        .insert_opt(name, Variable::new(Value::Undefined), realm)?;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn resolve(&self, name: &str, realm: &mut Realm) -> Res<Option<Value>> {
         if let Some(v) = self.variables.get(name, realm) {
             return Ok(Some(v.copy()));
@@ -823,6 +854,13 @@ impl Scope {
         self.scope
             .borrow_mut()?
             .declare_global_var(name, value, realm)?;
+        Ok(())
+    }
+
+    pub fn hoist_global_var(&mut self, name: String, realm: &mut Realm) -> Res {
+        self.scope
+            .borrow_mut()?
+            .hoist_global_var(name, realm)?;
         Ok(())
     }
 
