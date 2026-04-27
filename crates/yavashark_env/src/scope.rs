@@ -658,7 +658,11 @@ impl ScopeInternal {
                 if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
-                        return Err(Error::ty("Assignment to constant variable"));
+                        if self.state.is_strict_mode() {
+                            return Err(Error::ty("Assignment to constant variable"));
+                        }
+
+                        return Ok(true);
                     }
 
                     obj.define_property_attributes(
@@ -696,7 +700,11 @@ impl ScopeInternal {
                 return match obj.define_property(name, value, realm)? {
                     DefinePropertyResult::Handled => Ok(()),
                     DefinePropertyResult::ReadOnly => {
-                        Err(Error::ty("Assignment to constant variable"))
+                        if self.state.is_strict_mode() {
+                            return Err(Error::ty("Assignment to constant variable"));
+                        }
+
+                        return Ok(());
                     }
                     DefinePropertyResult::Setter(_, _) => Ok(()),
                 };
