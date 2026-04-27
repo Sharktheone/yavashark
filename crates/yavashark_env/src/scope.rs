@@ -532,8 +532,7 @@ impl ScopeInternal {
 
             match &self.parent {
                 Some(p) => {
-                    p.borrow_mut()?
-                        .hoist_global_var(name, realm)?;
+                    p.borrow_mut()?.hoist_global_var(name, realm)?;
                 }
                 None => {
                     self.variables
@@ -868,9 +867,7 @@ impl Scope {
     }
 
     pub fn hoist_global_var(&mut self, name: String, realm: &mut Realm) -> Res {
-        self.scope
-            .borrow_mut()?
-            .hoist_global_var(name, realm)?;
+        self.scope.borrow_mut()?.hoist_global_var(name, realm)?;
         Ok(())
     }
 

@@ -521,8 +521,6 @@ impl Value {
         matches!(self, Self::BigInt(_))
     }
 
-
-
     pub const fn as_string(&self) -> Result<&YSString, Error> {
         let Self::String(s) = self else {
             return Err(Error::ty("Value is not a string"));
@@ -566,7 +564,6 @@ impl Value {
     pub const fn is_undefined_or_null(&self) -> bool {
         matches!(self, Self::Undefined | Self::Null)
     }
-
 
     #[must_use]
     pub fn is_callable(&self) -> bool {
@@ -882,7 +879,6 @@ impl Value {
             Self::BigInt(b) => b.to_string().into(),
         })
     }
-
 }
 
 #[must_use]
