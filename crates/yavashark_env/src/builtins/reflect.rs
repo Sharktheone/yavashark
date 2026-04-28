@@ -44,7 +44,7 @@ impl Reflect {
         //This function performs the following steps when called:
         //1. If IsCallable(target) is false, throw a TypeError exception. - done by `target.call()`
         //2. Let args be ? CreateListFromArrayLike(argumentsList).
-        let args = ArrayLike::new(args, realm)?.to_vec(realm)?;
+        let args = ArrayLike::new(args, realm)?.take_vec(realm)?;
         //3. Perform PrepareForTailCall(). TODO
 
         //4. Return ? Call(target, thisArgument, args).
@@ -88,7 +88,7 @@ impl Reflect {
         };
 
         //     4. Let args be ? CreateListFromArrayLike(argumentsList).
-        let args = ArrayLike::new(args, realm)?.to_vec(realm)?;
+        let args = ArrayLike::new(args, realm)?.take_vec(realm)?;
 
         //     5. Return ? Construct(target, args, newTarget).
         let val = target.construct(args, realm)?;
