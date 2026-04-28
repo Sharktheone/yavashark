@@ -575,6 +575,25 @@ impl YSString {
         }
     }
 
+    pub fn from_codepoint_iter(iter: impl Iterator<Item = CodePoint>) -> Self {
+        let mut units = ThinVec::new();
+
+        for cp in iter {
+            match cp {
+                CodePoint::Unicode(c) => {
+                    let mut buf = [0u16; 2];
+                    let encoded = c.encode_utf16(&mut buf);
+                    units.extend_from_slice(encoded);
+                }
+                CodePoint::UnpairedSurrogate(s) => units.push(s),
+            }
+        }
+
+        Self {
+            inner: UnsafeCell::new(InnerString::OwnedUtf16(units)),
+        }
+    }
+
     /// Creates a string from a single UTF-16 code unit.
     #[must_use]
     pub const fn from_code_unit(unit: u16) -> Self {
