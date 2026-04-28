@@ -15,7 +15,7 @@ use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties, properties_new};
-use yavashark_string::{ToYSString, YSString};
+use yavashark_string::{CodePoint, ToYSString, YSString};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -195,19 +195,20 @@ impl StringConstructor {
 #[properties_new(raw)]
 impl StringConstructor {
     #[prop("fromCharCode")]
-    fn from_char_code(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> String {
-        args.iter()
-            .map(|v| v.to_number(realm).unwrap_or_default() as u32)
-            .filter_map(std::char::from_u32)
-            .collect::<String>()
-    }
+    fn from_char_code(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> YSString {
+        let iter = args.iter()
+            .map(|v| v.to_number(realm).unwrap_or_default() as u16);
+
+        YSString::from_utf16_iter(iter)
+  }
 
     #[prop("fromCodePoint")]
-    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> String {
-        args.iter()
+    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> YSString {
+        let iter = args.iter()
             .map(|v| v.to_number(realm).unwrap_or_default() as u32)
-            .filter_map(std::char::from_u32)
-            .collect::<String>()
+            .filter_map(CodePoint::from_u32);
+
+        YSString::from_codepoint_iter(iter)
     }
 
     #[length(1)]
