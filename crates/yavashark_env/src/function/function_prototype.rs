@@ -1,6 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
@@ -11,6 +10,7 @@ use crate::{
 };
 use std::cell::RefCell;
 use yavashark_macro::inline_props;
+use crate::utils::ArrayLike;
 
 #[inline_props(enumerable = false, configurable)]
 #[derive(Default, Debug)]
@@ -99,7 +99,7 @@ impl Initializer<ObjectHandle> for FunctionConstructor {
 
 #[allow(unused)]
 fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    let new_this = if let Some(new_this) = args.get(0) {
+    let new_this = if let Some(new_this) = args.first() {
         if new_this.is_nullish() {
             realm.global.clone().into()
         } else {
@@ -110,9 +110,9 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     };
 
     let args = if let Some(arr) = args.get(1) {
-        let array = Array::from_array_like(realm, arr.copy())?;
+        let mut array = ArrayLike::new(arr.copy(), realm)?;
 
-        array.as_vec()?
+        array.take_vec(realm)?
     } else {
         vec![]
     };
