@@ -429,6 +429,10 @@ impl Array {
             }
         };
 
+        if let Some(array) = array_like.downcast::<Self>() {
+            return array.shallow_clone(realm);
+        }
+
         let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
