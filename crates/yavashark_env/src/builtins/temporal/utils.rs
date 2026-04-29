@@ -8,7 +8,6 @@ mod plain_time;
 mod relative_to;
 mod timezone;
 
-use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::value_to_zoned_date_time;
 use crate::{builtins, Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::fields::{
@@ -23,6 +22,7 @@ use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
 use yavashark_macro::data_object;
+use crate::conversion::FromValueOutput;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -193,7 +193,10 @@ pub fn rounding_options(
 
         rel = match r {
             Some(Value::Object(obj)) => {
-                let plain_date = value_to_plain_date(obj.into(), realm)?;
+                let plain_date = temporal_rs::PlainDate::from_value_out(
+                    Value::Object(obj),
+                    realm,
+                )?;
 
                 Some(RelativeTo::PlainDate(plain_date))
             }

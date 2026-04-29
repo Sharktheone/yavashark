@@ -58,34 +58,26 @@ impl PlainDate {
         Ok(Self::new(date, realm)?.into_object())
     }
 
-    pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let date = value_to_plain_date(info, realm)?;
-
+    pub fn from(date: temporal_rs::PlainDate, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(Self::new(date, realm)?.into_object())
     }
 
     #[allow(clippy::use_self)]
-    pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
-        let left = value_to_plain_date(left, realm)?;
-        let right = value_to_plain_date(right, realm)?;
+    pub fn compare(left: temporal_rs::PlainDate, right: temporal_rs::PlainDate) -> Res<i8> {
 
         Ok(left.compare_iso(&right) as i8)
     }
 
-    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
-        let other = value_to_plain_date(other, realm)?;
-
+    pub fn equals(&self, other: temporal_rs::PlainDate) -> Res<bool> {
         Ok(self.date == other)
     }
 
     pub fn since(
         &self,
-        other: &Value,
+        other: temporal_rs::PlainDate,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let other = value_to_plain_date(other.clone(), realm)?;
-
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
@@ -101,11 +93,10 @@ impl PlainDate {
 
     pub fn until(
         &self,
-        other: &Value,
+        other: temporal_rs::PlainDate,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let other = value_to_plain_date(other.clone(), realm)?;
 
         let settings = opts
             .map(|s| difference_settings(s, realm))
