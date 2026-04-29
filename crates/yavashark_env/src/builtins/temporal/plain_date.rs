@@ -355,34 +355,6 @@ impl PlainDate {
     }
 }
 
-pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {
-    if let Value::String(str) = &info {
-        let date = str.parse().map_err(Error::from_temporal)?;
-
-        return Ok(date);
-    }
-
-    let obj = info.to_object()?;
-
-    if let Some(this) = obj.downcast::<NativeObject<PlainDate>>() {
-        return Ok(this.date.clone());
-    }
-
-    if obj.contains_key("year".into(), realm)?
-        && (obj.contains_key("month".into(), realm)?
-            || obj.contains_key("monthCode".into(), realm)?)
-        && obj.contains_key("day".into(), realm)?
-    {
-        let partial = value_to_partial_date(&obj, realm)?;
-        let overflow = overflow_options(&obj, realm)?;
-
-        return temporal_rs::PlainDate::from_partial(partial, overflow)
-            .map_err(Error::from_temporal);
-    }
-
-    Err(Error::ty("Invalid date")) //TODO
-}
-
 impl PrettyObjectOverride for PlainDate {
     fn pretty_inline(
         &self,
