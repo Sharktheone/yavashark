@@ -205,10 +205,11 @@ impl ArrayLike {
         Ok(res)
     }
 
-
     pub fn take_vec_no_close(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
-        if let Some(values) = &mut self.values.take() {
-            return Ok(values.clone());
+        if let Some(values) = self.values.take() {
+            self.len.set(values.len());
+            self.idx.set(0);
+            return Ok(values);
         }
 
         let mut res = Vec::with_capacity(self.len());
