@@ -33,7 +33,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
-use thin_vec::ThinVec;
+pub use thin_vec::ThinVec;
 
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
@@ -526,6 +526,12 @@ impl YSString {
             }
         } else {
             Self::from_utf16_iter(rc.encode_utf16())
+        }
+    }
+
+    pub fn new_owned_utf16(vec: ThinVec<u16>) -> Self {
+        Self {
+            inner: UnsafeCell::new(InnerString::OwnedUtf16(vec)),
         }
     }
 

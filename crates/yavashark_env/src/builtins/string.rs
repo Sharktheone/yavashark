@@ -15,7 +15,7 @@ use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties, properties_new};
-use yavashark_string::{CodePoint, ToYSString, YSString};
+use yavashark_string::{CodePoint, ThinVec, ToYSString, YSString};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -196,19 +196,34 @@ impl StringConstructor {
 impl StringConstructor {
     #[prop("fromCharCode")]
     fn from_char_code(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> YSString {
-        let iter = args.iter()
+        let iter = args
+            .iter()
             .map(|v| v.to_number(realm).unwrap_or_default() as u16);
 
         YSString::from_utf16_iter(iter)
-  }
+    }
 
     #[prop("fromCodePoint")]
     fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> YSString {
-        let iter = args.iter()
-            .map(|v| v.to_number(realm).unwrap_or_default() as u32)
-            .filter_map(CodePoint::from_u32);
+        let mut units = ThinVec::with_capacity(args.len());
 
-        YSString::from_codepoint_iter(iter)
+        for arg in args {
+            let Some(code_point) =
+                CodePoint::from_u32(arg.to_number(realm).unwrap_or_default() as u32)
+            else {
+                continue;
+            };
+
+            match code_point {
+                CodePoint::Unicode(ch) => {
+                    let mut buf = [0u16; 2];
+                    units.extend_from_slice(ch.encode_utf16(&mut buf));
+                }
+                CodePoint::UnpairedSurrogate(unit) => units.push(unit),
+            }
+        }
+
+        YSString::new_owned_utf16(units)
     }
 
     #[length(1)]
