@@ -1185,8 +1185,7 @@ impl MutObj for MutObject {
         _realm: &mut Realm,
     ) -> Res<Option<PropertyDescriptor>> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
-            let val: Value = self.prototype.clone().into();
-            return Ok(Some(val.into()));
+            return Ok(None);
         }
 
         if let InternalPropertyKey::Index(n) = name {
