@@ -1,0 +1,16 @@
+[package]
+name = "yavashark_bigint"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+gmp-mpfr-sys = { version = "1.7.1", optional = true }
+
+[features]
+default = ["gmp"]
+gmp = ["dep:gmp-mpfr-sys"]
+rust-native = []
+
+
+[lints]
+workspace = true
