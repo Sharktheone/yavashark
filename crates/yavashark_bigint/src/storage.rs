@@ -197,3 +197,54 @@ pub enum BigIntRepr<'a> {
     Dynamic(&'a [u64]),
 }
 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_small() {
+        let storage = BigIntStorage::new_small(42);
+        assert_eq!(storage.sign(), Sign::Positive);
+        assert!(storage.is_small());
+        assert_eq!(storage.small(), Some(42));
+    }
+
+    #[test]
+    fn small_negative() {
+        let storage = BigIntStorage::new_small(-42);
+        assert_eq!(storage.sign(), Sign::Negative);
+        assert!(storage.is_small());
+        assert_eq!(storage.small(), Some(-42));
+    }
+
+    #[test]
+    fn test_large() {
+        let storage = BigIntStorage::new_large([1, 2, 3], Sign::Positive);
+        assert_eq!(storage.sign(), Sign::Positive);
+        assert!(storage.is_large());
+        assert_eq!(storage.large(), Some([1, 2, 3]));
+    }
+
+    #[test]
+    fn large_negative() {
+        let storage = BigIntStorage::new_large([1, 2, 3], Sign::Negative);
+        assert_eq!(storage.sign(), Sign::Negative);
+        assert!(storage.is_large());
+        assert_eq!(storage.large(), Some([1, 2, 3]));
+    }
+
+    #[test]
+    fn test_dynamic() {
+        let vec = vec![4, 5, 6];
+        let rc: Rc<[u64]> = Rc::from(vec.into_boxed_slice());
+
+        let storage = BigIntStorage::new_dynamic(rc, Sign::Negative);
+        assert_eq!(storage.sign(), Sign::Negative);
+        assert!(storage.is_dynamic());
+        let (ptr, len) = storage.dynamic().unwrap();
+        let slice = unsafe { std::slice::from_raw_parts(ptr, len) };
+        assert_eq!(slice, &[4, 5, 6]);
+    }
+}
+
