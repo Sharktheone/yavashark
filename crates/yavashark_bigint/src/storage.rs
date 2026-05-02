@@ -3,8 +3,9 @@ use std::rc::Rc;
 
 /// If p2 and p3 are zero, then we have a Small BigInt (just one i64).
 /// The sign is always stored in p1.
-/// When p2 and p3 are non-zero then p1's second most msb sepecifies if we have a Large BigInt (3 u64s) or a Dynamic BigInt p3 is the pointer to the alloc, and p2 the length
-/// Layout of P1 when p2 and p3 are non-zero: [sign (1 bit), is_large (1 bit), value (62 bits)]
+/// Small: when p2 and p3 are zero, p1 is the value of the BigInt (with the sign bit).
+/// Large: when the last bit in p3 is set.
+/// Dynamic: when p1 is is zero except for the sign bit.
 #[repr(C)]
 pub(crate) struct BigIntStorage {
     p1: i64,
@@ -12,7 +13,9 @@ pub(crate) struct BigIntStorage {
     p3: Ptr,
 }
 
-const STORAGE_P1_MASK: u64 = 0x3FFF_FFFF_FFFF_FFFF;
+const STORAGE_P1_MASK: u64 = 0x7FFF_FFFF_FFFF_FFFF;
+const STORAGE_P3_MASK: u64 = 0xFFFF_FFFF_FFFF_FFFE;
+const P3_LARGE_BIT: u64 = 0b1;
 
 impl BigIntStorage {
     const fn new_small(val: i64) -> Self {
@@ -24,17 +27,16 @@ impl BigIntStorage {
     }
 
     const fn new_large(val: [u64; 3], sign: Sign) -> Self {
-        let sign_bit = match sign {
-            Sign::Positive => 0,
-            Sign::Negative => 1,
-        };
+        let sign = sign as u64;
 
-        let p1_val = val[0] & STORAGE_P1_MASK;
+        let p1 = ((val[0] & STORAGE_P1_MASK) | (sign << 63)) as i64;
+
+
 
         Self {
-            p1: ((sign_bit << 63) | (0 << 62) | p1_val) as i64,
+            p1,
             p2: val[1],
-            p3: Ptr { val: val[2] },
+            p3: Ptr { val: (val[2] & STORAGE_P3_MASK) | P3_LARGE_BIT },
         }
     }
 
@@ -53,7 +55,7 @@ impl BigIntStorage {
             Sign::Negative => 1,
         };
         Self {
-            p1: (sign_bit << 63) | (1 << 62),
+            p1: (sign_bit << 63),
             p2: len,
             p3: Ptr { ptr },
         }
@@ -72,11 +74,12 @@ impl BigIntStorage {
     }
 
     const fn is_large(&self) -> bool {
-        self.p2 != 0 && unsafe { self.p3.val } != 0 && (self.p1 & (1 << 62)) == 0
+        (unsafe { self.p3.val } & P3_LARGE_BIT) != 0
     }
 
     const fn is_dynamic(&self) -> bool {
-        self.p2 != 0 && unsafe { self.p3.val } != 0 && (self.p1 & (1 << 62)) != 0
+        let p3_val = unsafe { self.p3.val };
+        p3_val != 0 && (p3_val & P3_LARGE_BIT) == 0
     }
 
 
@@ -121,7 +124,7 @@ impl BigIntStorage {
         }
     }
 
-    const fn as_repr(&self) -> (BigIntRepr, Sign) {
+    const fn as_repr(&'_ self) -> (BigIntRepr<'_>, Sign) {
         let sign = self.sign();
 
         let repr = if let Some(small) = self.small() {
@@ -159,7 +162,7 @@ impl Clone for BigIntStorage {
         if let Some((ptr, len)) = self.dynamic() {
             let ptr = ptr::slice_from_raw_parts(ptr, len);
             let rc = unsafe { Rc::from_raw(ptr) };
-            let rc_clone = rc.clone();
+            let rc_clone = Rc::clone(&rc);
             mem::forget(rc);
             mem::forget(rc_clone);
         }
