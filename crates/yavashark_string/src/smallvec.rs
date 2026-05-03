@@ -36,7 +36,7 @@ impl Clone for SmallVec<u8> {
         let vec = self.slice().to_vec();
 
         #[allow(clippy::expect_used)]
-        Self::new(vec).expect("unreachable")
+        Self::new(vec)
     }
 }
 
@@ -67,25 +67,27 @@ impl DerefMut for SmallVec<u8> {
 impl Default for SmallVec<u8> {
     fn default() -> Self {
         #[allow(clippy::expect_used)]
-        Self::new(Vec::new()).expect("unreachable")
+        Self::new(Vec::new())
     }
 }
 
 impl<T> SmallVec<T> {
-    pub fn new(vec: Vec<T>) -> Result<Self, Vec<T>> {
+    pub fn new(vec: Vec<T>) -> Self {
         let len = vec.len();
         let cap = vec.capacity();
 
         let Some(len_cap) = SmallVecLenCap::new(len, cap) else {
-            return Err(vec);
+            unreachable!("this can store 2^60 items, on a 64 bit system this is impossible")
         };
         let mut vec = ManuallyDrop::new(vec);
 
-        let Some(ptr) = NonNull::new(vec.as_mut_ptr()) else {
-            return Err(ManuallyDrop::into_inner(vec));
+
+        let ptr = unsafe {
+            // Safety: `vec` is a valid Vec<T> since it was created from a Vec<T> (even Vec::new() has a non-null pointer)
+            NonNull::new_unchecked(vec.as_mut_ptr())
         };
 
-        Ok(Self { len_cap, ptr })
+        Self { len_cap, ptr }
     }
 
     unsafe fn to_vec_ref(&self) -> ManuallyDrop<Vec<T>> {

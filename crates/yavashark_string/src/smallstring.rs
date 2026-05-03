@@ -27,19 +27,14 @@ impl SmallString {
     pub fn new() -> Self {
         #[allow(clippy::expect_used)]
         Self {
-            inner: SmallVec::new(Vec::new()).expect("unreachable"),
+            inner: SmallVec::new(Vec::new())
         }
     }
 
-    pub fn from_string(mut string: String) -> Result<Self, String> {
-        Ok(Self {
-            inner: SmallVec::new(string.into_bytes()).map_err(|vec| {
-                unsafe {
-                    // SAFETY: `vec` is a valid Vec<u8> since it was created from a String
-                    String::from_utf8_unchecked(vec)
-                }
-            })?,
-        })
+    pub fn from_string(mut string: String) -> Self {
+        Self {
+            inner: SmallVec::new(string.into_bytes())
+        }
     }
 
     pub fn as_str(&self) -> &str {
@@ -61,17 +56,6 @@ impl SmallString {
         let vec = self.into_string().into_boxed_str();
 
         Rc::from(vec)
-    }
-
-    pub fn into_rc_if_fit(self) -> Result<Rc<str>, Self> {
-        let vec = self.into_string();
-
-        if vec.capacity() != vec.len() {
-            #[allow(clippy::expect_used)]
-            return Err(Self::from_string(vec).expect("unreachable"));
-        }
-
-        Ok(Rc::from(vec.into_boxed_str()))
     }
 
     pub fn copy_rc(&self) -> Rc<str> {
