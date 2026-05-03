@@ -85,11 +85,6 @@ enum InnerString {
     OwnedUtf8(SmallString),
     /// Reference-counted UTF-8 string
     RcUtf8(Rc<str>),
-    /// Boxed UTF-8 string (for strings > 2^60 bytes)
-    #[cold]
-    #[allow(clippy::box_collection)]
-    BoxedUtf8(Box<String>),
-
     // UTF-16 variants (non-ASCII or lone surrogates)
     /// Inline UTF-16 string (up to 11 code units)
     InlineUtf16(InlineUtf16String),
@@ -477,13 +472,8 @@ impl YSString {
             }
 
             // Fall back to heap
-            match SmallString::from_string(s) {
-                Ok(small) => Self {
-                    inner: UnsafeCell::new(InnerString::OwnedUtf8(small)),
-                },
-                Err(s) => Self {
-                    inner: UnsafeCell::new(InnerString::BoxedUtf8(Box::new(s))),
-                },
+            Self {
+                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(s))),
             }
         } else {
             // Convert to UTF-16
@@ -503,14 +493,10 @@ impl YSString {
             }
 
             // Fall back to heap
-            match SmallString::from_string(s.to_string()) {
-                Ok(small) => Self {
-                    inner: UnsafeCell::new(InnerString::OwnedUtf8(small)),
-                },
-                Err(s) => Self {
-                    inner: UnsafeCell::new(InnerString::BoxedUtf8(Box::new(s))),
-                },
+            Self {
+                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(s.to_string()))),
             }
+
         } else {
             // Convert to UTF-16
             Self::from_utf16_iter(s.encode_utf16())
@@ -703,7 +689,6 @@ impl YSString {
             InnerString::Static(s) => s.get(start..end),
             InnerString::OwnedUtf8(s) => s.get(start..end),
             InnerString::RcUtf8(s) => s.get(start..end),
-            InnerString::BoxedUtf8(s) => s.get(start..end),
 
             InnerString::InlineUtf16(_) | InnerString::OwnedUtf16(_) | InnerString::RcUtf16(_) => {
                 None
@@ -739,8 +724,7 @@ impl YSString {
             InnerString::InlineUtf8(_)
             | InnerString::Static(_)
             | InnerString::OwnedUtf8(_)
-            | InnerString::RcUtf8(_)
-            | InnerString::BoxedUtf8(_) => true,
+            | InnerString::RcUtf8(_) => true,
             InnerString::InlineUtf16(_) | InnerString::OwnedUtf16(_) | InnerString::RcUtf16(_) => {
                 false
             }
@@ -765,7 +749,6 @@ impl YSString {
             InnerString::Static(s) => s.len(),
             InnerString::OwnedUtf8(s) => s.len(),
             InnerString::RcUtf8(s) => s.len(),
-            InnerString::BoxedUtf8(s) => s.len(),
 
             // UTF-16 variants
             InnerString::InlineUtf16(inline) => inline.len(),
@@ -797,7 +780,6 @@ impl YSString {
             InnerString::Static(s) => Some(s),
             InnerString::OwnedUtf8(s) => Some(s),
             InnerString::RcUtf8(s) => Some(s),
-            InnerString::BoxedUtf8(s) => Some(s),
 
             // UTF-16 variants can't return &str directly
             InnerString::InlineUtf16(_) | InnerString::OwnedUtf16(_) | InnerString::RcUtf16(_) => {
@@ -811,14 +793,10 @@ impl YSString {
                     let s = rope.to_string();
                     let inner = unsafe { self.inner_mut_ref() };
 
-                    match SmallString::from_string(s) {
-                        Ok(small) => *inner = InnerString::OwnedUtf8(small),
-                        Err(s) => *inner = InnerString::BoxedUtf8(Box::new(s)),
-                    }
-
+                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s.clone()));
+                    
                     match inner {
                         InnerString::OwnedUtf8(s) => Some(s.as_str()),
-                        InnerString::BoxedUtf8(s) => Some(s.as_str()),
                         _ => None,
                     }
                 } else {
@@ -839,7 +817,6 @@ impl YSString {
             InnerString::Static(s) => Cow::Borrowed(s),
             InnerString::OwnedUtf8(s) => Cow::Borrowed(s),
             InnerString::RcUtf8(s) => Cow::Borrowed(s),
-            InnerString::BoxedUtf8(s) => Cow::Borrowed(s),
 
             InnerString::InlineUtf16(inline) => Cow::Owned(inline.to_string_lossy()),
             InnerString::OwnedUtf16(v) => Cow::Owned(String::from_utf16_lossy(v)),
@@ -856,7 +833,6 @@ impl YSString {
             InnerString::Static(s) => StrRef::Utf8(s),
             InnerString::OwnedUtf8(s) => StrRef::Utf8(s),
             InnerString::RcUtf8(s) => StrRef::Utf8(s),
-            InnerString::BoxedUtf8(s) => StrRef::Utf8(s),
 
             InnerString::InlineUtf16(inline) => StrRef::Utf16(inline.as_slice()),
             InnerString::OwnedUtf16(v) => StrRef::Utf16(v),
@@ -896,7 +872,6 @@ impl YSString {
             InnerString::Static(s) => s.as_bytes().get(index).map(|&b| u16::from(b)),
             InnerString::OwnedUtf8(s) => s.as_bytes().get(index).map(|&b| u16::from(b)),
             InnerString::RcUtf8(s) => s.as_bytes().get(index).map(|&b| u16::from(b)),
-            InnerString::BoxedUtf8(s) => s.as_bytes().get(index).map(|&b| u16::from(b)),
 
             // UTF-16 variants
             InnerString::InlineUtf16(inline) => inline.get(index),
@@ -949,7 +924,6 @@ impl YSString {
             InnerString::Static(s) => CodeUnits::Utf8(s.bytes()),
             InnerString::OwnedUtf8(s) => CodeUnits::Utf8(s.bytes()),
             InnerString::RcUtf8(s) => CodeUnits::Utf8(s.bytes()),
-            InnerString::BoxedUtf8(s) => CodeUnits::Utf8(s.bytes()),
 
             InnerString::InlineUtf16(inline) => CodeUnits::Utf16(inline.as_slice().iter().copied()),
             InnerString::OwnedUtf16(v) => CodeUnits::Utf16(v.iter().copied()),
@@ -993,8 +967,7 @@ impl YSString {
             InnerString::InlineUtf8(_)
             | InnerString::Static(_)
             | InnerString::OwnedUtf8(_)
-            | InnerString::RcUtf8(_)
-            | InnerString::BoxedUtf8(_) => true,
+            | InnerString::RcUtf8(_) => true,
 
             // Check UTF-16 for unpaired surrogates
             InnerString::InlineUtf16(inline) => is_utf16_well_formed(inline.as_slice()),
@@ -1048,18 +1021,14 @@ impl YSString {
                     // Need to upgrade to heap
                     let mut s = inline.as_str().to_string();
                     s.push(ch);
-                    match SmallString::from_string(s) {
-                        Ok(small) => *inner = InnerString::OwnedUtf8(small),
-                        Err(s) => *inner = InnerString::BoxedUtf8(Box::new(s)),
-                    }
+                    
+                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
                 }
                 InnerString::Static(s) => {
                     let mut string = (**s).to_string();
                     string.push(ch);
-                    match SmallString::from_string(string) {
-                        Ok(small) => *inner = InnerString::OwnedUtf8(small),
-                        Err(s) => *inner = InnerString::BoxedUtf8(Box::new(s)),
-                    }
+                    
+                    *inner = InnerString::OwnedUtf8(SmallString::from_string(string));
                 }
                 InnerString::OwnedUtf8(s) => {
                     s.push(ch);
@@ -1067,13 +1036,8 @@ impl YSString {
                 InnerString::RcUtf8(rc) => {
                     let mut s = rc.to_string();
                     s.push(ch);
-                    match SmallString::from_string(s) {
-                        Ok(small) => *inner = InnerString::OwnedUtf8(small),
-                        Err(s) => *inner = InnerString::BoxedUtf8(Box::new(s)),
-                    }
-                }
-                InnerString::BoxedUtf8(s) => {
-                    s.push(ch);
+                    
+                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
                 }
                 _ => {} // unreachable
             }
@@ -1105,13 +1069,6 @@ impl YSString {
                 s.encode_utf16().collect()
             }
             InnerString::RcUtf8(s) => s.encode_utf16().collect(),
-            InnerString::BoxedUtf8(s) => {
-                if ch.is_ascii() {
-                    s.push(ch);
-                    return;
-                }
-                s.encode_utf16().collect()
-            }
             InnerString::InlineUtf16(inline) => {
                 if inline.remaining_capacity() >= ch.len_utf16() && inline.push_char(ch) != 0 {
                     return;
@@ -1375,14 +1332,11 @@ impl YSString {
         // Flatten the rope/UTF-16 to UTF-8 first
         let inner = unsafe { self.inner_mut_ref() };
         let s = self.as_str_lossy().into_owned();
-        match SmallString::from_string(s) {
-            Ok(small) => *inner = InnerString::OwnedUtf8(small),
-            Err(s) => *inner = InnerString::BoxedUtf8(Box::new(s)),
-        }
-
+        
+        *inner = InnerString::OwnedUtf8(SmallString::from_string(s.clone()));
+        
         match inner {
             InnerString::OwnedUtf8(s) => s.chars(),
-            InnerString::BoxedUtf8(s) => s.chars(),
             _ => "".chars(), // Unreachable
         }
     }
@@ -1394,7 +1348,6 @@ impl YSString {
             InnerString::Static(s) => Some(s.as_bytes()),
             InnerString::OwnedUtf8(s) => Some(s.as_bytes()),
             InnerString::RcUtf8(s) => Some(s.as_bytes()),
-            InnerString::BoxedUtf8(s) => Some(s.as_bytes()),
             _ => None,
         }
     }
@@ -1450,7 +1403,6 @@ impl YSString {
                 InnerString::Static(s) => s.encode_utf16().collect(),
                 InnerString::OwnedUtf8(s) => s.encode_utf16().collect(),
                 InnerString::RcUtf8(s) => s.encode_utf16().collect(),
-                InnerString::BoxedUtf8(s) => s.encode_utf16().collect(),
                 InnerString::InlineUtf16(inline) => {
                     if inline.push(unit) {
                         return;
@@ -1511,8 +1463,6 @@ impl Clone for YSString {
             InnerString::RcUtf8(rc) => Self {
                 inner: UnsafeCell::new(InnerString::RcUtf8(Rc::clone(rc))),
             },
-            InnerString::BoxedUtf8(s) => Self::from_string((**s).clone()),
-
             InnerString::InlineUtf16(inline) => Self {
                 inner: UnsafeCell::new(InnerString::InlineUtf16(*inline)),
             },
