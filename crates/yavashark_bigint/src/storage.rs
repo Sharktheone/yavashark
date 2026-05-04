@@ -1,5 +1,6 @@
-use std::{mem, ptr};
+use std::mem::ManuallyDrop;
 use std::rc::Rc;
+use std::{mem, ptr};
 
 /// If p2 and p3 are zero, then we have a Small BigInt (just one i64).
 /// The sign is always stored in p1.
@@ -31,19 +32,17 @@ impl BigIntStorage {
 
         let p1 = ((val[0] & STORAGE_P1_MASK) | (sign << 63)) as i64;
 
-
-
         Self {
             p1,
             p2: val[1],
-            p3: Ptr { val: (val[2] & STORAGE_P3_MASK) | P3_LARGE_BIT },
+            p3: Ptr {
+                val: (val[2] & STORAGE_P3_MASK) | P3_LARGE_BIT,
+            },
         }
     }
 
     fn new_dynamic(val: Rc<[u64]>, sign: Sign) -> Self {
-        unsafe {
-            Self::new_dynamic_raw(Rc::into_raw(val), sign)
-        }
+        unsafe { Self::new_dynamic_raw(Rc::into_raw(val), sign) }
     }
 
     const unsafe fn new_dynamic_raw(ptr: *const [u64], sign: Sign) -> Self {
@@ -81,7 +80,6 @@ impl BigIntStorage {
         let p3_val = unsafe { self.p3.val };
         p3_val != 0 && (p3_val & P3_LARGE_BIT) == 0
     }
-
 
     const unsafe fn small_unchecked(&self) -> i64 {
         self.p1
@@ -140,8 +138,18 @@ impl BigIntStorage {
 
         (repr, sign)
     }
-}
 
+    fn dynamic_rc(&self) -> Option<ManuallyDrop<Rc<[u64]>>> {
+        if let Some((ptr, len)) = self.dynamic() {
+            let ptr = ptr::slice_from_raw_parts(ptr, len);
+            let rc = unsafe { Rc::from_raw(ptr) };
+
+            Some(ManuallyDrop::new(rc))
+        } else {
+            None
+        }
+    }
+}
 
 impl Drop for BigIntStorage {
     fn drop(&mut self) {
@@ -159,11 +167,8 @@ impl Drop for BigIntStorage {
 
 impl Clone for BigIntStorage {
     fn clone(&self) -> Self {
-        if let Some((ptr, len)) = self.dynamic() {
-            let ptr = ptr::slice_from_raw_parts(ptr, len);
-            let rc = unsafe { Rc::from_raw(ptr) };
+        if let Some(rc) = self.dynamic_rc() {
             let rc_clone = Rc::clone(&rc);
-            mem::forget(rc);
             mem::forget(rc_clone);
         }
 
@@ -182,8 +187,6 @@ pub enum Sign {
     Negative = 1,
 }
 
-
-
 #[derive(Clone, Copy)]
 union Ptr {
     val: u64,
@@ -196,7 +199,6 @@ pub enum BigIntRepr<'a> {
     Large([u64; 3]),
     Dynamic(&'a [u64]),
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -247,4 +249,3 @@ mod tests {
         assert_eq!(slice, &[4, 5, 6]);
     }
 }
-
