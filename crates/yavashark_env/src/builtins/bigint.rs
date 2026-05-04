@@ -132,6 +132,8 @@ impl BigIntObj {
             return Ok(BigInt::zero().into());
         }
 
+        let bits = bits.min(bigint.bits() + 1); // No need to compute modulo for bits larger than bigint's bit length + 1
+
         // 3. Return ℤ(ℝ(bigint) modulo 2^bits).
         let two_pow_bits = BigInt::from(1) << bits;
         let mod_value = modulo(&bigint, &two_pow_bits);
