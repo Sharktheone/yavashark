@@ -200,7 +200,7 @@ impl Debug for SmallVecLenCap {
 
 impl SmallVecLenCap {
     pub fn new(len: usize, cap: usize) -> Option<Self> {
-        if len > 0x7F_FF_FF_FF || cap > 0x7F_FF_FF_FF {
+        if len > 0x0FFF_FFFF_FFFF_FFFF || cap > 0x0FFF_FFFF_FFFF_FFFF {
             return None;
         }
 
