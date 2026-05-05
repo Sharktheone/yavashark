@@ -1,29 +1,30 @@
 use bumpalo::collections::Vec;
+use bumpalo::boxed::Box;
 use yavashark_string::YSString;
 
 pub enum Statement<'alloc> {
-    Block(Block<'alloc>),
-    Expression(Expression<'alloc>),
+    Block(Box<'alloc, Block<'alloc>>),
+    Expression(Box<'alloc, Expression<'alloc>>),
 
-    Break(Break),
-    Continue(Continue),
-    Return(Return<'alloc>),
-    Throw(Throw<'alloc>),
+    Break(Box<'alloc, Break>),
+    Continue(Box<'alloc, Continue>),
+    Return(Box<'alloc, Return<'alloc>>),
+    Throw(Box<'alloc, Throw<'alloc>>),
 
-    Try(Try<'alloc>),
+    Try(Box<'alloc, Try<'alloc>>),
 
-    If(If<'alloc>),
-    Switch(Switch<'alloc>),
+    If(Box<'alloc, If<'alloc>>),
+    Switch(Box<'alloc, Switch<'alloc>>),
 
 
-    Labelled(Labelled<'alloc>),
-    While(While<'alloc>),
-    DoWhile(DoWhile<'alloc>),
-    For(For<'alloc>),
-    ForIn(ForIn<'alloc>),
-    ForOf(ForOf<'alloc>),
+    Labelled(Box<'alloc, Labelled<'alloc>>),
+    While(Box<'alloc, While<'alloc>>),
+    DoWhile(Box<'alloc, DoWhile<'alloc>>),
+    For(Box<'alloc, For<'alloc>>),
+    ForIn(Box<'alloc, ForIn<'alloc>>),
+    ForOf(Box<'alloc, ForOf<'alloc>>),
 
-    With(With<'alloc>),
+    With(Box<'alloc, With<'alloc>>),
 
     Debugger(Debugger),
 }
