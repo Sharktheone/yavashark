@@ -157,7 +157,7 @@ fn run() {
             }
 
             match res {
-                Err(e) => println!("FAIL:\n {}", e.pretty_print()),
+                Err(e) => println!("FAIL:\n {}", e),
                 Ok(v) => println!("PASS:\n {v}"),
             }
             return;
@@ -170,7 +170,7 @@ fn run() {
         }
 
         match test_file(path) {
-            Err(e) => println!("FAIL:\n {}", e.pretty_print()),
+            Err(e) => println!("FAIL:\n {}", e),
             Ok(v) => println!("PASS:\n {v}"),
         }
     }
