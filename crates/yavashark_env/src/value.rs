@@ -33,6 +33,7 @@ pub mod property_key;
 mod symbol;
 pub mod variable;
 mod nan_v2;
+mod bigint;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
