@@ -76,6 +76,7 @@ mod oxc_parser {
     use oxc::allocator::Allocator;
     use oxc::span::SourceType;
     use std::path::PathBuf;
+    use oxc::diagnostics::{OxcDiagnostic, Severity};
 
     pub fn test_parse_oxc(file: PathBuf) {
         let input = std::fs::read_to_string(&file).unwrap();
@@ -86,9 +87,23 @@ mod oxc_parser {
 
         let parser = oxc::parser::Parser::new(&alloc, &input, SourceType::default());
 
+
         let res = parser.parse();
 
-        if !res.panicked && res.errors.is_empty() {
+        let sem = oxc_semantic::SemanticBuilder::new()
+            .with_check_syntax_error(false)
+            .build(&res.program);
+
+
+        fn has_errors(dia: &[OxcDiagnostic]) -> bool {
+            dia.iter().any(|d| d.severity == Severity::Error)
+        }
+
+        fn is_err_free(dia: &[OxcDiagnostic]) -> bool {
+            dia.iter().all(|d| d.severity != Severity::Error)
+        }
+
+        if !res.panicked && is_err_free(&res.errors) && is_err_free(&sem.errors) {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
                     println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
@@ -102,7 +117,7 @@ mod oxc_parser {
                 }
             }
 
-            println!("PARSE_ERROR:\n{:?}", res.errors);
+            println!("PARSE_ERROR:\n{:#?}\n{:#?}", res.errors, sem.errors);
             panic!()
         }
     }
