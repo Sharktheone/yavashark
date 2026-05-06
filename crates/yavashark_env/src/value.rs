@@ -32,6 +32,7 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
+mod nan_v2;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
