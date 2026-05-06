@@ -17,6 +17,7 @@ use std::ptr::NonNull;
 /// object (ptr)
 /// bit int (ptr)
 /// int32
+/// inline bigint (46bit)
 ///            0000 0000 0000 0000 0000 0000 0000 0000 0000 .. 0000
 /// +inf       0111 1111 1111 0000 0000 0000 0000 0000 0000 .. 0000
 /// -inf       1111 1111 1111 0000 0000 0000 0000 0000 0000 .. 0000
@@ -27,11 +28,16 @@ use std::ptr::NonNull;
 /// Null       0111 1111 1111 1001 1000 0000 0000 0000 0000 .. 0000
 /// Undefined  0111 1111 1111 1001 1000 0000 0000 0000 0000 .. 0001
 /// TheHole    0111 1111 1111 1001 1100 0000 0000 0000 0000 .. 0000
+///
 /// String     0111 1111 1111 1010 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// InlineStr  0111 1111 1111 1011 DDDD DDDD DDDD DDDD DDDD .. DDDD
-/// Object     0111 1111 1111 1100 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// Symbol     0111 1111 1111 1101 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// BigInt     0111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// InlineStr  1111 1111 1111 1010 DDDD DDDD DDDD DDDD DDDD .. DDDD
+/// Object     0111 1111 1111 1011 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// Symbol     0111 1111 1111 1100 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// BigInt     0111 1111 1111 1101 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// BigInt48   1111 1111 1111 1101 BIGI BIGI BIGI BIGI BIGI .. BIGI
+/// Unused     0111 1111 1111 1110 1100 0000 0000 0000 0000 .. 0000
+/// Unused     0111 1111 1111 1111 1100 0000 0000 0000 0000 .. 0000
+///
 /// Float64    Any other value.
 ///
 /// TODO: We want to move the THE_HOLE value to the Null / Undefined 2bit tag, so we can have one more value that being BigInt46 which stores a 46bit bigint directly in the value without needing to allocate.
@@ -57,6 +63,7 @@ pub enum ValueVariant {
     Object(NonNull<()>),
     BigInt(NonNull<()>),
     Integer(i32),
+    BigInt48(i64),
 }
 
 mod bits {
