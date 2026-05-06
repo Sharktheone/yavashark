@@ -200,7 +200,13 @@ impl Debug for SmallVecLenCap {
 
 impl SmallVecLenCap {
     pub fn new(len: usize, cap: usize) -> Option<Self> {
+        #[cfg(target_pointer_width = "64")]
         if len > 0x0FFF_FFFF_FFFF_FFFF || cap > 0x0FFF_FFFF_FFFF_FFFF {
+            return None;
+        }
+
+        #[cfg(target_pointer_width = "32")]
+        if len > 0x7F_FF_FF_FF || cap > 0x7F_FF_FF_FF {
             return None;
         }
 
