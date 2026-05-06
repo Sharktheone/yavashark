@@ -64,7 +64,6 @@ impl PlainDate {
 
     #[allow(clippy::use_self)]
     pub fn compare(left: temporal_rs::PlainDate, right: temporal_rs::PlainDate) -> Res<i8> {
-
         Ok(left.compare_iso(&right) as i8)
     }
 
@@ -97,7 +96,6 @@ impl PlainDate {
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?

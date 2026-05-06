@@ -1,5 +1,5 @@
-use bumpalo::collections::Vec;
 use bumpalo::boxed::Box;
+use bumpalo::collections::Vec;
 use yavashark_string::YSString;
 
 pub enum Statement<'alloc> {
@@ -16,7 +16,6 @@ pub enum Statement<'alloc> {
     If(Box<'alloc, If<'alloc>>),
     Switch(Box<'alloc, Switch<'alloc>>),
 
-
     Labelled(Box<'alloc, Labelled<'alloc>>),
     While(Box<'alloc, While<'alloc>>),
     DoWhile(Box<'alloc, DoWhile<'alloc>>),
@@ -29,13 +28,9 @@ pub enum Statement<'alloc> {
     Debugger(Debugger),
 }
 
-
 pub enum Expression<'alloc> {
-    A(&'alloc ())
-
+    A(&'alloc ()),
 }
-
-
 
 pub struct Block<'alloc> {
     statements: Vec<'alloc, Statement<'alloc>>,
@@ -140,5 +135,5 @@ pub struct With<'alloc> {
 
 pub struct Debugger;
 pub enum Pattern<'alloc> {
-    A(&'alloc ())
+    A(&'alloc ()),
 }

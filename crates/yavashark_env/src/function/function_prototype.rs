@@ -4,13 +4,13 @@ use crate::function::bound::BoundFunction;
 use crate::inline_props::InlineObject;
 use crate::partial_init::{Initializer, Partial};
 use crate::realm::Realm;
+use crate::utils::ArrayLike;
 use crate::{
     proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult,
     Variable,
 };
 use std::cell::RefCell;
 use yavashark_macro::inline_props;
-use crate::utils::ArrayLike;
 
 #[inline_props(enumerable = false, configurable)]
 #[derive(Default, Debug)]

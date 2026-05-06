@@ -81,7 +81,6 @@ impl<T> SmallVec<T> {
         };
         let mut vec = ManuallyDrop::new(vec);
 
-
         let ptr = unsafe {
             // Safety: `vec` is a valid Vec<T> since it was created from a Vec<T> (even Vec::new() has a non-null pointer)
             NonNull::new_unchecked(vec.as_mut_ptr())

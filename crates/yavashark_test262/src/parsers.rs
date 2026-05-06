@@ -74,9 +74,9 @@ mod oxc_parser {
     use crate::metadata::NegativePhase;
     use crate::utils::parse_metadata;
     use oxc::allocator::Allocator;
+    use oxc::diagnostics::{OxcDiagnostic, Severity};
     use oxc::span::SourceType;
     use std::path::PathBuf;
-    use oxc::diagnostics::{OxcDiagnostic, Severity};
 
     pub fn test_parse_oxc(file: PathBuf) {
         let input = std::fs::read_to_string(&file).unwrap();
@@ -87,13 +87,11 @@ mod oxc_parser {
 
         let parser = oxc::parser::Parser::new(&alloc, &input, SourceType::default());
 
-
         let res = parser.parse();
 
         let sem = oxc_semantic::SemanticBuilder::new()
             .with_check_syntax_error(false)
             .build(&res.program);
-
 
         fn has_errors(dia: &[OxcDiagnostic]) -> bool {
             dia.iter().any(|d| d.severity == Severity::Error)

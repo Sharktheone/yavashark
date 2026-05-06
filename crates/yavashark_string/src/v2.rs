@@ -1,7 +1,3 @@
-
-
-
-
 pub struct YSString {
     ptr: *const (),
     len: u32,
@@ -22,5 +18,3 @@ enum Storage {
     Rope,
     Static,
 }
-
-

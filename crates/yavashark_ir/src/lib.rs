@@ -1,6 +1,6 @@
-use yavashark_string::YSString;
-use bumpalo::collections::Vec;
 use crate::statement::Statement;
+use bumpalo::collections::Vec;
+use yavashark_string::YSString;
 
 mod statement;
 
@@ -8,11 +8,8 @@ mod statement;
 pub struct YavasharkIr<'alloc> {
     functions: Vec<'alloc, Function<'alloc>>,
 
-
     root: Statement<'alloc>,
 }
-
-
 
 pub struct Function<'alloc> {
     name: YSString,
@@ -20,13 +17,9 @@ pub struct Function<'alloc> {
     body: Statement<'alloc>,
 }
 
-
-
-
 pub struct YavasharkBlock<'alloc> {
     statements: Vec<'alloc, Statement<'alloc>>,
 }
-
 
 trait IRTranslator {
     fn translate(&self, input: &str) -> YavasharkIr;

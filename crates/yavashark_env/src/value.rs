@@ -19,11 +19,13 @@ pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::{ToYSString, YSString};
 
+mod bigint;
 mod constructor;
 mod conversion;
 mod function;
 mod name;
 pub mod nan_boxed;
+mod nan_v2;
 mod obj;
 mod object;
 mod object_impl;
@@ -32,8 +34,6 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
-mod nan_v2;
-mod bigint;
 
 #[derive(Debug, PartialEq)]
 pub enum Value {

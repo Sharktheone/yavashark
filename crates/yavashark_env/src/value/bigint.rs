@@ -18,4 +18,3 @@ pub enum BigIntRepr {
     Large([u64; 3]),
     Dynamic(Rc<[u64]>),
 }
-

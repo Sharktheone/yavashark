@@ -27,13 +27,13 @@ impl SmallString {
     pub fn new() -> Self {
         #[allow(clippy::expect_used)]
         Self {
-            inner: SmallVec::new(Vec::new())
+            inner: SmallVec::new(Vec::new()),
         }
     }
 
     pub fn from_string(mut string: String) -> Self {
         Self {
-            inner: SmallVec::new(string.into_bytes())
+            inner: SmallVec::new(string.into_bytes()),
         }
     }
 

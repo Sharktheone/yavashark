@@ -1,4 +1,3 @@
-
 /// Int32      0111 1111 1111 1001 0000 0000 0000 0000 IIII .. IIII
 ///
 /// Imm        0111 1111 1111 1010 0000 0000 0000 0000 iiii .. iiii
@@ -23,6 +22,3 @@ pub struct ValueInner {
     ptr_pad: u16,
     ptr: *const (),
 }
-
-
-

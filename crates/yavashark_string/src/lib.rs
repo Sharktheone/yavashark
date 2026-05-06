@@ -495,9 +495,10 @@ impl YSString {
 
             // Fall back to heap
             Self {
-                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(s.to_string()))),
+                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(
+                    s.to_string(),
+                ))),
             }
-
         } else {
             // Convert to UTF-16
             Self::from_utf16_iter(s.encode_utf16())
@@ -795,7 +796,7 @@ impl YSString {
                     let inner = unsafe { self.inner_mut_ref() };
 
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(s.clone()));
-                    
+
                     match inner {
                         InnerString::OwnedUtf8(s) => Some(s.as_str()),
                         _ => None,
@@ -1022,13 +1023,13 @@ impl YSString {
                     // Need to upgrade to heap
                     let mut s = inline.as_str().to_string();
                     s.push(ch);
-                    
+
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
                 }
                 InnerString::Static(s) => {
                     let mut string = (**s).to_string();
                     string.push(ch);
-                    
+
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(string));
                 }
                 InnerString::OwnedUtf8(s) => {
@@ -1037,7 +1038,7 @@ impl YSString {
                 InnerString::RcUtf8(rc) => {
                     let mut s = rc.to_string();
                     s.push(ch);
-                    
+
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
                 }
                 _ => {} // unreachable
@@ -1333,9 +1334,9 @@ impl YSString {
         // Flatten the rope/UTF-16 to UTF-8 first
         let inner = unsafe { self.inner_mut_ref() };
         let s = self.as_str_lossy().into_owned();
-        
+
         *inner = InnerString::OwnedUtf8(SmallString::from_string(s.clone()));
-        
+
         match inner {
             InnerString::OwnedUtf8(s) => s.chars(),
             _ => "".chars(), // Unreachable
