@@ -16,7 +16,7 @@ pub struct PropertyMap<T: ?Sized> {
 #[repr(C, align(8))]
 pub struct OpaqueData<T: ?Sized> {
     _marker: PhantomData<[Value]>,
-    _inner_marker: PhantomData<T>,
+    _inner_marker: PhantomData<NativeWrapper<T>>,
 }
 
 
