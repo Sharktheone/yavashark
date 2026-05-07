@@ -6,6 +6,18 @@ use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 use crate::object::native_wrapper::NativeWrapper;
 
+
+
+/// A property map is a contiguous block of memory that holds a fixed number of properties (as Values) and a native struct of type T.
+/// Internally, the `PropertyMap` is broken up into N 64-bit slots for different purposes.
+/// The layout of the property map is as follows:
+/// - Slot 0: `MapState` (8 bytes)
+/// - Slots 1..N: Properties (each 8 bytes, total size determined by `MapState.size`)
+/// - Slot N+1: Butterfly pointer
+/// - Slot N+2..N+2+M: Native struct of type T (size and alignment determined by T)
+///
+/// As a diagram this looks as follows:
+/// [ MapState | Property 0 | Property 1 | ... | Property N-1 | Butterfly Pointer | Native struct (T) ]
 #[repr(C)]
 #[repr(align(8))]
 pub struct PropertyMap<T: ?Sized> {
