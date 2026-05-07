@@ -24,6 +24,7 @@ mod properties;
 mod property_map;
 pub mod prototype;
 mod shape;
+mod native_wrapper;
 
 #[derive(Debug)]
 pub struct Object {
