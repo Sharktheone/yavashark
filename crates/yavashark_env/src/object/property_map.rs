@@ -27,15 +27,17 @@ pub struct PropertyMap<T: ?Sized> {
 
 #[repr(C, align(8))]
 pub struct OpaqueData<T: ?Sized> {
-    _marker: PhantomData<[Value]>,
-    _inner_marker: PhantomData<NativeWrapper<T>>,
+    _value: PhantomData<[Value]>,
+    _butterfly: PhantomData<*mut ButterFly>,
+    _inner: PhantomData<NativeWrapper<T>>,
 }
 
 
 #[repr(align(8))]
 pub struct Data<T: ?Sized> {
-    _marker: PhantomData<[Value]>,
-    _inner_marker: PhantomData<NativeWrapper<T>>,
+    _value: PhantomData<[Value]>,
+    _butterfly: PhantomData<*mut ButterFly>,
+    _inner: PhantomData<NativeWrapper<T>>,
     inner: [u8], // layout is the same as the two markers.
 }
 
