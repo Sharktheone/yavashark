@@ -51,6 +51,12 @@ struct MapState {
     _pad: [u8; 2],
 }
 
+const _: () = assert!(size_of::<MapState>() == 8, "MapState must be 8 bytes in size");
+const _: () = assert!(align_of::<MapState>() == 8, "MapState must be 8 bytes aligned");
+
+
+
+
 impl<T> PropertyMap<T> {
     pub fn sized_layout(size: u32) -> Layout {
         Self::unsized_layout(size, Layout::new::<T>())
