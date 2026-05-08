@@ -83,6 +83,13 @@ pub fn main() {
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
+            clap::Arg::new("profile-out")
+                .help("Write profiler output to this path")
+                .long("profile-out")
+                .value_name("PATH")
+                .required(false),
+        )
+        .arg(
             clap::Arg::new("eval")
                 .help("Evaluate the provided JavaScript code")
                 .short('e')
@@ -100,6 +107,7 @@ pub fn main() {
     let shell = matches.get_flag("shell");
     let shellold = matches.get_flag("shellold");
     let eval_code = matches.get_one::<String>("eval");
+    let profile_out = matches.get_one::<String>("profile-out").cloned();
 
     if !(interpreter || bytecode || ast || instructions) {
         interpreter = true;
@@ -132,6 +140,7 @@ pub fn main() {
             bytecode,
             old_bytecode,
             instructions,
+            profile_out.clone(),
         );
         return;
     }
@@ -159,6 +168,7 @@ pub fn main() {
             bytecode,
             old_bytecode,
             instructions,
+            profile_out.clone(),
         );
     }
 
@@ -168,6 +178,10 @@ pub fn main() {
         bytecode,
         old_bytecode,
         instructions,
+        profile_out: profile_out
+            .map(String::into_boxed_str)
+            .map(Box::leak)
+            .map(|s| s as &'static str),
     };
 
     if shell && shellold {
@@ -197,6 +211,7 @@ fn run_code(
     #[allow(unused_variables)] bytecode: bool,
     #[allow(unused_variables)] old_bytecode: bool,
     #[allow(unused_variables)] instructions: bool,
+    #[allow(unused_variables)] profile_out: Option<String>,
 ) {
     let string_input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
 
@@ -236,6 +251,11 @@ fn run_code(
 
     if interpreter {
         let mut realm = Realm::new().unwrap();
+        #[cfg(feature = "profiler")]
+        if let Some(profile_out) = profile_out.clone() {
+            let writer = yavashark_profiler::writer_for_path(profile_out).unwrap();
+            realm.set_profile_writer(writer);
+        }
         let mut scope = Scope::global(&realm, path.clone());
         realm.set_eval(InterpreterEval, false).unwrap();
         yavashark_vm::init(&mut realm).unwrap();
@@ -254,6 +274,11 @@ fn run_code(
         println!("Interpreter: {result:?}");
 
         rt.block_on(realm.run_event_loop());
+
+        #[cfg(feature = "profiler")]
+        if let Some(path) = realm.write_profile().unwrap() {
+            eprintln!("wrote profile to {}", path.display());
+        }
     }
 
     #[cfg(feature = "vm")]
