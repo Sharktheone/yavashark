@@ -1,6 +1,7 @@
 use bumpalo::boxed::Box;
 use bumpalo::collections::Vec;
 use yavashark_string::YSString;
+use crate::expr::Expression;
 
 pub enum Statement<'alloc> {
     Block(Box<'alloc, Block<'alloc>>),
@@ -28,9 +29,6 @@ pub enum Statement<'alloc> {
     Debugger(Debugger),
 }
 
-pub enum Expression<'alloc> {
-    A(&'alloc ()),
-}
 
 pub struct Block<'alloc> {
     statements: Vec<'alloc, Statement<'alloc>>,
