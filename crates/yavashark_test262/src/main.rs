@@ -52,10 +52,20 @@ fn run() {
     args.next();
 
     let mut enable_prof = false;
+    let mut profile_out = None;
     let mut next = args
         .next()
         .expect("please provide a test path or flags followed by a test path");
-    if next == "--prof" || next == "--profile" {
+    if next == "--profile-out" {
+        profile_out = Some(
+            args.next()
+                .expect("please provide an output path after --profile-out"),
+        );
+        enable_prof = true;
+        next = args
+            .next()
+            .expect("please provide a test path after --profile-out PATH");
+    } else if next == "--prof" || next == "--profile" {
         enable_prof = true;
         next = args
             .next()
