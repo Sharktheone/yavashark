@@ -24,27 +24,31 @@ pub struct ObjectConstructor {}
 
 impl Constructor for ObjectConstructor {
     fn construct(&self, realm: &mut Realm, mut args: Vec<Value>) -> Res<ObjectHandle> {
-        let Some(value) = args.first_mut() else {
-            return Ok(Object::new(realm).into());
-        };
+        crate::profiler::profile_call(realm, || self.name(), |realm| {
+            let Some(value) = args.first_mut() else {
+                return Ok(Object::new(realm).into());
+            };
 
-        let value = mem::replace(value, Value::Undefined);
+            let value = mem::replace(value, Value::Undefined);
 
-        Ok(match value {
-            Value::Object(obj) => obj,
-            Value::Number(num) => NumberObj::with_number(realm, num)?,
-            Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)?),
-            Value::Boolean(boolean) => BooleanObj::new(realm, boolean)?,
-            Value::Symbol(symbol) => SymbolObj::new(realm, symbol)?,
-            Value::BigInt(bigint) => BigIntObj::new(realm, bigint)?,
-            Value::Undefined | Value::Null => Object::new(realm),
+            Ok(match value {
+                Value::Object(obj) => obj,
+                Value::Number(num) => NumberObj::with_number(realm, num)?,
+                Value::String(string) => Obj::into_object(StringObj::with_string(realm, string)?),
+                Value::Boolean(boolean) => BooleanObj::new(realm, boolean)?,
+                Value::Symbol(symbol) => SymbolObj::new(realm, symbol)?,
+                Value::BigInt(bigint) => BigIntObj::new(realm, bigint)?,
+                Value::Undefined | Value::Null => Object::new(realm),
+            })
         })
     }
 }
 
 impl Func for ObjectConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
-        Ok(Constructor::construct(self, realm, args)?.into())
+        crate::profiler::profile_call(realm, || self.name(), |realm| {
+            Ok(Constructor::construct(self, realm, args)?.into())
+        })
     }
 }
 

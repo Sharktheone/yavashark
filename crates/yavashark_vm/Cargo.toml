@@ -17,6 +17,7 @@ swc_ecma_ast = "23.0.0"
 
 [features]
 default = []
+profiler = ["yavashark_env/profiler"]
 simple_bytecode = ["yavashark_bytecode/simple_bytecode"]
 
 

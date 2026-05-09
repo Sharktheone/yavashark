@@ -161,7 +161,9 @@ impl JSFunction {
 
 impl Func for JSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        self.raw.call(realm, args, this)
+        yavashark_env::profiler::profile_call(realm, || self.name(), |realm| {
+            self.raw.call(realm, args, this)
+        })
     }
 }
 
@@ -234,13 +236,15 @@ impl CustomGcRefUntyped for RawJSFunction {
 
 impl Constructor for JSFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        let this = self.new_instance(realm)?;
+        yavashark_env::profiler::profile_call(realm, || self.name(), |realm| {
+            let this = self.new_instance(realm)?;
 
-        if let Value::Object(obj) = self.raw.call(realm, args, this.copy())? {
-            return Ok(obj);
-        }
+            if let Value::Object(obj) = self.raw.call(realm, args, this.copy())? {
+                return Ok(obj);
+            }
 
-        this.to_object()
+            this.to_object()
+        })
     }
 
     // fn construct_proto(&self) -> Res<ObjectProperty> {

@@ -23,6 +23,7 @@ env_logger = "0.11.3"
 
 [features]
 default = []
+profiler = ["yavashark_env/profiler", "yavashark_vm?/profiler"]
 vm = ["dep:yavashark_vm", "dep:yavashark_bytecode_interpreter"]
 simple_bytecode = ["dep:yavashark_bytecode_interpreter", "yavashark_vm/simple_bytecode"]
 
