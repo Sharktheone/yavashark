@@ -4,6 +4,7 @@ use pprof::protos::Message;
 use pprof::protos::{Function, Line, Location, Profile as PProfProfile, Sample, ValueType};
 use std::collections::HashMap;
 use std::io::{self, Write};
+use std::mem;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use indexmap::IndexSet;
@@ -11,17 +12,20 @@ use indexmap::IndexSet;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FrameId(u64);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct StringId(i64);
+
 #[derive(Debug, Clone)]
 struct Frame {
     id: FrameId,
     parent: Option<FrameId>,
-    fn_name: String,
+    fn_name: StringId,
     start: Instant,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct SampleKey {
-    stack: Vec<String>,
+    stack: Vec<StringId>,
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -38,6 +42,7 @@ pub struct Profile {
     roots: Vec<FrameId>,
     active_frames: HashMap<FrameId, Frame>, //TODO: this could probably also just be a stack. Not fully sure about async though
     finished_samples: HashMap<SampleKey, SampleValue>,
+    strings: StringTable,
 }
 
 impl Default for Profile {
@@ -49,6 +54,7 @@ impl Default for Profile {
             roots: Vec::new(),
             active_frames: HashMap::new(),
             finished_samples: HashMap::new(),
+            strings: StringTable::default(),
         }
     }
 }
@@ -63,6 +69,8 @@ impl Profile {
         let id = self.next_frame_id;
         self.next_frame_id.0 += 1;
         let parent = self.roots.last().copied();
+
+        let fn_name = StringId(self.strings.intern(fn_name));
 
         self.active_frames.insert(
             id,
@@ -95,6 +103,7 @@ impl Profile {
         let elapsed = end.duration_since(frame.start);
         let nanos = elapsed.as_nanos() as u64;
         let stack = self.stack_for_frame(&frame);
+
         let sample = self.finished_samples.entry(SampleKey { stack }).or_default();
         sample.count += 1;
         sample.nanos += nanos;
@@ -105,8 +114,8 @@ impl Profile {
         self.root_start.elapsed()
     }
 
-    fn stack_for_frame(&self, frame: &Frame) -> Vec<String> {
-        let mut stack = vec![frame.fn_name.clone()];
+    fn stack_for_frame(&self, frame: &Frame) -> Vec<StringId> {
+        let mut stack = vec![frame.fn_name];
         let mut parent = frame.parent;
 
         while let Some(parent_id) = parent {
@@ -114,16 +123,21 @@ impl Profile {
                 break;
             };
 
-            stack.push(parent_frame.fn_name.clone());
+            stack.push(parent_frame.fn_name);
             parent = parent_frame.parent;
         }
 
         stack
     }
+    
+    #[must_use]
+    pub fn take(&mut self) -> Self {
+        mem::take(self)
+    }
 }
 
 pub trait ProfileWriter: Send {
-    fn write_profile(&mut self, profile: &Profile) -> io::Result<Vec<u8>>;
+    fn write_profile(&mut self, profile: Profile) -> io::Result<Vec<u8>>;
 }
 
 #[derive(Debug, Clone)]
@@ -150,7 +164,7 @@ impl ProfileWriterKind {
 pub struct PprofWriter;
 
 impl ProfileWriter for PprofWriter {
-    fn write_profile(&mut self, profile: &Profile) -> io::Result<Vec<u8>> {
+    fn write_profile(&mut self, profile: Profile) -> io::Result<Vec<u8>> {
         let encoded = Self::build_pprof(profile)?.encode_to_vec();
         let mut gz = GzEncoder::new(Vec::new(), Compression::default());
         gz.write_all(&encoded)?;
@@ -159,8 +173,8 @@ impl ProfileWriter for PprofWriter {
 }
 
 impl PprofWriter {
-    fn build_pprof(profile: &Profile) -> io::Result<PProfProfile> {
-        let mut strings = StringTable::default();
+    fn build_pprof(mut profile: Profile) -> io::Result<PProfProfile> {
+        let mut strings = mem::take(&mut profile.strings);
         let mut locations = Vec::new();
         let mut functions = Vec::new();
         let mut samples = Vec::new();
@@ -170,15 +184,14 @@ impl PprofWriter {
         for (sample_key, sample_value) in &profile.finished_samples {
             let mut location_id = Vec::with_capacity(sample_key.stack.len());
 
-            for fn_name in &sample_key.stack {
-                let function_id = *function_ids.entry(fn_name.clone()).or_insert_with(|| {
+            for name in &sample_key.stack {
+                let function_id = *function_ids.entry(name).or_insert_with(|| {
                     let id = (functions.len() + 1) as u64;
-                    let name = strings.intern(fn_name);
 
                     functions.push(Function {
                         id,
-                        name,
-                        system_name: name,
+                        name: name.0,
+                        system_name: name.0,
                         filename: 0,
                         start_line: 0,
                     });
@@ -219,10 +232,10 @@ impl PprofWriter {
             .unwrap_or_default()
             .as_nanos() as i64;
 
-        let sample_count_type = strings.intern("samples");
-        let sample_count_unit = strings.intern("count");
-        let wall_type = strings.intern("wall");
-        let nanos_unit = strings.intern("nanoseconds");
+        let sample_count_type = strings.intern("samples".to_owned());
+        let sample_count_unit = strings.intern("count".to_owned());
+        let wall_type = strings.intern("wall".to_owned());
+        let nanos_unit = strings.intern("nanoseconds".to_owned());
 
         let period_type = ValueType {
             ty: wall_type,
@@ -285,7 +298,7 @@ impl FileProfileWriter {
         &self.path
     }
 
-    pub fn write_to_path(&mut self, profile: &Profile) -> io::Result<PathBuf> {
+    pub fn write_to_path(&mut self, profile: Profile) -> io::Result<PathBuf> {
         if let Some(parent) = self.path.parent() {
             std::fs::create_dir_all(parent)?;
         }
@@ -299,14 +312,14 @@ impl FileProfileWriter {
 
 
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 struct StringTable {
     strings: IndexSet<String>,
 }
 
 impl StringTable {
-    fn intern(&mut self, value: &str) -> i64 {
-        self.strings.insert_full(value.to_string()).0 as i64 + 1
+    fn intern(&mut self, value: String) -> i64 {
+        self.strings.insert_full(value).0 as i64 + 1
     }
 
     fn finish(self) -> Vec<String> {

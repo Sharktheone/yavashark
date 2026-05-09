@@ -170,7 +170,7 @@ impl Realm {
             return Ok(None);
         };
 
-        writer.write_to_path(&self.profile).map(Some)
+        writer.write_to_path(self.profile.take()).map(Some)
     }
 }
 
