@@ -1,5 +1,15 @@
 use crate::conf;
 use crate::repl::{old_repl, repl};
+#[cfg(feature = "pprof")]
+use flate2::{Compression, write::GzEncoder};
+#[cfg(feature = "pprof")]
+use pprof::ProfilerGuard;
+#[cfg(feature = "pprof")]
+use pprof::protos::Message;
+#[cfg(feature = "pprof")]
+use std::fs::File;
+#[cfg(feature = "pprof")]
+use std::io::Write;
 use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
@@ -84,10 +94,23 @@ pub fn main() {
         )
         .arg(
             clap::Arg::new("profile-out")
-                .help("Write profiler output to this path")
+                .help("Write JS profiler output to this path")
                 .long("profile-out")
                 .value_name("PATH")
                 .required(false),
+        )
+        .arg(
+            clap::Arg::new("native-profile-out")
+                .help("Write native pprof output to this path")
+                .long("native-profile-out")
+                .value_name("PATH")
+                .required(false),
+        )
+        .arg(
+            clap::Arg::new("native-profile")
+                .help("Enable native pprof profiling")
+                .long("native-profile")
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("eval")
@@ -107,7 +130,11 @@ pub fn main() {
     let shell = matches.get_flag("shell");
     let shellold = matches.get_flag("shellold");
     let eval_code = matches.get_one::<String>("eval");
-    let profile_out = matches.get_one::<String>("profile-out").cloned();
+    let js_profile_out = matches.get_one::<String>("profile-out").cloned();
+    let native_profile_out = matches
+        .get_one::<String>("native-profile-out")
+        .cloned();
+    let native_profile = matches.get_flag("native-profile");
 
     if !(interpreter || bytecode || ast || instructions) {
         interpreter = true;
@@ -140,7 +167,9 @@ pub fn main() {
             bytecode,
             old_bytecode,
             instructions,
-            profile_out.clone(),
+            js_profile_out.as_deref(),
+            native_profile,
+            native_profile_out.as_deref(),
         );
         return;
     }
@@ -168,7 +197,9 @@ pub fn main() {
             bytecode,
             old_bytecode,
             instructions,
-            profile_out.clone(),
+            js_profile_out.as_deref(),
+            native_profile,
+            native_profile_out.as_deref(),
         );
     }
 
@@ -178,10 +209,6 @@ pub fn main() {
         bytecode,
         old_bytecode,
         instructions,
-        profile_out: profile_out
-            .map(String::into_boxed_str)
-            .map(Box::leak)
-            .map(|s| s as &'static str),
     };
 
     if shell && shellold {
@@ -211,7 +238,9 @@ fn run_code(
     #[allow(unused_variables)] bytecode: bool,
     #[allow(unused_variables)] old_bytecode: bool,
     #[allow(unused_variables)] instructions: bool,
-    #[allow(unused_variables)] profile_out: Option<String>,
+    #[allow(unused_variables)] js_profile_out: Option<&str>,
+    native_profile: bool,
+    #[allow(unused_variables)] native_profile_out: Option<&str>,
 ) {
     let string_input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
 
@@ -247,15 +276,24 @@ fn run_code(
         return;
     }
 
+    #[cfg(feature = "pprof")]
+    let native_guard = if native_profile {
+        Some(ProfilerGuard::new(1_000_000).unwrap())
+    } else {
+        None
+    };
+
+    #[cfg(not(feature = "pprof"))]
+    if native_profile {
+        eprintln!(
+            "Native profiling requested but not enabled at compile time. Rebuild with --features pprof."
+        );
+    }
+
     let rt = Builder::new_current_thread().enable_all().build().unwrap();
 
     if interpreter {
         let mut realm = Realm::new().unwrap();
-        #[cfg(feature = "profiler")]
-        if let Some(profile_out) = profile_out.clone() {
-            let writer = yavashark_profiler::writer_for_path(profile_out).unwrap();
-            realm.set_profile_writer(writer);
-        }
         let mut scope = Scope::global(&realm, path.clone());
         realm.set_eval(InterpreterEval, false).unwrap();
         yavashark_vm::init(&mut realm).unwrap();
@@ -274,11 +312,11 @@ fn run_code(
         println!("Interpreter: {result:?}");
 
         rt.block_on(realm.run_event_loop());
+    }
 
-        #[cfg(feature = "profiler")]
-        if let Some(path) = realm.write_profile().unwrap() {
-            eprintln!("wrote profile to {}", path.display());
-        }
+    #[cfg(feature = "pprof")]
+    if let Some(guard) = native_guard {
+        write_native_profile(native_profile_out.as_deref(), path.as_path(), guard);
     }
 
     #[cfg(feature = "vm")]
@@ -353,4 +391,46 @@ fn run_code(
             println!("OldBytecode: {:?}", vm.acc());
         }
     }
+}
+
+#[cfg(feature = "pprof")]
+#[allow(clippy::unwrap_used)]
+fn write_native_profile(profile_out: Option<&str>, path: &std::path::Path, guard: ProfilerGuard<'_>) {
+    let Ok(report) = guard.report().build() else {
+        return;
+    };
+    let Ok(profile) = report.pprof() else {
+        return;
+    };
+
+    let mut buf = Vec::new();
+    if profile.encode(&mut buf).is_err() {
+        return;
+    }
+
+    let out = profile_out
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_native_profile_path(path));
+    if let Some(parent) = out.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+
+    let Ok(file) = File::create(&out) else {
+        return;
+    };
+    let mut encoder = GzEncoder::new(file, Compression::default());
+    if encoder.write_all(&buf).is_err() {
+        return;
+    }
+    if encoder.finish().is_err() {
+        return;
+    }
+
+    eprintln!("wrote native profile to {}", out.display());
+}
+
+#[cfg(feature = "pprof")]
+fn default_native_profile_path(path: &std::path::Path) -> PathBuf {
+    let stem = path.file_stem().and_then(|name| name.to_str()).unwrap_or("profile");
+    PathBuf::from(format!("profiles/{stem}.native.pb.gz"))
 }

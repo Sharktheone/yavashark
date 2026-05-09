@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+flate2 = { version = "1.1.5" }
+pprof = { version = "0.15.0", features = ["prost-codec"] }
+indexmap = "2.14.0"
+
+[features]
+default = ["pprof"]
+pprof = []
 
 [lints]
 workspace = true

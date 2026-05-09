@@ -22,6 +22,7 @@ yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
 yavashark_vm = { path = "crates/yavashark_vm", optional = true }
 yavashark_env = { path = "crates/yavashark_env" }
+yavashark_profiler = { path = "crates/yavashark_profiler", optional = true }
 yavashark_swc_validator = { path = "crates/yavashark_swc_validator" }
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 swc_ecma_ast = "23.0.0"
@@ -42,6 +43,8 @@ yavashark_env = { path = "crates/yavashark_env", default-features = false }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 clap = "4.5.18"
+flate2 = { version = "1.1.5", optional = true }
+pprof = { version = "0.15.0", features = ["prost-codec"], optional = true }
 rustyline = { version = "15.0.0", features = ["derive"] }
 rustyline-derive = "0.11.0"
 tokio = { version = "1.47.1", features = ["full"] }
@@ -54,6 +57,8 @@ crate-type = ["cdylib"]
 default = ["simple_bytecode"]
 minimal = []
 memmap = []
+pprof = ["dep:pprof", "dep:flate2"]
+profiler = ["dep:yavashark_profiler", "yavashark_profiler/pprof", "yavashark_env/profiler", "yavashark_interpreter/profiler", "yavashark_vm?/profiler"]
 vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler", "yavashark_interpreter/vm"]
 simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/simple_bytecode"]
 out_of_spec_experiments = ["yavashark_env/out-of-spec-experiments"]
@@ -64,7 +69,7 @@ gui = ["yavashark_env/gui"]
 opt-level = 3
 codegen-units = 1
 debug = false
-strip = true
+strip = false
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
@@ -102,4 +107,3 @@ missing_errors_doc = "allow"
 too_many_lines = "allow"
 module_name_repetitions = "allow"
 unnecessary_wraps = "allow"
-
