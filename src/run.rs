@@ -296,6 +296,19 @@ fn run_code(
         let mut realm = Realm::new().unwrap();
         let mut scope = Scope::global(&realm, path.clone());
         realm.set_eval(InterpreterEval, false).unwrap();
+        #[cfg(feature = "profiler")]
+        if let Some(profile_out) = js_profile_out {
+            let p = match yavashark_profiler::FileProfileWriter::from_path(PathBuf::from(profile_out).as_path()) {
+                Ok(k) => k,
+                Err(e) => {
+                    println!("Error: {e}");
+                    return;
+                }
+            };
+
+
+            realm.set_profile_writer(p);
+        }
         yavashark_vm::init(&mut realm).unwrap();
 
         let result = match yavashark_interpreter::Interpreter::run_in(
@@ -312,6 +325,18 @@ fn run_code(
         println!("Interpreter: {result:?}");
 
         rt.block_on(realm.run_event_loop());
+
+        #[cfg(feature = "profiler")]
+        if let Some(profile_out) = js_profile_out {
+            match realm.write_profile() {
+                Ok(_) => {
+                    eprintln!("wrote JS profile to {}", profile_out);
+                }
+                Err(e) => {
+                    eprintln!("Error writing JS profile: {e}");
+                }
+            }
+        }
     }
 
     #[cfg(feature = "pprof")]
