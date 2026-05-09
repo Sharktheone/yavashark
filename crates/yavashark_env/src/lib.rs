@@ -10,6 +10,7 @@ pub mod console;
 pub mod error_obj;
 mod function;
 pub mod object;
+pub mod profiler;
 pub mod scope;
 
 pub mod args;
