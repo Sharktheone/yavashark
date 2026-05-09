@@ -12,7 +12,10 @@ use yavashark_interpreter::Interpreter;
 
 const SKIP_FEATURES: &[&str] = &["cross-realm"];
 
-pub fn run_file(file: PathBuf) -> Result<String, String> {
+pub fn run_file(
+    file: PathBuf,
+    #[cfg(feature = "profiler")] profile_out: Option<&Path>,
+) -> Result<String, String> {
     #[cfg(feature = "timings")]
     let parse = std::time::Instant::now();
     let (stmt, metadata) = parse_file(&file);
@@ -34,16 +37,24 @@ pub fn run_file(file: PathBuf) -> Result<String, String> {
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
     let (mut realm, mut scope, harness_dir) =
-        setup_global(file.clone(), raw, async_, strict).map_err(|e| e.to_string())?;
+        setup_global(file.clone(), raw, async_, strict, #[cfg(feature = "profiler")] profile_out)
+            .map_err(|e| e.to_string())?;
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();
     }
 
-    match run_file_in(file, &mut realm, &mut scope, stmt, metadata, &harness_dir) {
+    let result = match run_file_in(file, &mut realm, &mut scope, stmt, metadata, &harness_dir) {
         Ok(v) => Ok(v),
         Err(e) => Err(e.pretty_print(&mut realm)),
+    };
+
+    #[cfg(feature = "profiler")]
+    if let Some(path) = realm.write_profile().map_err(|e| e.to_string())? {
+        eprintln!("wrote profile to {}", path.display());
     }
+
+    result
 }
 
 pub fn run_file_in(

@@ -56,10 +56,15 @@ pub fn setup_global(
     raw: bool,
     async_: bool,
     strict: bool,
+    #[cfg(feature = "profiler")] profile_out: Option<&Path>,
 ) -> Res<(Realm, Scope, PathBuf)> {
     #[cfg(feature = "timings")]
     let now = std::time::Instant::now();
     let mut r = Realm::new()?;
+    #[cfg(feature = "profiler")]
+    if let Some(profile_out) = profile_out {
+        r.set_profile_writer(yavashark_profiler::FileProfileWriter::from_path(profile_out)?);
+    }
     #[cfg(feature = "timings")]
     unsafe {
         crate::REALM_DURATION = now.elapsed();
@@ -125,7 +130,14 @@ mod tests {
 
     #[test]
     fn new_harness() {
-        let (_global, _scope, _) = match setup_global(PathBuf::new(), false, false, false) {
+        let (_global, _scope, _) = match setup_global(
+            PathBuf::new(),
+            false,
+            false,
+            false,
+            #[cfg(feature = "profiler")]
+            None,
+        ) {
             Ok(v) => v,
             Err(e) => {
                 panic!("Failed to create new harness: {e}")

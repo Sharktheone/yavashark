@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 yavashark_env = { path = "../yavashark_env" }
+yavashark_profiler = { path = "../yavashark_profiler", optional = true }
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_value = { path = "../yavashark_value", features = ["display_object"] }
 yavashark_garbage = { path = "../yavashark_garbage" }
@@ -34,5 +35,6 @@ bitflags = "2.6.0"
 default = []
 oxc = ["dep:oxc", "dep:oxc_semantic"]
 parser_test = []
-pprof = ["dep:pprof", "dep:flate2"]
+pprof = ["dep:pprof", "dep:flate2", "profiler", "yavashark_profiler/pprof"]
+profiler = ["dep:yavashark_profiler", "yavashark_env/profiler", "yavashark_interpreter/profiler", "yavashark_vm/profiler"]
 timings = []
