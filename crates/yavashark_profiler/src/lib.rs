@@ -92,7 +92,7 @@ impl Profile {
             self.roots.remove(index);
         }
 
-        let elapsed = frame.start.duration_since(end);
+        let elapsed = end.duration_since(frame.start);
         let nanos = elapsed.as_nanos() as u64;
         let stack = self.stack_for_frame(&frame);
         let sample = self.finished_samples.entry(SampleKey { stack }).or_default();
@@ -306,7 +306,7 @@ struct StringTable {
 
 impl StringTable {
     fn intern(&mut self, value: &str) -> i64 {
-        self.strings.insert_full(value.to_string()).0 as i64
+        self.strings.insert_full(value.to_string()).0 as i64 + 1
     }
 
     fn finish(self) -> Vec<String> {
