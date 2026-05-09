@@ -380,10 +380,12 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #env::value::Constructor for #name {
                 fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#object_handle, #error> {
-                    use #env::value::{Obj, IntoValue, FromValue};
-                    use #try_into_value;
+                    #env::profiler::profile_call(realm, || #env::value::Obj::name(self), |realm| {
+                        use #env::value::{Obj, IntoValue, FromValue};
+                        use #try_into_value;
 
-                    #fn_tok?.to_object()
+                        #fn_tok?.to_object()
+                    })
                 }
             }
         });
@@ -397,10 +399,12 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #env::value::Func for #name {
                 fn call(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>, this: #value) -> #value_result {
-                    use #env::value::{Obj, IntoValue, FromValue};
-                    use #try_into_value;
+                    #env::profiler::profile_call(realm, || #env::value::Obj::name(self), |realm| {
+                        use #env::value::{Obj, IntoValue, FromValue};
+                        use #try_into_value;
 
-                    #fn_tok
+                        #fn_tok
+                    })
                 }
             }
         });

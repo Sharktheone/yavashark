@@ -169,7 +169,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let function = if args.function {
         quote! {
             fn call(&self, args: ::std::vec::Vec< #value>, this: #value, realm: &mut #realm) -> #value_result {
-                #env::value::Func::call(self, realm, args, this)
+                #env::profiler::profile_call(realm, || #env::value::Obj::name(self), |realm| {
+                    #env::value::Func::call(self, realm, args, this)
+                })
             }
 
             fn is_callable(&self) -> bool {
@@ -223,7 +225,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let constructor = if args.constructor {
         quote! {
             fn construct(&self, args: ::std::vec::Vec<#value>, realm: &mut #realm) -> #res<#object_handle> {
-                #env::value::Constructor::construct(self, realm, args)
+                #env::profiler::profile_call(realm, || #env::value::Obj::name(self), |realm| {
+                    #env::value::Constructor::construct(self, realm, args)
+                })
             }
 
             fn is_constructable(&self) -> bool {
