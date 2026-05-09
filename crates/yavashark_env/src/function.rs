@@ -144,7 +144,7 @@ impl ObjectImpl for NativeFunction {
     }
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-        crate::profiler::profile_call(realm, || self.props.name, |realm| {
+        crate::profiler::profile_call(realm, || self.props.name.to_string(), |realm| {
             (self.f)(args, this, realm)
         })
     }
