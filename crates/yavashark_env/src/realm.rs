@@ -10,12 +10,17 @@ use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
 use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
+#[cfg(feature = "profiler")]
+use std::time::Instant;
 pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::rc::Rc;
+
+#[cfg(feature = "profiler")]
+use yavashark_profiler::{FileProfileWriter, FrameId, Profile};
 
 pub struct PrivateRc<T>(Rc<T>);
 
@@ -59,6 +64,10 @@ pub struct Realm {
     pub global: ObjectHandle,              // [[GlobalObject]]
     pub env: Environment,                  // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
+    #[cfg(feature = "profiler")]
+    pub profile: Profile,
+    #[cfg(feature = "profiler")]
+    profile_writer: Option<Box<FileProfileWriter>>,
 }
 
 impl Debug for Realm {
@@ -79,6 +88,10 @@ impl Realm {
                 modules: HashMap::new(),
             },
             queue: AsyncTaskQueue::new(),
+            #[cfg(feature = "profiler")]
+            profile: Profile::new(),
+            #[cfg(feature = "profiler")]
+            profile_writer: None,
         };
 
         init_global_obj(&mut realm)?;
@@ -130,6 +143,35 @@ impl Realm {
     pub fn has_pending_jobs(&self) -> bool {
         !self.queue.is_empty()
     }
+
+    #[cfg(feature = "profiler")]
+    pub fn set_profile_writer(&mut self, writer: FileProfileWriter) {
+        self.profile_writer = Some(Box::new(writer));
+    }
+
+    #[cfg(feature = "profiler")]
+    pub fn profile_writer(&self) -> Option<&FileProfileWriter> {
+        self.profile_writer.as_deref()
+    }
+
+    #[cfg(feature = "profiler")]
+    pub fn profile_add_frame(&mut self, fn_name: String, start: Instant) -> FrameId {
+        self.profile.add_frame(fn_name, start)
+    }
+
+    #[cfg(feature = "profiler")]
+    pub fn profile_end_frame(&mut self, frame_id: FrameId, end: Instant) {
+        self.profile.end_frame(frame_id, end);
+    }
+
+    #[cfg(feature = "profiler")]
+    pub fn write_profile(&mut self) -> std::io::Result<Option<std::path::PathBuf>> {
+        let Some(writer) = self.profile_writer.as_mut() else {
+            return Ok(None);
+        };
+
+        writer.write_to_path(&self.profile).map(Some)
+    }
 }
 
 impl Default for Realm {
@@ -141,6 +183,10 @@ impl Default for Realm {
                 modules: HashMap::new(),
             },
             queue: AsyncTaskQueue::new(),
+            #[cfg(feature = "profiler")]
+            profile: Profile::new(),
+            #[cfg(feature = "profiler")]
+            profile_writer: None,
         }
     }
 }
