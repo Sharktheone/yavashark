@@ -95,7 +95,9 @@ impl<T> SmallVec<T> {
 
         let ptr = self.ptr.as_ptr();
 
-        ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap))
+        unsafe {
+            ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap))
+        }
     }
 
     pub fn into_vec(self) -> Vec<T> {
