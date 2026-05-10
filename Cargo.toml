@@ -1,7 +1,7 @@
 [package]
 name = "yavashark"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 rust-version = "1.76"
 description = "A new, experimental, JavaScript/TypeScript engine written in Rust"
 license = "MIT"
