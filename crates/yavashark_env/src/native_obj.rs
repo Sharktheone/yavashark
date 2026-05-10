@@ -66,7 +66,9 @@ impl<T: ?Sized + Debug + 'static> ObjectImpl for NativeObject<T> {
         } else if ty == TypeId::of::<T>() {
             Some(NonNull::from(&self.native).cast())
         } else {
-            self.get_wrapped_object().inner_downcast(ty)
+            unsafe {
+                self.get_wrapped_object().inner_downcast(ty)
+            }
         }
     }
 }

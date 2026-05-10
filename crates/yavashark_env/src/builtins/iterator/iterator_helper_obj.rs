@@ -62,7 +62,7 @@ impl<T: IteratorHelperImpl> ObjectImpl for IteratorHelperObject<T> {
         } else if ty == TypeId::of::<T>() {
             Some(NonNull::from(&self.native).cast())
         } else {
-            self.get_wrapped_object().inner_downcast(ty)
+            unsafe { self.get_wrapped_object().inner_downcast(ty) }
         }
     }
 
@@ -74,10 +74,9 @@ impl<T: IteratorHelperImpl> ObjectImpl for IteratorHelperObject<T> {
             let trait_ref: &dyn IteratorHelperImpl = &self.native;
             // Transmute the fat pointer to NonNull<[()]> for storage
             // This preserves both the data pointer and vtable pointer
-            Some(std::mem::transmute_copy::<
-                &dyn IteratorHelperImpl,
-                NonNull<[()]>,
-            >(&trait_ref))
+            Some(unsafe {
+                std::mem::transmute_copy::<&dyn IteratorHelperImpl, NonNull<[()]>>(&trait_ref)
+            })
         } else {
             None
         }

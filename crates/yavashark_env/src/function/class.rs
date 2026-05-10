@@ -409,7 +409,9 @@ impl Obj for Class {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
-            self.inner.inner_downcast(ty)
+            unsafe {
+                self.inner.inner_downcast(ty)
+            }
         }
     }
 
@@ -792,7 +794,9 @@ impl Obj for ClassInstance {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
-            self.inner.borrow().inner_downcast(ty)
+            unsafe {
+                self.inner.borrow().inner_downcast(ty)
+            }
         }
     }
 

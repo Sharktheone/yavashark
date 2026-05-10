@@ -45,7 +45,9 @@ pub unsafe trait Collectable: Sized {
     unsafe fn deallocate(this: NonNull<[(); 0]>) {
         let this: NonNull<Self> = this.cast();
 
-        let _ = Box::from_raw(this.as_ptr());
+        unsafe {
+            let _ = Box::from_raw(this.as_ptr());
+        }
     }
 
     #[cfg(feature = "easy_debug")]

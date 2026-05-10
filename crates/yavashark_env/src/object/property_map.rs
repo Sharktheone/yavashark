@@ -88,7 +88,9 @@ impl<T> PropertyMap<T> {
     }
 
     pub unsafe fn initialize(this: *mut MaybeUninit<Self>, size: u32, native: T) {
-        let this = (*this).as_mut_ptr();
+        let this = unsafe {
+            (*this).as_mut_ptr()
+        };
         let state = MapState {
             size,
             extensible: true,
@@ -96,15 +98,17 @@ impl<T> PropertyMap<T> {
             _pad: [0; _],
         };
 
-        (*this).state = state;
+        unsafe {
+            (*this).state = state;
 
-        (*this)
-            .get_uninitialized_properties()
-            .fill(MaybeUninit::new(Value::hole()));
+            (*this)
+                .get_uninitialized_properties()
+                .fill(MaybeUninit::new(Value::hole()));
 
-        let native_ptr = (*this).get_native_ptr();
+            let native_ptr = (*this).get_native_ptr();
 
-        std::ptr::write(native_ptr.as_ptr(), native);
+            std::ptr::write(native_ptr.as_ptr(), native);
+        }
     }
 
     pub unsafe fn initialize_native_cb(
@@ -119,15 +123,18 @@ impl<T> PropertyMap<T> {
             _pad: [0; _],
         };
 
-        (*this.as_ptr()).state = state;
+        let native_ptr = unsafe {
+            (*this.as_ptr()).state = state;
 
-        (*this.as_ptr())
-            .get_uninitialized_properties()
-            .fill(MaybeUninit::new(Value::hole()));
+            (*this.as_ptr())
+                .get_uninitialized_properties()
+                .fill(MaybeUninit::new(Value::hole()));
 
-        let native_ptr = (*this.as_ptr()).get_native_ptr();
+            (*this.as_ptr()).get_native_ptr()
+        };
 
         native(native_ptr);
+
     }
 }
 
@@ -193,7 +200,7 @@ impl<T: ?Sized> PropertyMap<T> {
             _pad: [0; _],
         };
 
-        (*this).state = state;
+        unsafe { (*this).state = state; }
     }
 
     pub const fn get(&self, index: u32) -> Option<&Value> {
@@ -221,9 +228,11 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     const unsafe fn get_ptr(&self, index: u32) -> NonNull<Value> {
-        NonNull::from_ref(&self.data)
-            .byte_add(index as usize * size_of::<Value>())
-            .cast()
+        unsafe {
+            NonNull::from_ref(&self.data)
+                .byte_add(index as usize * size_of::<Value>())
+                .cast()
+        }
     }
 }
 

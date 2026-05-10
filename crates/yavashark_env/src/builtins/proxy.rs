@@ -491,7 +491,9 @@ impl Obj for Proxy {
             return Some(NonNull::from(self).cast());
         }
 
-        self.inner.inner_downcast(ty)
+        unsafe {
+            self.inner.inner_downcast(ty)
+        }
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {

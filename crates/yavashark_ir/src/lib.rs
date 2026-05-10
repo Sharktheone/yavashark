@@ -3,6 +3,7 @@ use bumpalo::collections::Vec;
 use yavashark_string::YSString;
 
 mod statement;
+mod expr;
 
 /// This IR will be used for many optimizations in the YS interpreter and compiler.
 pub struct YavasharkIr<'alloc> {

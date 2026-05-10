@@ -382,7 +382,9 @@ impl ValueInner {
     }
 
     pub const unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
-        NonNull::new_unchecked(self.ptr.cast_mut())
+        unsafe {
+            NonNull::new_unchecked(self.ptr.cast_mut())
+        }
     }
 
     pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
