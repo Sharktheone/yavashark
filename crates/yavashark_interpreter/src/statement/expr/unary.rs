@@ -2,7 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::{Expr, UnaryExpr, UnaryOp};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::{Error, Realm, RuntimeResult, Value};
+use yavashark_env::{Error, PrimitiveValue, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -106,12 +106,14 @@ impl Interpreter {
             UnaryOp::Tilde => {
                 if let Value::BigInt(b) = value {
                     (!&*b).into()
+                } else if let Value::Object(obj) = &value && let Some(PrimitiveValue::BigInt(b)) = obj.primitive(realm)? {
+                    (!&*b).into()
                 } else {
                     let n = value.to_int_or_null(realm)? as i32;
 
                     (!n).into()
                 }
-                
+
             },
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
             UnaryOp::Void => Value::Undefined,
