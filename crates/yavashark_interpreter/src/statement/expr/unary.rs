@@ -103,7 +103,16 @@ impl Interpreter {
                 }
             }
             UnaryOp::Bang => Value::Boolean(!value.is_truthy()),
-            UnaryOp::Tilde => Value::Number((!(value.to_int_or_null(realm))?) as f64),
+            UnaryOp::Tilde => {
+                if let Value::BigInt(b) = value {
+                    (!&*b).into()
+                } else {
+                    let n = value.to_int_or_null(realm)? as i32;
+
+                    (!n).into()
+                }
+                
+            },
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
             UnaryOp::Void => Value::Undefined,
             UnaryOp::Delete => Value::Boolean(false), // unreachable
