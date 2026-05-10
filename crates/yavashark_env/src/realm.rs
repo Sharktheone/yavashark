@@ -107,7 +107,9 @@ impl Realm {
                     return Ok(Value::Undefined);
                 };
 
-                let code = code.to_string(realm)?;
+                let Value::String(code) = code else {
+                    return Ok(code.copy());
+                };
 
                 let mut scope = Scope::global(realm, PathBuf::from("eval")); //TODO: the scope should be the caller's scope
 
