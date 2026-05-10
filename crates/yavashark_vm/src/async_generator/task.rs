@@ -17,7 +17,7 @@ pub struct AsyncGeneratorTask {
     await_promise:
         Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>, bool)>>,
     promise: OwningGcGuard<'static, BoxedObj, Promise>,
-    gen: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
+    generator: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
     gen_notify: Option<OwningGcGuardRefed<BoxedObj, Notified<'static>>>,
 }
 
@@ -28,13 +28,13 @@ impl AsyncGeneratorTask {
     pub fn new(
         realm: &mut Realm,
         state: Option<VmState>,
-        gen: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
+        generator: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
     ) -> Res<ObjectHandle> {
         let promise_obj = Promise::new(realm)?.into_object();
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let gen_notify = if state.is_none() {
-            Some(gen.clone().map_refed(|gen| gen.notify.notified()))
+            Some(generator.clone().map_refed(|generator| generator.notify.notified()))
         } else {
             None
         };
@@ -43,7 +43,7 @@ impl AsyncGeneratorTask {
             state,
             await_promise: None,
             promise,
-            gen,
+            generator,
             gen_notify,
         };
 
@@ -62,7 +62,7 @@ impl AsyncTask for AsyncGeneratorTask {
             if pinned.poll(cx).is_pending() {
                 return Poll::Pending;
             }
-            inner.state = inner.gen.state.take();
+            inner.state = inner.generator.state.take();
             inner.gen_notify = None;
         }
 
@@ -150,7 +150,7 @@ impl AsyncGeneratorTask {
                 AsyncGeneratorPoll::Ret(_, ret) => {
                     match ret {
                         Ok(val) => {
-                            self.gen.notify.notify_waiters();
+                            self.generator.notify.notify_waiters();
                             let obj = Object::new(realm);
 
                             obj.define_property("done".into(), true.into(), realm)?;
@@ -159,7 +159,7 @@ impl AsyncGeneratorTask {
                             self.promise.resolve(&obj.into(), realm)?;
                         }
                         Err(e) => {
-                            self.gen.notify.notify_waiters();
+                            self.generator.notify.notify_waiters();
                             let e = ErrorObj::error_to_value(e, realm)?;
                             self.promise.reject(&e, realm)?;
                         }
@@ -168,8 +168,8 @@ impl AsyncGeneratorTask {
                     Poll::Ready(Ok(()))
                 }
                 AsyncGeneratorPoll::Yield(state, mut val) => {
-                    self.gen.state.replace(Some(state));
-                    self.gen.notify.notify_one();
+                    self.generator.state.replace(Some(state));
+                    self.generator.notify.notify_one();
 
                     if let Value::Object(obj) = &val {
                         if let Some(promise) = obj.downcast::<Promise>() {

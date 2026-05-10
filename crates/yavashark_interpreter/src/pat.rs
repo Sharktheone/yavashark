@@ -274,12 +274,12 @@ pub fn set_value_name(name: &str, value: &Value, realm: &mut Realm) -> Res {
             class.update_name(name, realm)?;
         }
 
-        if let Some(gen) = obj.downcast::<GeneratorFunction>() {
-            gen.update_name(name, realm)?;
+        if let Some(generator) = obj.downcast::<GeneratorFunction>() {
+            generator.update_name(name, realm)?;
         }
 
-        if let Some(gen) = obj.downcast::<AsyncGeneratorFunction>() {
-            gen.update_name(name, realm)?;
+        if let Some(generator) = obj.downcast::<AsyncGeneratorFunction>() {
+            generator.update_name(name, realm)?;
         }
     }
 
