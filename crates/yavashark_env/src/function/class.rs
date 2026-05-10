@@ -159,7 +159,7 @@ impl Obj for Class {
         value: ObjectHandle,
         realm: &mut Realm,
     ) -> Res {
-        if matches!(&name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
+        if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == Some("prototype")) {
             return Err(Error::new("Cannot set prototype property"));
         }
 

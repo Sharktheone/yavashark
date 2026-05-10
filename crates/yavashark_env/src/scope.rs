@@ -674,7 +674,7 @@ impl ScopeInternal {
                     return Ok(true);
                 }
             }
-            ObjectOrVariables::Variables(ref mut v) => {
+            ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(name) {
                     if !var.get(realm).properties.is_writable() {
                         return Err(Error::ty("Assignment to constant variable"));
