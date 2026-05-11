@@ -1,4 +1,7 @@
+use std::mem::{MaybeUninit};
 use std::ops::{Deref, DerefMut};
+use std::ptr;
+use std::ptr::{NonNull};
 
 #[repr(C, align(8))]
 pub struct NativeWrapper<T: ?Sized> {
@@ -13,10 +16,25 @@ impl<T> NativeWrapper<T> {
         "Alignment of T must be <= 8; consider wrapping in a Box<T>"
     );
 
-    pub const fn new(data: T) -> Self {
+    pub const fn new_sized(data: T) -> Self {
         let () = Self::DATA_ALIGNMENT_REQUIREMENT;
 
         Self { data }
+    }
+
+    pub unsafe fn initialize_from_ref(this: NonNull<MaybeUninit<Self>>, data: T) {
+        unsafe {
+            (*(*this.as_ptr()).as_mut_ptr()).data = data;
+        }
+    }
+
+    pub unsafe fn initialize_from_ref_cb<R>(this: NonNull<MaybeUninit<Self>>, data: impl FnOnce(NonNull<MaybeUninit<T>>) -> R) -> R {
+        unsafe {
+            let native = &raw mut (*(*this.as_ptr()).as_mut_ptr()).data;
+
+
+            data(NonNull::new_unchecked(native).cast())
+        }
     }
 }
 
