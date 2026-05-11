@@ -87,9 +87,9 @@ impl<T> PropertyMap<T> {
         unsafe { self.get_native_ptr().as_mut() }
     }
 
-    pub unsafe fn initialize(this: *mut MaybeUninit<Self>, size: u32, native: T) {
+    pub unsafe fn initialize(this: NonNull<MaybeUninit<Self>>, size: u32, native: T) {
         let this = unsafe {
-            (*this).as_mut_ptr()
+            (*this.as_ptr()).as_mut_ptr()
         };
         let state = MapState {
             size,
