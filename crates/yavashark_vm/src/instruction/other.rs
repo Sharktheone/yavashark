@@ -1,7 +1,7 @@
-use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_bytecode::data::{ControlIdx, Label, VarName};
+use crate::data::{Data, OutputData};
 use yavashark_bytecode::JmpAddr;
+use yavashark_bytecode::data::{ControlIdx, Label, VarName};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
 use yavashark_env::value::{IntoValue, ObjectOrNull};

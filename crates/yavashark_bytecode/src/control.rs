@@ -1,5 +1,5 @@
-use crate::data::VarName;
 use crate::JmpAddr;
+use crate::data::VarName;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ControlBlock {

@@ -11,8 +11,8 @@ use crate::value::property_key::{
     BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey,
 };
 use crate::{Error, ObjectProperty, Res};
-use indexmap::map::Entry;
 use indexmap::IndexMap;
+use indexmap::map::Entry;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::mem;

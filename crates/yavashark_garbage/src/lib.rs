@@ -18,7 +18,7 @@ use spin_lock::SpinLock;
 
 use crate::tagged_ptr::TaggedPtr;
 #[cfg(feature = "easy_debug")]
-use crate::trace::{TraceID, TRACER};
+use crate::trace::{TRACER, TraceID};
 
 #[cfg(feature = "actual_gc")]
 pub(crate) mod spin_lock;
@@ -1280,7 +1280,9 @@ impl<T: Collectable> Drop for GcBox<T> {
                     "Cannot drop a GcBox that is still referenced - wrong use of gc or memory leak"
                 );
             } else {
-                warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad");
+                warn!(
+                    "Failed to proof that all references to a GcBox have been dropped - this might be bad"
+                );
                 //TODO: should we also panic here?
             }
 
@@ -1381,7 +1383,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
                 } // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                  //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             #[cfg(feature = "actual_gc")]

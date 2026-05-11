@@ -28,11 +28,7 @@ pub trait ToNumber {
 
 impl ToNumber for bool {
     fn num(&self) -> f64 {
-        if *self {
-            1.0
-        } else {
-            0.0
-        }
+        if *self { 1.0 } else { 0.0 }
     }
 }
 
@@ -888,20 +884,12 @@ impl PartialOrd for Value {
 impl Value {
     #[must_use]
     pub fn log_or(&self, rhs: Self) -> Self {
-        if self.is_truthy() {
-            self.copy()
-        } else {
-            rhs
-        }
+        if self.is_truthy() { self.copy() } else { rhs }
     }
 
     #[must_use]
     pub fn log_and(&self, rhs: Self) -> Self {
-        if self.is_truthy() {
-            rhs
-        } else {
-            self.copy()
-        }
+        if self.is_truthy() { rhs } else { self.copy() }
     }
 
     // pub fn pow(&self, rhs: &Self, realm: &mut Realm) -> Result<Self, Error> {

@@ -1,18 +1,18 @@
 mod conv;
 
-use crate::array::{convert_index, Array, ArrayIterator, ArrayIteratorKind, MutableArrayIterator};
+use crate::array::{Array, ArrayIterator, ArrayIteratorKind, MutableArrayIterator, convert_index};
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::{BigInt64Array, BigInt64ArrayConstructor};
 use crate::builtins::biguint64array::{BigUint64Array, BigUint64ArrayConstructor};
 use crate::builtins::float16array::{Float16Array, Float16ArrayConstructor};
 use crate::builtins::float32array::{Float32Array, Float32ArrayConstructor};
 use crate::builtins::float64array::{Float64Array, Float64ArrayConstructor};
+use crate::builtins::int8array::{Int8Array, Int8ArrayConstructor};
 use crate::builtins::int16array::{Int16Array, Int16ArrayConstructor};
 use crate::builtins::int32array::{Int32Array, Int32ArrayConstructor};
-use crate::builtins::int8array::{Int8Array, Int8ArrayConstructor};
+use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 use crate::builtins::uint16array::{Uint16Array, Uint16ArrayConstructor};
 use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
-use crate::builtins::uint8clampedarray::{Uint8ClampedArray, Uint8ClampedArrayConstructor};
 use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
 use crate::utils::{ArrayLike, ValueIterator};
@@ -21,7 +21,7 @@ use crate::{
     Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Symbol,
     Value, ValueResult, Variable,
 };
-use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
+use bytemuck::{AnyBitPattern, NoUninit, Zeroable, try_cast_vec};
 use conv::to_value;
 use half::f16;
 use num_traits::{FromPrimitive, ToPrimitive};
@@ -321,10 +321,12 @@ impl crate::value::ObjectImpl for TypedArray {
             return self.get_wrapped_object().values(realm);
         }
 
-        let mut values = typed_array_run!(slice
-            .iter()
-            .map(|x| to_value(x.0).into())
-            .collect::<Vec<_>>());
+        let mut values = typed_array_run!(
+            slice
+                .iter()
+                .map(|x| to_value(x.0).into())
+                .collect::<Vec<_>>()
+        );
 
         values.append(&mut self.get_wrapped_object().values(realm)?);
 

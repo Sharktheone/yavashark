@@ -1,12 +1,10 @@
 #![allow(unused)]
 use crate::object::inline::{ButterFly, Value};
+use crate::object::native_wrapper::NativeWrapper;
 use std::alloc::Layout;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
-use crate::object::native_wrapper::NativeWrapper;
-
-
 
 /// A property map is a contiguous block of memory that holds a fixed number of properties (as Values) and a native struct of type T.
 /// Internally, the `PropertyMap` is broken up into N 64-bit slots for different purposes.
@@ -33,7 +31,6 @@ pub struct OpaqueData<T: ?Sized> {
     _inner: PhantomData<NativeWrapper<T>>,
 }
 
-
 #[repr(align(8))]
 pub struct Data<T: ?Sized> {
     _value: PhantomData<[Value]>,
@@ -41,8 +38,6 @@ pub struct Data<T: ?Sized> {
     _inner: PhantomData<NativeWrapper<T>>,
     inner: [u8], // layout is the same as the two markers.
 }
-
-
 
 #[repr(align(8))]
 struct MapState {
@@ -52,8 +47,15 @@ struct MapState {
     _pad: [u8; 2],
 }
 
-const _: () = assert!(size_of::<MapState>() == 8, "MapState must be 8 bytes in size");
-const _: () = assert!(align_of::<MapState>() == 8, "MapState must be 8 bytes aligned");
+const _: () = assert!(
+    size_of::<MapState>() == 8,
+    "MapState must be 8 bytes in size"
+);
+const _: () = assert!(
+    align_of::<MapState>() == 8,
+    "MapState must be 8 bytes aligned"
+);
+
 
 impl<T: ?Sized> PropertyMap<T> {
     const NUM_INTERNAL_SLOTS: usize = 1; // MapState takes one slot.
@@ -82,9 +84,7 @@ impl<T> PropertyMap<T> {
     }
 
     pub unsafe fn initialize(this: NonNull<MaybeUninit<Self>>, size: u32, native: T) {
-        let this = unsafe {
-            (*this.as_ptr()).as_mut_ptr()
-        };
+        let this = unsafe { (*this.as_ptr()).as_mut_ptr() };
         let state = MapState {
             size,
             extensible: true,
@@ -242,7 +242,9 @@ impl<T: ?Sized> PropertyMap<T> {
             _pad: [0; _],
         };
 
-        unsafe { (*this).state = state; }
+        unsafe {
+            (*this).state = state;
+        }
     }
 
     pub const fn get(&self, index: u32) -> Option<&Value> {

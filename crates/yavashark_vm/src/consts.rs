@@ -1,5 +1,5 @@
-use crate::function_code::{BytecodeArrowFunction, BytecodeFunction};
 use crate::VM;
+use crate::function_code::{BytecodeArrowFunction, BytecodeFunction};
 use std::cell::RefCell;
 use yavashark_bytecode::{
     ArrayLiteralBlueprint, ConstValue, DataTypeValue, ObjectLiteralBlueprint,
@@ -7,8 +7,8 @@ use yavashark_bytecode::{
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
-use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::value::IntoValue;
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::{Error, Object, Value, ValueResult};
 
 pub trait ConstIntoValue {

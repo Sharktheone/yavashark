@@ -5,7 +5,7 @@ use std::mem;
 use std::rc::Rc;
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
-use yavashark_bytecode::{instructions, BytecodeFunctionCode, ConstIdx, Reg, VarName};
+use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName, instructions};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
@@ -280,7 +280,7 @@ impl ResumableVM<'_> {
                         return self.poll_next();
                     }
                     ControlFlow::Return(value) => {
-                        return AsyncGeneratorPoll::Ret(self.state, Ok(value))
+                        return AsyncGeneratorPoll::Ret(self.state, Ok(value));
                     }
                     ControlFlow::Break(_) => {
                         return AsyncGeneratorPoll::Ret(

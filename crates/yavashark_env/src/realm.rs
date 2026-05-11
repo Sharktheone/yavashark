@@ -10,14 +10,14 @@ use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
 use crate::task_queue::AsyncTaskQueue;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
-#[cfg(feature = "profiler")]
-use std::time::Instant;
 pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::rc::Rc;
+#[cfg(feature = "profiler")]
+use std::time::Instant;
 
 #[cfg(feature = "profiler")]
 use yavashark_profiler::{FileProfileWriter, FrameId, Profile};

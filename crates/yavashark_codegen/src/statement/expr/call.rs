@@ -24,7 +24,7 @@ impl ByteCodegen {
 
         self.instructions
             .push(Instruction::CallAcc(stmt.args.len() as u16)); //TODO: how can we push the args here?
-                                                                 //TODO: variadic args?
+        //TODO: variadic args?
 
         Ok(())
     }

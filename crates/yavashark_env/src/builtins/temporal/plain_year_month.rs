@@ -1,16 +1,16 @@
-use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{
     difference_settings, display_calendar, overflow_options, overflow_options_opt,
     value_to_year_month_fields,
 };
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
+use temporal_rs::Calendar;
 use temporal_rs::fields::CalendarFields;
 use temporal_rs::partial::PartialYearMonth;
-use temporal_rs::Calendar;
 use yavashark_macro::props;
 use yavashark_string::YSString;
 

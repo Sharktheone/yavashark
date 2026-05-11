@@ -1,4 +1,4 @@
-use crate::conversion::{downcast_obj, FromValueOutput};
+use crate::conversion::{FromValueOutput, downcast_obj};
 use crate::experiments::gui::ui::Ui;
 use crate::value::{BoxedObj, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};

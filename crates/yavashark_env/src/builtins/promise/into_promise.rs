@@ -1,5 +1,5 @@
 use crate::builtins::Promise;
-use crate::conversion::{downcast_obj, TryIntoValue};
+use crate::conversion::{TryIntoValue, downcast_obj};
 use crate::task_queue::{AsyncTask, AsyncTaskQueue};
 use crate::value::{BoxedObj, Obj};
 use crate::{ObjectHandle, Realm, Res};

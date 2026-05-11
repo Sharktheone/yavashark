@@ -1,12 +1,12 @@
-use crate::function::{JSFunction, OptimizedJSFunction};
 use crate::Interpreter;
-use std::any::{type_name_of_val, Any, TypeId};
+use crate::function::{JSFunction, OptimizedJSFunction};
+use std::any::{Any, TypeId, type_name_of_val};
 use std::cell::RefCell;
 use std::mem;
 use swc_ecma_ast::FnDecl;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
-use yavashark_env::{optimizer::OptimFunction, Realm, Res, Value};
+use yavashark_env::{Realm, Res, Value, optimizer::OptimFunction};
 
 impl Interpreter {
     pub fn decl_fn_ret(

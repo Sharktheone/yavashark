@@ -11,8 +11,8 @@ use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 use std::path::PathBuf;
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
@@ -131,9 +131,7 @@ pub fn main() {
     let shellold = matches.get_flag("shellold");
     let eval_code = matches.get_one::<String>("eval");
     let js_profile_out = matches.get_one::<String>("profile-out").cloned();
-    let native_profile_out = matches
-        .get_one::<String>("native-profile-out")
-        .cloned();
+    let native_profile_out = matches.get_one::<String>("native-profile-out").cloned();
     let native_profile = matches.get_flag("native-profile");
 
     if !(interpreter || bytecode || ast || instructions) {
@@ -298,14 +296,15 @@ fn run_code(
         realm.set_eval(InterpreterEval, false).unwrap();
         #[cfg(feature = "profiler")]
         if let Some(profile_out) = js_profile_out {
-            let p = match yavashark_profiler::FileProfileWriter::from_path(PathBuf::from(profile_out).as_path()) {
+            let p = match yavashark_profiler::FileProfileWriter::from_path(
+                PathBuf::from(profile_out).as_path(),
+            ) {
                 Ok(k) => k,
                 Err(e) => {
                     println!("Error: {e}");
                     return;
                 }
             };
-
 
             realm.set_profile_writer(p);
         }
@@ -404,8 +403,8 @@ fn run_code(
         }
 
         if old_bytecode {
-            use yavashark_vm::yavashark_bytecode::data::DataSection;
             use yavashark_vm::OldOwnedVM;
+            use yavashark_vm::yavashark_bytecode::data::DataSection;
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
             let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
@@ -420,7 +419,11 @@ fn run_code(
 
 #[cfg(feature = "pprof")]
 #[allow(clippy::unwrap_used)]
-fn write_native_profile(profile_out: Option<&str>, path: &std::path::Path, guard: ProfilerGuard<'_>) {
+fn write_native_profile(
+    profile_out: Option<&str>,
+    path: &std::path::Path,
+    guard: ProfilerGuard<'_>,
+) {
     let Ok(report) = guard.report().build() else {
         return;
     };
@@ -456,6 +459,9 @@ fn write_native_profile(profile_out: Option<&str>, path: &std::path::Path, guard
 
 #[cfg(feature = "pprof")]
 fn default_native_profile_path(path: &std::path::Path) -> PathBuf {
-    let stem = path.file_stem().and_then(|name| name.to_str()).unwrap_or("profile");
+    let stem = path
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .unwrap_or("profile");
     PathBuf::from(format!("profiles/{stem}.native.pb.gz"))
 }

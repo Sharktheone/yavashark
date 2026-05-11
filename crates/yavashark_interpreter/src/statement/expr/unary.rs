@@ -106,15 +106,16 @@ impl Interpreter {
             UnaryOp::Tilde => {
                 if let Value::BigInt(b) = value {
                     (!&*b).into()
-                } else if let Value::Object(obj) = &value && let Some(PrimitiveValue::BigInt(b)) = obj.primitive(realm)? {
+                } else if let Value::Object(obj) = &value
+                    && let Some(PrimitiveValue::BigInt(b)) = obj.primitive(realm)?
+                {
                     (!&*b).into()
                 } else {
                     let n = value.to_int_or_null(realm)? as i32;
 
                     (!n).into()
                 }
-
-            },
+            }
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
             UnaryOp::Void => Value::Undefined,
             UnaryOp::Delete => Value::Boolean(false), // unreachable

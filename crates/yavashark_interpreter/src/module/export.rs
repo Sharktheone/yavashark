@@ -1,5 +1,5 @@
-use crate::statement::decl::{var, DeclRet};
 use crate::Interpreter;
+use crate::statement::decl::{DeclRet, var};
 use swc_common::Spanned;
 use swc_ecma_ast::{
     DefaultDecl, ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, ExportSpecifier,

@@ -12,12 +12,12 @@ mod values;
 use crate::config::Config;
 use crate::inline_props::args::InlinePropsArgs;
 use crate::inline_props::property::{Kind, Property};
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::TokenStream;
-use syn::spanned::Spanned;
 use syn::Fields;
+use syn::spanned::Spanned;
 
 pub fn inline_props(
     attrs: proc_macro::TokenStream,

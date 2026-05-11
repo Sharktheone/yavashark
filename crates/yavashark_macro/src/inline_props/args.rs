@@ -1,5 +1,5 @@
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 
 #[derive(Debug, FromMeta)]
 struct InnerInlinePropsArgs {

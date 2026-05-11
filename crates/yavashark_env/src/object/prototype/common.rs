@@ -5,8 +5,8 @@ use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj}
 use crate::error_obj::ErrorObj;
 use crate::realm::{Intrinsic, Realm};
 use crate::utils::coerce_object;
-use crate::value::property_key::IntoPropertyKey;
 use crate::value::Property;
+use crate::value::property_key::IntoPropertyKey;
 use crate::{Error, Object, ObjectHandle, ObjectOrNull, Symbol, Value, ValueResult};
 use yavashark_string::YSString;
 

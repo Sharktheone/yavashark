@@ -1,5 +1,5 @@
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro2::Ident;
 use quote::ToTokens;
 use syn::spanned::Spanned;

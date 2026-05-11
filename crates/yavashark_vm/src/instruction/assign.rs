@@ -1,5 +1,5 @@
-use crate::data::{Data, OutputData};
 use crate::VM;
+use crate::data::{Data, OutputData};
 use yavashark_env::Res;
 
 pub fn add_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {

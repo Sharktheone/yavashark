@@ -1,7 +1,7 @@
+use crate::Realm;
 use crate::error::Error;
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{Hint, Value};
-use crate::Realm;
 use num_traits::ToPrimitive;
 
 impl Value {

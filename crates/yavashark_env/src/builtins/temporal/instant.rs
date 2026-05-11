@@ -5,7 +5,7 @@ use crate::builtins::temporal::utils::{
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::conversion::downcast_obj;
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};

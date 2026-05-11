@@ -1,6 +1,6 @@
 use crate::partial_init::Initializer;
 use crate::utils::ProtoDefault;
-use crate::value::{fmt_num, Constructor, Func, Obj};
+use crate::value::{Constructor, Func, Obj, fmt_num};
 use crate::{
     MutObject, NativeFunction, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
 };
@@ -203,11 +203,7 @@ impl NumberConstructor {
 
                 let val = digits.first().unwrap_or(&0).to_f64().unwrap_or(0.0);
 
-                if sign == Sign::Minus {
-                    -val
-                } else {
-                    val
-                }
+                if sign == Sign::Minus { -val } else { val }
             }),
             _ => val.to_number(realm)?,
         })

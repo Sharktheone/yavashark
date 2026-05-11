@@ -1,5 +1,5 @@
-use crate::data::{Data, OutputData};
 use crate::VM;
+use crate::data::{Data, OutputData};
 use yavashark_env::Res;
 
 pub fn b_xor(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {

@@ -1,5 +1,5 @@
-use crate::function::JSFunction;
 use crate::Interpreter;
+use crate::function::JSFunction;
 use std::rc::Rc;
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};

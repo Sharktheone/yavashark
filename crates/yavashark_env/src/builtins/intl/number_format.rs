@@ -1,10 +1,10 @@
 use crate::array::Array;
 use crate::builtins::intl::utils::{LocaleMatcher, LocaleMatcherOptions};
-use crate::value::{fmt_num, IntoValue, Obj};
+use crate::value::{IntoValue, Obj, fmt_num};
 use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value};
 use icu::decimal::input::Decimal;
 use icu::decimal::options::{DecimalFormatterOptions, GroupingStrategy};
-use icu::decimal::{parts as icu_parts, DecimalFormatter};
+use icu::decimal::{DecimalFormatter, parts as icu_parts};
 use icu::locale::Locale;
 use std::cell::RefCell;
 use std::sync::Arc;

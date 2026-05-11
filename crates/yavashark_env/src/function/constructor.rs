@@ -32,9 +32,7 @@ impl Debug for NativeConstructor {
 
 impl Constructor for NativeConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        crate::profiler::profile_call(realm, || self.name.clone(), |realm| {
-            (self.f)(args, realm)
-        })
+        crate::profiler::profile_call(realm, || self.name.clone(), |realm| (self.f)(args, realm))
     }
 
     // fn construct_proto(&self) -> Res<ObjectProperty> {
@@ -44,16 +42,20 @@ impl Constructor for NativeConstructor {
 
 impl Func for NativeConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
-        crate::profiler::profile_call(realm, || self.name.clone(), |realm| {
-            if self.special {
-                Ok((self.f)(args, realm)?.into())
-            } else {
-                Err(Error::ty_error(format!(
-                    "Constructor {} requires 'new'",
-                    self.name
-                )))
-            }
-        })
+        crate::profiler::profile_call(
+            realm,
+            || self.name.clone(),
+            |realm| {
+                if self.special {
+                    Ok((self.f)(args, realm)?.into())
+                } else {
+                    Err(Error::ty_error(format!(
+                        "Constructor {} requires 'new'",
+                        self.name
+                    )))
+                }
+            },
+        )
     }
 }
 

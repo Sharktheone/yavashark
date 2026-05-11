@@ -269,16 +269,12 @@ pub trait ObjectImpl: Debug + 'static {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
-            unsafe {
-                self.get_wrapped_object().inner_downcast(ty)
-            }
+            unsafe { self.get_wrapped_object().inner_downcast(ty) }
         }
     }
 
     unsafe fn inner_downcast_fat_ptr(&self, ty: TypeId) -> Option<NonNull<[()]>> {
-        unsafe {
-            self.get_wrapped_object().inner_downcast_fat_ptr(ty)
-        }
+        unsafe { self.get_wrapped_object().inner_downcast_fat_ptr(ty) }
     }
 
     fn is_extensible(&self) -> bool {
@@ -557,15 +553,11 @@ impl<T: ObjectImpl> Obj for T {
     }
 
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
-        unsafe {
-            ObjectImpl::inner_downcast(self, ty)
-        }
+        unsafe { ObjectImpl::inner_downcast(self, ty) }
     }
 
     unsafe fn inner_downcast_fat_ptr(&self, ty: TypeId) -> Option<NonNull<[()]>> {
-        unsafe {
-            ObjectImpl::inner_downcast_fat_ptr(self, ty)
-        }
+        unsafe { ObjectImpl::inner_downcast_fat_ptr(self, ty) }
     }
 
     fn is_extensible(&self) -> bool {

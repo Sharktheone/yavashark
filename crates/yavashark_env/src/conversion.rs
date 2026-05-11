@@ -2,7 +2,7 @@ use crate::array::Array;
 use crate::value::ops::BigIntOrNumber;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::{
-    fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj, PrimitiveValue,
+    BoxedObj, FromValue, Hint, IntoValue, Obj, PrimitiveValue, fmt_num, ops::ToNumber,
 };
 use crate::{
     Error, GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value,

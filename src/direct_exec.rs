@@ -1,6 +1,6 @@
 use std::path::PathBuf;
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_ast::Stmt;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::scope::Scope;

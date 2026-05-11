@@ -94,7 +94,11 @@ fn run() {
         #[cfg(feature = "pprof")]
         if enable_prof {
             let guard = ProfilerGuard::new(1_000_000).expect("failed to start profiler");
-            let res = run_file(path.clone(), #[cfg(feature = "profiler")] profile_out_path.as_deref());
+            let res = run_file(
+                path.clone(),
+                #[cfg(feature = "profiler")]
+                profile_out_path.as_deref(),
+            );
 
             write_native_profile(profile_out_path.as_deref(), &path, guard);
 
@@ -118,10 +122,16 @@ fn run() {
 
         #[cfg(all(not(feature = "pprof"), not(feature = "profiler")))]
         if enable_prof {
-            eprintln!("Profiling requested but not enabled at compile time. Rebuild with --features pprof or profiler.");
+            eprintln!(
+                "Profiling requested but not enabled at compile time. Rebuild with --features pprof or profiler."
+            );
         }
 
-        match run_file(path, #[cfg(feature = "profiler")] None) {
+        match run_file(
+            path,
+            #[cfg(feature = "profiler")]
+            None,
+        ) {
             Err(e) => println!("FAIL:\n {}", e),
             Ok(v) => println!("PASS:\n {v}"),
         }
@@ -145,7 +155,9 @@ fn run() {
 
         #[cfg(not(feature = "pprof"))]
         if enable_prof {
-            eprintln!("Profiling requested but not enabled at compile time. Rebuild with --features pprof.");
+            eprintln!(
+                "Profiling requested but not enabled at compile time. Rebuild with --features pprof."
+            );
         }
 
         match test_file(path) {
@@ -156,7 +168,11 @@ fn run() {
 }
 
 #[cfg(feature = "pprof")]
-fn write_native_profile(profile_out: Option<&std::path::Path>, path: &std::path::Path, guard: ProfilerGuard<'_>) {
+fn write_native_profile(
+    profile_out: Option<&std::path::Path>,
+    path: &std::path::Path,
+    guard: ProfilerGuard<'_>,
+) {
     let Ok(report) = guard.report().build() else {
         return;
     };
@@ -172,7 +188,10 @@ fn write_native_profile(profile_out: Option<&std::path::Path>, path: &std::path:
     let out = profile_out
         .map(std::path::Path::to_path_buf)
         .unwrap_or_else(|| {
-            let test_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("profile");
+            let test_name = path
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("profile");
             PathBuf::from(format!("profiles/{test_name}.native.pb.gz"))
         });
 

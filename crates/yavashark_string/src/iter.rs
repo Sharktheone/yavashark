@@ -1,6 +1,6 @@
 //! Iterators for `YSString` code units and code points.
 
-use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, CodePoint};
+use crate::codepoint::{CodePoint, decode_surrogate_pair, is_high_surrogate, is_low_surrogate};
 
 /// Iterator over UTF-16 code units of a string.
 #[derive(Clone, Debug)]

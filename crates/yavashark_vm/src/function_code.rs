@@ -62,7 +62,7 @@ impl FunctionCode for BytecodeFunction {
                         Err(Error::syn("Illegal await statement").into())
                     }
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
-                }
+                };
             }
         }
 
@@ -107,7 +107,7 @@ impl FunctionCode for BytecodeArrowFunction {
                         Err(Error::syn("Illegal await statement").into())
                     }
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
-                }
+                };
             }
         }
 

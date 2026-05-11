@@ -1,11 +1,11 @@
 use std::path::PathBuf;
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
+use yavashark_env::Realm;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
-use yavashark_env::Realm;
 use yavashark_interpreter::eval::InterpreterEval;
 
 #[allow(clippy::expect_used)]

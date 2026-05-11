@@ -16,25 +16,31 @@ pub struct BoundFunction {
 
 impl Func for BoundFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        crate::profiler::profile_call(realm, || self.name(), |realm| {
-            let args = if self.bound_args.is_empty() {
-                args
-            } else {
-                let mut bound_args = self.bound_args.clone();
-                bound_args.extend(args);
-                bound_args
-            };
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| {
+                let args = if self.bound_args.is_empty() {
+                    args
+                } else {
+                    let mut bound_args = self.bound_args.clone();
+                    bound_args.extend(args);
+                    bound_args
+                };
 
-            self.func.call(realm, args, self.bound_this.copy())
-        })
+                self.func.call(realm, args, self.bound_this.copy())
+            },
+        )
     }
 }
 
 impl Constructor for BoundFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
-        crate::profiler::profile_call(realm, || self.name(), |realm| {
-            self.func.as_object()?.construct(args, realm)
-        })
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| self.func.as_object()?.construct(args, realm),
+        )
     }
 }
 

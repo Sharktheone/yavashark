@@ -4,7 +4,7 @@ use crate::conversion::ActualString;
 use crate::value::{IntoValue, Obj};
 use crate::{Error, Object, ObjectHandle, Realm, Res, Value};
 use base64::alphabet::{STANDARD, URL_SAFE};
-use base64::{engine, Engine};
+use base64::{Engine, engine};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 

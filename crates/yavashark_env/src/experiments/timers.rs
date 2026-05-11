@@ -8,7 +8,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
-use tokio::time::{sleep, Sleep};
+use tokio::time::{Sleep, sleep};
 
 pub struct SleepDuration {
     dur: Duration,

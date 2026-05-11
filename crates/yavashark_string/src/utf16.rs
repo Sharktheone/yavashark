@@ -2,4 +2,4 @@
 
 mod inline;
 
-pub use inline::{InlineUtf16String, INLINE_UTF16_CAPACITY};
+pub use inline::{INLINE_UTF16_CAPACITY, InlineUtf16String};

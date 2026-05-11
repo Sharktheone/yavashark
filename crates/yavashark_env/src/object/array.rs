@@ -1,10 +1,10 @@
 use crate::builtins::iterator::Iterator;
-use crate::builtins::{to_integer_or_infinity, Map, NumberConstructor, Proxy, Set};
+use crate::builtins::{Map, NumberConstructor, Proxy, Set, to_integer_or_infinity};
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::conversion::TryIntoValue;
 use crate::object::Object;
 use crate::realm::{Intrinsic, Realm};
-use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
+use crate::utils::{ArrayLike, ProtoDefault, ValueIterator, coerce_object_strict};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{
     Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj,

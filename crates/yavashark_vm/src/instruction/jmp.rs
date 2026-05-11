@@ -1,5 +1,5 @@
-use crate::data::Data;
 use crate::VM;
+use crate::data::Data;
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::{Res, Value};
 

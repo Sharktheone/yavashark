@@ -570,11 +570,15 @@ pub trait Obj: Debug + 'static {
 
     fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)>;
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Res<Value> {
-        crate::profiler::profile_call(realm, || self.name(), |_realm| {
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |_realm| {
                 _ = args;
                 _ = this;
                 Err(Error::ty_error(format!("{} is not callable", self.name())))
-        })
+            },
+        )
     }
     fn is_callable(&self) -> bool {
         false
@@ -589,11 +593,18 @@ pub trait Obj: Debug + 'static {
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        crate::profiler::profile_call(realm, || self.name(), |_realm| {
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |_realm| {
                 _ = args;
                 //TODO: i think this somehow needs to work differently
-                Err(Error::ty_error(format!("{} is not constructable", self.class_name())))
-        })
+                Err(Error::ty_error(format!(
+                    "{} is not constructable",
+                    self.class_name()
+                )))
+            },
+        )
     }
     fn is_constructable(&self) -> bool {
         false
@@ -848,11 +859,15 @@ pub trait MutObj: Debug + 'static {
     fn get_array_or_done(&mut self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)>;
     fn call(&mut self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Res<Value> {
         let class_name = self.class_name();
-        crate::profiler::profile_call(realm, || class_name.to_string(), |_realm| {
+        crate::profiler::profile_call(
+            realm,
+            || class_name.to_string(),
+            |_realm| {
                 _ = args;
                 _ = this;
                 Err(Error::ty_error(format!("{class_name} is not callable")))
-        })
+            },
+        )
     }
     fn is_callable(&self) -> bool {
         false
@@ -868,10 +883,16 @@ pub trait MutObj: Debug + 'static {
 
     fn construct(&mut self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         let class_name = self.class_name();
-        crate::profiler::profile_call(realm, || class_name.to_string(), |_realm| {
+        crate::profiler::profile_call(
+            realm,
+            || class_name.to_string(),
+            |_realm| {
                 _ = args;
-                Err(Error::ty_error(format!("{class_name} is not constructable")))
-        })
+                Err(Error::ty_error(format!(
+                    "{class_name} is not constructable"
+                )))
+            },
+        )
     }
     fn is_constructable(&self) -> bool {
         false

@@ -1,4 +1,4 @@
-use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
+use crate::uz::{DoubleU4, UZ_BYTES, UsizeSmall};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
@@ -95,9 +95,7 @@ impl<T> SmallVec<T> {
 
         let ptr = self.ptr.as_ptr();
 
-        unsafe {
-            ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap))
-        }
+        unsafe { ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap)) }
     }
 
     pub fn into_vec(self) -> Vec<T> {

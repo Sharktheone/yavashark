@@ -1,5 +1,6 @@
 use flate2::Compression;
 use flate2::write::GzEncoder;
+use indexmap::IndexSet;
 use pprof::protos::Message;
 use pprof::protos::{Function, Line, Location, Profile as PProfProfile, Sample, ValueType};
 use std::collections::HashMap;
@@ -7,7 +8,6 @@ use std::io::{self, Write};
 use std::mem;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use indexmap::IndexSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct FrameId(u64);
@@ -104,7 +104,10 @@ impl Profile {
         let nanos = elapsed.as_nanos() as u64;
         let stack = self.stack_for_frame(&frame);
 
-        let sample = self.finished_samples.entry(SampleKey { stack }).or_default();
+        let sample = self
+            .finished_samples
+            .entry(SampleKey { stack })
+            .or_default();
         sample.count += 1;
         sample.nanos += nanos;
     }
@@ -129,7 +132,7 @@ impl Profile {
 
         stack
     }
-    
+
     #[must_use]
     pub fn take(&mut self) -> Self {
         mem::take(self)
@@ -308,9 +311,6 @@ impl FileProfileWriter {
         Ok(self.path.clone())
     }
 }
-
-
-
 
 #[derive(Default, Debug, Clone)]
 struct StringTable {

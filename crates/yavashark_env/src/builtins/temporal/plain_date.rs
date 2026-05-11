@@ -1,4 +1,4 @@
-use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
@@ -10,7 +10,7 @@ use crate::builtins::temporal::utils::{
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::builtins::value_to_partial_date;
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::options::DisplayCalendar;

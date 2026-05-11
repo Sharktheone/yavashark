@@ -1,6 +1,6 @@
+use crate::VM;
 use crate::data::{Data, OutputData};
 use crate::instruction::get_private_member;
-use crate::VM;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 

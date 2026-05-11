@@ -23,6 +23,7 @@ pub use call::*;
 pub use cmp::*;
 pub use controlflow::*;
 pub use env::*;
+pub use r#in::*;
 pub use instanceof::*;
 pub use jmp::*;
 pub use lda::*;
@@ -32,7 +33,6 @@ pub use logical::*;
 pub use math::*;
 pub use member::*;
 pub use nullish_coalescing::*;
-pub use r#in::*;
 pub use scope::*;
 pub use stack::*;
 #[allow(unused)]

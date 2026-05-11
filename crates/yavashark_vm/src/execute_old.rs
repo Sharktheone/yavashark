@@ -1,4 +1,4 @@
-use crate::{instructions, VM};
+use crate::{VM, instructions};
 use yavashark_bytecode::Instruction;
 use yavashark_env::ControlResult;
 

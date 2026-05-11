@@ -1,13 +1,13 @@
 use crate::metadata::{Flags, Metadata, NegativePhase};
 use std::path::Path;
+use swc_common::BytePos;
 use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCommentsMap};
 use swc_common::input::StringInput;
 use swc_common::util::take::Take;
-use swc_common::BytePos;
 use swc_ecma_ast::{ModuleItem, Program, Script};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-use yaml_rust2::yaml::YamlDecoder;
 use yaml_rust2::Yaml;
+use yaml_rust2::yaml::YamlDecoder;
 use yavashark_swc_validator::Validator;
 
 pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
@@ -126,7 +126,9 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                             }
                         }
 
-                        println!("PARSE_ERROR: Expected script but found module declarations (import/export in script code)");
+                        println!(
+                            "PARSE_ERROR: Expected script but found module declarations (import/export in script code)"
+                        );
                         panic!()
                     }
                 }

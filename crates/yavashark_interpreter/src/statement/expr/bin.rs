@@ -148,11 +148,7 @@ impl Interpreter {
             BinaryOp::NullishCoalescing => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                if left.is_nullish() {
-                    right
-                } else {
-                    left
-                }
+                if left.is_nullish() { right } else { left }
             }
         })
     }

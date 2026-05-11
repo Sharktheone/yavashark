@@ -248,7 +248,7 @@ impl Interpreter {
                 )?;
             }
             AssignTargetPat::Invalid(_) => {
-                return Err(Error::syn("Invalid left-hand side in assignment"))
+                return Err(Error::syn("Invalid left-hand side in assignment"));
             }
         }
 
@@ -573,7 +573,7 @@ impl Interpreter {
                 )?;
             }
             AssignTargetPat::Invalid(_) => {
-                return Err(Error::syn("Invalid left-hand side in assignment").into())
+                return Err(Error::syn("Invalid left-hand side in assignment").into());
             }
         }
 

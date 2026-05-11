@@ -1,5 +1,5 @@
-use crate::data::Data;
 use crate::VM;
+use crate::data::Data;
 use yavashark_bytecode::data::VarName;
 use yavashark_env::{Error, Res, Value};
 

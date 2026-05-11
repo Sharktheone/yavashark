@@ -1,10 +1,10 @@
 use swc_common::Spanned;
 use swc_ecma_ast::{Decl, Stmt};
 
-use yavashark_env::{scope::Scope, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{Realm, Res, RuntimeResult, Value, scope::Scope};
 
-use crate::location::get_location;
 use crate::Interpreter;
+use crate::location::get_location;
 
 mod block;
 mod r#break;

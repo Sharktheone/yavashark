@@ -6,20 +6,20 @@ use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
 use crate::builtins::float64array::Float64Array;
+use crate::builtins::int8array::Int8Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
-use crate::builtins::int8array::Int8Array;
 use crate::builtins::shared_buf::SharedArrayBuffer;
 use crate::builtins::typed_array::TypedArray;
+use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
-use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
-    intl, iterator, signal, temporal, AggregateError, Arguments, AsyncDisposableStack, Atomics,
-    BigIntObj, BooleanObj, Date, DisposableStack, EvalError, Map, NumberObj, Promise, Proxy,
-    RangeError, ReferenceError, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError,
-    ThrowTypeError, TypeError, URIError, WeakMap, WeakRef, WeakSet,
+    AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date,
+    DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp,
+    Set, StringObj, SuppressedError, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError,
+    WeakMap, WeakRef, WeakSet, intl, iterator, signal, temporal,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};

@@ -1,5 +1,5 @@
-use crate::control::ControlBlock;
 use crate::ConstValue;
+use crate::control::ControlBlock;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct DataSection {

@@ -7,8 +7,8 @@ use swc_ecma_ast::{
 use yavashark_env::value::property_key::{BorrowedInternalPropertyKey, IntoPropertyKey};
 use yavashark_env::value::{BoxedObj, CustomGcRefUntyped, InstanceFieldInitializer, Obj};
 use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey,
-    Realm, Res, Value, ValueResult, Variable,
+    Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey, Realm, Res,
+    Value, ValueResult, Variable, scope::Scope,
 };
 use yavashark_garbage::GcRef;
 use yavashark_string::{ToYSString, YSString};
@@ -174,7 +174,7 @@ pub fn create_class(
             }
             ClassMember::Empty(_) => {}
             ClassMember::TsIndexSignature(_) => {
-                return Err(Error::syn("TsIndexSignature is not supported"))
+                return Err(Error::syn("TsIndexSignature is not supported"));
             }
             ClassMember::ClassProp(p) => {
                 let name = prop_name_to_value(&p.key, realm, p.span, scope)?;
@@ -416,7 +416,7 @@ fn define_method_on_class(
 mod tests {
     #[test]
     fn test_decl_class() {
-        use yavashark_env::{test_eval, Value};
+        use yavashark_env::{Value, test_eval};
 
         test_eval!(
             r"
@@ -450,7 +450,7 @@ mod tests {
 
     #[test]
     fn test_decl_class_with_super() {
-        use yavashark_env::{test_eval, Value};
+        use yavashark_env::{Value, test_eval};
 
         test_eval!(
             r#"
@@ -511,7 +511,7 @@ mod tests {
 
     #[test]
     fn test_decl_class_with_static_block() {
-        use yavashark_env::{test_eval, Value};
+        use yavashark_env::{Value, test_eval};
 
         test_eval!(
             r"

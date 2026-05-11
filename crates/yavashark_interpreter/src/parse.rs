@@ -1,6 +1,6 @@
+use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_common::util::take::Take;
-use swc_common::BytePos;
 use swc_ecma_ast::{Module, Program, Script};
 use swc_ecma_parser::{EsSyntax, PResult, Parser, Syntax};
 use yavashark_env::{Error, Res};

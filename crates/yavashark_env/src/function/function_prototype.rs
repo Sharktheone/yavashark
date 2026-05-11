@@ -6,8 +6,8 @@ use crate::partial_init::{Initializer, Partial};
 use crate::realm::Realm;
 use crate::utils::ArrayLike;
 use crate::{
-    proto, Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult,
-    Variable,
+    Error, NativeConstructor, NativeFunction, ObjectHandle, Res, Value, ValueResult, Variable,
+    proto,
 };
 use std::cell::RefCell;
 use yavashark_macro::inline_props;

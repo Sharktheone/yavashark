@@ -48,13 +48,13 @@ impl<T> RuntimeLifetime<T> {
     }
 
     pub fn with<R>(&self, f: impl FnOnce(&mut T) -> Res<R>) -> Res<R> {
-        if self.0 .1.get() {
+        if self.0.1.get() {
             return Err(Error::new("Value already borrowed"));
         }
 
-        self.0 .1.set(true);
+        self.0.1.set(true);
 
-        let r = self.0 .0.get();
+        let r = self.0.0.get();
 
         let Some(mut r) = r else {
             return Err(Error::new("Used value outside of its context"));
@@ -64,14 +64,14 @@ impl<T> RuntimeLifetime<T> {
 
         let res = f(r);
 
-        self.0 .1.set(false);
+        self.0.1.set(false);
 
         res
     }
 
     pub fn update<'a>(&self, new: &'a mut T) -> RuntimeLifetimeGuard<'a, T> {
-        let old = self.0 .0.replace(Some(NonNull::from(new)));
-        let borrowed = self.0 .1.replace(false);
+        let old = self.0.0.replace(Some(NonNull::from(new)));
+        let borrowed = self.0.1.replace(false);
 
         RuntimeLifetimeGuard {
             ptr: self.0.clone(),

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::path::PathBuf;
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::builtins::array_buf::ArrayBuffer;
 use yavashark_env::scope::Scope;

@@ -6,8 +6,8 @@ use crate::value::{
 };
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
-use indexmap::map::Entry;
 use indexmap::IndexMap;
+use indexmap::map::Entry;
 pub use prototype::Prototype;
 use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
@@ -19,12 +19,12 @@ pub mod array;
 pub mod constructor;
 
 mod inline;
+mod native_wrapper;
 mod prealloc;
 mod properties;
 mod property_map;
 pub mod prototype;
 mod shape;
-mod native_wrapper;
 
 #[derive(Debug)]
 pub struct Object {

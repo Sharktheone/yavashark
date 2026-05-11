@@ -1,5 +1,5 @@
 use crate::params::VMParams;
-use crate::{BorrowedVM, VMStateFunctionCode, VM};
+use crate::{BorrowedVM, VM, VMStateFunctionCode};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -84,43 +84,49 @@ impl BytecodeFunction {
 
 impl Func for BytecodeFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        yavashark_env::profiler::profile_call(realm, || self.name(), |realm| {
-            let scope = &mut Scope::with_parent(&self.scope)?;
-            scope.state_set_returnable()?;
+        yavashark_env::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| {
+                let scope = &mut Scope::with_parent(&self.scope)?;
+                scope.state_set_returnable()?;
 
-            self.params.execute(&args, scope.clone(), realm)?;
+                self.params.execute(&args, scope.clone(), realm)?;
 
-            let mut scope = Scope::with_parent(scope)?;
-            scope.state_set_function()?;
+                let mut scope = Scope::with_parent(scope)?;
+                scope.state_set_function()?;
 
-            let args = Arguments::new(args, Some(this.copy()), realm)?;
+                let args = Arguments::new(args, Some(this.copy()), realm)?;
 
-            let args = ObjectHandle::new(args);
+                let args = ObjectHandle::new(args);
 
-            scope.declare_var("arguments".to_string(), args.into(), realm)?;
+                scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
-            let ds = self.code.data_section();
+                let ds = self.code.data_section();
 
-            let mut vm = BorrowedVM::with_scope(&self.code.instructions, ds, realm, scope);
+                let mut vm = BorrowedVM::with_scope(&self.code.instructions, ds, realm, scope);
 
-            match vm.run() {
-                Ok(()) => {}
-                Err(e) => {
-                    return match e {
-                        ControlFlow::Error(e) => Err(e),
-                        ControlFlow::Return(v) => Ok(v),
-                        ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
-                        ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
-                        ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement")),
-                        ControlFlow::Await(_) | ControlFlow::YieldStar(_) => {
-                            Err(Error::syn("Illegal await statement"))
-                        }
-                        ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
+                match vm.run() {
+                    Ok(()) => {}
+                    Err(e) => {
+                        return match e {
+                            ControlFlow::Error(e) => Err(e),
+                            ControlFlow::Return(v) => Ok(v),
+                            ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
+                            ControlFlow::Continue(_) => {
+                                Err(Error::syn("Illegal continue statement"))
+                            }
+                            ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement")),
+                            ControlFlow::Await(_) | ControlFlow::YieldStar(_) => {
+                                Err(Error::syn("Illegal await statement"))
+                            }
+                            ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
+                        };
                     }
                 }
-            }
 
-            Ok(vm.acc())
-        })
+                Ok(vm.acc())
+            },
+        )
     }
 }

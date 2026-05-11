@@ -357,31 +357,35 @@ impl Obj for Proxy {
     }
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<Value, Error> {
-        crate::profiler::profile_call(realm, || self.name(), |realm| {
-            if self.revoke.get() {
-                return Err(Error::ty(
-                    "Cannot perform 'apply' on a proxy that has been revoked",
-                ));
-            }
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| {
+                if self.revoke.get() {
+                    return Err(Error::ty(
+                        "Cannot perform 'apply' on a proxy that has been revoked",
+                    ));
+                }
 
-            if let Some(apply) = self.handler.get_opt("apply", realm)? {
-                let apply = apply.to_object()?;
+                if let Some(apply) = self.handler.get_opt("apply", realm)? {
+                    let apply = apply.to_object()?;
 
-                let arguments = Array::with_elements(realm, args)?;
-                apply.call(
-                    vec![
-                        self.inner.clone().into(),
-                        this,
-                        arguments.into_value(),
-                        self.this(),
-                    ],
-                    self.handler.clone().into(),
-                    realm,
-                )
-            } else {
-                self.inner.call(args, this, realm)
-            }
-        })
+                    let arguments = Array::with_elements(realm, args)?;
+                    apply.call(
+                        vec![
+                            self.inner.clone().into(),
+                            this,
+                            arguments.into_value(),
+                            self.this(),
+                        ],
+                        self.handler.clone().into(),
+                        realm,
+                    )
+                } else {
+                    self.inner.call(args, this, realm)
+                }
+            },
+        )
     }
 
     fn is_callable(&self) -> bool {
@@ -447,31 +451,35 @@ impl Obj for Proxy {
     }
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
-        crate::profiler::profile_call(realm, || self.name(), |realm| {
-            if self.revoke.get() {
-                return Err(Error::ty(
-                    "Cannot perform 'construct' on a proxy that has been revoked",
-                ));
-            }
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| {
+                if self.revoke.get() {
+                    return Err(Error::ty(
+                        "Cannot perform 'construct' on a proxy that has been revoked",
+                    ));
+                }
 
-            if let Some(construct) = self.handler.get_opt("construct", realm)? {
-                let construct = construct.to_object()?;
-                let arguments = Array::with_elements(realm, args)?;
-                construct
-                    .call(
-                        vec![
-                            self.inner.clone().into(),
-                            arguments.into_value(),
-                            self.this(),
-                        ],
-                        self.handler.clone().into(),
-                        realm,
-                    )?
-                    .to_object()
-            } else {
-                self.inner.construct(args, realm)
-            }
-        })
+                if let Some(construct) = self.handler.get_opt("construct", realm)? {
+                    let construct = construct.to_object()?;
+                    let arguments = Array::with_elements(realm, args)?;
+                    construct
+                        .call(
+                            vec![
+                                self.inner.clone().into(),
+                                arguments.into_value(),
+                                self.this(),
+                            ],
+                            self.handler.clone().into(),
+                            realm,
+                        )?
+                        .to_object()
+                } else {
+                    self.inner.construct(args, realm)
+                }
+            },
+        )
     }
 
     fn is_constructable(&self) -> bool {
@@ -491,9 +499,7 @@ impl Obj for Proxy {
             return Some(NonNull::from(self).cast());
         }
 
-        unsafe {
-            self.inner.inner_downcast(ty)
-        }
+        unsafe { self.inner.inner_downcast(ty) }
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {

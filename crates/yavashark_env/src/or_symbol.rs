@@ -1,6 +1,6 @@
+use crate::Realm;
 use crate::conversion::FromValueOutput;
 use crate::value::{FromValue, IntoValue, Symbol, Value};
-use crate::Realm;
 
 #[derive(Debug)]
 pub enum OrSymbol<T = Value> {

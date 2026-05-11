@@ -1,6 +1,6 @@
 #[allow(non_snake_case)]
 mod jsf__k {
-    use yavashark_env::{expr, test_eval, Value};
+    use yavashark_env::{Value, expr, test_eval};
 
     #[test]
     fn test_false() {

@@ -1,8 +1,8 @@
+use crate::Value;
 use crate::console::print::PrettyPrint;
 use crate::object::Object;
 use crate::partial_init::Initializer;
 use crate::realm::Realm;
-use crate::Value;
 use crate::{NativeFunction, ObjectHandle, Res};
 
 mod error;

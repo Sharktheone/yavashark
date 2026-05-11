@@ -1,11 +1,11 @@
-use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{
-    difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
-    OverflowOptions,
+    OverflowOptions, difference_settings, overflow_options, string_rounding_mode_opts,
+    value_to_partial_time,
 };
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::options::{Overflow, ToStringRoundingOptions};

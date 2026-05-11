@@ -6,23 +6,23 @@ use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
 use crate::builtins::float64array::Float64Array;
+use crate::builtins::int8array::Int8Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
-use crate::builtins::int8array::Int8Array;
 use crate::builtins::intl::Intl;
 use crate::builtins::iterator::Iterator as IteratorConstructor;
 use crate::builtins::shared_buf::SharedArrayBuffer;
 use crate::builtins::signal::Signal;
+use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
-use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
     DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
-    IsFinite, IsNan, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError, Reflect,
-    RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, Temporal, TypeError, URIError,
-    Unescape, WeakMap, WeakRef, WeakSet, JSON,
+    IsFinite, IsNan, JSON, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError,
+    Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, Temporal, TypeError,
+    URIError, Unescape, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;

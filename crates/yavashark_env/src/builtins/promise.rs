@@ -13,8 +13,8 @@ use crate::{
 use futures::future::{join_all, select_all};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
-use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
+use tokio::sync::futures::Notified;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 

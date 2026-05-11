@@ -36,9 +36,15 @@ pub fn run_file(
     let strict = metadata.flags.contains(Flags::ONLY_STRICT);
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
-    let (mut realm, mut scope, harness_dir) =
-        setup_global(file.clone(), raw, async_, strict, #[cfg(feature = "profiler")] profile_out)
-            .map_err(|e| e.to_string())?;
+    let (mut realm, mut scope, harness_dir) = setup_global(
+        file.clone(),
+        raw,
+        async_,
+        strict,
+        #[cfg(feature = "profiler")]
+        profile_out,
+    )
+    .map_err(|e| e.to_string())?;
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();

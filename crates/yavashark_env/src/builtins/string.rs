@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::builtins::iterator::Iterator;
-use crate::builtins::{create_iter_result, RegExp};
+use crate::builtins::{RegExp, create_iter_result};
 use crate::conversion::{ActualString, Stringable};
 use crate::realm::Intrinsic;
 use crate::utils::{ArrayLike, ProtoDefault};

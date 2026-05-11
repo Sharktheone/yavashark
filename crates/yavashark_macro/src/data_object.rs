@@ -5,11 +5,11 @@ mod structure;
 use crate::data_object::args::DataObjectArgs;
 use crate::data_object::enumeration::data_enum;
 use crate::data_object::structure::data_struct;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream as TokenStream1;
-use syn::parse::discouraged::Speculative;
 use syn::parse::Parse;
+use syn::parse::discouraged::Speculative;
 use syn::spanned::Spanned;
 
 pub fn data_object(

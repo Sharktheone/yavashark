@@ -7,8 +7,8 @@ use crate::simplerepl::Repl;
 use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 use std::path::Path;
-use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::{Builder, Runtime};
 use yavashark_env::print::PrettyPrint;
@@ -233,8 +233,8 @@ fn run_input(
 
         #[cfg(feature = "vm")]
         if conf.old_bytecode {
-            use yavashark_vm::yavashark_bytecode::data::DataSection;
             use yavashark_vm::OldBorrowedVM;
+            use yavashark_vm::yavashark_bytecode::data::DataSection;
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
             let mut vm = OldBorrowedVM::with_scope(

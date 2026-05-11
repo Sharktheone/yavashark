@@ -1,6 +1,6 @@
 use crate::builtins::Instant;
 use crate::conversion::downcast_obj;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::Hint;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};

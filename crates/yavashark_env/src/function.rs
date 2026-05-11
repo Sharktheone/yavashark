@@ -144,9 +144,11 @@ impl ObjectImpl for NativeFunction {
     }
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-        crate::profiler::profile_call(realm, || self.props.name.to_string(), |realm| {
-            (self.f)(args, this, realm)
-        })
+        crate::profiler::profile_call(
+            realm,
+            || self.props.name.to_string(),
+            |realm| (self.f)(args, this, realm),
+        )
     }
 
     fn is_callable(&self) -> bool {
@@ -162,25 +164,29 @@ impl ObjectImpl for NativeFunction {
     // }
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        crate::profiler::profile_call(realm, || self.props.name.to_string(), |realm| {
-            if !self.constructor {
-                return Err(Error::ty_error(format!(
-                    "{} is not a constructor",
-                    self.props.name
-                )));
-            }
+        crate::profiler::profile_call(
+            realm,
+            || self.props.name.to_string(),
+            |realm| {
+                if !self.constructor {
+                    return Err(Error::ty_error(format!(
+                        "{} is not a constructor",
+                        self.props.name
+                    )));
+                }
 
-            let proto = Obj::resolve_property(self, "prototype".into(), realm)?.map_or_else(
-                || realm.intrinsics.func.clone().into(),
-                |p| p.assert_value(),
-            );
+                let proto = Obj::resolve_property(self, "prototype".into(), realm)?.map_or_else(
+                    || realm.intrinsics.func.clone().into(),
+                    |p| p.assert_value(),
+                );
 
-            let proto: ObjectOrNull = proto.value.try_into()?;
+                let proto: ObjectOrNull = proto.value.try_into()?;
 
-            let obj = Object::with_proto(proto).into();
+                let obj = Object::with_proto(proto).into();
 
-            (self.f)(args, obj, realm)?.to_object()
-        })
+                (self.f)(args, obj, realm)?.to_object()
+            },
+        )
     }
 
     fn is_constructable(&self) -> bool {

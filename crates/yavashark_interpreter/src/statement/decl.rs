@@ -1,5 +1,5 @@
-use crate::statement::decl::var::Variable;
 use crate::Interpreter;
+use crate::statement::decl::var::Variable;
 use swc_ecma_ast::{Decl, ObjectPatProp, Pat, VarDecl, VarDeclKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};

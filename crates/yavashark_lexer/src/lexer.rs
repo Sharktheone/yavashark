@@ -4,12 +4,12 @@ use crate::char_iterator::CharIteratorReceiver;
 use crate::lexer::separators::Separators;
 use crate::lexer::state::LexerState;
 use crate::span::Span;
+use crate::tokens::Token;
 use crate::tokens::group::Group;
 use crate::tokens::ident::Ident;
 use crate::tokens::keyword::{Keyword, KeywordType};
 use crate::tokens::lit::{Lit, LitKind};
 use crate::tokens::punct::{Punct, PunctKind};
-use crate::tokens::Token;
 
 mod separators;
 pub(crate) mod state;

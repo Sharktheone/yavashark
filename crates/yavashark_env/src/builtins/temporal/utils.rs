@@ -10,7 +10,7 @@ mod timezone;
 
 use crate::builtins::value_to_zoned_date_time;
 use crate::conversion::FromValueOutput;
-use crate::{builtins, Error, ObjectHandle, Realm, Res, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Value, builtins};
 use temporal_rs::fields::{
     CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
 };

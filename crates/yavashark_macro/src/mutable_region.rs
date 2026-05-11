@@ -1,6 +1,6 @@
 use crate::config::Config;
 use proc_macro2::Ident;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::Field;
 
 pub struct MutableRegion {

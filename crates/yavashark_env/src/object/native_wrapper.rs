@@ -8,9 +8,7 @@ pub struct NativeWrapper<T: ?Sized> {
     data: T,
 }
 
-
 impl<T> NativeWrapper<T> {
-
     const DATA_ALIGNMENT_REQUIREMENT: () = assert!(
         align_of::<T>() <= 8,
         "Alignment of T must be <= 8; consider wrapping in a Box<T>"

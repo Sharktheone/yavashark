@@ -1,15 +1,15 @@
 use std::iter;
-use swc_common::{Span, DUMMY_SP};
+use swc_common::{DUMMY_SP, Span};
 use swc_ecma_ast::{Expr, ObjectPatProp, Pat, PropName};
 
+use crate::Interpreter;
 use crate::function::JSFunction;
 use crate::statement::expr::ArrowFunction;
-use crate::Interpreter;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
-use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::value::IntoValue;
 use yavashark_env::value::Obj;
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::{
     Class, ClassInstance, Error, Object, PropertyKey, Realm, Res, Value, ValueResult,
 };

@@ -1,8 +1,8 @@
 use crate::value::{CustomGcRefUntyped, DefinePropertyResult};
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
-use std::collections::hash_map::Entry;
 use std::collections::HashSet;
+use std::collections::hash_map::Entry;
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::rc::Rc;

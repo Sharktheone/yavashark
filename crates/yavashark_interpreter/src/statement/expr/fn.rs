@@ -1,5 +1,5 @@
-use crate::function::JSFunction;
 use crate::Interpreter;
+use crate::function::JSFunction;
 use swc_ecma_ast::FnExpr;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult};

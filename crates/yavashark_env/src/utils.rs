@@ -30,7 +30,7 @@ pub fn coerce_object_strict(value: Value, realm: &mut Realm) -> Res<ObjectHandle
         Value::Undefined | Value::Null => {
             return Err(crate::error::Error::ty(
                 "Cannot convert undefined or null to object",
-            ))
+            ));
         }
     })
 }

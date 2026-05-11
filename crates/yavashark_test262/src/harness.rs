@@ -1,13 +1,13 @@
 use crate::metadata::Flags;
-use crate::test262::{print, Test262};
+use crate::test262::{Test262, print};
 use crate::utils::parse_file;
 use crate::{ObjectHandle, TEST262_FALLBACK_DIR};
 use std::fs;
 use std::path::{Path, PathBuf};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
-use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_interpreter::Interpreter;
+use yavashark_interpreter::eval::InterpreterEval;
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
@@ -63,7 +63,9 @@ pub fn setup_global(
     let mut r = Realm::new()?;
     #[cfg(feature = "profiler")]
     if let Some(profile_out) = profile_out {
-        r.set_profile_writer(yavashark_profiler::FileProfileWriter::from_path(profile_out)?);
+        r.set_profile_writer(yavashark_profiler::FileProfileWriter::from_path(
+            profile_out,
+        )?);
     }
     #[cfg(feature = "timings")]
     unsafe {

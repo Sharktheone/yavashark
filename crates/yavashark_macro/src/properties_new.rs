@@ -1,16 +1,16 @@
 mod constant;
 mod method;
 
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl, Path};
+use quote::{ToTokens, format_ident, quote};
+use syn::{Expr, ImplItem, ItemImpl, Path, spanned::Spanned};
 
 use crate::config::Config;
-use crate::properties_new::constant::{parse_constant, Constant};
-use crate::properties_new::method::{parse_method, Method};
+use crate::properties_new::constant::{Constant, parse_constant};
+use crate::properties_new::method::{Method, parse_method};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Type {

@@ -9,7 +9,7 @@ use std::rc::Rc;
 use swc_ecma_ast::{BlockStmt, Expr, ExprStmt, Lit, ModuleItem, Program, Stmt};
 
 use yavashark_env::scope::{ModuleScope, Scope};
-use yavashark_env::{scope, ControlFlow, Realm, Res, Value, ValueResult};
+use yavashark_env::{ControlFlow, Realm, Res, Value, ValueResult, scope};
 
 mod class;
 pub mod eval;
@@ -118,8 +118,8 @@ impl Interpreter {
 #[cfg(test)]
 mod temp_test {
     use super::*;
-    use swc_common::input::StringInput;
     use swc_common::BytePos;
+    use swc_common::input::StringInput;
     use swc_ecma_parser::{EsSyntax, Parser, Syntax};
     use yavashark_env::test_eval;
 

@@ -1,4 +1,4 @@
-use crate::builtins::{check_radix, NumberConstructor};
+use crate::builtins::{NumberConstructor, check_radix};
 use crate::conversion::downcast_obj;
 use crate::error::Error;
 use crate::value::Obj;
@@ -45,11 +45,7 @@ fn to_index(value: &Value, realm: &mut Realm) -> Res<u64> {
 /// This differs from Rust's `%` operator which can return negative values.
 fn modulo(n: &BigInt, d: &BigInt) -> BigInt {
     let rem = n % d;
-    if rem.is_negative() {
-        rem + d
-    } else {
-        rem
-    }
+    if rem.is_negative() { rem + d } else { rem }
 }
 
 #[object]

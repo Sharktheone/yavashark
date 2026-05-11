@@ -57,7 +57,7 @@ impl Interpreter {
 
 #[cfg(test)]
 mod tests {
-    use yavashark_env::{test_eval, Value};
+    use yavashark_env::{Value, test_eval};
 
     #[test]
     fn run_for_loop() {

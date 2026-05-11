@@ -1,5 +1,5 @@
-use crate::value::Value;
 use crate::Realm;
+use crate::value::Value;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};

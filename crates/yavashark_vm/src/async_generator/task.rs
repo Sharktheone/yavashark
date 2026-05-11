@@ -34,7 +34,11 @@ impl AsyncGeneratorTask {
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let gen_notify = if state.is_none() {
-            Some(generator.clone().map_refed(|generator| generator.notify.notified()))
+            Some(
+                generator
+                    .clone()
+                    .map_refed(|generator| generator.notify.notified()),
+            )
         } else {
             None
         };

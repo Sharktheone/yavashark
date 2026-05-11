@@ -2,7 +2,7 @@ use crate::config::Config;
 use crate::deref_type;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::spanned::Spanned;
 use syn::{Expr, ImplItem, Lit, Path};
 

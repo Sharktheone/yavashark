@@ -1,5 +1,5 @@
-use crate::class::{create_class, decl_class};
 use crate::Interpreter;
+use crate::class::{create_class, decl_class};
 use swc_ecma_ast::ClassExpr;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{IntoValue, Obj};

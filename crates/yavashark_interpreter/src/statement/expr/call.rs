@@ -2,8 +2,8 @@ use std::cell::RefCell;
 use swc_common::{Span, Spanned};
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
-use crate::location::get_location;
 use crate::Interpreter;
+use crate::location::get_location;
 use yavashark_env::import::DynamicImport;
 use yavashark_env::scope::Scope;
 use yavashark_env::utils::ValueIterator;
@@ -168,12 +168,12 @@ impl Interpreter {
                     return Err(ControlFlow::error(format!(
                         "{:?}: Invalid expression.",
                         stmt.span
-                    )))
+                    )));
                 }
                 _ => {
                     return Err(ControlFlow::error(format!(
                         "{span:?}: TS and JSX are not supported."
-                    )))
+                    )));
                 }
             },
             None,

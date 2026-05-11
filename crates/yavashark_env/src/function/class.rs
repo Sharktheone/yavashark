@@ -10,8 +10,8 @@ use crate::{
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 use std::cell::RefCell;
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::ops::Deref;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
@@ -319,11 +319,15 @@ impl Obj for Class {
     }
 
     fn call(&self, _args: Vec<Value>, _this: Value, realm: &mut Realm) -> ValueResult {
-        crate::profiler::profile_call(realm, || self.name(), |_realm| {
-            Err(Error::new(
-                "Class constructor cannot be invoked without 'new'",
-            ))
-        })
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |_realm| {
+                Err(Error::new(
+                    "Class constructor cannot be invoked without 'new'",
+                ))
+            },
+        )
     }
 
     fn is_callable(&self) -> bool {
@@ -339,62 +343,67 @@ impl Obj for Class {
     }
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        crate::profiler::profile_call(realm, || self.name(), |realm| {
-            let instance = if let Some(constructor) = &self.constructor {
-                let this = ClassInstance::new_with_proto(
-                    self.prototype.try_borrow()?.clone(),
-                    self.name.borrow().clone(),
-                )
-                .into_value();
+        crate::profiler::profile_call(
+            realm,
+            || self.name(),
+            |realm| {
+                let instance = if let Some(constructor) = &self.constructor {
+                    let this = ClassInstance::new_with_proto(
+                        self.prototype.try_borrow()?.clone(),
+                        self.name.borrow().clone(),
+                    )
+                    .into_value();
 
-                for field in self.instance_fields.try_borrow()?.iter() {
-                    field.initialize(this.copy(), realm)?;
-                }
+                    for field in self.instance_fields.try_borrow()?.iter() {
+                        field.initialize(this.copy(), realm)?;
+                    }
 
-                constructor.construct(args, this.copy(), realm)?;
+                    constructor.construct(args, this.copy(), realm)?;
 
-                this.to_object()?
-            } else if let Some(sup) = &self.sup {
-                let c = sup.construct(args, realm)?;
+                    this.to_object()?
+                } else if let Some(sup) = &self.sup {
+                    let c = sup.construct(args, realm)?;
 
-                c.set_prototype(self.prototype.try_borrow()?.clone().into(), realm)?;
+                    c.set_prototype(self.prototype.try_borrow()?.clone().into(), realm)?;
 
-                let parent_private_props = if let Some(parent_instance) = c.downcast::<ClassInstance>() {
-                    parent_instance.private_props.borrow().clone()
+                    let parent_private_props =
+                        if let Some(parent_instance) = c.downcast::<ClassInstance>() {
+                            parent_instance.private_props.borrow().clone()
+                        } else {
+                            HashMap::new()
+                        };
+
+                    let instance = ClassInstance {
+                        inner: RefCell::new(c),
+                        private_props: RefCell::new(parent_private_props),
+                        name: self.name.borrow().clone(),
+                    }
+                    .into_object();
+
+                    let this: Value = instance.clone().into();
+                    for field in self.instance_fields.try_borrow()?.iter() {
+                        field.initialize(this.copy(), realm)?;
+                    }
+
+                    instance
                 } else {
-                    HashMap::new()
+                    let instance = ClassInstance::new_with_proto(
+                        self.prototype.try_borrow()?.clone(),
+                        self.name.borrow().clone(),
+                    )
+                    .into_object();
+
+                    let this: Value = instance.clone().into();
+                    for field in self.instance_fields.try_borrow()?.iter() {
+                        field.initialize(this.copy(), realm)?;
+                    }
+
+                    instance
                 };
 
-                let instance = ClassInstance {
-                    inner: RefCell::new(c),
-                    private_props: RefCell::new(parent_private_props),
-                    name: self.name.borrow().clone(),
-                }
-                .into_object();
-
-                let this: Value = instance.clone().into();
-                for field in self.instance_fields.try_borrow()?.iter() {
-                    field.initialize(this.copy(), realm)?;
-                }
-
-                instance
-            } else {
-                let instance = ClassInstance::new_with_proto(
-                    self.prototype.try_borrow()?.clone(),
-                    self.name.borrow().clone(),
-                )
-                .into_object();
-
-                let this: Value = instance.clone().into();
-                for field in self.instance_fields.try_borrow()?.iter() {
-                    field.initialize(this.copy(), realm)?;
-                }
-
-                instance
-            };
-
-            Ok(instance)
-        })
+                Ok(instance)
+            },
+        )
     }
 
     fn is_constructable(&self) -> bool {
@@ -409,9 +418,7 @@ impl Obj for Class {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
-            unsafe {
-                self.inner.inner_downcast(ty)
-            }
+            unsafe { self.inner.inner_downcast(ty) }
         }
     }
 
@@ -794,9 +801,7 @@ impl Obj for ClassInstance {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
-            unsafe {
-                self.inner.borrow().inner_downcast(ty)
-            }
+            unsafe { self.inner.borrow().inner_downcast(ty) }
         }
     }
 

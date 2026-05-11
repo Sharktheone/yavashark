@@ -1,5 +1,5 @@
-use crate::value_ext::ValueExt;
 use crate::VM;
+use crate::value_ext::ValueExt;
 use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::ControlResult;
 

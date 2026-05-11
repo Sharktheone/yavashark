@@ -1,9 +1,9 @@
 use crate::builtins::temporal::utils::{
     opt_relative_to_wrap, rounding_options, string_rounding_mode_opts,
 };
-use crate::conversion::{downcast_obj, NonFract};
+use crate::conversion::{NonFract, downcast_obj};
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::Object;
 use crate::{Error, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::str::FromStr;

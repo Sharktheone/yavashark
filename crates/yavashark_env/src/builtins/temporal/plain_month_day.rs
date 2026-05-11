@@ -3,14 +3,14 @@ use crate::builtins::temporal::utils::{
     display_calendar, overflow_options, overflow_options_opt, value_to_calendar_fields,
 };
 use crate::native_obj::NativeObject;
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use icu::calendar::AnyCalendarKind;
 use std::str::FromStr;
+use temporal_rs::Calendar;
 use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialDate;
-use temporal_rs::Calendar;
 use yavashark_macro::props;
 use yavashark_string::YSString;
 

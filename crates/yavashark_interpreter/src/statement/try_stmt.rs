@@ -52,7 +52,7 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
 #[cfg(test)]
 mod tests {
     use yavashark_env::error::ErrorKind;
-    use yavashark_env::{test_eval, Value};
+    use yavashark_env::{Value, test_eval};
 
     #[test]
     fn try_stmt() {
