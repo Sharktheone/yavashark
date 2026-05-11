@@ -26,6 +26,7 @@ pub struct PropertyMap<T: ?Sized> {
 }
 
 #[repr(C, align(8))]
+#[derive(Default)]
 pub struct OpaqueData<T: ?Sized> {
     _value: PhantomData<[Value]>,
     _butterfly: PhantomData<*mut ButterFly>,
