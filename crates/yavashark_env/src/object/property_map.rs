@@ -17,7 +17,7 @@ use crate::object::native_wrapper::NativeWrapper;
 /// - Slot N+2..N+2+M: Native struct of type T (size and alignment determined by T)
 ///
 /// As a diagram this looks as follows:
-/// [ MapState | Property 0 | Property 1 | ... | Property N-1 | Butterfly Pointer | Native struct (T) ]
+/// [ MapState | Property 0 | Property 1 | ... | Property N-1 | Butterfly Pointer (if present) | Native struct (T) ]
 #[repr(C)]
 #[repr(align(8))]
 pub struct PropertyMap<T: ?Sized> {
@@ -55,21 +55,14 @@ struct MapState {
 const _: () = assert!(size_of::<MapState>() == 8, "MapState must be 8 bytes in size");
 const _: () = assert!(align_of::<MapState>() == 8, "MapState must be 8 bytes aligned");
 
-
-
+impl<T: ?Sized> PropertyMap<T> {
+    const NUM_INTERNAL_SLOTS: usize = 1; // MapState takes one slot.
+    const NUM_BUTTERFLY_SLOTS: usize = 1; // Butterfly pointer takes one slot.
+}
 
 impl<T> PropertyMap<T> {
     pub fn sized_layout(size: u32) -> Layout {
-        Self::unsized_layout(size, Layout::new::<T>())
-    }
-
-    pub const fn size_from_alloc_bytes(bytes: usize) -> u32 {
-        let header = size_of::<Self>();
-
-        let native_size = size_of::<T>();
-        let native_align = align_of::<T>();
-
-        0
+        Self::layout(size, Layout::new::<NativeWrapper<T>>(), false)
     }
 
     pub const fn get_native_ptr(&self) -> NonNull<T> {
@@ -181,16 +174,18 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub fn unsized_layout(size: u32, native: Layout) -> Layout {
-        let layout = Layout::new::<Self>();
+    pub fn layout(size: u32, native: Layout, butterfly: bool) -> Layout {
+        let num_slots = size as usize + Self::NUM_INTERNAL_SLOTS +
+            if butterfly { Self::NUM_BUTTERFLY_SLOTS } else { 0 };
 
-        layout
-            .extend(Layout::array::<Value>(size as usize).expect("Invalid layout for property map"))
-            .expect("Invalid layout for property map")
-            .0
-            .extend(native)
-            .expect("Invalid layout for property map")
-            .0
+        let native_slots = native.size().div_ceil(8);
+
+        let total_slots = num_slots + native_slots;
+
+        Layout::from_size_align(
+            total_slots * 8,
+            8,
+        ).expect("Invalid layout for PropertyMap")
     }
 
     pub const unsafe fn initialize_unsized(this: *mut Self, size: u32) {
