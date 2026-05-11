@@ -130,6 +130,52 @@ impl<T> PropertyMap<T> {
         native(native_ptr);
 
     }
+
+    pub fn from_alloc_size(this: NonNull<MaybeUninit<Self>>, capacity: usize, native_size: usize, butterfly: bool) -> NonNull<MaybeUninit<Self>> {
+        let slots = capacity / 8;
+
+        let native_slots = native_size.div_ceil(8);
+        let num_slots = slots - Self::NUM_INTERNAL_SLOTS -
+            if butterfly { Self::NUM_BUTTERFLY_SLOTS } else { 0 } - native_slots;
+
+
+        unsafe {
+            (*(*this.as_ptr()).as_mut_ptr()).state = MapState {
+                size: num_slots as u32,
+                extensible: true,
+                has_butterfly: butterfly,
+                _pad: [0; _],
+            };
+
+            (*(*this.as_ptr()).as_mut_ptr())
+                .get_uninitialized_properties()
+                .fill(MaybeUninit::new(Value::hole()));
+        }
+
+
+        this
+    }
+
+    pub fn from_alloc_size_native_cb(
+        this: NonNull<MaybeUninit<Self>>,
+        capacity: usize,
+        native_size: usize,
+        butterfly: bool,
+        native: impl FnOnce(NonNull<MaybeUninit<T>>),
+    ) -> NonNull<Self> {
+        let mut this = Self::from_alloc_size(this, capacity, native_size, butterfly);
+
+        let native_ptr = unsafe {
+            (*(*this.as_ptr()).as_mut_ptr()).get_native_ptr()
+                .cast::<MaybeUninit<T>>()
+        };
+
+        native(native_ptr);
+
+        unsafe {
+            NonNull::from(this.as_mut().assume_init_mut())
+        }
+    }
 }
 
 impl<T: ?Sized> PropertyMap<T> {
