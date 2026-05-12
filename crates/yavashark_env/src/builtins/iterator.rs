@@ -22,6 +22,7 @@ use crate::{
 };
 use iterator_helper_obj::IteratorHelperObject;
 use yavashark_macro::props;
+use crate::utils::coerce_object;
 
 /// %Iterator% - The Iterator constructor (27.1.3)
 ///
@@ -61,23 +62,18 @@ impl Iterator {
     fn from(o: Value, #[realm] realm: &mut Realm) -> Res<Value> {
         // 1. If O is a String, set O to ! ToObject(O).
         let o = if o.is_string() {
-            o.to_object()?.into()
+            coerce_object(o, realm)?
         } else {
-            o
+            // 2. If O is not an Object, throw TypeError
+            o.to_object()?
         };
-
-        // 2. If O is not an Object, throw TypeError
-        if !o.is_object() {
-            return Err(Error::ty("Iterator.from requires an object or string"));
-        }
-        let o_obj = o.clone().to_object()?;
 
         // 3. Let iteratorRecord be ? GetIteratorFlattenable(O, iterate-strings).
         // GetIteratorFlattenable checks for [Symbol.iterator] first
-        let iterator_method = o_obj.get(Symbol::ITERATOR, realm)?;
+        let iterator_method = o.get(Symbol::ITERATOR, realm)?;
 
         if iterator_method.is_callable() {
-            let iter = iterator_method.call(realm, vec![], o)?;
+            let iter = iterator_method.call(realm, vec![], o.into())?;
             let iterator_obj = iter.clone().to_object()?;
 
             // 4. Let hasInstance be ? OrdinaryHasInstance(%Iterator%, iteratorRecord.[[Iterator]]).
@@ -95,12 +91,12 @@ impl Iterator {
         }
 
         // No [Symbol.iterator], check for "next" method (iterator-like)
-        let next_method = o_obj.get("next", realm)?;
+        let next_method = o.get("next", realm)?;
         if !next_method.is_callable() {
             return Err(Error::ty("Object is not iterable"));
         }
 
-        let wrapped = WrapForValidIteratorPrototype::new(o_obj, next_method.to_object()?, realm)?;
+        let wrapped = WrapForValidIteratorPrototype::new(o, next_method.to_object()?, realm)?;
         Ok(wrapped.into_object().into())
     }
 
