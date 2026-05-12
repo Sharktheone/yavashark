@@ -8,7 +8,6 @@ use crate::builtins::temporal::utils::{
     value_to_calendar_fields,
 };
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
-use crate::builtins::value_to_partial_date;
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};

@@ -1,6 +1,7 @@
+#![allow(dead_code)]
+
 use std::mem::{MaybeUninit};
 use std::ops::{Deref, DerefMut};
-use std::ptr;
 use std::ptr::{NonNull};
 
 #[repr(C, align(8))]
