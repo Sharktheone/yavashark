@@ -48,8 +48,8 @@ impl Completer for ScopeCompleter {
         for name in names {
             if name.starts_with(line) {
                 completions.push(Pair {
-                    display: name.to_string(),
-                    replacement: name.to_string(),
+                    display: name.clone(),
+                    replacement: name.clone(),
                 });
             }
         }

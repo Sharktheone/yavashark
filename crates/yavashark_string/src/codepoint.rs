@@ -44,7 +44,7 @@ impl CodePoint {
     #[inline]
     #[must_use]
     pub const fn from_u32(value: u32) -> Option<Self> {
-        if value > 0x10FFFF {
+        if value > 0x0010_FFFF {
             return None;
         }
 
@@ -246,7 +246,7 @@ mod tests {
 
     #[test]
     fn test_from_u32_invalid() {
-        assert!(CodePoint::from_u32(0x110000).is_none());
+        assert!(CodePoint::from_u32(0x0011_0000).is_none());
     }
 
     #[test]

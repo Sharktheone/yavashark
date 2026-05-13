@@ -172,7 +172,7 @@ impl InlineUtf16String {
 
     /// Converts to a Rust String, replacing unpaired surrogates with U+FFFD.
     #[must_use]
-    pub fn to_string_lossy(&self) -> String {
+    pub fn to_string_lossy(self) -> String {
         String::from_utf16_lossy(self.as_slice())
     }
 
@@ -180,7 +180,7 @@ impl InlineUtf16String {
     ///
     /// Returns `None` if the string contains unpaired surrogates.
     #[must_use]
-    pub fn to_string(&self) -> Option<String> {
+    pub fn to_string(self) -> Option<String> {
         String::from_utf16(self.as_slice()).ok()
     }
 }
