@@ -1,6 +1,6 @@
 use crate::params::VMParams;
 use crate::{GeneratorPoll, ResumableVM, VmState};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -156,7 +156,6 @@ impl Func for GeneratorFunction {
 #[object]
 pub struct Generator {
     state: RefCell<Option<VmState>>,
-    running: Cell<bool>,
 }
 
 impl Generator {
@@ -174,7 +173,6 @@ impl Generator {
                 ),
             }),
             state: RefCell::new(Some(state)),
-            running: Cell::new(false),
         })
     }
 
@@ -197,17 +195,12 @@ impl Generator {
 
     #[length(1)]
     fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        if self.running.replace(true) {
-            return Err(Error::new("Generator is already running"));
-        }
-
         let Some(state) = self.state.take() else {
             let obj = Object::new(realm);
 
             obj.define_property("done".into(), true.into(), realm)?;
             obj.define_property("value".into(), Value::Undefined, realm)?;
 
-            self.running.set(false);
             return Ok(obj);
         };
 
@@ -222,7 +215,6 @@ impl Generator {
                 obj.define_property("done".into(), false.into(), realm)?;
                 obj.define_property("value".into(), val, realm)?;
 
-                self.running.set(false);
                 Ok(obj)
             }
             GeneratorPoll::Ret(res) => {
@@ -233,7 +225,6 @@ impl Generator {
                 obj.define_property("done".into(), true.into(), realm)?;
                 obj.define_property("value".into(), val, realm)?;
 
-                self.running.set(false);
                 Ok(obj)
             }
         }
