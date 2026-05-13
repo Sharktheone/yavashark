@@ -297,6 +297,7 @@ impl FileProfileWriter {
         Ok(Self::new(path, inner))
     }
 
+    #[must_use] 
     pub fn path(&self) -> &Path {
         &self.path
     }

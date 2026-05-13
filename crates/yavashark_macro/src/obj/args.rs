@@ -114,8 +114,8 @@ impl ItemArgs {
                     let mut func = None;
                     let mut multi = false;
 
-                    if !matches!(attr.meta, syn::Meta::Path(_)) {
-                        if let Err(e) =
+                    if !matches!(attr.meta, syn::Meta::Path(_))
+                        && let Err(e) =
                             attr.parse_nested_meta(|meta| {
                                 if meta.path.is_ident("untyped") {
                                     ty = false;
@@ -140,7 +140,6 @@ impl ItemArgs {
                             err = Some(e);
                             return false;
                         };
-                    }
 
                     let id = match f
                         .ident

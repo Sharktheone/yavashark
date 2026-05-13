@@ -2,13 +2,13 @@ use std::mem::ManuallyDrop;
 use std::rc::Rc;
 use std::{mem, ptr};
 
-/// If p2 and p3 are zero, then we have a Small BigInt (just one i64).
+/// If p2 and p3 are zero, then we have a Small `BigInt` (just one i64).
 /// The sign is always stored in p1.
-/// Small: when p2 and p3 are zero, p1 is the value of the BigInt (with the sign bit).
+/// Small: when p2 and p3 are zero, p1 is the value of the `BigInt` (with the sign bit).
 /// Large: when the last bit in p3 is set.
 /// Dynamic: when p1 is is zero except for the sign bit.
 #[repr(C)]
-pub(crate) struct BigIntStorage {
+pub struct BigIntStorage {
     p1: i64,
     p2: u64,
     p3: Ptr,

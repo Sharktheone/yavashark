@@ -69,10 +69,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         }
     };
 
-    let args = match PropertiesArgs::from_list(&attr_args) {
-        Ok(args) => args,
-        Err(e) => return Err(e.into()),
-    };
+    let args = PropertiesArgs::from_list(&attr_args)?;
 
     if args.no_intrinsic && args.intrinsic_name.is_some() {
         return Err(syn::Error::new(

@@ -78,7 +78,7 @@ impl Consumer {
         24
     }
 
-    pub fn c(&mut self) -> i32 {
+    pub const fn c(&mut self) -> i32 {
         12
     }
 
@@ -86,7 +86,7 @@ impl Consumer {
         6
     }
 
-    pub fn e(this: Handle<Self>, agent: &mut Agent) -> i32 {
+    pub const fn e(this: Handle<Self>, agent: &mut Agent) -> i32 {
         let inner = &raw const this;
 
         3

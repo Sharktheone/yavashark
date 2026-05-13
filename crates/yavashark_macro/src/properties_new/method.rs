@@ -220,8 +220,8 @@ pub fn parse_method(
                     this = Some(args.len());
                 }
 
-                if let syn::Type::Path(type_path) = deref_type(&pat.ty) {
-                    if type_path
+                if let syn::Type::Path(type_path) = deref_type(&pat.ty)
+                    && type_path
                         .path
                         .segments
                         .last()
@@ -229,7 +229,6 @@ pub fn parse_method(
                     {
                         realm = Some(args.len());
                     }
-                }
 
                 pat.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("this") {

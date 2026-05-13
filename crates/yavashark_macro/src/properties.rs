@@ -50,11 +50,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             if attr.path().is_ident("constructor") {
                 let mut self_mut = false;
 
-                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
-                    if self_arg.mutability.is_some() {
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
+                    && self_arg.mutability.is_some() {
                         self_mut = true;
                     }
-                }
 
                 let mut special = false;
 
@@ -105,11 +104,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let mut self_mut = false;
 
-                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
-                    if self_arg.mutability.is_some() {
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
+                    && self_arg.mutability.is_some() {
                         self_mut = true;
                     }
-                }
 
                 remove.push(idx);
                 properties.push(Item {
@@ -143,11 +141,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let mut self_mut = false;
 
-                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
-                    if self_arg.mutability.is_some() {
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
+                    && self_arg.mutability.is_some() {
                         self_mut = true;
                     }
-                }
 
                 let mut has_realm = false;
                 let mut has_this = false;
@@ -193,15 +190,14 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 });
                 let mut get = None;
 
-                if attr.path().is_ident("get") {
-                    if let Err(e) = attr.parse_nested_meta(|attr| {
+                if attr.path().is_ident("get")
+                    && let Err(e) = attr.parse_nested_meta(|attr| {
                         get = Some(attr.path.require_ident()?.clone());
 
                         Ok(())
                     }) {
                         return e.to_compile_error().into();
                     }
-                }
 
                 let mut set = None;
 

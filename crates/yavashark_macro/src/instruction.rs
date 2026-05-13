@@ -26,10 +26,7 @@ pub fn instruction(input: TokenStream) -> syn::Result<TokenStream> {
         }
     };
 
-    let args = match InstructionArgs::from_list(&attr_args) {
-        Ok(args) => args,
-        Err(e) => return Err(e.into()),
-    };
+    let args = InstructionArgs::from_list(&attr_args)?;
 
     let num_insts = (args.inputs as usize).pow(IN_TYPES.len() as u32)
         * if args.output { OUT_TYPES.len() } else { 1 };
