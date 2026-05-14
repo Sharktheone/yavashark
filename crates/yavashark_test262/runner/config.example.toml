@@ -14,7 +14,7 @@ history_only = false
 workers = 256
 
 # Path to test root directory
-test_root_dir = "test262/test"
+test_root_dir = "../../test262/test"
 
 # Enable diff output
 diff = true
