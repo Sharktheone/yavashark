@@ -1,5 +1,7 @@
 use yavashark_string::YSString;
 use bumpalo::boxed::Box;
+use num_bigint::BigInt;
+use regress::Regex;
 
 pub enum Expression<'alloc> {
     BooleanLit(bool),
@@ -7,8 +9,8 @@ pub enum Expression<'alloc> {
     FloatLit(f64),
     Int32Lit(i32),
     StringLit(YSString),
-    BigIntLit(BigInt),
-    RegExpLit(RegExp),
+    BigIntLit(Box<'alloc, BigInt>),
+    RegExpLit(Box<'alloc, Regex>),
     TemplateLit(Box<'alloc, TemplateLiteral<'alloc>>),
     Ident(YSString),
     MetaProp(Box<'alloc, MetaProp>),

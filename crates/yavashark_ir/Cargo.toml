@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 bumpalo = { version = "3.20.2", features = ["collections", "boxed"] }
 yavashark_string = { path = "../yavashark_string"}
+num-bigint = "0.4.6"
+regress = "0.11.1"
 
 [lints]
 workspace = true
