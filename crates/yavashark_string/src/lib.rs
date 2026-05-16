@@ -517,7 +517,7 @@ impl YSString {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub const fn new_owned_utf16(vec: ThinVec<u16>) -> Self {
         Self {
             inner: UnsafeCell::new(InnerString::OwnedUtf16(vec)),
@@ -903,9 +903,10 @@ impl YSString {
         if is_high_surrogate(unit) {
             // Check if next unit is a low surrogate
             if let Some(next) = self.code_unit_at(index + 1)
-                && is_low_surrogate(next) {
-                    return Some(CodePoint::Unicode(decode_surrogate_pair(unit, next)));
-                }
+                && is_low_surrogate(next)
+            {
+                return Some(CodePoint::Unicode(decode_surrogate_pair(unit, next)));
+            }
             // Unpaired high surrogate
             Some(CodePoint::UnpairedSurrogate(unit))
         } else if is_low_surrogate(unit) {

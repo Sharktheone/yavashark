@@ -56,7 +56,6 @@ const _: () = assert!(
     "MapState must be 8 bytes aligned"
 );
 
-
 impl<T: ?Sized> PropertyMap<T> {
     const NUM_INTERNAL_SLOTS: usize = 1; // MapState takes one slot.
     const NUM_BUTTERFLY_SLOTS: usize = 1; // Butterfly pointer takes one slot.
@@ -128,16 +127,25 @@ impl<T> PropertyMap<T> {
         };
 
         native(native_ptr);
-
     }
 
-    pub fn from_alloc_size(this: NonNull<MaybeUninit<Self>>, capacity: usize, native_size: usize, butterfly: bool) -> NonNull<MaybeUninit<Self>> {
+    pub fn from_alloc_size(
+        this: NonNull<MaybeUninit<Self>>,
+        capacity: usize,
+        native_size: usize,
+        butterfly: bool,
+    ) -> NonNull<MaybeUninit<Self>> {
         let slots = capacity / 8;
 
         let native_slots = native_size.div_ceil(8);
-        let num_slots = slots - Self::NUM_INTERNAL_SLOTS -
-            if butterfly { Self::NUM_BUTTERFLY_SLOTS } else { 0 } - native_slots;
-
+        let num_slots = slots
+            - Self::NUM_INTERNAL_SLOTS
+            - if butterfly {
+                Self::NUM_BUTTERFLY_SLOTS
+            } else {
+                0
+            }
+            - native_slots;
 
         unsafe {
             (*(*this.as_ptr()).as_mut_ptr()).state = MapState {
@@ -152,7 +160,6 @@ impl<T> PropertyMap<T> {
                 .fill(MaybeUninit::new(Value::hole()));
         }
 
-
         this
     }
 
@@ -166,15 +173,14 @@ impl<T> PropertyMap<T> {
         let mut this = Self::from_alloc_size(this, capacity, native_size, butterfly);
 
         let native_ptr = unsafe {
-            (*(*this.as_ptr()).as_mut_ptr()).get_native_ptr()
+            (*(*this.as_ptr()).as_mut_ptr())
+                .get_native_ptr()
                 .cast::<MaybeUninit<T>>()
         };
 
         native(native_ptr);
 
-        unsafe {
-            NonNull::from(this.as_mut().assume_init_mut())
-        }
+        unsafe { NonNull::from(this.as_mut().assume_init_mut()) }
     }
 }
 
@@ -221,17 +227,19 @@ impl<T: ?Sized> PropertyMap<T> {
     }
 
     pub fn layout(size: u32, native: Layout, butterfly: bool) -> Layout {
-        let num_slots = size as usize + Self::NUM_INTERNAL_SLOTS +
-            if butterfly { Self::NUM_BUTTERFLY_SLOTS } else { 0 };
+        let num_slots = size as usize
+            + Self::NUM_INTERNAL_SLOTS
+            + if butterfly {
+                Self::NUM_BUTTERFLY_SLOTS
+            } else {
+                0
+            };
 
         let native_slots = native.size().div_ceil(8);
 
         let total_slots = num_slots + native_slots;
 
-        Layout::from_size_align(
-            total_slots * 8,
-            8,
-        ).expect("Invalid layout for PropertyMap")
+        Layout::from_size_align(total_slots * 8, 8).expect("Invalid layout for PropertyMap")
     }
 
     pub const unsafe fn initialize_unsized(this: *mut Self, size: u32) {

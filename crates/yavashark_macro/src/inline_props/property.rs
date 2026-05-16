@@ -253,11 +253,12 @@ fn get_partial_type(ty: &syn::Type) -> &Type {
             }
             if let Some(segment) = type_path.path.segments.last()
                 && segment.ident == "Partial"
-                    && let syn::PathArguments::AngleBracketed(args) = &segment.arguments
-                        && args.args.len() == 2
-                            && let syn::GenericArgument::Type(inner_ty) = &args.args[0] {
-                                return inner_ty;
-                            }
+                && let syn::PathArguments::AngleBracketed(args) = &segment.arguments
+                && args.args.len() == 2
+                && let syn::GenericArgument::Type(inner_ty) = &args.args[0]
+            {
+                return inner_ty;
+            }
             ty
         }
         _ => ty,

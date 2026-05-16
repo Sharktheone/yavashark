@@ -226,9 +226,9 @@ pub fn parse_method(
                         .segments
                         .last()
                         .is_some_and(|seg| seg.ident == "Realm")
-                    {
-                        realm = Some(args.len());
-                    }
+                {
+                    realm = Some(args.len());
+                }
 
                 pat.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("this") {

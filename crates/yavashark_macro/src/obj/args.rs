@@ -136,10 +136,10 @@ impl ItemArgs {
 
                                 Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
                             })
-                        {
-                            err = Some(e);
-                            return false;
-                        };
+                    {
+                        err = Some(e);
+                        return false;
+                    };
 
                     let id = match f
                         .ident

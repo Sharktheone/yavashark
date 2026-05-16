@@ -1,7 +1,7 @@
-use yavashark_string::YSString;
 use bumpalo::boxed::Box;
 use num_bigint::BigInt;
 use regress::Regex;
+use yavashark_string::YSString;
 
 pub enum Expression<'alloc> {
     BooleanLit(bool),

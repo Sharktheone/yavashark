@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
-use std::mem::{MaybeUninit};
+use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
-use std::ptr::{NonNull};
+use std::ptr::NonNull;
 
 #[repr(C, align(8))]
 pub struct NativeWrapper<T: ?Sized> {
@@ -27,10 +27,12 @@ impl<T> NativeWrapper<T> {
         }
     }
 
-    pub unsafe fn initialize_from_ref_cb<R>(this: NonNull<MaybeUninit<Self>>, data: impl FnOnce(NonNull<MaybeUninit<T>>) -> R) -> R {
+    pub unsafe fn initialize_from_ref_cb<R>(
+        this: NonNull<MaybeUninit<Self>>,
+        data: impl FnOnce(NonNull<MaybeUninit<T>>) -> R,
+    ) -> R {
         unsafe {
             let native = &raw mut (*(*this.as_ptr()).as_mut_ptr()).data;
-
 
             data(NonNull::new_unchecked(native).cast())
         }

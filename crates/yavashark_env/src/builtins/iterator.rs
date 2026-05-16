@@ -15,6 +15,7 @@ pub use record::*;
 use crate::builtins::to_integer_or_infinity;
 use crate::native_obj::NativeObject;
 use crate::realm::Intrinsic;
+use crate::utils::coerce_object;
 use crate::value::IntoValue;
 use crate::value::Obj;
 use crate::{
@@ -22,7 +23,6 @@ use crate::{
 };
 use iterator_helper_obj::IteratorHelperObject;
 use yavashark_macro::props;
-use crate::utils::coerce_object;
 
 /// %Iterator% - The Iterator constructor (27.1.3)
 ///

@@ -51,9 +51,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut self_mut = false;
 
                 if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
-                    && self_arg.mutability.is_some() {
-                        self_mut = true;
-                    }
+                    && self_arg.mutability.is_some()
+                {
+                    self_mut = true;
+                }
 
                 let mut special = false;
 
@@ -105,9 +106,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut self_mut = false;
 
                 if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
-                    && self_arg.mutability.is_some() {
-                        self_mut = true;
-                    }
+                    && self_arg.mutability.is_some()
+                {
+                    self_mut = true;
+                }
 
                 remove.push(idx);
                 properties.push(Item {
@@ -142,9 +144,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut self_mut = false;
 
                 if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first()
-                    && self_arg.mutability.is_some() {
-                        self_mut = true;
-                    }
+                    && self_arg.mutability.is_some()
+                {
+                    self_mut = true;
+                }
 
                 let mut has_realm = false;
                 let mut has_this = false;
@@ -195,9 +198,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         get = Some(attr.path.require_ident()?.clone());
 
                         Ok(())
-                    }) {
-                        return e.to_compile_error().into();
-                    }
+                    })
+                {
+                    return e.to_compile_error().into();
+                }
 
                 let mut set = None;
 

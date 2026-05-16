@@ -179,13 +179,14 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
 fn update_partial_type(mut ty: syn::Type, wrapper: TokenStream) -> syn::Type {
     if let syn::Type::Path(type_path) = &mut ty
         && let Some(segment) = type_path.path.segments.last_mut()
-            && segment.ident == "Partial"
-                && let syn::PathArguments::AngleBracketed(args) = &mut segment.arguments
-                    && let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first_mut() {
-                        *inner_ty = syn::parse_quote! {
-                            #wrapper<#inner_ty>
-                        };
-                    }
+        && segment.ident == "Partial"
+        && let syn::PathArguments::AngleBracketed(args) = &mut segment.arguments
+        && let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first_mut()
+    {
+        *inner_ty = syn::parse_quote! {
+            #wrapper<#inner_ty>
+        };
+    }
 
     ty
 }
