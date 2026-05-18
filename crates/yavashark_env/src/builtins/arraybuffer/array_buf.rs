@@ -85,6 +85,7 @@ impl ArrayBuffer {
 
 #[props(intrinsic_name = arraybuffer, to_string_tag = "ArrayBuffer")]
 impl ArrayBuffer {
+
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {
         let max_len = match opts.map(|v| {
@@ -226,6 +227,11 @@ impl ArrayBuffer {
         let inner = self.inner.borrow();
 
         inner.buffer.is_none()
+    }
+
+    #[get("immutale")]
+    fn immutale(&self) -> bool {
+        false
     }
 
     #[prop("isView")]
