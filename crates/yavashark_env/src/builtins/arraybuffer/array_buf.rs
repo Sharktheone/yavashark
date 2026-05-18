@@ -229,8 +229,8 @@ impl ArrayBuffer {
         inner.buffer.is_none()
     }
 
-    #[get("immutale")]
-    fn immutale(&self) -> bool {
+    #[get("immutable")]
+    fn immutable(&self) -> bool {
         false
     }
 
