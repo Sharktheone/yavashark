@@ -212,7 +212,7 @@ impl<T: ?Sized> PropertyMap<T> {
         }
     }
 
-    pub const fn get_butterfly(&self) -> Option<NonNull<ButterFly>> {
+    pub fn get_butterfly(&self) -> Option<NonNull<ButterFly>> {
         if self.state.has_butterfly {
             let ptr = unsafe {
                 self.get_unchecked(self.state.size)

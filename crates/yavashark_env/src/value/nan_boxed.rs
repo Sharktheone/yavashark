@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use std::num::{NonZero, NonZeroU64, NonZeroUsize};
 use std::ptr;
 use std::ptr::NonNull;
 
@@ -44,13 +45,7 @@ use std::ptr::NonNull;
 ///
 #[repr(C)]
 #[derive(Clone, Copy)]
-pub struct ValueInner {
-    #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-    half: u32,
-    #[cfg(target_pointer_width = "16")]
-    ptr_pad: u16,
-    ptr: *const (),
-}
+pub struct ValueInner(u64);
 
 pub enum ValueVariant {
     Number(f64),
@@ -207,40 +202,11 @@ mod bits {
 
 impl ValueInner {
     const fn from_bits(bits: u64) -> Self {
-        Self {
-            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-            half: (bits >> 32) as u32,
-            #[cfg(target_pointer_width = "16")]
-            ptr_pad: (bits >> 48) as u16,
-            ptr: ptr::without_provenance_mut(bits as usize),
-        }
-    }
-
-    fn with_provenance(ptr: NonNull<()>, addr: u64) -> Self {
-        Self {
-            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-            half: (addr >> 32) as u32,
-            #[cfg(target_pointer_width = "16")]
-            ptr_pad: (addr >> 48) as u16,
-            ptr: ptr.cast::<()>().as_ptr().with_addr(addr as usize),
-        }
+        Self(bits)
     }
 
     fn value(self) -> u64 {
-        //TODO: should this be a transmute?
-        let mut bits = self.ptr.addr() as u64;
-
-        #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-        {
-            bits |= (self.half as u64) << 32;
-        }
-
-        #[cfg(target_pointer_width = "16")]
-        {
-            bits |= (self.ptr_pad as u64) << 48;
-        }
-
-        bits
+        self.0
     }
 
     pub const fn from_f64(value: f64) -> Self {
@@ -279,14 +245,10 @@ impl ValueInner {
         Self::from_bits(bits)
     }
 
-    pub const unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
-        Self {
-            #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-            half: 0,
-            #[cfg(target_pointer_width = "16")]
-            ptr_pad: 0,
-            ptr: ptr.as_ptr(),
-        }
+    pub unsafe fn from_ptr(ptr: NonNull<()>) -> Self {
+        let addr = ptr.expose_provenance();
+
+        Self(addr.get() as u64)
     }
 
     pub unsafe fn from_object_raw(ptr: NonNull<()>) -> Self {
@@ -381,13 +343,23 @@ impl ValueInner {
         }
     }
 
-    pub const unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
-        unsafe { NonNull::new_unchecked(self.ptr.cast_mut()) }
+    pub unsafe fn unsafe_assume_pointer(self) -> NonNull<()> {
+        unsafe {
+            let addr = NonZeroUsize::new_unchecked(self.value() as usize);
+
+            NonNull::with_exposed_provenance(addr)
+        }
     }
 
     pub unsafe fn as_pointer_unchecked(self) -> NonNull<()> {
         let addr = bits::decode_pointer(self.value());
-        unsafe { NonNull::new_unchecked(self.ptr.with_addr(addr).cast_mut()) }
+
+        unsafe {
+            //SAFETY: pointers are guaranteed to be non-null in the JS value.
+            let addr = NonZero::new_unchecked(addr);
+
+            NonNull::with_exposed_provenance(addr)
+        }
     }
 
     pub fn as_inline_string(self) -> Option<[u8; 6]> {
