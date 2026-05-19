@@ -13,51 +13,13 @@ use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Varia
 pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
-use std::rc::Rc;
 #[cfg(feature = "profiler")]
 use std::time::Instant;
 
 #[cfg(feature = "profiler")]
 use yavashark_profiler::{FileProfileWriter, FrameId, Profile};
-
-pub struct PrivateRc<T>(Rc<T>);
-
-impl<T> Deref for PrivateRc<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl<T> DerefMut for PrivateRc<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        Rc::get_mut(&mut self.0).expect("Multiple references exist")
-    }
-}
-
-impl<T> PrivateRc<T> {
-    #[must_use]
-    pub fn clone_public<'a>(&self) -> PublicRc<'a, T> {
-        PublicRc(self.0.clone(), std::marker::PhantomData)
-    }
-}
-
-pub struct PublicRc<'a, T>(Rc<T>, std::marker::PhantomData<&'a ()>);
-
-impl<'a, T> Deref for PublicRc<'a, T>
-where
-    T: 'a,
-    Self: 'a,
-{
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+use crate::utils::private_rc::PrivateRc;
 
 pub struct Realm {
     pub intrinsics: PrivateRc<Intrinsics>, // [[Intrinsics]]
@@ -82,7 +44,7 @@ impl Realm {
         let proto = intrinsics.obj.clone();
 
         let mut realm = Self {
-            intrinsics: PrivateRc(Rc::new(intrinsics)),
+            intrinsics: PrivateRc::new(intrinsics),
             global: new_global_obj(proto)?,
             env: Environment {
                 modules: HashMap::new(),
@@ -179,7 +141,7 @@ impl Realm {
 impl Default for Realm {
     fn default() -> Self {
         Self {
-            intrinsics: PrivateRc(Rc::new(Intrinsics::default())),
+            intrinsics: PrivateRc::new(Intrinsics::default()),
             global: Object::null(),
             env: Environment {
                 modules: HashMap::new(),
