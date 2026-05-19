@@ -62,6 +62,7 @@ vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler", "ya
 simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/simple_bytecode"]
 out_of_spec_experiments = ["yavashark_env/out-of-spec-experiments"]
 gui = ["yavashark_env/gui"]
+obj_trace = ["yavashark_env/obj_trace"]
 
 
 [profile.release]
