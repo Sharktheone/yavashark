@@ -58,10 +58,14 @@ impl Tracer {
         thread::spawn(|| {
             use crate::trace_gui::App;
             use eframe::NativeOptions;
-            use winit::platform::wayland::EventLoopBuilderExtWayland;
 
             let options = NativeOptions {
                 event_loop_builder: Some(Box::new(|builder| {
+                    #[cfg(linux)]
+                    use winit::platform::wayland::EventLoopBuilderExtWayland;
+                    #[cfg(windows)]
+                    use winit::platform::windows::EventLoopExtWindows;
+
                     builder.with_any_thread(true);
                 })),
                 ..Default::default()
@@ -163,3 +167,4 @@ impl Tracer {
         trace.delete_cache();
     }
 }
+
