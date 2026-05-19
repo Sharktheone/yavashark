@@ -1,10 +1,10 @@
 {
   "profiles": {
-    "fast": {
+    "fast2": {
       "test_root": "../../test262/test/",
       "noskip": true,
-      "workers": 2048,
-      "timeout": "15s"
+      "workers": 1024,
+      "timeout": "5s"
     },
     "interactive": {
       "test_root": "../../test262/test/",
