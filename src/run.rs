@@ -11,8 +11,10 @@ use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 use std::path::PathBuf;
+use rustyline::validate::ValidationResult::Valid;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
+use swc_ecma_ast::Program;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
@@ -243,7 +245,7 @@ fn run_code(
 
     let mut p = Parser::new(Syntax::Es(c), string_input, None);
 
-    let script = match p.parse_script() {
+    let prog = match p.parse_program() {
         Ok(s) => s,
         Err(e) => {
             println!("SyntaxError: {e:?}");
@@ -255,9 +257,21 @@ fn run_code(
         println!("AST:\n{script:#?}");
     }
 
-    if let Err(e) = Validator::new().validate_statements(&script.body) {
-        println!("SyntaxError: {e}");
-        return;
+    let mut validator = Validator::new();
+
+    match &prog {
+        Program::Script(script) => {
+            if let Err(e) = validator.validate_statements(&script.body) {
+                println!("SyntaxError: {e}");
+                return;
+            }
+        }
+        Program::Module(module) => {
+            if let Err(e) = validator.validate_module_items(&module.body) {
+                println!("SyntaxError: {e}");
+                return;
+            }
+        }
     }
 
     #[cfg(feature = "pprof")]
@@ -296,8 +310,9 @@ fn run_code(
         }
         yavashark_vm::init(&mut realm).unwrap();
 
-        let result = match yavashark_interpreter::Interpreter::run_in(
-            &script.body,
+
+        let result = match yavashark_interpreter::Interpreter::run_program_in(
+            &prog,
             &mut realm,
             &mut scope,
         ) {
@@ -333,6 +348,12 @@ fn run_code(
     if bytecode {
         use yavashark_vm::yavashark_bytecode::data::DataSection;
         use yavashark_vm::{OwnedVM, VM};
+
+        let Some(script) = prog.as_script() else {
+            eprintln!("Only scripts are supported in bytecode mode currently");
+            return;
+        };
+
 
         let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
 
@@ -382,6 +403,12 @@ fn run_code(
 
     #[cfg(feature = "vm")]
     if instructions {
+        let Some(script) = prog.as_script() else {
+            eprintln!("Only scripts are supported in bytecode mode currently");
+            return;
+        };
+
+
         let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
 
         if instructions {
