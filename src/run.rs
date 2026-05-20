@@ -254,7 +254,7 @@ fn run_code(
     };
 
     if ast {
-        println!("AST:\n{script:#?}");
+        println!("AST:\n{prog:#?}");
     }
 
     let mut validator = Validator::new();
