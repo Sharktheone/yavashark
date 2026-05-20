@@ -309,21 +309,7 @@ impl RopeStr {
         result
     }
 
-    /// Flatten to String (only valid if both sides are UTF-8).
-    fn to_string(&self) -> String {
-        let mut result = String::with_capacity(self.len());
-        if let Some(s) = self.inner.left.as_str() {
-            result.push_str(s);
-        } else {
-            result.push_str(&self.inner.left.as_str_lossy());
-        }
-        if let Some(s) = self.inner.right.as_str() {
-            result.push_str(s);
-        } else {
-            result.push_str(&self.inner.right.as_str_lossy());
-        }
-        result
-    }
+
 
     fn as_ysstring(&self) -> YSString {
         YSString::from_rope_str(self.clone())
@@ -376,6 +362,30 @@ impl RopeStr {
         }
 
         None
+    }
+}
+
+
+// this has the reason, so we can control how large the backing buffer is as we'll know how large it is
+#[allow(clippy::to_string_trait_impl)]
+impl ToString for RopeStr {
+    fn to_string(&self) -> String {
+        let mut result = String::with_capacity(self.len());
+
+        self.for_each_elem(&mut |w| {
+            match w {
+                Wtf::Utf8(s) => result.push_str(s),
+                Wtf::Utf16(s) => {
+                    for &unit in s {
+                        result.push(std::char::from_u32(u32::from(unit)).unwrap_or('\u{FFFD}'));
+                    }
+                }
+            }
+
+            None::<()>
+        });
+
+        result
     }
 }
 
