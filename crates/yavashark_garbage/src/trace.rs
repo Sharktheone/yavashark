@@ -61,7 +61,7 @@ impl Tracer {
 
             let options = NativeOptions {
                 event_loop_builder: Some(Box::new(|builder| {
-                    #[cfg(linux)]
+                    #[cfg(target_os = "linux")]
                     use winit::platform::wayland::EventLoopBuilderExtWayland;
                     #[cfg(windows)]
                     use winit::platform::windows::EventLoopExtWindows;
