@@ -1,5 +1,5 @@
 use crate::conf;
-use crate::repl::{old_repl, repl};
+use crate::repl::repl;
 #[cfg(feature = "pprof")]
 use flate2::{Compression, write::GzEncoder};
 #[cfg(feature = "pprof")]
@@ -124,11 +124,9 @@ pub fn main() {
 
     let mut interpreter = matches.get_flag("interpreter");
     let bytecode = matches.get_flag("bytecode");
-    let old_bytecode = matches.get_flag("oldbytecode");
     let ast = matches.get_flag("ast");
     let instructions = matches.get_flag("instructions");
     let shell = matches.get_flag("shell");
-    let shellold = matches.get_flag("shellold");
     let eval_code = matches.get_one::<String>("eval");
     let js_profile_out = matches.get_one::<String>("profile-out").cloned();
     let native_profile_out = matches.get_one::<String>("native-profile-out").cloned();
@@ -163,7 +161,6 @@ pub fn main() {
             ast,
             interpreter,
             bytecode,
-            old_bytecode,
             instructions,
             js_profile_out.as_deref(),
             native_profile,
@@ -193,7 +190,6 @@ pub fn main() {
             ast,
             interpreter,
             bytecode,
-            old_bytecode,
             instructions,
             js_profile_out.as_deref(),
             native_profile,
@@ -205,21 +201,12 @@ pub fn main() {
         ast,
         interpreter,
         bytecode,
-        old_bytecode,
         instructions,
     };
 
-    if shell && shellold {
-        println!("Cannot run both shells");
-        return;
-    }
 
     if shell {
         repl(config).unwrap();
-    }
-
-    if shellold {
-        old_repl(config).unwrap();
     }
 }
 
@@ -234,7 +221,6 @@ fn run_code(
     ast: bool,
     interpreter: bool,
     #[allow(unused_variables)] bytecode: bool,
-    #[allow(unused_variables)] old_bytecode: bool,
     #[allow(unused_variables)] instructions: bool,
     #[allow(unused_variables)] js_profile_out: Option<&str>,
     native_profile: bool,
@@ -395,24 +381,11 @@ fn run_code(
     }
 
     #[cfg(feature = "vm")]
-    if old_bytecode || instructions {
+    if instructions {
         let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
 
         if instructions {
             println!("{bc:#?}");
-        }
-
-        if old_bytecode {
-            use yavashark_vm::OldOwnedVM;
-            use yavashark_vm::yavashark_bytecode::data::DataSection;
-            let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
-
-            let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
-
-            vm.run().unwrap();
-            rt.block_on(vm.get_realm().run_event_loop());
-
-            println!("OldBytecode: {:?}", vm.acc());
         }
     }
 }

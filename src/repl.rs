@@ -1,9 +1,7 @@
 mod helper;
 
-use crate::conf;
 use crate::conf::Conf;
 use crate::repl::helper::ReplHelper;
-use crate::simplerepl::Repl;
 use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 use std::path::Path;
@@ -53,7 +51,7 @@ pub fn repl(conf: Conf) -> Res {
 
     rl.set_helper(Some(h));
 
-    let mut count = 1;
+    let mut count = 1u32;
 
     let rt = Builder::new_current_thread().enable_all().build()?;
 
@@ -176,7 +174,7 @@ fn run_input(
             }
         };
 
-        if conf.old_bytecode || conf.bytecode {
+        if conf.bytecode {
             println!("Interpreter: {}", result.pretty_print(interpreter_realm));
         } else {
             println!("{}", result.pretty_print(interpreter_realm));
@@ -216,71 +214,4 @@ fn run_input(
             rt.block_on(vm_realm.run_event_loop());
         }
     }
-
-    #[cfg(feature = "vm")]
-    if conf.old_bytecode {
-        let bc = match yavashark_codegen::ByteCodegen::compile(&script.body) {
-            Ok(bc) => bc,
-            Err(e) => {
-                eprintln!("Failed to compile code: {e:?}");
-                return;
-            }
-        };
-
-        if conf.instructions {
-            println!("{bc:#?}");
-        }
-
-        #[cfg(feature = "vm")]
-        if conf.old_bytecode {
-            use yavashark_vm::OldBorrowedVM;
-            use yavashark_vm::yavashark_bytecode::data::DataSection;
-            let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
-
-            let mut vm = OldBorrowedVM::with_scope(
-                &bc.instructions,
-                &data,
-                old_vm_realm,
-                old_vm_scope.clone(),
-            );
-
-            if let Err(e) = vm.run() {
-                eprintln!("Uncaught: {e:?}");
-            }
-
-            println!("OldBytecode: {:?}", vm.acc());
-
-            rt.block_on(old_vm_realm.run_event_loop());
-        }
-    }
-}
-
-pub fn old_repl(conf: conf::Conf) -> Res {
-    let path = Path::new("repl.js");
-
-    let mut interpreter_realm = Realm::new()?;
-    let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
-
-    let mut vm_realm = Realm::new()?;
-    let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
-
-    let mut old_vm_realm = Realm::new()?;
-    let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
-    let rt = Builder::new_current_thread().enable_all().build()?;
-
-    let mut repl = Repl::new(Box::new(move |input| {
-        run_input(
-            input,
-            conf,
-            &mut interpreter_realm,
-            &mut interpreter_scope,
-            &mut vm_realm,
-            &vm_scope,
-            &mut old_vm_realm,
-            &old_vm_scope,
-            &rt,
-        );
-    }));
-
-    repl.run();
 }

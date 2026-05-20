@@ -6,7 +6,6 @@ mod optimizer;
 mod repl;
 #[cfg(not(feature = "minimal"))]
 mod run;
-mod simplerepl;
 
 fn main() {
     #[cfg(not(feature = "minimal"))]
