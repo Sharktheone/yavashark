@@ -11,7 +11,6 @@ use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 use std::path::PathBuf;
-use rustyline::validate::ValidationResult::Valid;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_ast::Program;
