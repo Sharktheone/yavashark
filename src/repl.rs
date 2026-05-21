@@ -37,7 +37,6 @@ pub fn repl(conf: Conf) -> Res {
     old_vm_realm.set_eval(InterpreterEval, false)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut old_vm_realm)?;
-    let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
 
     let config = Config::builder()
         .history_ignore_space(true)
@@ -94,8 +93,6 @@ pub fn repl(conf: Conf) -> Res {
             &mut interpreter_scope,
             &mut vm_realm,
             &vm_scope,
-            &mut old_vm_realm,
-            &old_vm_scope,
             &rt,
         );
     }
@@ -111,8 +108,6 @@ fn run_input(
     interpreter_scope: &mut Scope,
     vm_realm: &mut Realm,
     vm_scope: &Scope,
-    old_vm_realm: &mut Realm,
-    old_vm_scope: &Scope,
     rt: &Runtime,
 ) {
     if input.is_empty() {
