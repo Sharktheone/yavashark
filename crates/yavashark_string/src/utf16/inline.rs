@@ -1,8 +1,10 @@
 use std::fmt::{self, Debug};
 
+use crate::InlineLen;
+
 /// Maximum number of UTF-16 code units that can be stored inline.
 /// With 1 byte for length and 22 bytes for data, we can fit 11 u16 values.
-pub const INLINE_UTF16_CAPACITY: usize = 11;
+pub const INLINE_UTF16_CAPACITY: usize = 10;
 
 /// An inline UTF-16 string that stores up to 11 code units without heap allocation.
 ///
@@ -12,9 +14,12 @@ pub const INLINE_UTF16_CAPACITY: usize = 11;
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct InlineUtf16String {
-    len: u8,
-    data: [u16; INLINE_UTF16_CAPACITY],
+    len: InlineLen,
+    data: Data,
 }
+
+#[derive(Clone, Copy)]
+struct Data([u16; INLINE_UTF16_CAPACITY]);
 
 impl InlineUtf16String {
     /// Creates an empty inline UTF-16 string.
@@ -22,8 +27,8 @@ impl InlineUtf16String {
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            len: 0,
-            data: [0; INLINE_UTF16_CAPACITY],
+            len: InlineLen::Empty,
+            data: Data([0; INLINE_UTF16_CAPACITY]),
         }
     }
 
@@ -41,8 +46,8 @@ impl InlineUtf16String {
         data[..units.len()].copy_from_slice(units);
 
         Some(Self {
-            len: units.len() as u8,
-            data,
+            len: InlineLen::from_usize(units.len())?,
+            data: Data(data),
         })
     }
 
@@ -52,7 +57,7 @@ impl InlineUtf16String {
     pub const fn from_code_unit(unit: u16) -> Self {
         let mut data = [0u16; INLINE_UTF16_CAPACITY];
         data[0] = unit;
-        Self { len: 1, data }
+        Self { len: InlineLen::Len1, data: Data(data) }
     }
 
     /// Creates an inline UTF-16 string from a char.
@@ -63,9 +68,15 @@ impl InlineUtf16String {
     pub const fn from_char(c: char) -> Self {
         let mut data = [0u16; INLINE_UTF16_CAPACITY];
         let encoded = c.encode_utf16(&mut data);
+
+        let len = match InlineLen::from_usize(encoded.len()) {
+            Some(len) => len,
+            None => InlineLen::Empty,
+        };
+        
         Self {
-            len: encoded.len() as u8,
-            data,
+            len,
+            data: Data(data),
         }
     }
 
@@ -80,14 +91,14 @@ impl InlineUtf16String {
     #[inline]
     #[must_use]
     pub const fn is_empty(&self) -> bool {
-        self.len == 0
+        self.len as usize == 0
     }
 
     /// Returns the code units as a slice.
     #[inline]
     #[must_use]
     pub fn as_slice(&self) -> &[u16] {
-        &self.data[..self.len as usize]
+        &self.data.0[..self.len as usize]
     }
 
     /// Returns the code units as a mutable slice.
@@ -95,7 +106,7 @@ impl InlineUtf16String {
     #[must_use]
     pub fn as_mut_slice(&mut self) -> &mut [u16] {
         let len = self.len as usize;
-        &mut self.data[..len]
+        &mut self.data.0[..len]
     }
 
     /// Gets the code unit at the given index.
@@ -103,7 +114,7 @@ impl InlineUtf16String {
     #[must_use]
     pub const fn get(&self, index: usize) -> Option<u16> {
         if index < self.len as usize {
-            Some(self.data[index])
+            Some(self.data.0[index])
         } else {
             None
         }
@@ -115,8 +126,11 @@ impl InlineUtf16String {
     #[inline]
     pub const fn push(&mut self, unit: u16) -> bool {
         if (self.len as usize) < INLINE_UTF16_CAPACITY {
-            self.data[self.len as usize] = unit;
-            self.len += 1;
+            self.data.0[self.len as usize] = unit;
+            self.len = match InlineLen::from_usize(self.len as usize + 1) {
+                Some(len) => len,
+                None => self.len, // This should never happen since we check capacity above
+            };
             true
         } else {
             false
@@ -134,8 +148,11 @@ impl InlineUtf16String {
 
         if self.len as usize + needed <= INLINE_UTF16_CAPACITY {
             for &unit in encoded.iter() {
-                self.data[self.len as usize] = unit;
-                self.len += 1;
+                self.data.0[self.len as usize] = unit;
+                self.len = match InlineLen::from_usize(self.len as usize + 1) {
+                    Some(len) => len,
+                    None => self.len, // This should never happen since we check capacity above
+                };
             }
             needed
         } else {
@@ -149,10 +166,13 @@ impl InlineUtf16String {
             return false;
         }
 
-        self.data[self.len as usize..self.len as usize + units.len()].copy_from_slice(units);
+        self.data.0[self.len as usize..self.len as usize + units.len()].copy_from_slice(units);
 
-        self.len += units.len() as u8;
-
+        self.len = match InlineLen::from_usize(self.len as usize + units.len()) {
+            Some(len) => len,
+            None => self.len, // This should never happen since we check capacity above
+        };        
+        
         true
     }
 
