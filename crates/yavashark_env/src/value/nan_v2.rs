@@ -185,6 +185,17 @@ mod bits {
         box_ptr::<HEAP_BIGINT_TAG>(ptr)
     }
 
+    pub const unsafe fn unbox_int32(val: u64) -> i32 {
+        debug_assert!(is_int32(val));
+        val as i32
+    }
+
+    pub const unsafe fn unbox_bool(val: u64) -> bool {
+        debug_assert!(is_bool(val));
+
+        val == TRUE
+    }
+
     pub unsafe fn unbox_inline_string(val: u64) -> [u8; 6] {
         debug_assert!(is_inline_string(val));
 
