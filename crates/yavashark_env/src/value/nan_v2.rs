@@ -544,6 +544,41 @@ pub enum JSBigInt {
 mod tests {
     use super::*;
 
+
+    #[test]
+    fn test_f64_val() {
+        let value = ValueInner::from_f64(42.42);
+
+        assert_eq!(value.to_bits(), 42.42f64.to_bits());
+        assert_eq!(value.as_f64(), Some(42.42));
+    }
+
+
+    #[test]
+    fn test_f64_inf() {
+        let inf = ValueInner::from_f64(f64::INFINITY);
+        let neg_inf = ValueInner::from_f64(f64::NEG_INFINITY);
+
+        assert_eq!(inf.to_bits(), f64::INFINITY.to_bits());
+        assert_eq!(inf.as_f64(), Some(f64::INFINITY));
+
+        assert_eq!(neg_inf.to_bits(), f64::NEG_INFINITY.to_bits());
+        assert_eq!(neg_inf.as_f64(), Some(f64::NEG_INFINITY));
+    }
+
+    #[test]
+    fn test_f64_nan() {
+        let nan = ValueInner::from_f64(f64::NAN);
+
+        println!("{:#b}", nan.to_bits());
+        println!("{:#x}", nan.to_bits());
+
+        assert_eq!(nan.to_bits(), f64::NAN.to_bits());
+        assert!(f64::from_bits(nan.to_bits()).is_nan());
+        assert_eq!(nan.as_f64(), Some(f64::NAN));
+        assert!(nan.as_f64().unwrap().is_nan());
+    }
+
     #[test]
     fn test_int32() {
         let value = ValueInner::from_int32(42);
