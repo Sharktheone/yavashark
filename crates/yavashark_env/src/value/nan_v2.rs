@@ -82,6 +82,10 @@ mod bits {
         val == UNDEFINED
     }
 
+    pub const fn is_the_hole(val: u64) -> bool {
+        val == THE_HOLE
+    }
+
     pub const fn is_inline_string(val: u64) -> bool {
         tag(val) == INLINE_STRING_TAG
     }
@@ -113,8 +117,6 @@ mod bits {
     pub const fn is_big_int(val: u64) -> bool {
         ignore_inline_tag(val) == HEAP_BIGINT_TAG
     }
-
-
 
     pub const fn tag(val: u64) -> u64 {
         val & TAG_MASK
