@@ -29,6 +29,7 @@ pub struct ValueInner {
 
 
 mod bits {
+    use std::ptr::NonNull;
     // 0xFFFF FFFF FFFF FFFF
     pub const INT32_TAG: u64 = 0x7FF9_0000_0000_0000;
 
@@ -129,4 +130,55 @@ mod bits {
     pub const fn val(val: u64) -> u64 {
         val & VALUE_48BIT_MASK
     }
+
+    pub fn box_ptr<const TAG: u64>(ptr: NonNull<()>) -> u64 {
+        ptr.expose_provenance().get() as u64 | TAG
+    }
+
+    pub const fn box_int32(val: i32) -> u64 {
+        (val as u64) | INT32_TAG
+    }
+
+    pub const fn box_bool(val: bool) -> u64 {
+        (val as u64) | BOOL_TAG
+    }
+
+    pub const fn null() -> u64 {
+        NULL
+    }
+
+    pub const fn undefined() -> u64 {
+        UNDEFINED
+    }
+
+    pub const fn the_hole() -> u64 {
+        THE_HOLE
+    }
+
+    pub fn box_inline_string(val: [u8; 6]) -> u64 {
+        let mut expanded = [0u8; 8];
+        expanded[0..6].copy_from_slice(&val);
+        u64::from_le_bytes(expanded) | INLINE_STRING_TAG
+    }
+
+    pub const fn box_inline_big_int(val: i64) -> u64 {
+        todo!()
+    }
+
+    pub fn box_object(ptr: NonNull<()>) -> u64 {
+        box_ptr::<OBJECT_TAG>(ptr)
+    }
+
+    pub fn box_symbol(ptr: NonNull<()>) -> u64 {
+        box_ptr::<SYMBOL_TAG>(ptr)
+    }
+
+    pub fn box_heap_string(ptr: NonNull<()>) -> u64 {
+        box_ptr::<HEAP_STRING_TAG>(ptr)
+    }
+
+    pub fn box_heap_big_int(ptr: NonNull<()>) -> u64 {
+        box_ptr::<HEAP_BIGINT_TAG>(ptr)
+    }
+
 }
