@@ -29,7 +29,9 @@ pub struct ValueInner {
 
 
 mod bits {
+    use std::num::NonZeroUsize;
     use std::ptr::NonNull;
+
     // 0xFFFF FFFF FFFF FFFF
     pub const INT32_TAG: u64 = 0x7FF9_0000_0000_0000;
 
@@ -180,5 +182,62 @@ mod bits {
     pub fn box_heap_big_int(ptr: NonNull<()>) -> u64 {
         box_ptr::<HEAP_BIGINT_TAG>(ptr)
     }
+
+    pub unsafe fn unbox_inline_string(val: u64) -> [u8; 6] {
+        debug_assert!(is_inline_string(val));
+
+        let bytes = (val & VALUE_48BIT_MASK).to_le_bytes();
+        let mut result = [0u8; 6];
+        result.copy_from_slice(&bytes[0..6]);
+        result
+    }
+
+    pub unsafe fn unbox_inline_big_int(val: u64) -> i64 {
+        debug_assert!(is_inline_big_int(val));
+
+        todo!()
+    }
+
+
+    pub unsafe fn unbox_ptr(val: u64) -> NonNull<()> {
+        unsafe {
+            let ptr_val = NonZeroUsize::new_unchecked((val & VALUE_48BIT_MASK) as usize);
+            NonNull::with_exposed_provenance(ptr_val)
+        }
+    }
+
+    pub unsafe fn unbox_object(val: u64) -> NonNull<()> {
+        debug_assert!(is_object(val));
+
+        unsafe {
+            unbox_ptr(val)
+        }
+
+    }
+
+    pub unsafe fn unbox_symbol(val: u64) -> NonNull<()> {
+        debug_assert!(is_symbol(val));
+
+        unsafe {
+            unbox_ptr(val)
+        }
+    }
+
+    pub unsafe fn unbox_heap_string(val: u64) -> NonNull<()> {
+        debug_assert!(is_heap_string(val));
+
+        unsafe {
+            unbox_ptr(val)
+        }
+    }
+
+    pub unsafe fn unbox_heap_big_int(val: u64) -> NonNull<()> {
+        debug_assert!(is_heap_big_int(val));
+
+        unsafe {
+            unbox_ptr(val)
+        }
+    }
+
 
 }
