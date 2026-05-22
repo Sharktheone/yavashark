@@ -481,12 +481,131 @@ impl ValueInner {
     }
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum JSString {
     Inline([u8; 6]),
     Heap(NonNull<()>),
 }
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum JSBigInt {
     Inline(i64),
     Heap(NonNull<()>),
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_int32() {
+        let value = ValueInner::from_int32(42);
+        assert!(value.is_int32());
+        assert_eq!(value.as_int32(), Some(42));
+    }
+
+    #[test]
+    fn test_bool() {
+        let true_value = ValueInner::from_bool(true);
+        let false_value = ValueInner::from_bool(false);
+
+        assert!(true_value.is_bool());
+        assert!(false_value.is_bool());
+
+        assert_eq!(true_value.as_bool(), Some(true));
+        assert_eq!(false_value.as_bool(), Some(false));
+    }
+
+    #[test]
+    fn test_null_undefined() {
+        let null_value = ValueInner::null();
+        let undefined_value = ValueInner::undefined();
+
+        assert!(null_value.is_null());
+        assert!(undefined_value.is_undefined());
+    }
+
+    #[test]
+    fn test_inline_string() {
+        let string_value = ValueInner::from_inline_string(*b"luna!?");
+        assert!(string_value.is_inline_string());
+        assert_eq!(string_value.as_inline_string(), Some(*b"luna!?"));
+    }
+
+    #[test]
+    fn test_heap_string() {
+        let heap_string_ptr = NonNull::new(0x1234 as *mut ()).unwrap();
+        let string_value = ValueInner::from_heap_string(heap_string_ptr);
+
+        assert!(string_value.is_heap_string());
+        assert_eq!(string_value.as_heap_string(), Some(heap_string_ptr));
+    }
+
+    #[test]
+    fn test_object() {
+        let object_ptr = NonNull::new(0x4242 as *mut ()).unwrap();
+        let object_value = ValueInner::from_object(object_ptr);
+
+        assert!(object_value.is_object());
+        assert_eq!(object_value.as_object(), Some(object_ptr));
+    }
+
+    #[test]
+    fn test_symbol() {
+        let symbol_ptr = NonNull::new(0x1337 as *mut ()).unwrap();
+        let symbol_value = ValueInner::from_symbol(symbol_ptr);
+
+        assert!(symbol_value.is_symbol());
+        assert_eq!(symbol_value.as_symbol(), Some(symbol_ptr));
+    }
+
+    #[test]
+    fn test_inline_big_int() {
+        let big_int_value = ValueInner::from_inline_big_int(42_1337_6967);
+        assert!(big_int_value.is_inline_big_int());
+        assert_eq!(big_int_value.as_inline_big_int(), Some(42_1337_6967));
+    }
+
+    #[test]
+    fn test_heap_big_int() {
+        let heap_big_int_ptr = NonNull::new(0x6969 as *mut ()).unwrap();
+        let big_int_value = ValueInner::from_heap_big_int(heap_big_int_ptr);
+
+        assert!(big_int_value.is_heap_big_int());
+        assert_eq!(big_int_value.as_heap_big_int(), Some(heap_big_int_ptr));
+    }
+
+    #[test]
+    fn test_string_enum() {
+        let inline_string = JSString::Inline(*b"luna!?");
+        let heap_string_ptr = NonNull::new(0x6767 as *mut ()).unwrap();
+        let heap_string = JSString::Heap(heap_string_ptr);
+
+        let inline_value = ValueInner::from_string(inline_string);
+        let heap_value = ValueInner::from_string(heap_string);
+
+        assert!(inline_value.is_inline_string());
+        assert!(heap_value.is_heap_string());
+
+        assert_eq!(inline_value.as_string(), Some(inline_string));
+        assert_eq!(heap_value.as_string(), Some(heap_string));
+    }
+
+    #[test]
+    fn test_big_int_enum() {
+        let inline_big_int = JSBigInt::Inline(42_1337_6967);
+        let heap_big_int_ptr = NonNull::new(0x4200 as *mut ()).unwrap();
+        let heap_big_int = JSBigInt::Heap(heap_big_int_ptr);
+
+        let inline_value = ValueInner::from_big_int(inline_big_int);
+        let heap_value = ValueInner::from_big_int(heap_big_int);
+
+        assert!(inline_value.is_inline_big_int());
+        assert!(heap_value.is_heap_big_int());
+
+        assert_eq!(inline_value.as_big_int(), Some(inline_big_int));
+        assert_eq!(heap_value.as_big_int(), Some(heap_big_int));
+    }
 }
