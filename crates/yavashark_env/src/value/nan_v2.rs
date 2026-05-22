@@ -314,6 +314,102 @@ impl ValueInner {
     pub const fn is_big_int(self) -> bool {
         bits::is_big_int(self.val)
     }
+
+    pub const fn as_int32(self) -> Option<i32> {
+        if self.is_int32() {
+            unsafe { Some(bits::unbox_int32(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub const fn as_bool(self) -> Option<bool> {
+        if self.is_bool() {
+            unsafe { Some(bits::unbox_bool(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_inline_string(self) -> Option<[u8; 6]> {
+        if self.is_inline_string() {
+            unsafe { Some(bits::unbox_inline_string(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_inline_big_int(self) -> Option<i64> {
+        if self.is_inline_big_int() {
+            unsafe { Some(bits::unbox_inline_big_int(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_object(self) -> Option<NonNull<()>> {
+        if self.is_object() {
+            unsafe { Some(bits::unbox_object(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_symbol(self) -> Option<NonNull<()>> {
+        if self.is_symbol() {
+            unsafe { Some(bits::unbox_symbol(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_heap_string(self) -> Option<NonNull<()>> {
+        if self.is_heap_string() {
+            unsafe { Some(bits::unbox_heap_string(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_heap_big_int(self) -> Option<NonNull<()>> {
+        if self.is_heap_big_int() {
+            unsafe { Some(bits::unbox_heap_big_int(self.val)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_string(self) -> Option<JSString> {
+        if self.is_heap_string() {
+            unsafe {
+                let ptr = bits::unbox_heap_string(self.val);
+                Some(JSString::Heap(ptr))
+            }
+        } else if self.is_inline_string() {
+            unsafe {
+                let bytes = bits::unbox_inline_string(self.val);
+                Some(JSString::Inline(bytes))
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn as_big_int(self) -> Option<JSBigInt> {
+        if self.is_heap_big_int() {
+            unsafe {
+                let ptr = bits::unbox_heap_big_int(self.val);
+                Some(JSBigInt::Heap(ptr))
+            }
+        } else if self.is_inline_big_int() {
+            unsafe {
+                let val = bits::unbox_inline_big_int(self.val);
+                Some(JSBigInt::Inline(val))
+            }
+        } else {
+            None
+        }
+    }
 }
 
 
