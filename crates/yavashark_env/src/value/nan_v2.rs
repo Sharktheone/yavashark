@@ -250,9 +250,70 @@ mod bits {
         unsafe {
             unbox_ptr(val)
         }
+impl ValueInner {
+    pub const unsafe fn from_bits(bits: u64) -> Self {
+        Self { val: bits }
     }
 
+    pub const fn to_bits(self) -> u64 {
+        self.val
+    }
 
+    pub const fn is_int32(self) -> bool {
+        bits::is_int32(self.val)
+    }
+
+    pub const fn is_imm(self) -> bool {
+        bits::is_imm(self.val)
+    }
+
+    pub const fn is_bool(self) -> bool {
+        bits::is_bool(self.val)
+    }
+
+    pub const fn is_null(self) -> bool {
+        bits::is_null(self.val)
+    }
+
+    pub const fn is_undefined(self) -> bool {
+        bits::is_undefined(self.val)
+    }
+
+    pub const fn is_the_hole(self) -> bool {
+        bits::is_the_hole(self.val)
+    }
+
+    pub const fn is_inline_string(self) -> bool {
+        bits::is_inline_string(self.val)
+    }
+
+    pub const fn is_inline_big_int(self) -> bool {
+        bits::is_inline_big_int(self.val)
+    }
+
+    pub const fn is_object(self) -> bool {
+        bits::is_object(self.val)
+    }
+
+    pub const fn is_symbol(self) -> bool {
+        bits::is_symbol(self.val)
+    }
+
+    pub const fn is_heap_string(self) -> bool {
+        bits::is_heap_string(self.val)
+    }
+
+    pub const fn is_heap_big_int(self) -> bool {
+        bits::is_heap_big_int(self.val)
+    }
+
+    pub const fn is_string(self) -> bool {
+        bits::is_string(self.val)
+    }
+
+    pub const fn is_big_int(self) -> bool {
+        bits::is_big_int(self.val)
+    }
 }
 
 
