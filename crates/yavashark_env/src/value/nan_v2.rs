@@ -29,7 +29,6 @@ pub struct ValueInner {
     val: u64,
 }
 
-
 mod bits {
     use std::num::NonZeroUsize;
     use std::ptr::NonNull;
@@ -55,17 +54,16 @@ mod bits {
     pub const HEAP_STRING_TAG: u64 = 0xFFFC_0000_0000_0000;
     pub const HEAP_BIGINT_TAG: u64 = 0xFFFD_0000_0000_0000;
 
-
     pub const VALUE_48BIT_MASK: u64 = 0x0000_FFFF_FFFF_FFFF;
 
     pub const TAG_MASK: u64 = 0xFFFF_0000_0000_0000;
 
     pub const IGNORE_INLINE_MASK: u64 = 0x7FFF_0000_0000_0000;
 
-    const _INLINE_STRING_CHECK: () = assert!(INLINE_STRING_TAG & IGNORE_INLINE_MASK == HEAP_STRING_TAG & IGNORE_INLINE_MASK);
-    const _INLINE_BIGINT_CHECK: () = assert!(INLINE_BIGINT_TAG & IGNORE_INLINE_MASK == HEAP_BIGINT_TAG & IGNORE_INLINE_MASK);
-
-
+    const _INLINE_STRING_CHECK: () =
+        assert!(INLINE_STRING_TAG & IGNORE_INLINE_MASK == HEAP_STRING_TAG & IGNORE_INLINE_MASK);
+    const _INLINE_BIGINT_CHECK: () =
+        assert!(INLINE_BIGINT_TAG & IGNORE_INLINE_MASK == HEAP_BIGINT_TAG & IGNORE_INLINE_MASK);
 
     pub const fn is_int32(val: u64) -> bool {
         tag(val) == INT32_TAG
@@ -211,7 +209,6 @@ mod bits {
         todo!()
     }
 
-
     pub unsafe fn unbox_ptr(val: u64) -> NonNull<()> {
         unsafe {
             let ptr_val = NonZeroUsize::new_unchecked((val & VALUE_48BIT_MASK) as usize);
@@ -222,37 +219,109 @@ mod bits {
     pub unsafe fn unbox_object(val: u64) -> NonNull<()> {
         debug_assert!(is_object(val));
 
-        unsafe {
-            unbox_ptr(val)
-        }
-
+        unsafe { unbox_ptr(val) }
     }
 
     pub unsafe fn unbox_symbol(val: u64) -> NonNull<()> {
         debug_assert!(is_symbol(val));
 
-        unsafe {
-            unbox_ptr(val)
-        }
+        unsafe { unbox_ptr(val) }
     }
 
     pub unsafe fn unbox_heap_string(val: u64) -> NonNull<()> {
         debug_assert!(is_heap_string(val));
 
-        unsafe {
-            unbox_ptr(val)
-        }
+        unsafe { unbox_ptr(val) }
     }
 
     pub unsafe fn unbox_heap_big_int(val: u64) -> NonNull<()> {
         debug_assert!(is_heap_big_int(val));
 
-        unsafe {
-            unbox_ptr(val)
-        }
+        unsafe { unbox_ptr(val) }
+    }
+}
+
 impl ValueInner {
     pub const unsafe fn from_bits(bits: u64) -> Self {
         Self { val: bits }
+    }
+
+    pub const fn from_int32(val: i32) -> Self {
+        Self {
+            val: bits::box_int32(val),
+        }
+    }
+
+    pub const fn from_bool(val: bool) -> Self {
+        Self {
+            val: bits::box_bool(val),
+        }
+    }
+
+    pub const fn null() -> Self {
+        Self { val: bits::null() }
+    }
+
+    pub const fn undefined() -> Self {
+        Self {
+            val: bits::undefined(),
+        }
+    }
+
+    pub const unsafe fn the_hole() -> Self {
+        Self {
+            val: bits::the_hole(),
+        }
+    }
+
+    pub fn from_inline_string(val: [u8; 6]) -> Self {
+        Self {
+            val: bits::box_inline_string(val),
+        }
+    }
+
+    pub const fn from_inline_big_int(val: i64) -> Self {
+        Self {
+            val: bits::box_inline_big_int(val),
+        }
+    }
+
+    pub fn from_object(ptr: NonNull<()>) -> Self {
+        Self {
+            val: bits::box_object(ptr),
+        }
+    }
+
+    pub fn from_symbol(ptr: NonNull<()>) -> Self {
+        Self {
+            val: bits::box_symbol(ptr),
+        }
+    }
+
+    pub fn from_heap_string(ptr: NonNull<()>) -> Self {
+        Self {
+            val: bits::box_heap_string(ptr),
+        }
+    }
+
+    pub fn from_heap_big_int(ptr: NonNull<()>) -> Self {
+        Self {
+            val: bits::box_heap_big_int(ptr),
+        }
+    }
+
+    pub fn from_string(val: JSString) -> Self {
+        match val {
+            JSString::Inline(bytes) => Self::from_inline_string(bytes),
+            JSString::Heap(ptr) => Self::from_heap_string(ptr),
+        }
+    }
+
+    pub fn from_big_int(val: JSBigInt) -> Self {
+        match val {
+            JSBigInt::Inline(int) => Self::from_inline_big_int(int),
+            JSBigInt::Heap(ptr) => Self::from_heap_big_int(ptr),
+        }
     }
 
     pub const fn to_bits(self) -> u64 {
@@ -411,7 +480,6 @@ impl ValueInner {
         }
     }
 }
-
 
 pub enum JSString {
     Inline([u8; 6]),
