@@ -9,18 +9,20 @@
 /// Undefined  0111 1111 1111 1010 0000 0000 0000 0000 0000 .. 0011
 /// TheHole    0111 1111 1111 1010 0000 0000 0000 0000 0000 .. 0100
 ///
-/// String     1111 1111 1111 1000 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// Unused     0111 1111 1111 1011 0000 0000 0000 0000 0000 .. 0000
+///
+/// InlineStr  0111 1111 1111 1100 DDDD DDDD DDDD DDDD DDDD .. DDDD => Inline marker first bit and second + third bit in the 4th group
+/// BigInt48   0111 1111 1111 1101 BBBB BBBB BBBB BBBB BBBB .. BBBB
+///
 /// Object     1111 1111 1111 1001 PPPP PPPP PPPP PPPP PPPP .. PPPP
 /// Symbol     1111 1111 1111 1010 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// BigInt     1111 1111 1111 1011 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// InlineStr  1111 1111 1111 1100 DDDD DDDD DDDD DDDD DDDD .. DDDD
-/// BigInt48   1111 1111 1111 1101 BBBB BBBB BBBB BBBB BBBB .. BBBB
+///
+/// Unused     1111 1111 1111 1011 0000 0000 0000 0000 0000 .. 0000
+///
+/// String     1111 1111 1111 1100 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// BigInt     1111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct ValueInner {
-    #[cfg(any(target_pointer_width = "32", target_pointer_width = "16"))]
-    half: u32,
-    #[cfg(target_pointer_width = "16")]
-    ptr_pad: u16,
-    ptr: *const (),
+    val: u64,
 }
