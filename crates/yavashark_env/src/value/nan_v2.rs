@@ -54,6 +54,11 @@ mod bits {
     pub const HEAP_STRING_TAG: u64 = 0xFFFC_0000_0000_0000;
     pub const HEAP_BIGINT_TAG: u64 = 0xFFFD_0000_0000_0000;
 
+    pub const MASK_NAN: u64 = 0x7FF8_0000_0000_0000;
+    pub const MASK_KIND: u64 = MASK_NAN | 0xF_0000_0000_0000;
+    pub const TAG_INF: u64 = 0x0_0000_0000_0000;
+    pub const TAG_NAN: u64 = 0x8_0000_0000_0000;
+
     pub const VALUE_48BIT_MASK: u64 = 0x0000_FFFF_FFFF_FFFF;
 
     pub const TAG_MASK: u64 = 0xFFFF_0000_0000_0000;
@@ -64,6 +69,13 @@ mod bits {
         assert!(INLINE_STRING_TAG & IGNORE_INLINE_MASK == HEAP_STRING_TAG & IGNORE_INLINE_MASK);
     const _INLINE_BIGINT_CHECK: () =
         assert!(INLINE_BIGINT_TAG & IGNORE_INLINE_MASK == HEAP_BIGINT_TAG & IGNORE_INLINE_MASK);
+
+
+    pub const fn is_f64(val: u64) -> bool {
+        (val & MASK_NAN) != MASK_NAN
+            || (val & MASK_KIND) == TAG_INF
+            || (val & MASK_KIND) == TAG_NAN
+    }
 
     pub const fn is_int32(val: u64) -> bool {
         tag(val) == INT32_TAG
@@ -133,9 +145,18 @@ mod bits {
         val & VALUE_48BIT_MASK
     }
 
+    pub const fn box_f64(val: f64) -> u64 {
+        if val.is_nan() {
+            f64::NAN.to_bits()
+        } else {
+            val.to_bits()
+        }
+    }
+
     pub fn box_ptr<const TAG: u64>(ptr: NonNull<()>) -> u64 {
         ptr.expose_provenance().get() as u64 | TAG
     }
+
 
     pub const fn box_int32(val: i32) -> u64 {
         (val as u64) | INT32_TAG
@@ -181,6 +202,12 @@ mod bits {
 
     pub fn box_heap_big_int(ptr: NonNull<()>) -> u64 {
         box_ptr::<HEAP_BIGINT_TAG>(ptr)
+    }
+
+
+    pub const unsafe fn unbox_f64(val: u64) -> f64 {
+        debug_assert!(is_f64(val));
+        f64::from_bits(val)
     }
 
     pub const unsafe fn unbox_int32(val: u64) -> i32 {
@@ -244,6 +271,12 @@ mod bits {
 impl ValueInner {
     pub const unsafe fn from_bits(bits: u64) -> Self {
         Self { val: bits }
+    }
+
+    pub const fn from_f64(val: f64) -> Self {
+        Self {
+            val: bits::box_f64(val)
+        }
     }
 
     pub const fn from_int32(val: i32) -> Self {
@@ -328,6 +361,10 @@ impl ValueInner {
         self.val
     }
 
+    pub const fn is_f64(self) -> bool {
+        bits::is_f64(self.val)
+    }
+
     pub const fn is_int32(self) -> bool {
         bits::is_int32(self.val)
     }
@@ -382,6 +419,14 @@ impl ValueInner {
 
     pub const fn is_big_int(self) -> bool {
         bits::is_big_int(self.val)
+    }
+
+    pub const fn as_f64(self) -> Option<f64> {
+        if self.is_f64() {
+            unsafe { Some(bits::unbox_f64(self.val)) }
+        } else {
+            None
+        }
     }
 
     pub const fn as_int32(self) -> Option<i32> {
