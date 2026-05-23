@@ -649,6 +649,13 @@ mod tests {
     }
 
     #[test]
+    fn test_inline_neg_big_int() {
+        let big_int_value = ValueInner::from_inline_big_int(-42_1337_6967);
+        assert!(big_int_value.is_inline_big_int());
+        assert_eq!(big_int_value.as_inline_big_int(), Some(-42_1337_6967));
+    }
+
+    #[test]
     fn test_heap_big_int() {
         let heap_big_int_ptr = NonNull::new(0x6969 as *mut ()).unwrap();
         let big_int_value = ValueInner::from_heap_big_int(heap_big_int_ptr);
@@ -676,16 +683,20 @@ mod tests {
     #[test]
     fn test_big_int_enum() {
         let inline_big_int = JSBigInt::Inline(42_1337_6967);
+        let inline_neg_big_int = JSBigInt::Inline(-42_1337_6967);
         let heap_big_int_ptr = NonNull::new(0x4200 as *mut ()).unwrap();
         let heap_big_int = JSBigInt::Heap(heap_big_int_ptr);
 
         let inline_value = ValueInner::from_big_int(inline_big_int);
+        let inline_neg_value = ValueInner::from_big_int(inline_neg_big_int);
         let heap_value = ValueInner::from_big_int(heap_big_int);
 
         assert!(inline_value.is_inline_big_int());
+        assert!(inline_neg_value.is_inline_big_int());
         assert!(heap_value.is_heap_big_int());
 
         assert_eq!(inline_value.as_big_int(), Some(inline_big_int));
+        assert_eq!(inline_neg_value.as_big_int(), Some(inline_neg_big_int));
         assert_eq!(heap_value.as_big_int(), Some(heap_big_int));
     }
 }
