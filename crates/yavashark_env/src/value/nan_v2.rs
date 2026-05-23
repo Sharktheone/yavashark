@@ -185,7 +185,7 @@ mod bits {
     }
 
     pub const fn box_inline_big_int(val: i64) -> u64 {
-        todo!()
+        (val as u64 & VALUE_48BIT_MASK) | INLINE_BIGINT_TAG
     }
 
     pub fn box_object(ptr: NonNull<()>) -> u64 {
@@ -233,7 +233,7 @@ mod bits {
     pub unsafe fn unbox_inline_big_int(val: u64) -> i64 {
         debug_assert!(is_inline_big_int(val));
 
-        todo!()
+        (((val & VALUE_48BIT_MASK) << 16) as i64) >> 16
     }
 
     pub unsafe fn unbox_ptr(val: u64) -> NonNull<()> {
