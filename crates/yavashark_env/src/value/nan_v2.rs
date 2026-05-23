@@ -575,7 +575,7 @@ mod tests {
 
         assert_eq!(nan.to_bits(), f64::NAN.to_bits());
         assert!(f64::from_bits(nan.to_bits()).is_nan());
-        assert_eq!(nan.as_f64(), Some(f64::NAN));
+        assert!(nan.as_f64().is_some());
         assert!(nan.as_f64().unwrap().is_nan());
     }
 
