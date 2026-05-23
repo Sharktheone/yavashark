@@ -56,8 +56,8 @@ mod bits {
 
     pub const MASK_NAN: u64 = 0x7FF8_0000_0000_0000;
     pub const MASK_KIND: u64 = MASK_NAN | 0xF_0000_0000_0000;
-    pub const TAG_INF: u64 = 0x0_0000_0000_0000;
-    pub const TAG_NAN: u64 = 0x8_0000_0000_0000;
+    pub const TAG_INF: u64 = 0x7FF0_0000_0000_0000;
+    pub const TAG_NAN: u64 = 0x7FF8_0000_0000_0000;
 
     pub const VALUE_48BIT_MASK: u64 = 0x0000_FFFF_FFFF_FFFF;
 
