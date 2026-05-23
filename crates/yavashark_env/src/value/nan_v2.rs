@@ -570,9 +570,6 @@ mod tests {
     fn test_f64_nan() {
         let nan = ValueInner::from_f64(f64::NAN);
 
-        println!("{:#b}", nan.to_bits());
-        println!("{:#x}", nan.to_bits());
-
         assert_eq!(nan.to_bits(), f64::NAN.to_bits());
         assert!(f64::from_bits(nan.to_bits()).is_nan());
         assert!(nan.as_f64().is_some());
