@@ -186,6 +186,27 @@ impl HeapString {
     }
 }
 
+impl Drop for HeapString {
+    fn drop(&mut self) {
+        if Storage::Rc == self.storage {
+            // SAFETY: get_base_ptr returns a valid pointer, and len is correct
+            let ptr = unsafe { self.get_base_ptr().as_ptr() };
+
+            match self.ty {
+                Type::Ascii => {
+                    let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                    let str = unsafe { str::from_utf8_unchecked(slice) };
+                    let _rc: Rc<str> = unsafe { Rc::from_raw(&raw const *str) };
+                }
+                Type::Wtf16 => {
+                    let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                    let _rc: Rc<[u16]> = unsafe { Rc::from_raw(&raw const *slice) };
+                }
+            }
+        }
+    }
+}
+
 
 struct InlineAscii {
     len: InlineLen,
