@@ -1,4 +1,4 @@
-use std::cell::UnsafeCell;
+use std::{cell::UnsafeCell, rc::Rc};
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -17,9 +17,7 @@ enum Type {
 }
 
 enum Storage {
-    Inline,
     Rc,
-    Rope,
     Static,
 }
 
@@ -32,6 +30,62 @@ struct HeapString {
     ty: Type,
     storage: Storage,
 }
+
+
+
+impl HeapString {
+    fn from_static_ascii(s: &'static str) -> Self {
+        Self {
+            ptr: s.as_ptr() as *const (),
+            len: s.len() as u32,
+            ptr_offset: 0,
+            len_offset: 0,
+            ty: Type::Ascii,
+            storage: Storage::Static,
+        }
+    }
+
+    fn from_static_wtf16(s: &'static [u16]) -> Self {
+        Self {
+            ptr: s.as_ptr() as *const (),
+            len: s.len() as u32,
+            ptr_offset: 0,
+            len_offset: 0,
+            ty: Type::Wtf16,
+            storage: Storage::Static,
+        }
+    }
+
+    fn from_rc_ascii(s: Rc<str>) -> Self {
+        let len = s.len() as u32;
+        Self {
+            ptr: s.as_ptr() as *const (),
+            len,
+            ptr_offset: 0,
+            len_offset: 0,
+            ty: Type::Ascii,
+            storage: Storage::Rc,
+        }
+    }
+
+    fn from_rc_wtf16(s: Rc<[u16]>) -> Self {
+        let len = s.len() as u32;
+        Self {
+            ptr: s.as_ptr() as *const (),
+            len,
+            ptr_offset: 0,
+            len_offset: 0,
+            ty: Type::Wtf16,
+            storage: Storage::Rc,
+        }
+    }
+
+    
+
+
+    
+}
+
 
 struct InlineAscii {
     len: InlineLen,
