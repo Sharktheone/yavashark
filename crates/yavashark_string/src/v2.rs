@@ -11,17 +11,21 @@ enum Inner {
     Rope(RopeString),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Type {
     Ascii,
     Wtf16,
 }
 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Storage {
     Rc,
     Static,
 }
 
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum StringRef<'a> {
     Ascii(&'a str),
     Wtf16(&'a [u16]),
