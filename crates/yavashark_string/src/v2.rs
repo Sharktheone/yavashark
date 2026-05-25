@@ -1,4 +1,4 @@
-use std::{cell::UnsafeCell, rc::Rc};
+use std::{cell::UnsafeCell, ptr::NonNull, rc::Rc};
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -23,7 +23,7 @@ enum Storage {
 
 #[repr(Rust, packed)]
 struct HeapString {
-    ptr: *const (), //actual ptr = ptr - ptr_offset
+    ptr: NonNull<()>, //actual ptr = ptr - ptr_offset
     len: u32,
     ptr_offset: u32,
     len_offset: u32, //len + len_offset = capacity
@@ -36,7 +36,7 @@ struct HeapString {
 impl HeapString {
     fn from_static_ascii(s: &'static str) -> Self {
         Self {
-            ptr: s.as_ptr() as *const (),
+            ptr: NonNull::from(s).cast(),
             len: s.len() as u32,
             ptr_offset: 0,
             len_offset: 0,
@@ -47,7 +47,7 @@ impl HeapString {
 
     fn from_static_wtf16(s: &'static [u16]) -> Self {
         Self {
-            ptr: s.as_ptr() as *const (),
+            ptr: NonNull::from(s).cast(), 
             len: s.len() as u32,
             ptr_offset: 0,
             len_offset: 0,
@@ -58,8 +58,14 @@ impl HeapString {
 
     fn from_rc_ascii(s: Rc<str>) -> Self {
         let len = s.len() as u32;
+
+        let ptr = Rc::into_raw(s);
+
+        
+        
         Self {
-            ptr: s.as_ptr() as *const (),
+            // SAFETY: Rc::into:raw always returns a non-null and aligned pointer
+            ptr: unsafe { NonNull::new_unchecked(ptr.cast_mut().cast()) },
             len,
             ptr_offset: 0,
             len_offset: 0,
@@ -70,8 +76,12 @@ impl HeapString {
 
     fn from_rc_wtf16(s: Rc<[u16]>) -> Self {
         let len = s.len() as u32;
+
+        let ptr = Rc::into_raw(s);
+
         Self {
-            ptr: s.as_ptr() as *const (),
+            // SAFETY: Rc::into:raw always returns a non-null and aligned pointer
+            ptr: unsafe { NonNull::new_unchecked(ptr.cast_mut().cast()) },
             len,
             ptr_offset: 0,
             len_offset: 0,
