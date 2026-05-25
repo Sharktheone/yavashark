@@ -1,4 +1,4 @@
-use std::{cell::UnsafeCell, ptr::NonNull, rc::Rc};
+use std::{cell::UnsafeCell, ptr::NonNull, rc::Rc, slice};
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -19,6 +19,12 @@ enum Type {
 enum Storage {
     Rc,
     Static,
+}
+
+
+enum StringRef<'a> {
+    Ascii(&'a str),
+    Wtf16(&'a [u16]),
 }
 
 #[repr(Rust, packed)]
@@ -99,6 +105,33 @@ impl HeapString {
         // SAFETY: len_offset is always <= u32::MAX
         (self.len + self.len_offset) as usize
     }
+
+
+    const fn as_ptr(&self) -> NonNull<()> {
+        self.ptr
+    }
+
+    const fn as_ref(&'_ self) -> StringRef<'_> {
+        match self.ty {
+            Type::Ascii => {
+                let str = unsafe {
+                    // SAFETY: ptr is valid and properly aligned, and len is correct
+                    let slice = slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize);
+
+                    //SAFETY: slice is valid UTF-8
+                    str::from_utf8_unchecked(slice)
+                };
+
+                StringRef::Ascii(str)
+            },
+            Type::Wtf16 => {
+                // SAFETY: base_ptr is valid and properly aligned, and len is correct
+                let slice = unsafe { slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize) };
+                StringRef::Wtf16(slice)
+            },
+        }
+    }
+
 
     
 
