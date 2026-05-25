@@ -1,4 +1,5 @@
 use std::{cell::UnsafeCell, ptr::NonNull, rc::Rc, slice};
+use std::mem::ManuallyDrop;
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -39,6 +40,15 @@ struct HeapString {
     len_offset: u32, //len + len_offset = capacity
     ty: Type,
     storage: Storage,
+}
+
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum HeapStringStorage {
+    StaticAscii(&'static str),
+    StaticWtf16(&'static [u16]),
+    RcAscii(ManuallyDrop<Rc<str>>),
+    RcWtf16(ManuallyDrop<Rc<[u16]>>),
 }
 
 
@@ -137,10 +147,43 @@ impl HeapString {
     }
 
 
-    
+    fn storage(&self) -> HeapStringStorage {
+        let ptr = self.get_base_ptr().as_ptr();
+
+        match (self.ty, self.storage) {
+            (Type::Ascii, Storage::Static) => {
+                // SAFETY: ptr is valid and properly aligned, and len is correct
+                let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                let s = unsafe { str::from_utf8_unchecked(slice) };
+                HeapStringStorage::StaticAscii(s)
+            }
+            (Type::Wtf16, Storage::Static) => {
+                // SAFETY: ptr is valid and properly aligned, and len is correct
+                let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                HeapStringStorage::StaticWtf16(slice)
+            },
+            (Type::Ascii, Storage::Rc) => {
+                let rc = unsafe {
+                    let slice = slice::from_raw_parts(ptr.cast(), self.len as usize);
+                    let str = str::from_utf8_unchecked(slice);
 
 
-    
+                    Rc::from_raw(&raw const *str)
+                };
+
+                HeapStringStorage::RcAscii(ManuallyDrop::new(rc))
+            }
+            (Type::Wtf16, Storage::Rc) => {
+                let rc = unsafe {
+                    let slice = slice::from_raw_parts(ptr.cast(), self.len as usize);
+
+                    Rc::from_raw(&raw const *slice)
+                };
+
+                HeapStringStorage::RcWtf16(ManuallyDrop::new(rc))
+            }
+        }
+    }
 }
 
 
