@@ -220,11 +220,16 @@ struct InlineWtf16 {
 }
 
 struct RopeString {
-    ptr1: *const YSString,
-    ptr2: *const YSString
+    from: u32,
+    to: u32,
+    inner: Box<RopeStringInner>,
 }
 
-/// Length enum for inline strings (0-23 bytes).
+struct RopeStringInner {
+    a: YSString,
+    b: YSString,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum InlineLen {
