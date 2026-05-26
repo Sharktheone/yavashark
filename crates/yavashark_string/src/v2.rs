@@ -215,7 +215,7 @@ struct InlineAscii {
 
 #[repr(Rust, packed)]
 struct InlineWtf16 {
-    len: InlineLen,
+    len: InlineLenWtf,
     bytes: [u16; 11],
 }
 
@@ -257,4 +257,20 @@ pub enum InlineLen {
     Len21,
     Len22,
     Len23,
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum InlineLenWtf {
+    Empty = 0,
+    Len1,
+    Len2,
+    Len3,
+    Len4,
+    Len5,
+    Len6,
+    Len7,
+    Len8,
+    Len9,
+    Len10,
+    Len11,
 }
