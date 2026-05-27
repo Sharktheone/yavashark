@@ -26,6 +26,22 @@ impl InlineAscii {
 
         Some(Self { len: InlineLen::from_usize(s.len())?, bytes })
     }
+
+    pub fn slice(self, start: u32, end: u32) -> Option<Self> {
+        let start = start as usize;
+        let end = end as usize;
+
+        if start > end || end > self.len.to_usize() {
+            return None;
+        }
+
+        let mut bytes = [0; Self::CAPACITY];
+        bytes[..(end - start)].copy_from_slice(&self.bytes[start..end]);
+
+        Some(Self { len: InlineLen::from_usize(end - start)?, bytes })
+    }
+
+
 }
 
 impl InlineWtf16 {
@@ -44,6 +60,21 @@ impl InlineWtf16 {
         bytes[..units.len()].copy_from_slice(units);
 
         Some(Self { len: InlineLenWtf::from_usize(units.len())?, bytes })
+    }
+
+
+    pub fn slice(self, start: u32, end: u32) -> Option<Self> {
+        let start = start as usize;
+        let end = end as usize;
+
+        if start > end || end > self.len.to_usize() {
+            return None;
+        }
+
+        let mut bytes = [0; Self::CAPACITY];
+        bytes[..(end - start)].copy_from_slice(&self.bytes[start..end]);
+
+        Some(Self { len: InlineLenWtf::from_usize(end - start)?, bytes })
     }
 }
 
