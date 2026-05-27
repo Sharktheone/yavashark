@@ -164,6 +164,17 @@ impl HeapString {
             }
         }
     }
+
+    unsafe fn copy(&self) -> Self {
+        Self {
+            ptr: self.ptr,
+            len: self.len,
+            ptr_offset: self.ptr_offset,
+            len_offset: self.len_offset,
+            ty: self.ty,
+            storage: self.storage,
+        }
+    }
 }
 
 impl Drop for HeapString {
@@ -181,6 +192,36 @@ impl Drop for HeapString {
                 Type::Wtf16 => {
                     let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
                     let _rc: Rc<[u16]> = unsafe { Rc::from_raw(&raw const *slice) };
+                }
+            }
+        }
+    }
+}
+
+impl Clone for HeapString {
+    fn clone(&self) -> Self {
+        match self.storage {
+            Storage::Static => unsafe { self.copy() },
+            Storage::Rc => {
+                let ptr = self.get_base_ptr().as_ptr();
+                match self.ty {
+                    Type::Ascii => {
+                        let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                        let str = unsafe { str::from_utf8_unchecked(slice) };
+                        let rc: ManuallyDrop<Rc<str>> = unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *str)) };
+
+                        let _rc_clone = ManuallyDrop::new(Rc::clone(&rc));
+
+                        unsafe { self.copy() }
+                    }
+                    Type::Wtf16 => {
+                        let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
+                        let rc: ManuallyDrop<Rc<[u16]>> = unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *slice)) };
+
+                        let _rc_clone = ManuallyDrop::new(Rc::clone(&rc));
+
+                        unsafe { self.copy() }
+                    }
                 }
             }
         }
