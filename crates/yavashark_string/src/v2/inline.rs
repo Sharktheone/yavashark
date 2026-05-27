@@ -1,13 +1,53 @@
 pub struct InlineAscii {
     len: InlineLen,
-    bytes: [u8; 23],
+    bytes: [u8; Self::CAPACITY],
 }
 
 #[repr(Rust, packed)]
 pub struct InlineWtf16 {
     len: InlineLenWtf,
-    bytes: [u16; 11],
+    bytes: [u16; Self::CAPACITY],
 }
+
+impl InlineAscii {
+    const CAPACITY: usize = 23;
+
+    pub fn new() -> Self {
+        Self { len: InlineLen::Empty, bytes: [0; Self::CAPACITY] }
+    }
+
+    pub fn try_from_str(s: &str) -> Option<Self> {
+        if s.len() > Self::CAPACITY {
+            return None;
+        }
+
+        let mut bytes = [0; Self::CAPACITY];
+        bytes[..s.len()].copy_from_slice(s.as_bytes());
+
+        Some(Self { len: InlineLen::from_usize(s.len())?, bytes })
+    }
+}
+
+impl InlineWtf16 {
+    const CAPACITY: usize = 11;
+
+    pub fn new() -> Self {
+        Self { len: InlineLenWtf::Empty, bytes: [0; Self::CAPACITY] }
+    }
+
+    pub fn try_from_slice(units: &[u16]) -> Option<Self> {
+        if units.len() > Self::CAPACITY {
+            return None;
+        }
+
+        let mut bytes = [0; Self::CAPACITY];
+        bytes[..units.len()].copy_from_slice(units);
+
+        Some(Self { len: InlineLenWtf::from_usize(units.len())?, bytes })
+    }
+}
+
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
