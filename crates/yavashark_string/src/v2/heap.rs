@@ -103,6 +103,21 @@ impl HeapString {
         }
     }
 
+    pub fn slice(self, start: u32, end: u32) -> Result<Self, Self> {
+        if start > end || end > self.len {
+            return Err(self);
+        }
+
+        Ok(Self {
+            ptr: unsafe { NonNull::new_unchecked(self.ptr.as_ptr().add(start as usize)) },
+            len: end - start,
+            ptr_offset: self.ptr_offset + start,
+            len_offset: self.len_offset + (self.len - end),
+            ty: self.ty,
+            storage: self.storage,
+        })
+    }
+
     const fn get_base_ptr(&self) -> NonNull<()> {
         // SAFETY: ptr is always valid and properly aligned, and ptr_offset is always <= u32::MAX
         unsafe { self.ptr.sub(self.ptr_offset as usize) }
