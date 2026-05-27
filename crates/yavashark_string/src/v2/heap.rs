@@ -34,7 +34,7 @@ enum HeapStringStorage {
 
 
 impl HeapString {
-    fn from_static_ascii(s: &'static str) -> Self {
+    pub fn from_static_ascii(s: &'static str) -> Self {
         Self {
             ptr: NonNull::from(s).cast(),
             len: s.len() as u32,
@@ -45,7 +45,7 @@ impl HeapString {
         }
     }
 
-    fn from_static_wtf16(s: &'static [u16]) -> Self {
+    pub fn from_static_wtf16(s: &'static [u16]) -> Self {
         Self {
             ptr: NonNull::from(s).cast(),
             len: s.len() as u32,
@@ -56,7 +56,20 @@ impl HeapString {
         }
     }
 
-    fn from_rc_ascii(s: Rc<str>) -> Self {
+    pub fn from_str(s: &str) -> Self {
+        let rc = Rc::from(s);
+
+        Self::from_rc_ascii(rc)
+    }
+
+    pub fn from_wtf16(s: &[u16]) -> Self {
+        let rc = Rc::from(s);
+
+        Self::from_rc_wtf16(rc)
+    }
+
+
+    pub fn from_rc_ascii(s: Rc<str>) -> Self {
         let len = s.len() as u32;
 
         let ptr = Rc::into_raw(s);
@@ -74,7 +87,7 @@ impl HeapString {
         }
     }
 
-    fn from_rc_wtf16(s: Rc<[u16]>) -> Self {
+    pub fn from_rc_wtf16(s: Rc<[u16]>) -> Self {
         let len = s.len() as u32;
 
         let ptr = Rc::into_raw(s);
