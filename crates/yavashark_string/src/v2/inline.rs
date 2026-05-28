@@ -72,7 +72,8 @@ impl InlineWtf16 {
         }
 
         let mut bytes = [0; Self::CAPACITY];
-        bytes[..(end - start)].copy_from_slice(&self.bytes[start..end]);
+        let sbytes = self.bytes;
+        bytes[..(end - start)].copy_from_slice(&sbytes[start..end]);
 
         Some(Self { len: InlineLenWtf::from_usize(end - start)?, bytes })
     }
