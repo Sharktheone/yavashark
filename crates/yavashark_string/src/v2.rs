@@ -2,6 +2,7 @@ mod heap;
 mod inline;
 mod rope;
 
+use std::mem::size_of;
 use std::cell::UnsafeCell;
 use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
@@ -10,6 +11,8 @@ use crate::v2::rope::RopeString;
 pub struct YSString {
     inner: UnsafeCell<Inner>,
 }
+
+const _: [(); 24] = [(); size_of::<YSString>()];
 
 enum Inner {
     Heap(HeapString),
@@ -77,6 +80,21 @@ impl YSString {
         }
     }
     
+    pub fn len(&self) -> u32 {
+        let inner = unsafe { &*self.inner.get() };
+        
+        match inner {
+            Inner::Heap(heap) => heap.len(),
+            Inner::InlineAscii(inline) => inline.len(),
+            Inner::InlineWtf16(inline) => inline.len(),
+            Inner::Rope(rope) => rope.len(),
+        }
+    }
+    
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+    
     
     pub fn slice(self, start: u32, end: u32) -> Option<Self> {
         let inner = self.inner.into_inner();
@@ -101,4 +119,3 @@ enum StringRef<'a> {
     Ascii(&'a str),
     Wtf16(&'a [u16]),
 }
-

@@ -102,6 +102,10 @@ impl HeapString {
             storage: Storage::Rc,
         }
     }
+    
+    pub fn len(&self) -> u32 {
+        self.len
+    }
 
     pub fn slice(self, start: u32, end: u32) -> Result<Self, Self> {
         if start > end || end > self.len {
