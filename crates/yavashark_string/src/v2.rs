@@ -76,6 +76,18 @@ impl YSString {
             HeapString::from_wtf16(s).into()
         }
     }
+    
+    
+    pub fn slice(self, start: u32, end: u32) -> Option<Self> {
+        let inner = self.inner.into_inner();
+        
+        match inner {
+            Inner::Heap(heap) => heap.slice(start, end).ok().map(Into::into),
+            Inner::InlineAscii(inline) => inline.slice(start, end).map(Into::into),
+            Inner::InlineWtf16(inline) => inline.slice(start, end).map(Into::into),
+            Inner::Rope(rope) => rope.slice(start, end).map(Into::into),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
