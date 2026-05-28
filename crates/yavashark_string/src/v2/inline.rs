@@ -27,27 +27,33 @@ impl InlineAscii {
         let mut bytes = [0; Self::CAPACITY];
         bytes[..s.len()].copy_from_slice(s.as_bytes());
 
-        Some(Self { len: InlineLen::from_usize(s.len())?, bytes })
+        Some(Self { len: InlineLen::from_u32(s.len() as u32)?, bytes })
+    }
+
+    pub fn len(&self) -> u32 {
+        self.len.to_u32()
     }
 
     pub fn slice(self, start: u32, end: u32) -> Option<Self> {
-        let start = start as usize;
-        let end = end as usize;
-
-        if start > end || end > self.len.to_usize() {
+        if start > end || end > self.len.to_u32() {
             return None;
         }
 
         let mut bytes = [0; Self::CAPACITY];
+        let len = InlineLen::from_u32(end - start)?;
+
+        let end = end as usize;
+        let start = start as usize;
+
         bytes[..(end - start)].copy_from_slice(&self.bytes[start..end]);
 
-        Some(Self { len: InlineLen::from_usize(end - start)?, bytes })
+        Some(Self { len, bytes })
     }
 }
 
 impl AsRef<str> for InlineAscii {
     fn as_ref(&self) -> &str {
-        let len = self.len.to_usize();
+        let len = self.len.to_u32() as usize;
 
         unsafe {
             std::str::from_utf8_unchecked(&self.bytes[..len])
@@ -78,23 +84,29 @@ impl InlineWtf16 {
         let mut bytes = [0; Self::CAPACITY];
         bytes[..units.len()].copy_from_slice(units);
 
-        Some(Self { len: InlineLenWtf::from_usize(units.len())?, bytes })
+        Some(Self { len: InlineLenWtf::from_u32(units.len() as u32)?, bytes })
+    }
+
+    pub fn len(&self) -> u32 {
+        self.len.to_u32()
     }
 
 
     pub fn slice(self, start: u32, end: u32) -> Option<Self> {
-        let start = start as usize;
-        let end = end as usize;
-
-        if start > end || end > self.len.to_usize() {
+        if start > end || end > self.len.to_u32() {
             return None;
         }
 
         let mut bytes = [0; Self::CAPACITY];
         let sbytes = self.bytes;
+        let len = InlineLenWtf::from_u32(end - start)?;
+
+        let end = end as usize;
+        let start = start as usize;
+
         bytes[..(end - start)].copy_from_slice(&sbytes[start..end]);
 
-        Some(Self { len: InlineLenWtf::from_usize(end - start)?, bytes })
+        Some(Self { len, bytes })
     }
 }
 
@@ -145,7 +157,7 @@ pub enum InlineLenWtf {
 
 
 impl InlineLen {
-    pub fn from_usize(len: usize) -> Option<Self> {
+    pub fn from_u32(len: u32) -> Option<Self> {
         match len {
             0 => Some(Self::Empty),
             1 => Some(Self::Len1),
@@ -175,13 +187,13 @@ impl InlineLen {
         }
     }
 
-    pub fn to_usize(self) -> usize {
-        self as usize
+    pub fn to_u32(self) -> u32 {
+        self as u32
     }
 }
 
 impl InlineLenWtf {
-    pub fn from_usize(len: usize) -> Option<Self> {
+    pub fn from_u32(len: u32) -> Option<Self> {
         match len {
             0 => Some(Self::Empty),
             1 => Some(Self::Len1),
@@ -199,7 +211,7 @@ impl InlineLenWtf {
         }
     }
 
-    pub fn to_usize(self) -> usize {
-        self as usize
+    pub fn to_u32(self) -> u32 {
+        self as u32
     }
 }
