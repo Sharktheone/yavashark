@@ -1,3 +1,6 @@
+use std::mem::size_of;
+use std::ops::Deref;
+
 pub struct InlineAscii {
     len: InlineLen,
     bytes: [u8; Self::CAPACITY],
@@ -40,8 +43,24 @@ impl InlineAscii {
 
         Some(Self { len: InlineLen::from_usize(end - start)?, bytes })
     }
+}
 
+impl AsRef<str> for InlineAscii {
+    fn as_ref(&self) -> &str {
+        let len = self.len.to_usize();
 
+        unsafe {
+            std::str::from_utf8_unchecked(&self.bytes[..len])
+        }
+    }
+}
+
+impl Deref for InlineAscii {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
+    }
 }
 
 impl InlineWtf16 {
@@ -78,8 +97,6 @@ impl InlineWtf16 {
         Some(Self { len: InlineLenWtf::from_usize(end - start)?, bytes })
     }
 }
-
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
