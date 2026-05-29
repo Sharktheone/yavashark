@@ -85,7 +85,6 @@ impl ArrayBuffer {
 
 #[props(intrinsic_name = arraybuffer, to_string_tag = "ArrayBuffer")]
 impl ArrayBuffer {
-
     #[constructor]
     fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {
         let max_len = match opts.map(|v| {

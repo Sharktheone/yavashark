@@ -205,7 +205,6 @@ pub fn main() {
         instructions,
     };
 
-
     if shell {
         repl(config).unwrap();
     }
@@ -309,18 +308,15 @@ fn run_code(
         }
         yavashark_vm::init(&mut realm).unwrap();
 
-
-        let result = match yavashark_interpreter::Interpreter::run_program_in(
-            &prog,
-            &mut realm,
-            &mut scope,
-        ) {
-            Ok(v) => v,
-            Err(e) => {
-                println!("Error: {}", e.pretty_print(&mut realm));
-                return;
-            }
-        };
+        let result =
+            match yavashark_interpreter::Interpreter::run_program_in(&prog, &mut realm, &mut scope)
+            {
+                Ok(v) => v,
+                Err(e) => {
+                    println!("Error: {}", e.pretty_print(&mut realm));
+                    return;
+                }
+            };
         println!("Interpreter: {result:?}");
 
         rt.block_on(realm.run_event_loop());
@@ -352,7 +348,6 @@ fn run_code(
             eprintln!("Only scripts are supported in bytecode mode currently");
             return;
         };
-
 
         let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
 
@@ -406,7 +401,6 @@ fn run_code(
             eprintln!("Only scripts are supported in bytecode mode currently");
             return;
         };
-
 
         let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
 

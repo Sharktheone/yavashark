@@ -57,7 +57,10 @@ impl InlineUtf16String {
     pub const fn from_code_unit(unit: u16) -> Self {
         let mut data = [0u16; INLINE_UTF16_CAPACITY];
         data[0] = unit;
-        Self { len: InlineLen::Len1, data: Data(data) }
+        Self {
+            len: InlineLen::Len1,
+            data: Data(data),
+        }
     }
 
     /// Creates an inline UTF-16 string from a char.
@@ -73,7 +76,7 @@ impl InlineUtf16String {
             Some(len) => len,
             None => InlineLen::Empty,
         };
-        
+
         Self {
             len,
             data: Data(data),
@@ -171,8 +174,8 @@ impl InlineUtf16String {
         self.len = match InlineLen::from_usize(self.len as usize + units.len()) {
             Some(len) => len,
             None => self.len, // This should never happen since we check capacity above
-        };        
-        
+        };
+
         true
     }
 

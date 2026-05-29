@@ -309,8 +309,6 @@ impl RopeStr {
         result
     }
 
-
-
     fn as_ysstring(&self) -> YSString {
         YSString::from_rope_str(self.clone())
     }
@@ -364,7 +362,6 @@ impl RopeStr {
         None
     }
 }
-
 
 // this has the reason, so we can control how large the backing buffer is as we'll know how large it is
 #[allow(clippy::to_string_trait_impl)]

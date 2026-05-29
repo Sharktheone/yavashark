@@ -1,10 +1,8 @@
+use crate::v2::{StringRef, Type};
 use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
 use std::rc::Rc;
 use std::slice;
-use crate::v2::{StringRef, Type};
-
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Storage {
@@ -22,7 +20,6 @@ pub struct HeapString {
     storage: Storage,
 }
 
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum HeapStringStorage {
     StaticAscii(&'static str),
@@ -30,8 +27,6 @@ enum HeapStringStorage {
     RcAscii(ManuallyDrop<Rc<str>>),
     RcWtf16(ManuallyDrop<Rc<[u16]>>),
 }
-
-
 
 impl HeapString {
     pub fn from_static_ascii(s: &'static str) -> Self {
@@ -68,13 +63,10 @@ impl HeapString {
         Self::from_rc_wtf16(rc)
     }
 
-
     pub fn from_rc_ascii(s: Rc<str>) -> Self {
         let len = s.len() as u32;
 
         let ptr = Rc::into_raw(s);
-
-
 
         Self {
             // SAFETY: Rc::into:raw always returns a non-null and aligned pointer
@@ -102,7 +94,7 @@ impl HeapString {
             storage: Storage::Rc,
         }
     }
-    
+
     pub fn len(&self) -> u32 {
         self.len
     }
@@ -132,7 +124,6 @@ impl HeapString {
         (self.len + self.len_offset) as usize
     }
 
-
     const fn as_ptr(&self) -> NonNull<()> {
         self.ptr
     }
@@ -149,15 +140,15 @@ impl HeapString {
                 };
 
                 StringRef::Ascii(str)
-            },
+            }
             Type::Wtf16 => {
                 // SAFETY: base_ptr is valid and properly aligned, and len is correct
-                let slice = unsafe { slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize) };
+                let slice =
+                    unsafe { slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize) };
                 StringRef::Wtf16(slice)
-            },
+            }
         }
     }
-
 
     fn storage(&self) -> HeapStringStorage {
         let ptr = self.get_base_ptr().as_ptr();
@@ -173,12 +164,11 @@ impl HeapString {
                 // SAFETY: ptr is valid and properly aligned, and len is correct
                 let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
                 HeapStringStorage::StaticWtf16(slice)
-            },
+            }
             (Type::Ascii, Storage::Rc) => {
                 let rc = unsafe {
                     let slice = slice::from_raw_parts(ptr.cast(), self.len as usize);
                     let str = str::from_utf8_unchecked(slice);
-
 
                     Rc::from_raw(&raw const *str)
                 };
@@ -240,7 +230,8 @@ impl Clone for HeapString {
                     Type::Ascii => {
                         let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
                         let str = unsafe { str::from_utf8_unchecked(slice) };
-                        let rc: ManuallyDrop<Rc<str>> = unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *str)) };
+                        let rc: ManuallyDrop<Rc<str>> =
+                            unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *str)) };
 
                         let _rc_clone = ManuallyDrop::new(Rc::clone(&rc));
 
@@ -248,7 +239,8 @@ impl Clone for HeapString {
                     }
                     Type::Wtf16 => {
                         let slice = unsafe { slice::from_raw_parts(ptr.cast(), self.len as usize) };
-                        let rc: ManuallyDrop<Rc<[u16]>> = unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *slice)) };
+                        let rc: ManuallyDrop<Rc<[u16]>> =
+                            unsafe { ManuallyDrop::new(Rc::from_raw(&raw const *slice)) };
 
                         let _rc_clone = ManuallyDrop::new(Rc::clone(&rc));
 

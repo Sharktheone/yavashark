@@ -17,9 +17,9 @@ use std::path::PathBuf;
 #[cfg(feature = "profiler")]
 use std::time::Instant;
 
+use crate::utils::private_rc::PrivateRc;
 #[cfg(feature = "profiler")]
 use yavashark_profiler::{FileProfileWriter, FrameId, Profile};
-use crate::utils::private_rc::PrivateRc;
 
 pub struct Realm {
     pub intrinsics: PrivateRc<Intrinsics>, // [[Intrinsics]]

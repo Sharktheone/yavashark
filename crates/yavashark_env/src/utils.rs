@@ -1,6 +1,6 @@
 mod iterator;
-mod protodefault;
 pub(crate) mod private_rc;
+mod protodefault;
 
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::value::Obj;

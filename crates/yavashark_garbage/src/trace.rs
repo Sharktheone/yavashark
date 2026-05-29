@@ -167,4 +167,3 @@ impl Tracer {
         trace.delete_cache();
     }
 }
-

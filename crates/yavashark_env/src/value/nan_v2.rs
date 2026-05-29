@@ -70,11 +70,8 @@ mod bits {
     const _INLINE_BIGINT_CHECK: () =
         assert!(INLINE_BIGINT_TAG & IGNORE_INLINE_MASK == HEAP_BIGINT_TAG & IGNORE_INLINE_MASK);
 
-
     pub const fn is_f64(val: u64) -> bool {
-        (val & MASK_NAN) != MASK_NAN
-            || (val & MASK_KIND) == TAG_INF
-            || (val & MASK_KIND) == TAG_NAN
+        (val & MASK_NAN) != MASK_NAN || (val & MASK_KIND) == TAG_INF || (val & MASK_KIND) == TAG_NAN
     }
 
     pub const fn is_int32(val: u64) -> bool {
@@ -157,7 +154,6 @@ mod bits {
         ptr.expose_provenance().get() as u64 | TAG
     }
 
-
     pub const fn box_int32(val: i32) -> u64 {
         (val as u64) | INT32_TAG
     }
@@ -203,7 +199,6 @@ mod bits {
     pub fn box_heap_big_int(ptr: NonNull<()>) -> u64 {
         box_ptr::<HEAP_BIGINT_TAG>(ptr)
     }
-
 
     pub const unsafe fn unbox_f64(val: u64) -> f64 {
         debug_assert!(is_f64(val));
@@ -275,7 +270,7 @@ impl ValueInner {
 
     pub const fn from_f64(val: f64) -> Self {
         Self {
-            val: bits::box_f64(val)
+            val: bits::box_f64(val),
         }
     }
 
@@ -538,12 +533,9 @@ pub enum JSBigInt {
     Heap(NonNull<()>),
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
 
     #[test]
     fn test_f64_val() {
@@ -552,7 +544,6 @@ mod tests {
         assert_eq!(value.to_bits(), 42.42f64.to_bits());
         assert_eq!(value.as_f64(), Some(42.42));
     }
-
 
     #[test]
     fn test_f64_inf() {

@@ -24,7 +24,6 @@ impl RopeString {
         self.from += start;
         self.to = self.from + (end - start);
 
-
         Some(self)
     }
 }
