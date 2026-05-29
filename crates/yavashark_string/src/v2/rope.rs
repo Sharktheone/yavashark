@@ -1,14 +1,15 @@
+use std::ptr::NonNull;
+
 use crate::v2::YSString;
+
+
+type Gc<T> = NonNull<T>;
 
 pub struct RopeString {
     from: u32,
     to: u32,
-    inner: Box<RopeStringInner>,
-}
-
-struct RopeStringInner {
-    a: YSString,
-    b: YSString,
+    a: Gc<YSString>,
+    b: Gc<YSString>,
 }
 
 impl RopeString {

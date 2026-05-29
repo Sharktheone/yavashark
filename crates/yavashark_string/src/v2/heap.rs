@@ -95,7 +95,7 @@ impl HeapString {
         }
     }
 
-    pub fn len(&self) -> u32 {
+    pub const fn len(&self) -> u32 {
         self.len
     }
 
