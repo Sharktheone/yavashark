@@ -105,7 +105,7 @@ impl HeapString {
         }
 
         Ok(Self {
-            ptr: unsafe { NonNull::new_unchecked(self.ptr.as_ptr().add(start as usize)) },
+            ptr: unsafe { NonNull::new_unchecked(self.ptr.as_ptr().byte_add(start as usize)) },
             len: end - start,
             ptr_offset: self.ptr_offset + start,
             len_offset: self.len_offset + (self.len - end),
