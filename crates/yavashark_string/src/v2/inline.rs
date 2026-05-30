@@ -1,11 +1,13 @@
 use std::mem::size_of;
 use std::ops::Deref;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InlineAscii {
     len: InlineLen,
     bytes: [u8; Self::CAPACITY],
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(Rust, packed)]
 pub struct InlineWtf16 {
     len: InlineLenWtf,
@@ -15,7 +17,7 @@ pub struct InlineWtf16 {
 impl InlineAscii {
     const CAPACITY: usize = 23;
 
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             len: InlineLen::Empty,
             bytes: [0; Self::CAPACITY],
