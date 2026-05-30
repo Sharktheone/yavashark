@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use crate::v2::{StringRef, Type};
+use crate::v2::{RopableStringRef, StringRef, Type};
 use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
 use std::rc::Rc;
@@ -135,7 +135,7 @@ impl HeapString {
         self.ptr
     }
 
-    const fn as_ref(&'_ self) -> StringRef<'_> {
+    pub const fn as_ref(&'_ self) -> StringRef<'_> {
         match self.ty {
             Type::Ascii => {
                 let str = unsafe {
@@ -156,6 +156,33 @@ impl HeapString {
             }
         }
     }
+
+    pub const fn as_rope_ref(&'_ self) -> RopableStringRef<'_> {
+        match self.ty {
+            Type::Ascii => {
+                let str = unsafe {
+                    // SAFETY: ptr is valid and properly aligned, and len is correct
+                    let slice = slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize);
+
+                    //SAFETY: slice is valid UTF-8
+                    str::from_utf8_unchecked(slice)
+                };
+
+                RopableStringRef::Ascii(str)
+            }
+            Type::Wtf16 => {
+                // SAFETY: base_ptr is valid and properly aligned, and len is correct
+                let slice =
+                    unsafe { slice::from_raw_parts(self.ptr.as_ptr().cast(), self.len as usize) };
+                RopableStringRef::Wtf16(slice)
+            }
+        }
+    }
+
+
+
+
+
 
     fn storage(&self) -> HeapStringStorage {
         let ptr = self.get_base_ptr().as_ptr();

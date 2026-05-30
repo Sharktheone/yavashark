@@ -6,7 +6,7 @@ mod reference;
 
 use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
-use crate::v2::rope::RopeString;
+use crate::v2::rope::{RopeString, RopeStringRef};
 use std::cell::UnsafeCell;
 use std::fmt::Debug;
 use std::mem::{size_of, ManuallyDrop};
@@ -146,6 +146,17 @@ impl YSString {
         }
     }
 
+    fn as_rope_ref(&self) -> RopableStringRef {
+        let inner = unsafe { &*self.inner.get() };
+
+        match inner {
+            Inner::Heap(heap) => heap.as_rope_ref(),
+            Inner::InlineAscii(inline) => RopableStringRef::Ascii(inline.as_ref()),
+            Inner::InlineWtf16(inline) => RopableStringRef::Wtf16(&[]), //TODO
+            Inner::Rope(rope) => RopableStringRef::Rope(RopeStringRef::new(rope)),
+        }
+    }
+
     pub fn slice(self, start: u32, end: u32) -> Option<Self> {
         let inner = self.inner.into_inner();
 
@@ -185,5 +196,5 @@ pub enum StringRef<'a> {
 enum RopableStringRef<'a> {
     Ascii(&'a str),
     Wtf16(&'a [u16]),
-    Rope(RopeString),
+    Rope(RopeStringRef<'a>),
 }

@@ -101,3 +101,44 @@ impl RopeString {
 
 
 }
+
+
+
+
+#[derive(Debug, Clone, Copy)]
+pub struct RopeStringRef<'a> {
+    rope: RopeString,
+    _marker: PhantomData<&'a RopeString>,
+}
+
+impl<'a> RopeStringRef<'a> {
+    pub const fn new(rope: &'a RopeString) -> Self {
+        Self {
+            rope: *rope,
+            _marker: PhantomData,
+        }
+    }
+    
+    pub fn as_ref(&self) -> &'a RopeString {
+        unsafe {
+            mem::transmute::<&RopeString, &'a RopeString>(&self.rope)
+        }
+    }
+}
+
+
+impl Deref for RopeStringRef<'_> {
+    type Target = RopeString;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
+    }
+}
+
+impl DerefMut for RopeStringRef<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe {
+            mem::transmute::<&mut RopeString, &mut RopeString>(&mut self.rope)
+        }
+    }
+}
