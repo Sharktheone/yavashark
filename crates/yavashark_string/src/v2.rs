@@ -1,6 +1,7 @@
 mod heap;
 mod inline;
 mod rope;
+mod small_pointer;
 
 use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
