@@ -52,6 +52,19 @@ impl Default for YSString {
     }
 }
 
+impl Clone for YSString {
+    fn clone(&self) -> Self {
+        let inner = unsafe { &*self.inner.get() };
+
+        match inner {
+            Inner::Heap(heap) => heap.clone().into(),
+            Inner::InlineAscii(inline) => (*inline).into(),
+            Inner::InlineWtf16(inline) => (*inline).into(),
+            Inner::Rope(rope) => rope.clone().into(),
+        }
+    }
+}
+
 impl YSString {
     fn new() -> Self {
         InlineAscii::new().into()
