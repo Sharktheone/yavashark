@@ -8,6 +8,9 @@ use crate::v2::inline::{InlineAscii, InlineWtf16};
 use crate::v2::rope::RopeString;
 use std::cell::UnsafeCell;
 use std::mem::size_of;
+use std::mem::{size_of, ManuallyDrop};
+use std::ptr;
+use crate::v2::reference::YSStringRef;
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -113,6 +116,19 @@ impl YSString {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    pub const fn to_ref(&self) -> YSStringRef {
+        let copied = unsafe {
+            ManuallyDrop::new(
+                ptr::read(self)
+            )
+        };
+
+        YSStringRef {
+            inner: copied,
+            _marker: std::marker::PhantomData,
+        }
     }
 
     pub fn slice(self, start: u32, end: u32) -> Option<Self> {
