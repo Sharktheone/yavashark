@@ -46,8 +46,18 @@ impl From<RopeString> for YSString {
     }
 }
 
+impl Default for YSString {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl YSString {
-    fn from_inner(inner: Inner) -> Self {
+    fn new() -> Self {
+        InlineAscii::new().into()
+    }
+
+    const fn from_inner(inner: Inner) -> Self {
         Self {
             inner: UnsafeCell::new(inner),
         }
