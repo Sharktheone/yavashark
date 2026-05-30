@@ -161,10 +161,12 @@ impl YSString {
                 )
         }
     }
-    
+
     pub fn concat(a: Gc<Self>, b: Gc<Self>) -> Self {
         RopeString::new(a, b).into()
     }
+
+
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -174,7 +176,14 @@ enum Type {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum StringRef<'a> {
+pub enum StringRef<'a> {
     Ascii(&'a str),
     Wtf16(&'a [u16]),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum RopableStringRef<'a> {
+    Ascii(&'a str),
+    Wtf16(&'a [u16]),
+    Rope(RopeString),
 }
