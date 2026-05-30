@@ -31,6 +31,19 @@ impl Debug for RopeString {
 }
 
 impl RopeString {
+    pub fn new(a: Gc<YSString>, b: Gc<YSString>) -> Self {
+        let a_len = a.len();
+        let b_len = b.len();
+
+        Self {
+            from: 0,
+            to: a_len + b_len,
+            a,
+            b,
+        }
+    }
+
+
     pub const fn len(&self) -> u32 {
         self.to - self.from
     }
@@ -85,5 +98,6 @@ impl RopeString {
         Ok(self)
 
     }
+
 
 }

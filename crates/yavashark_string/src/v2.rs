@@ -12,6 +12,7 @@ use std::fmt::Debug;
 use std::mem::{size_of, ManuallyDrop};
 use std::ptr;
 use crate::v2::reference::YSStringRef;
+use crate::v2::small_pointer::Gc;
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -159,6 +160,10 @@ impl YSString {
                     }
                 )
         }
+    }
+    
+    pub fn concat(a: Gc<Self>, b: Gc<Self>) -> Self {
+        RopeString::new(a, b).into()
     }
 }
 
