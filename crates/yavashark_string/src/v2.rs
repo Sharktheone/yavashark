@@ -2,6 +2,7 @@ mod heap;
 mod inline;
 mod rope;
 mod small_pointer;
+mod reference;
 
 use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
@@ -138,7 +139,12 @@ impl YSString {
             Inner::Heap(heap) => heap.slice(start, end).ok().map(Into::into),
             Inner::InlineAscii(inline) => inline.slice(start, end).map(Into::into),
             Inner::InlineWtf16(inline) => inline.slice(start, end).map(Into::into),
-            Inner::Rope(rope) => rope.slice(start, end).map(Into::into),
+            Inner::Rope(rope) => rope.slice(start, end)
+                .map(|r| match r {
+                        Ok(rope) => rope.into(),
+                        Err(string) => string,
+                    }
+                )
         }
     }
 }
