@@ -1,9 +1,9 @@
 use std::ptr::NonNull;
-
+use crate::v2::small_pointer::SmallPointer;
 use crate::v2::YSString;
 
 
-type Gc<T> = NonNull<T>;
+type Gc<T> = SmallPointer<T>;
 
 pub struct RopeString {
     from: u32,
