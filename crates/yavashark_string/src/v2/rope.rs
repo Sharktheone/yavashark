@@ -1,10 +1,12 @@
 use std::ptr::NonNull;
-use crate::v2::small_pointer::SmallPointer;
+use crate::v2::small_pointer::{Gc, SmallPointer};
 use crate::v2::YSString;
 
 
-type Gc<T> = SmallPointer<T>;
 
+
+
+#[derive(Clone)]
 pub struct RopeString {
     from: u32,
     to: u32,
@@ -13,7 +15,7 @@ pub struct RopeString {
 }
 
 impl RopeString {
-    pub fn len(&self) -> u32 {
+    pub const fn len(&self) -> u32 {
         self.to - self.from
     }
 
