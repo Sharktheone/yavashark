@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+use std::ops::Deref;
 use std::ptr::NonNull;
 use crate::v2::small_pointer::{Gc, SmallPointer};
 use crate::v2::YSString;
@@ -12,6 +14,20 @@ pub struct RopeString {
     to: u32,
     a: Gc<YSString>,
     b: Gc<YSString>,
+}
+
+impl Debug for RopeString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let a = self.a.deref();
+        let b = self.b.deref();
+
+        let a = a.to_ref();
+        let b = b.to_ref();
+
+
+
+        Ok(())
+    }
 }
 
 impl RopeString {

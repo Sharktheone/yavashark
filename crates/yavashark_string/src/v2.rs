@@ -8,13 +8,26 @@ use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
 use crate::v2::rope::RopeString;
 use std::cell::UnsafeCell;
-use std::mem::size_of;
+use std::fmt::Debug;
 use std::mem::{size_of, ManuallyDrop};
 use std::ptr;
 use crate::v2::reference::YSStringRef;
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
+}
+
+impl Debug for YSString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let inner = unsafe { &*self.inner.get() };
+
+        match inner {
+            Inner::Heap(heap) => heap.fmt(f),
+            Inner::InlineAscii(inline) => inline.fmt(f),
+            Inner::InlineWtf16(inline) => inline.fmt(f),
+            Inner::Rope(rope) => rope.fmt(f),
+        }
+    }
 }
 
 const _: [(); 24] = [(); size_of::<YSString>()];
@@ -89,19 +102,19 @@ impl YSString {
     }
 
     pub fn from_ascii(s: &str) -> Self {
-        if let Some(inline) = InlineAscii::try_from_str(s) {
-            inline.into()
-        } else {
-            HeapString::from_str(s).into()
-        }
+        InlineAscii::try_from_str(s)
+            .map_or_else(
+                || HeapString::from_str(s).into(),
+                Into::into
+            )
     }
 
     pub fn from_wtf16(s: &[u16]) -> Self {
-        if let Some(inline) = InlineWtf16::try_from_slice(s) {
-            inline.into()
-        } else {
-            HeapString::from_wtf16(s).into()
-        }
+        InlineWtf16::try_from_slice(s)
+            .map_or_else(
+                || HeapString::from_wtf16(s).into(),
+                Into::into
+            )
     }
 
     pub fn len(&self) -> u32 {

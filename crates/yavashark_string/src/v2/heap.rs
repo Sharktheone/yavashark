@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use crate::v2::{StringRef, Type};
 use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
@@ -18,6 +19,12 @@ pub struct HeapString {
     len_offset: u32, //len + len_offset = capacity
     ty: Type,
     storage: Storage,
+}
+
+impl Debug for HeapString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.as_ref().fmt(f)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
