@@ -1,14 +1,16 @@
 use std::fmt::Debug;
-use std::ops::Deref;
+use std::marker::PhantomData;
+use std::mem;
+use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use crate::v2::small_pointer::{Gc, SmallPointer};
-use crate::v2::YSString;
+use crate::v2::{RopableStringRef, StringRef, YSString};
 
 
 
 
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct RopeString {
     from: u32,
     to: u32,
@@ -100,6 +102,70 @@ impl RopeString {
     }
 
 
+    pub fn for_each_elem<'a, F>(&'a self, f: &mut impl FnMut(StringRef<'a>)  -> Option<F>) -> Option<F> {
+        let a_len = self.a.len();
+
+        if self.from < a_len { //TODO: should we make this check? (If not we have to change some things in the RopePath below
+            match self.a.as_rope_ref() {
+                RopableStringRef::Ascii(a) => {
+                    let start = self.from as usize;
+                    let end = self.to.min(a_len) as usize;
+
+                    if let Some(result) = f(StringRef::Ascii(&a[start..end])) {
+                        return Some(result);
+                    }
+                }
+                RopableStringRef::Wtf16(w) => {
+                    let start = self.from as usize;
+                    let end = self.to.min(a_len) as usize;
+
+                    if let Some(result) = f(StringRef::Wtf16(&w[start..end])) {
+                        return Some(result);
+                    }
+                }
+                RopableStringRef::Rope(mut rope) => {
+                    rope.from += self.from;
+                    rope.to = rope.from + (self.to - self.from).min(a_len - self.from);
+
+                    if let Some(result) = rope.as_ref().for_each_elem(f) {
+                        return Some(result);
+                    }
+                }
+            }
+        }
+
+        if self.to > a_len {
+            match self.b.as_rope_ref() {
+                RopableStringRef::Ascii(b) => {
+                    let start = (self.from - a_len) as usize;
+                    let end = (self.to - a_len) as usize;
+
+                    if let Some(result) = f(StringRef::Ascii(&b[start..end])) {
+                        return Some(result);
+                    }
+                }
+                RopableStringRef::Wtf16(w) => {
+                    let start = (self.from - a_len) as usize;
+                    let end = (self.to - a_len) as usize;
+
+                    if let Some(result) = f(StringRef::Wtf16(&w[start..end])) {
+                        return Some(result);
+                    }
+                }
+                RopableStringRef::Rope(mut rope) => {
+                    rope.from += self.from - a_len;
+                    rope.to = rope.from + (self.to - self.from).min(self.b.len() - (self.from - a_len));
+
+                    if let Some(result) = rope.as_ref().for_each_elem(f) {
+                        return Some(result);
+                    }
+                }
+            }
+        }
+
+        None
+    }
+ 
 }
 
 
