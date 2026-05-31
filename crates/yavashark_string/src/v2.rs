@@ -208,4 +208,18 @@ impl RopableStringRef<'_> {
             RopableStringRef::Rope(rope) => rope.write_to_utf16_buffer(buffer, offset),
         }
     }
+
+    fn write_to_ascii_buffer(&self, buffer: &mut [u8], offset: usize) {
+        match self {
+            RopableStringRef::Ascii(s) => {
+                buffer[offset..offset + s.len()].copy_from_slice(s.as_bytes());
+            }
+            RopableStringRef::Wtf16(units) => {
+                for (i, unit) in units.iter().enumerate() {
+                    buffer[offset + i] = *unit as u8;
+                }
+            }
+            RopableStringRef::Rope(rope) => rope.write_to_ascii_buffer(buffer, offset),
+        }
+    }
 }

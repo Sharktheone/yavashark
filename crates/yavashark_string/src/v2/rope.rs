@@ -214,6 +214,29 @@ impl<'a> RopeStringRef<'a> {
             Some(())
         });
     }
+    
+    pub fn write_to_ascii_buffer(&self, buffer: &mut [u8], mut offset: usize) {
+        self.as_ref().for_each_elem(&mut |elem| {
+            match elem {
+                StringRef::Ascii(s) => {
+                    for (i, &b) in s.as_bytes().iter().enumerate() {
+                        buffer[offset + i] = b;
+                    }
+                    
+                    offset += s.len();
+                }
+                StringRef::Wtf16(w) => {
+                    for (i, &b) in w.iter().enumerate() {
+                        buffer[offset + i] = b as u8;
+                    }
+                    
+                    offset += w.len();
+                }
+            }
+
+            Some(())
+        });
+    }
 }
 
 impl Deref for RopeStringRef<'_> {
