@@ -110,6 +110,17 @@ impl YSString {
         InlineWtf16::try_from_slice(s).map_or_else(|| HeapString::from_wtf16(s).into(), Into::into)
     }
 
+    pub fn get_type(&self) -> Type {
+        let inner = unsafe { &*self.inner.get() };
+
+        match inner {
+            Inner::Heap(heap) => heap.get_type(),
+            Inner::InlineAscii(_) => Type::Ascii,
+            Inner::InlineWtf16(_) => Type::Wtf16,
+            Inner::Rope(rope) => rope.get_type(),
+        }
+    }
+
     pub fn len(&self) -> u32 {
         let inner = unsafe { &*self.inner.get() };
 

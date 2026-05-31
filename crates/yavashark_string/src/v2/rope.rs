@@ -1,5 +1,5 @@
 use crate::v2::small_pointer::{Gc, SmallPointer};
-use crate::v2::{RopableStringRef, StringRef, YSString};
+use crate::v2::{RopableStringRef, StringRef, Type, YSString};
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem;
@@ -36,6 +36,17 @@ impl RopeString {
             to: a_len + b_len,
             a,
             b,
+        }
+    }
+    
+    pub fn get_type(&self) -> Type {
+        let a_ty = self.a.deref().get_type();
+        let b_ty = self.b.deref().get_type();
+
+        if a_ty == Type::Wtf16 || b_ty == Type::Wtf16 {
+            Type::Wtf16
+        } else {
+            Type::Ascii
         }
     }
 

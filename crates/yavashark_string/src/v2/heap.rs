@@ -101,6 +101,10 @@ impl HeapString {
             storage: Storage::Rc,
         }
     }
+    
+    pub fn get_type(&self) -> Type {
+        self.ty
+    }
 
     pub const fn len(&self) -> u32 {
         self.len
