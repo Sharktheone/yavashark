@@ -193,3 +193,19 @@ enum RopableStringRef<'a> {
     Wtf16(&'a [u16]),
     Rope(RopeStringRef<'a>),
 }
+
+impl RopableStringRef<'_> {
+    fn write_to_utf16_buffer(&self, buffer: &mut [u16], offset: usize) {
+        match self {
+            RopableStringRef::Ascii(s) => {
+                for (i, byte) in s.as_bytes().iter().enumerate() {
+                    buffer[offset + i] = *byte as u16;
+                }
+            }
+            RopableStringRef::Wtf16(units) => {
+                buffer[offset..offset + units.len()].copy_from_slice(units);
+            }
+            RopableStringRef::Rope(rope) => rope.write_to_utf16_buffer(buffer, offset),
+        }
+    }
+}

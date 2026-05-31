@@ -190,6 +190,30 @@ impl<'a> RopeStringRef<'a> {
     pub fn as_ref(&self) -> &'a RopeString {
         unsafe { mem::transmute::<&RopeString, &'a RopeString>(&self.rope) }
     }
+    
+    
+    pub fn write_to_utf16_buffer(&self, buffer: &mut [u16], mut offset: usize) {
+        self.as_ref().for_each_elem(&mut |elem| {
+            match elem {
+                StringRef::Ascii(s) => {
+                    for (i, &b) in s.as_bytes().iter().enumerate() {
+                        buffer[offset + i] = b as u16;
+                    }
+                    
+                    offset += s.len();
+                }
+                StringRef::Wtf16(w) => {
+                    for (i, &b) in w.iter().enumerate() {
+                        buffer[offset + i] = b;
+                    }
+                    
+                    offset += w.len();
+                }
+            }
+
+            Some(())
+        });
+    }
 }
 
 impl Deref for RopeStringRef<'_> {
