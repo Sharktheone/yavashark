@@ -15,12 +15,22 @@ pub struct InlineWtf16 {
 }
 
 impl InlineAscii {
-    const CAPACITY: usize = 23;
+    pub const CAPACITY: usize = 23;
 
     pub const fn new() -> Self {
         Self {
             len: InlineLen::Empty,
             bytes: [0; Self::CAPACITY],
+        }
+    }
+
+    pub fn from_bytes(bytes: [u8; Self::CAPACITY], len: u32) -> Self {
+        let len = InlineLen::from_u32(len)
+            .unwrap_or(InlineLen::Len23);
+
+        Self {
+            len,
+            bytes,
         }
     }
 
@@ -76,12 +86,22 @@ impl Deref for InlineAscii {
 }
 
 impl InlineWtf16 {
-    const CAPACITY: usize = 11;
+    pub const CAPACITY: usize = 11;
 
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             len: InlineLenWtf::Empty,
             bytes: [0; Self::CAPACITY],
+        }
+    }
+
+    pub fn from_bytes(bytes: [u16; Self::CAPACITY], len: u32) -> Self {
+        let len = InlineLenWtf::from_u32(len)
+            .unwrap_or(InlineLenWtf::Len11);
+
+        Self {
+            len,
+            bytes,
         }
     }
 

@@ -171,6 +171,39 @@ impl YSString {
     }
 
     pub fn concat(a: Gc<Self>, b: Gc<Self>) -> Self {
+        let a_len = a.len();
+        let b_len = b.len();
+
+        let full_len = a_len + b_len;
+
+        let a_type = a.get_type();
+        let b_type = b.get_type();
+
+        let is_utf16 = a_type == Type::Wtf16 || b_type == Type::Wtf16;
+        let is_utf8 = a_type == Type::Ascii && b_type == Type::Ascii;
+
+        if is_utf16 && full_len <= InlineWtf16::CAPACITY as u32 {
+            let mut buffer = [0; InlineWtf16::CAPACITY];
+
+            a.as_rope_ref().write_to_utf16_buffer(&mut buffer, 0);
+            b.as_rope_ref().write_to_utf16_buffer(&mut buffer, a_len as usize);
+
+            return InlineWtf16::from_bytes(buffer, full_len).into();
+        }
+
+        if is_utf8 && full_len <= InlineAscii::CAPACITY as u32 {
+            let mut buffer = [0; InlineAscii::CAPACITY];
+
+            a.as_rope_ref().write_to_ascii_buffer(&mut buffer, 0);
+            b.as_rope_ref().write_to_ascii_buffer(&mut buffer, a_len as usize);
+
+            return InlineAscii::from_bytes(buffer, full_len).into();
+        }
+
+
+
+
+
         RopeString::new(a, b).into()
     }
 }
