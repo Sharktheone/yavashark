@@ -14,14 +14,13 @@ pub struct SmallPointer<T> {
     _marker: PhantomData<NonNull<T>>,
 }
 
-impl <T> Clone for SmallPointer<T> {
+impl<T> Clone for SmallPointer<T> {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl <T> Copy for SmallPointer<T> {}
-
+impl<T> Copy for SmallPointer<T> {}
 
 impl<T> SmallPointer<T> {
     pub fn new(ptr: NonNull<T>) -> Self {
@@ -43,7 +42,6 @@ impl<T> SmallPointer<T> {
         }
     }
 
-
     pub fn get(self) -> NonNull<T> {
         #[cfg(target_pointer_width = "16")]
         let addr = self.p2 as usize;
@@ -54,18 +52,11 @@ impl<T> SmallPointer<T> {
         #[cfg(target_pointer_width = "64")]
         let addr = (self.p2 as usize) << 32 | (self.p1 as usize);
 
-        let addr = unsafe {
-            NonZeroUsize::new_unchecked(addr)
-        };
+        let addr = unsafe { NonZeroUsize::new_unchecked(addr) };
 
         NonNull::with_exposed_provenance(addr)
     }
-
 }
-
-
-
-
 
 pub struct Gc<T> {
     ptr: SmallPointer<T>,

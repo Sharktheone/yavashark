@@ -1,13 +1,12 @@
+use crate::v2::YSString;
 use std::mem::ManuallyDrop;
 use std::ops::Deref;
 use std::ptr;
-use crate::v2::YSString;
 
 pub struct YSStringRef<'a> {
     pub(crate) inner: ManuallyDrop<YSString>,
     pub(crate) _marker: std::marker::PhantomData<&'a YSString>,
 }
-
 
 impl Deref for YSStringRef<'_> {
     type Target = YSString;
@@ -17,7 +16,6 @@ impl Deref for YSStringRef<'_> {
     }
 }
 
-
 impl Clone for YSStringRef<'_> {
     fn clone(&self) -> Self {
         self.copy()
@@ -26,9 +24,7 @@ impl Clone for YSStringRef<'_> {
 
 impl YSStringRef<'_> {
     pub const fn copy(&self) -> Self {
-        unsafe {
-            ptr::read(self)
-        }
+        unsafe { ptr::read(self) }
     }
 
     pub fn to_owned(&self) -> YSString {

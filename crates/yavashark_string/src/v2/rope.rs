@@ -1,14 +1,10 @@
+use crate::v2::small_pointer::{Gc, SmallPointer};
+use crate::v2::{RopableStringRef, StringRef, YSString};
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
-use crate::v2::small_pointer::{Gc, SmallPointer};
-use crate::v2::{RopableStringRef, StringRef, YSString};
-
-
-
-
 
 #[derive(Copy, Clone)]
 pub struct RopeString {
@@ -26,8 +22,6 @@ impl Debug for RopeString {
         let a = a.to_ref();
         let b = b.to_ref();
 
-
-
         Ok(())
     }
 }
@@ -44,7 +38,6 @@ impl RopeString {
             b,
         }
     }
-
 
     pub const fn len(&self) -> u32 {
         self.to - self.from
@@ -65,14 +58,13 @@ impl RopeString {
         Some(self.shake())
     }
 
-
     pub fn shake(mut self) -> Result<Self, YSString> {
         if self.from == 0 && self.to == self.raw_len() {
             return Ok(self);
         }
 
         if self.from == self.to {
-            return Err(YSString::new())
+            return Err(YSString::new());
         }
 
         if self.from > self.a.len() {
@@ -98,14 +90,16 @@ impl RopeString {
         }
 
         Ok(self)
-
     }
 
-
-    pub fn for_each_elem<'a, F>(&'a self, f: &mut impl FnMut(StringRef<'a>)  -> Option<F>) -> Option<F> {
+    pub fn for_each_elem<'a, F>(
+        &'a self,
+        f: &mut impl FnMut(StringRef<'a>) -> Option<F>,
+    ) -> Option<F> {
         let a_len = self.a.len();
 
-        if self.from < a_len { //TODO: should we make this check? (If not we have to change some things in the RopePath below
+        if self.from < a_len {
+            //TODO: should we make this check? (If not we have to change some things in the RopePath below
             match self.a.as_rope_ref() {
                 RopableStringRef::Ascii(a) => {
                     let start = self.from as usize;
@@ -154,7 +148,8 @@ impl RopeString {
                 }
                 RopableStringRef::Rope(mut rope) => {
                     rope.from += self.from - a_len;
-                    rope.to = rope.from + (self.to - self.from).min(self.b.len() - (self.from - a_len));
+                    rope.to =
+                        rope.from + (self.to - self.from).min(self.b.len() - (self.from - a_len));
 
                     if let Some(result) = rope.as_ref().for_each_elem(f) {
                         return Some(result);
@@ -165,11 +160,7 @@ impl RopeString {
 
         None
     }
- 
 }
-
-
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct RopeStringRef<'a> {
@@ -184,14 +175,11 @@ impl<'a> RopeStringRef<'a> {
             _marker: PhantomData,
         }
     }
-    
+
     pub fn as_ref(&self) -> &'a RopeString {
-        unsafe {
-            mem::transmute::<&RopeString, &'a RopeString>(&self.rope)
-        }
+        unsafe { mem::transmute::<&RopeString, &'a RopeString>(&self.rope) }
     }
 }
-
 
 impl Deref for RopeStringRef<'_> {
     type Target = RopeString;
@@ -203,8 +191,6 @@ impl Deref for RopeStringRef<'_> {
 
 impl DerefMut for RopeStringRef<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe {
-            mem::transmute::<&mut RopeString, &mut RopeString>(&mut self.rope)
-        }
+        unsafe { mem::transmute::<&mut RopeString, &mut RopeString>(&mut self.rope) }
     }
 }

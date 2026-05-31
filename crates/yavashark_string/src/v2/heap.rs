@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use crate::v2::{RopableStringRef, StringRef, Type};
+use std::fmt::Debug;
 use std::mem::ManuallyDrop;
 use std::ptr::NonNull;
 use std::rc::Rc;
@@ -178,11 +178,6 @@ impl HeapString {
             }
         }
     }
-
-
-
-
-
 
     fn storage(&self) -> HeapStringStorage {
         let ptr = self.get_base_ptr().as_ptr();

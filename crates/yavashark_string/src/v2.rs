@@ -1,18 +1,18 @@
 mod heap;
 mod inline;
+mod reference;
 mod rope;
 mod small_pointer;
-mod reference;
 
 use crate::v2::heap::HeapString;
 use crate::v2::inline::{InlineAscii, InlineWtf16};
+use crate::v2::reference::YSStringRef;
 use crate::v2::rope::{RopeString, RopeStringRef};
+use crate::v2::small_pointer::Gc;
 use std::cell::UnsafeCell;
 use std::fmt::Debug;
-use std::mem::{size_of, ManuallyDrop};
+use std::mem::{ManuallyDrop, size_of};
 use std::ptr;
-use crate::v2::reference::YSStringRef;
-use crate::v2::small_pointer::Gc;
 
 pub struct YSString {
     inner: UnsafeCell<Inner>,
@@ -103,19 +103,11 @@ impl YSString {
     }
 
     pub fn from_ascii(s: &str) -> Self {
-        InlineAscii::try_from_str(s)
-            .map_or_else(
-                || HeapString::from_str(s).into(),
-                Into::into
-            )
+        InlineAscii::try_from_str(s).map_or_else(|| HeapString::from_str(s).into(), Into::into)
     }
 
     pub fn from_wtf16(s: &[u16]) -> Self {
-        InlineWtf16::try_from_slice(s)
-            .map_or_else(
-                || HeapString::from_wtf16(s).into(),
-                Into::into
-            )
+        InlineWtf16::try_from_slice(s).map_or_else(|| HeapString::from_wtf16(s).into(), Into::into)
     }
 
     pub fn len(&self) -> u32 {
@@ -134,11 +126,7 @@ impl YSString {
     }
 
     pub const fn to_ref(&self) -> YSStringRef {
-        let copied = unsafe {
-            ManuallyDrop::new(
-                ptr::read(self)
-            )
-        };
+        let copied = unsafe { ManuallyDrop::new(ptr::read(self)) };
 
         YSStringRef {
             inner: copied,
@@ -164,20 +152,16 @@ impl YSString {
             Inner::Heap(heap) => heap.slice(start, end).ok().map(Into::into),
             Inner::InlineAscii(inline) => inline.slice(start, end).map(Into::into),
             Inner::InlineWtf16(inline) => inline.slice(start, end).map(Into::into),
-            Inner::Rope(rope) => rope.slice(start, end)
-                .map(|r| match r {
-                        Ok(rope) => rope.into(),
-                        Err(string) => string,
-                    }
-                )
+            Inner::Rope(rope) => rope.slice(start, end).map(|r| match r {
+                Ok(rope) => rope.into(),
+                Err(string) => string,
+            }),
         }
     }
 
     pub fn concat(a: Gc<Self>, b: Gc<Self>) -> Self {
         RopeString::new(a, b).into()
     }
-
-
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
