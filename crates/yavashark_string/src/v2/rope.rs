@@ -184,7 +184,14 @@ impl RopeString {
                     let s_slice = &s[..compare_len];
                     let prefix_slice = &prefix_slice[..compare_len];
 
-                    if s_slice != prefix_slice {
+                    if *s_slice != *prefix_slice {
+                        return Some(())
+                    }
+
+
+                    offset += s_slice.len();
+
+                    if offset >= prefix.len() {
                         return None;
                     }
 
@@ -204,16 +211,22 @@ impl RopeString {
                         let encoded = chr.encode_utf8(&mut buf);
 
                         if encoded.as_bytes() != [*prefix_byte] {
-                            return None;
+                            return Some(())
                         }
 
-                        offset += encoded.len()
+                        offset += encoded.len();
+
+                        if offset >= prefix.len() {
+                            return None;
+                        }
                     }
                 }
             }
 
-            Some(())
-        }).is_some() && offset == prefix.len()
+            None
+        });
+
+        matches.is_none() && offset == prefix.len()
     }
 }
 
