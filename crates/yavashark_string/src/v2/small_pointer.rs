@@ -95,6 +95,14 @@ impl GCAllocator {
     }
 }
 
+impl Drop for GCAllocator {
+    fn drop(&mut self) {
+        for gc in &self.gcs {
+            unsafe { (gc.drop)(gc.ptr) }
+        }
+    }
+}
+
 pub struct GCDef {
     ptr: NonNull<()>,
     drop: unsafe fn(NonNull<()>),
