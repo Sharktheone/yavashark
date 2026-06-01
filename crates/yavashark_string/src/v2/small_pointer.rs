@@ -58,6 +58,48 @@ impl<T> SmallPointer<T> {
     }
 }
 
+
+//This is just a mock and highly unsafe!
+pub struct GCAllocator {
+    gcs: Vec<GCDef>,
+}
+
+impl GCAllocator {
+    pub fn new() -> Self {
+        Self { gcs: Vec::new() }
+    }
+
+    pub fn alloc<T>(&mut self, value: T) -> Gc<T> {
+        let boxed = Box::new(value);
+
+
+        let ptr = unsafe {
+            NonNull::new_unchecked(Box::into_raw(boxed))
+        };
+
+        self.gcs.push(GCDef {
+            ptr: ptr.cast(),
+            drop: Self::drop_impl::<T>,
+        });
+
+        Gc {
+            ptr: SmallPointer::new(ptr),
+        }
+    }
+
+    unsafe fn drop_impl<T>(ptr: NonNull<()>) {
+        let ptr = ptr.cast::<T>();
+        let _boxed = unsafe {
+            Box::from_raw(ptr.as_ptr())
+        };
+    }
+}
+
+pub struct GCDef {
+    ptr: NonNull<()>,
+    drop: unsafe fn(NonNull<()>),
+}
+
 pub struct Gc<T> {
     ptr: SmallPointer<T>,
 }
