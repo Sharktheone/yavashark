@@ -176,7 +176,7 @@ impl RopeString {
     pub fn starts_with(&self, prefix: &str) -> bool {
         let mut offset = 0;
 
-        self.for_each_elem(&mut |elem| {
+        let matches = self.for_each_elem(&mut |elem| {
             match elem {
                 StringRef::Ascii(s) => {
                     let prefix_slice = &prefix[offset..];
@@ -194,9 +194,6 @@ impl RopeString {
                     if offset >= prefix.len() {
                         return None;
                     }
-
-
-                    offset += s.len();
                 }
                 StringRef::Wtf16(w) => {
                     let prefix_slice = &prefix[offset..];
@@ -205,7 +202,7 @@ impl RopeString {
                     let prefix_slice = &prefix_slice[..compare_len];
 
                     for (w_unit, prefix_byte) in w_slice.iter().zip(prefix_slice.as_bytes()) {
-                        let chr = char::from_u32(*w_unit as u32)?;
+                        let chr = char::from_u32(u32::from(*w_unit))?;
 
                         let mut buf = [0; 4];
                         let encoded = chr.encode_utf8(&mut buf);
@@ -307,5 +304,26 @@ impl Deref for RopeStringRef<'_> {
 impl DerefMut for RopeStringRef<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { mem::transmute::<&mut RopeString, &mut RopeString>(&mut self.rope) }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::v2::small_pointer::GCAllocator;
+    use super::*;
+
+    #[test]
+    fn test_rope_string_starts_with() {
+        let mut gc = GCAllocator::new();
+
+        let a = gc.alloc(YSString::from_str("Hello, "));
+        let b = gc.alloc(YSString::from_str("world!"));
+
+        let rope = RopeString::new(a, b);
+        assert_eq!(rope.len(), 13);
+        assert!(rope.starts_with("Hello"));
+        assert!(rope.starts_with("Hello, "));
+        assert!(!rope.starts_with("world"));
     }
 }
