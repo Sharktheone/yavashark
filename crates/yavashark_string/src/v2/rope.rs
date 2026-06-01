@@ -171,6 +171,50 @@ impl RopeString {
 
         None
     }
+
+
+    pub fn starts_with(&self, prefix: &str) -> bool {
+        let mut offset = 0;
+
+        self.for_each_elem(&mut |elem| {
+            match elem {
+                StringRef::Ascii(s) => {
+                    let prefix_slice = &prefix[offset..];
+                    let compare_len = s.len().min(prefix_slice.len());
+                    let s_slice = &s[..compare_len];
+                    let prefix_slice = &prefix_slice[..compare_len];
+
+                    if s_slice != prefix_slice {
+                        return None;
+                    }
+
+
+                    offset += s.len();
+                }
+                StringRef::Wtf16(w) => {
+                    let prefix_slice = &prefix[offset..];
+                    let compare_len = w.len().min(prefix_slice.len());
+                    let w_slice = &w[..compare_len];
+                    let prefix_slice = &prefix_slice[..compare_len];
+
+                    for (w_unit, prefix_byte) in w_slice.iter().zip(prefix_slice.as_bytes()) {
+                        let chr = char::from_u32(*w_unit as u32)?;
+
+                        let mut buf = [0; 4];
+                        let encoded = chr.encode_utf8(&mut buf);
+
+                        if encoded.as_bytes() != [*prefix_byte] {
+                            return None;
+                        }
+
+                        offset += encoded.len()
+                    }
+                }
+            }
+
+            Some(())
+        }).is_some() && offset == prefix.len()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
