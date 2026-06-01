@@ -101,7 +101,7 @@ impl HeapString {
             storage: Storage::Rc,
         }
     }
-    
+
     pub fn get_type(&self) -> Type {
         self.ty
     }
@@ -161,7 +161,7 @@ impl HeapString {
         }
     }
 
-    pub const fn as_rope_ref(&'_ self) -> RopableStringRef<'_> {
+    pub(super) const fn as_rope_ref(&'_ self) -> RopableStringRef<'_> {
         match self.ty {
             Type::Ascii => {
                 let str = unsafe {

@@ -94,6 +94,10 @@ impl YSString {
         }
     }
 
+    pub fn from_str(s: &str) -> Self {
+        Self::from_ascii(s)
+    }
+
     pub fn from_static_ascii(s: &'static str) -> Self {
         HeapString::from_static_ascii(s).into()
     }
@@ -136,7 +140,7 @@ impl YSString {
         self.len() == 0
     }
 
-    pub const fn to_ref(&self) -> YSStringRef {
+    pub const fn to_ref(&'_ self) -> YSStringRef<'_> {
         let copied = unsafe { ManuallyDrop::new(ptr::read(self)) };
 
         YSStringRef {
@@ -145,7 +149,7 @@ impl YSString {
         }
     }
 
-    fn as_rope_ref(&self) -> RopableStringRef {
+    fn as_rope_ref(&'_ self) -> RopableStringRef<'_> {
         let inner = unsafe { &*self.inner.get() };
 
         match inner {
@@ -210,7 +214,7 @@ impl YSString {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Type {
+pub enum Type {
     Ascii,
     Wtf16,
 }
