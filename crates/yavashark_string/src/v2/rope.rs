@@ -142,7 +142,7 @@ impl RopeString {
         if self.to > a_len {
             match self.b.as_rope_ref() {
                 RopableStringRef::Ascii(b) => {
-                    let start = (self.from - a_len) as usize;
+                    let start = self.from.saturating_sub(a_len) as usize;
                     let end = (self.to - a_len) as usize;
 
                     if let Some(result) = f(StringRef::Ascii(&b[start..end])) {
