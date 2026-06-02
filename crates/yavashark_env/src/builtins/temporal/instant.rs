@@ -98,7 +98,11 @@ impl Instant {
     ) -> Res<NativeObject<Self>> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
-        let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
+        let epoch_ns = EpochNanoseconds::from(ns);
+        epoch_ns.check_validity().map_err(|e| Error::range("epoch out of range"))?;
+
+
+        let i = temporal_rs::Instant::from(epoch_ns);
 
         Self::from_stamp(i, realm)
     }
