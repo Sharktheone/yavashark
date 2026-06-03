@@ -295,7 +295,7 @@ impl<T: FromValueOutput> FromValueOutput for Option<T> {
     }
 }
 
-pub struct Stringable(String);
+pub struct Stringable(pub String);
 
 impl Deref for Stringable {
     type Target = String;
