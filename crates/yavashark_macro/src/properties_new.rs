@@ -291,39 +291,58 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
             }
         };
 
-        let name = js_name
-            .map(|js| quote! { #js })
-            .unwrap_or_else(|| quote! { stringify!(#name) });
+        let mut names = Vec::with_capacity(1);
+
+        match js_name {
+            Some(Expr::Array(array)) => {
+                names.reserve(array.elems.len());
+                for expr in array.elems {
+                    names.push(quote! { #expr })
+
+                }
+            }
+            Some(expr) => names.push(quote! { #expr }),
+            _ => names.push(quote!(stringify!(#name)))
+        }
+
+        let mut elem = quote! {
+            let prop = #prop_tokens;
+        };
+
+        for name in names {
 
         let tokens = match prop_type {
             Type::Normal => {
                 quote! {
-                    {
-                        let prop = #prop_tokens;
-
                         obj.define_property_attributes(#name.into(), #var_create, realm)?;
-                    }
                 }
             }
             Type::Get => {
                 quote! {
-                    {
-                        let prop = #prop_tokens;
                         obj.define_getter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
-                    }
                 }
             }
             Type::Set => {
                 quote! {
-                    {
-                        let prop = #prop_tokens;
-                        obj.define_setter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
-                    }
+                    obj.define_setter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
                 }
             }
         };
 
-        init.extend(tokens);
+
+        elem.extend(tokens);
+
+
+        }
+
+        init.extend(quote! {
+            {
+                #elem
+            }
+        })
+
+
+
     }
 
     init
