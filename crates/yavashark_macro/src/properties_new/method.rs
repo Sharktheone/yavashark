@@ -77,6 +77,11 @@ impl Method {
         let js_name = self
             .js_name
             .clone()
+            .as_ref()
+            .and_then(|js| match js {
+                Expr::Array(a) => a.elems.first(),
+                _ => Some(js)
+            })
             .map(|js| quote! { #js })
             .unwrap_or_else(|| quote! { stringify!(#name_ident) });
 
