@@ -272,7 +272,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 method.name,
                 method.js_name,
                 method.ty,
-                quote! {#variable::write_config(prop.into())},
+                quote! {#variable::write_config(prop)},
             ),
             Prop::Constant(constant) => {
                 let writable = constant.writable;
@@ -307,24 +307,39 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
 
         let mut elem = quote! {
             let prop = #prop_tokens;
+            let prop = prop.into();
         };
 
-        for name in names {
+        if prop_type == Type::Normal {
+            elem.extend(quote! {
+                let prop = #var_create;
+            })
+
+        }
+
+        for (i, name) in names.iter().enumerate() {
+            let clone = if i == names.len() - 1 {
+                quote! {  }
+            } else {
+                quote! { .clone() }
+            };
+
+
 
         let tokens = match prop_type {
             Type::Normal => {
                 quote! {
-                        obj.define_property_attributes(#name.into(), #var_create, realm)?;
+                        obj.define_property_attributes(#name.into(), prop #clone, realm)?;
                 }
             }
             Type::Get => {
                 quote! {
-                        obj.define_getter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
+                        obj.define_getter_attributes(#name.into(), prop #clone, #attributes::config(), realm)?;
                 }
             }
             Type::Set => {
                 quote! {
-                    obj.define_setter_attributes(#name.into(), prop.into(), #attributes::config(), realm)?;
+                    obj.define_setter_attributes(#name.into(), prop #clone, #attributes::config(), realm)?;
                 }
             }
         };
