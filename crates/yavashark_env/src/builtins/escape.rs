@@ -1,8 +1,10 @@
 use crate::error::Error;
 use crate::partial_init::Initializer;
-use crate::{NativeFunction, ObjectHandle, Realm, Res, ValueResult};
+use crate::{NativeFunction, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::fmt::Write;
+use std::mem;
 use std::str::Chars;
+use crate::conversion::{FromValueOutput, Stringable};
 
 #[must_use]
 pub fn get_escape(realm: &mut Realm) -> ObjectHandle {
@@ -145,6 +147,10 @@ pub fn get_decode_uri(realm: &mut Realm) -> ObjectHandle {
             let arg = if args.is_empty() {
                 "undefined".into()
             } else {
+                if args[0].is_symbol() {
+                    return Err(Error::ty("Cannot convert a Symbol value to a string"));
+                }
+
                 args[0].to_string(realm)?
             };
             decode_uri_impl(&arg.as_str_lossy(), false)
