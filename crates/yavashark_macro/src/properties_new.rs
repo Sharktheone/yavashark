@@ -272,7 +272,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 method.name,
                 method.js_name,
                 method.ty,
-                quote! {#variable::write_config(prop)},
+                quote! {#variable::write_config(prop.into())},
             ),
             Prop::Constant(constant) => {
                 let writable = constant.writable;
@@ -307,7 +307,6 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
 
         let mut elem = quote! {
             let prop = #prop_tokens;
-            let prop = prop.into();
         };
 
         if prop_type == Type::Normal {
@@ -334,12 +333,12 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
             }
             Type::Get => {
                 quote! {
-                        obj.define_getter_attributes(#name.into(), prop #clone, #attributes::config(), realm)?;
+                        obj.define_getter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
                 }
             }
             Type::Set => {
                 quote! {
-                    obj.define_setter_attributes(#name.into(), prop #clone, #attributes::config(), realm)?;
+                    obj.define_setter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
                 }
             }
         };
