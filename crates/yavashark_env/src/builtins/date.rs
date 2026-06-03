@@ -1110,7 +1110,7 @@ impl Date {
         })
     }
 
-    #[prop("toUTCString")]
+    #[prop(["toUTCString", "toGMTString"])]
     pub fn to_utc_string(&self) -> String {
         self.date()
             .map_or("Invalid Date".to_string(), |d| d.to_utc().to_string())
