@@ -324,12 +324,12 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
             let tokens = match prop_type {
                 Type::Normal => {
                     quote! {
-                            obj.define_property_attributes(#name.into(), prop #clone, realm)?;
+                        obj.define_property_attributes(#name.into(), prop #clone, realm)?;
                     }
                 }
                 Type::Get => {
                     quote! {
-                            obj.define_getter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
+                        obj.define_getter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
                     }
                 }
                 Type::Set => {
