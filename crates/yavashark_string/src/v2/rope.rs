@@ -172,7 +172,6 @@ impl RopeString {
         None
     }
 
-
     pub fn starts_with(&self, prefix: &str) -> bool {
         let mut offset = 0;
 
@@ -185,9 +184,8 @@ impl RopeString {
                     let prefix_slice = &prefix_slice[..compare_len];
 
                     if *s_slice != *prefix_slice {
-                        return Some(())
+                        return Some(());
                     }
-
 
                     offset += s_slice.len();
 
@@ -208,7 +206,7 @@ impl RopeString {
                         let encoded = chr.encode_utf8(&mut buf);
 
                         if encoded.as_bytes() != [*prefix_byte] {
-                            return Some(())
+                            return Some(());
                         }
 
                         offset += encoded.len();
@@ -244,7 +242,6 @@ impl<'a> RopeStringRef<'a> {
     pub fn as_ref(&self) -> &'a RopeString {
         unsafe { mem::transmute::<&RopeString, &'a RopeString>(&self.rope) }
     }
-
 
     pub fn write_to_utf16_buffer(&self, buffer: &mut [u16], mut offset: usize) {
         self.as_ref().for_each_elem(&mut |elem| {
@@ -307,11 +304,10 @@ impl DerefMut for RopeStringRef<'_> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::v2::small_pointer::GCAllocator;
     use super::*;
+    use crate::v2::small_pointer::GCAllocator;
 
     #[test]
     fn test_rope_string_starts_with() {

@@ -80,10 +80,12 @@ impl Instant {
             Value::BigInt(bigint) => temporal_rs::Instant::from_epoch_milliseconds(
                 bigint.to_i64().ok_or(Error::range("epoch out of range"))?,
             ),
-            Value::Number(num) => {
-                temporal_rs::Instant::from_epoch_milliseconds(*num as i64)
+            Value::Number(num) => temporal_rs::Instant::from_epoch_milliseconds(*num as i64),
+            _ => {
+                return Err(Error::ty(
+                    "Expected a BigInt or Number for epoch milliseconds",
+                ));
             }
-            _ => return Err(Error::ty("Expected a BigInt or Number for epoch milliseconds")),
         }
         .map_err(Error::from_temporal)?;
 
@@ -98,8 +100,9 @@ impl Instant {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let epoch_ns = EpochNanoseconds::from(ns);
-        epoch_ns.check_validity().map_err(|e| Error::range("epoch out of range"))?;
-
+        epoch_ns
+            .check_validity()
+            .map_err(|e| Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(epoch_ns);
 

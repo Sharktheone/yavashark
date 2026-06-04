@@ -25,13 +25,9 @@ impl InlineAscii {
     }
 
     pub fn from_bytes(bytes: [u8; Self::CAPACITY], len: u32) -> Self {
-        let len = InlineLen::from_u32(len)
-            .unwrap_or(InlineLen::Len23);
+        let len = InlineLen::from_u32(len).unwrap_or(InlineLen::Len23);
 
-        Self {
-            len,
-            bytes,
-        }
+        Self { len, bytes }
     }
 
     pub fn try_from_str(s: &str) -> Option<Self> {
@@ -96,13 +92,9 @@ impl InlineWtf16 {
     }
 
     pub fn from_bytes(bytes: [u16; Self::CAPACITY], len: u32) -> Self {
-        let len = InlineLenWtf::from_u32(len)
-            .unwrap_or(InlineLenWtf::Len11);
+        let len = InlineLenWtf::from_u32(len).unwrap_or(InlineLenWtf::Len11);
 
-        Self {
-            len,
-            bytes,
-        }
+        Self { len, bytes }
     }
 
     pub fn try_from_slice(units: &[u16]) -> Option<Self> {

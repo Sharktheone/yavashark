@@ -298,11 +298,10 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 names.reserve(array.elems.len());
                 for expr in array.elems {
                     names.push(quote! { #expr })
-
                 }
             }
             Some(expr) => names.push(quote! { #expr }),
-            _ => names.push(quote!(stringify!(#name)))
+            _ => names.push(quote!(stringify!(#name))),
         }
 
         let mut elem = quote! {
@@ -313,40 +312,34 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
             elem.extend(quote! {
                 let prop = #var_create;
             })
-
         }
 
         for (i, name) in names.iter().enumerate() {
             let clone = if i == names.len() - 1 {
-                quote! {  }
+                quote! {}
             } else {
                 quote! { .clone() }
             };
 
-
-
-        let tokens = match prop_type {
-            Type::Normal => {
-                quote! {
-                        obj.define_property_attributes(#name.into(), prop #clone, realm)?;
+            let tokens = match prop_type {
+                Type::Normal => {
+                    quote! {
+                            obj.define_property_attributes(#name.into(), prop #clone, realm)?;
+                    }
                 }
-            }
-            Type::Get => {
-                quote! {
-                        obj.define_getter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
+                Type::Get => {
+                    quote! {
+                            obj.define_getter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
+                    }
                 }
-            }
-            Type::Set => {
-                quote! {
-                    obj.define_setter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
+                Type::Set => {
+                    quote! {
+                        obj.define_setter_attributes(#name.into(), prop #clone.into(), #attributes::config(), realm)?;
+                    }
                 }
-            }
-        };
+            };
 
-
-        elem.extend(tokens);
-
-
+            elem.extend(tokens);
         }
 
         init.extend(quote! {
@@ -354,9 +347,6 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 #elem
             }
         })
-
-
-
     }
 
     init

@@ -1,10 +1,10 @@
+use crate::conversion::{FromValueOutput, Stringable};
 use crate::error::Error;
 use crate::partial_init::Initializer;
 use crate::{NativeFunction, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::fmt::Write;
 use std::mem;
 use std::str::Chars;
-use crate::conversion::{FromValueOutput, Stringable};
 
 #[must_use]
 pub fn get_escape(realm: &mut Realm) -> ObjectHandle {

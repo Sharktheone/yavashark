@@ -190,7 +190,8 @@ impl YSString {
             let mut buffer = [0; InlineWtf16::CAPACITY];
 
             a.as_rope_ref().write_to_utf16_buffer(&mut buffer, 0);
-            b.as_rope_ref().write_to_utf16_buffer(&mut buffer, a_len as usize);
+            b.as_rope_ref()
+                .write_to_utf16_buffer(&mut buffer, a_len as usize);
 
             return InlineWtf16::from_bytes(buffer, full_len).into();
         }
@@ -199,15 +200,11 @@ impl YSString {
             let mut buffer = [0; InlineAscii::CAPACITY];
 
             a.as_rope_ref().write_to_ascii_buffer(&mut buffer, 0);
-            b.as_rope_ref().write_to_ascii_buffer(&mut buffer, a_len as usize);
+            b.as_rope_ref()
+                .write_to_ascii_buffer(&mut buffer, a_len as usize);
 
             return InlineAscii::from_bytes(buffer, full_len).into();
         }
-
-
-
-
-
 
         RopeString::new(a, b).into()
     }
