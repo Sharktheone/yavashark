@@ -270,7 +270,7 @@ impl Math {
     /// https://262.ecma-international.org/#sec-math.ceil
     ///
     /// This function returns the smallest (closest to -∞) integral Number value that is not less than x. If x is already an integral Number, the result is x.
-    fn ceil(n: f64) -> f64 {
+    const fn ceil(n: f64) -> f64 {
         // 1. Let n be ? ToNumber(x).
 
         // 2. If n is not finite or n is either +0𝔽 or -0𝔽, return n.
@@ -353,7 +353,7 @@ impl Math {
     /// https://262.ecma-international.org/#sec-math.floor
     ///
     /// This function returns the greatest (closest to +∞) integral Number value that is not greater than x. If x is already an integral Number, the result is x.
-    fn floor(n: f64) -> f64 {
+    const fn floor(n: f64) -> f64 {
         // 1. Let n be ? ToNumber(x).
 
         // 2. If n is not finite or n is either +0𝔽 or -0𝔽, return n.
@@ -712,7 +712,7 @@ impl Math {
     /// https://262.ecma-international.org/#sec-math.trunc
     ///
     /// This function returns the integral part of the number x, removing any fractional digits. If x is already integral, the result is x.
-    fn trunc(n: f64) -> f64 {
+    const fn trunc(n: f64) -> f64 {
         // 1. Let n be ? ToNumber(x).
 
         // 2. If n is not finite or n is either +0𝔽 or -0𝔽, return n.
