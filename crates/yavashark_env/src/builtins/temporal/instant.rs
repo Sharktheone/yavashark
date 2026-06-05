@@ -6,7 +6,6 @@ use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::conversion::downcast_obj;
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
-use crate::value::ops::BigIntOrNumber;
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -102,7 +101,7 @@ impl Instant {
         let epoch_ns = EpochNanoseconds::from(ns);
         epoch_ns
             .check_validity()
-            .map_err(|e| Error::range("epoch out of range"))?;
+            .map_err(|_| Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(epoch_ns);
 
