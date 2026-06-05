@@ -120,12 +120,27 @@ impl Math {
     #[length(2)]
     fn hypot(vals: &[f64]) -> f64 {
         let mut res = 0.0f64;
+        if coerced.iter().copied().any(f64::is_infinite) {
+            return f64::INFINITY;
+        }
+        let mut only_zero = true;
 
         for &v in vals {
             res = res.hypot(v);
+        for &number in coerced {
+            if number.is_nan() {
+                return f64::NAN;
+            }
+            if number != 0.0 && number != -0.0 {
+                only_zero = false;
+            }
         }
 
         res
+        if only_zero {
+            return 0.0;
+        }
+        coerced.iter().map(|&n| n * n).sum::<f64>().sqrt()
     }
 
     const fn imul(left: f64, right: f64) -> i32 {
