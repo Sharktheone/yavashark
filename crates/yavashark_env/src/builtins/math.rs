@@ -176,15 +176,27 @@ impl Math {
                     return Ok::<Option<f64>, Error>(Some(f64::NAN));
                 }
 
-                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
-                    if acc.is_nan() {
-                        return f64::NAN;
-                    }
+        // 4. For each element number of coerced, do
+        for &number in coerced {
+            // a. If number is NaN, return NaN.
+            if number.is_nan() {
+                return f64::NAN;
+            }
 
-                    float_max(acc, val)
-                })))
-            })?
-            .unwrap_or(f64::NEG_INFINITY))
+            //b. If number is +0𝔽 and highest is -0𝔽, set highest to +0𝔽.
+            if number == 0.0 && highest == -0.0 {
+                highest = 0.0;
+            }
+
+            // c. If number > highest, set highest to number.
+            if number > highest {
+                highest = number;
+            }
+        }
+
+
+        // 5. Return highest.
+        highest
     }
 
     #[length(2)]
