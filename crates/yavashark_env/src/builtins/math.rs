@@ -209,6 +209,7 @@ impl Math {
                 if val.is_nan() {
                     return Ok::<Option<f64>, Error>(Some(f64::NAN));
                 }
+        let mut lowest = f64::INFINITY;
 
                 Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
                     if acc.is_nan() {
@@ -218,6 +219,18 @@ impl Math {
                 })))
             })?
             .unwrap_or(f64::INFINITY))
+        for &number in coerced {
+            if number.is_nan() {
+                return f64::NAN;
+            }
+            if number == -0.0 && lowest == 0.0 {
+                lowest = -0.0;
+            }
+            if number < lowest {
+                lowest = number;
+            }
+        }
+        lowest
     }
 
     fn pow(base: f64, exponent: f64) -> f64 {
