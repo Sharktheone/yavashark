@@ -749,23 +749,6 @@ impl Math {
     }
 }
 
-fn float_max(left: f64, right: f64) -> f64 {
-    #[allow(clippy::float_cmp)]
-    if left > right {
-        left
-    } else if right > left {
-        right
-    } else if left == right {
-        if left.is_sign_positive() && right.is_sign_negative() {
-            left
-        } else {
-            right
-        }
-    } else {
-        left + right
-    }
-}
-
 fn float_min(left: f64, right: f64) -> f64 {
     #[allow(clippy::float_cmp)]
     if left < right {
