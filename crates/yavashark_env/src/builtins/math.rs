@@ -565,7 +565,7 @@ impl Math {
             }
 
             //b. If number is -0𝔽 and lowest is +0𝔽, set lowest to -0𝔽.
-            if number == -0.0 && lowest == 0.0 {
+            if number == -0.0 && number.is_sign_negative() && lowest == 0.0 {
                 lowest = -0.0;
             }
 
