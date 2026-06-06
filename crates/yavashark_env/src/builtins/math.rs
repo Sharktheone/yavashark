@@ -543,6 +543,10 @@ impl Math {
         highest
     }
 
+    /// # 21.3.2.26 Math.min ( ...args )
+    /// https://262.ecma-international.org/#sec-math.min
+    ///
+    /// Given zero or more arguments, this function calls ToNumber on each of the arguments and returns the smallest of the resulting values.
     #[length(2)]
     fn min(coerced: &[f64]) -> f64 {
         // 1. Let coerced be a new empty List.
