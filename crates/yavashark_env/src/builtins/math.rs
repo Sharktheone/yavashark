@@ -528,7 +528,7 @@ impl Math {
             }
 
             //b. If number is +0𝔽 and highest is -0𝔽, set highest to +0𝔽.
-            if number == 0.0 && highest == -0.0 && highest.is_sign_negative() {
+            if number == 0.0 && number.is_sign_positive() && highest == -0.0 && highest.is_sign_negative() {
                 highest = 0.0;
             }
 
@@ -565,7 +565,7 @@ impl Math {
             }
 
             //b. If number is -0𝔽 and lowest is +0𝔽, set lowest to -0𝔽.
-            if number == -0.0 && number.is_sign_negative() && lowest == 0.0 {
+            if number == -0.0 && number.is_sign_negative() && lowest == 0.0 && lowest.is_sign_positive() {
                 lowest = -0.0;
             }
 
