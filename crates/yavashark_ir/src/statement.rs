@@ -134,3 +134,7 @@ pub struct Debugger;
 pub enum Pattern<'alloc> {
     A(&'alloc ()),
 }
+
+struct VarDecl<'alloc> {
+    a: &'alloc (),
+}
