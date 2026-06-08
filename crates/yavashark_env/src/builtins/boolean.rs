@@ -1,16 +1,15 @@
 use crate::utils::ProtoDefault;
 use crate::value::{Constructor, CustomName, Func, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
 
 #[object(name)]
 #[derive(Debug)]
 pub struct BooleanObj {
-    #[mutable]
-    #[primitive]
-    boolean: bool,
+    #[primitive(.get())]
+    boolean: Cell<bool>,
 }
 
 impl CustomName for BooleanObj {
@@ -26,8 +25,8 @@ impl ProtoDefault for BooleanObj {
                 object: MutObject::with_proto(
                     realm.intrinsics.clone_public().boolean.get(realm)?.clone(),
                 ),
-                boolean: false,
             }),
+            boolean: Cell::new(false),
         })
     }
 
@@ -35,8 +34,8 @@ impl ProtoDefault for BooleanObj {
         Self {
             inner: RefCell::new(MutableBooleanObj {
                 object: MutObject::null(),
-                boolean: false,
             }),
+            boolean: Cell::new(false),
         }
     }
 }
@@ -97,8 +96,8 @@ impl BooleanObj {
                 object: MutObject::with_proto(
                     realm.intrinsics.clone_public().boolean.get(realm)?.clone(),
                 ),
-                boolean,
             }),
+            boolean: Cell::new(boolean),
         }
         .into_object())
     }
@@ -114,9 +113,7 @@ impl BooleanObj {
 impl BooleanObj {
     #[prop("valueOf")]
     fn value_of(&self) -> bool {
-        let inner = self.inner.borrow();
-
-        inner.boolean
+        self.boolean.get()
     }
 
     #[prop("toString")]
