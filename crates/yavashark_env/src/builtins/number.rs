@@ -6,7 +6,7 @@ use crate::{
 };
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
 
@@ -115,9 +115,8 @@ fn format_exponential(x: f64, f: usize) -> YSString {
 #[object]
 #[derive(Debug)]
 pub struct NumberObj {
-    #[mutable]
-    #[primitive]
-    number: f64,
+    #[primitive(.get())]
+    number: Cell<f64>,
 }
 
 impl ProtoDefault for NumberObj {
@@ -127,8 +126,8 @@ impl ProtoDefault for NumberObj {
                 object: MutObject::with_proto(
                     realm.intrinsics.clone_public().number.get(realm)?.clone(),
                 ),
-                number: 0.0,
             }),
+            number: Cell::new(0.0),
         })
     }
 
@@ -136,8 +135,8 @@ impl ProtoDefault for NumberObj {
         Self {
             inner: RefCell::new(MutableNumberObj {
                 object: MutObject::null(),
-                number: 0.0,
             }),
+            number: Cell::new(0.0),
         }
     }
 }
@@ -306,8 +305,8 @@ impl NumberObj {
                 object: MutObject::with_proto(
                     realm.intrinsics.clone_public().number.get(realm)?.clone(),
                 ),
-                number: number.into(),
             }),
+            number: Cell::new(number.into()),
         };
 
         Ok(this.into_object())
@@ -549,14 +548,12 @@ impl NumberObj {
 
     #[prop("valueOf")]
     fn value_of(&self) -> f64 {
-        let inner = self.inner.borrow();
-
-        inner.number
+        self.number.get()
     }
 
     #[prop("toLocaleString")]
     fn to_locale_string(&self) -> Res<YSString> {
-        let num = self.inner.borrow().number;
+        let num = self.number.get();
 
         Self::fmt_string(num, None)
     }
