@@ -512,6 +512,14 @@ impl YSString {
         }
     }
 
+    pub fn new_inline(s: &str) -> Option<Self> {
+        if s.is_ascii() {
+            InlineString::try_from_string(s).map(Self::from_inline)
+        } else {
+            None
+        }
+    }
+
     /// Creates a string from a reference-counted string.
     #[must_use]
     pub fn from_rc(rc: Rc<str>) -> Self {
