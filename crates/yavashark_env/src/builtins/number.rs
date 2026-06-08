@@ -547,7 +547,7 @@ impl NumberObj {
     }
 
     #[prop("valueOf")]
-    fn value_of(&self) -> f64 {
+    const fn value_of(&self) -> f64 {
         self.number.get()
     }
 

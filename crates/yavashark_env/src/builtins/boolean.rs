@@ -112,7 +112,7 @@ impl BooleanObj {
 )]
 impl BooleanObj {
     #[prop("valueOf")]
-    fn value_of(&self) -> bool {
+   const fn value_of(&self) -> bool {
         self.boolean.get()
     }
 
