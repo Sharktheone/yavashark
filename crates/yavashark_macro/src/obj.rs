@@ -257,7 +257,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let primitive = if let Some(primitive) = item_args.primitive {
+    let primitive = if let Some((primitive, prim_get)) = item_args.primitive {
         let is_mutable = mutable_region.contains(&primitive);
 
         if is_mutable {
@@ -265,13 +265,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 fn primitive(&self, realm: &mut #realm) -> #res<::core::option::Option<#primitive_value>> {
                     let inner = self.inner.borrow();
 
-                    ::core::result::Result::Ok(::core::option::Option::Some(inner.#primitive.clone().into()))
+                    ::core::result::Result::Ok(::core::option::Option::Some(inner.#primitive #prim_get .clone().into()))
                 }
             }
         } else {
             quote! {
                 fn primitive(&self, realm: &mut #realm) -> #res<::core::option::Option<#primitive_value>> {
-                    ::core::result::Result::Ok(::core::option::Option::Some(self.#primitive.clone().into()))
+                    ::core::result::Result::Ok(::core::option::Option::Some(self.#primitive #prim_get .clone().into()))
                 }
             }
         }

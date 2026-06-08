@@ -1,3 +1,4 @@
+use proc_macro2::TokenStream;
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro2::Ident;
@@ -97,7 +98,7 @@ pub struct ItemArgs {
     #[allow(unused)]
     pub gc: Vec<GcItem>,
     pub mutable_region: Vec<Ident>,
-    pub primitive: Option<Ident>,
+    pub primitive: Option<(Ident, TokenStream)>,
 }
 
 impl ItemArgs {
@@ -188,7 +189,14 @@ impl ItemArgs {
                         return false;
                     };
 
-                    primitive = Some(ident); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
+                    let mut tokens = TokenStream::new();
+
+                    if let Ok(list) = attr.meta.require_list() {
+                        tokens = list.tokens.clone();
+                    }
+
+                    primitive = Some((ident, tokens)); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
+
 
                     return false;
                 }
