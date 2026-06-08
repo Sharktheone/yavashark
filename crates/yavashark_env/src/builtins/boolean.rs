@@ -117,9 +117,11 @@ impl BooleanObj {
     }
 
     #[prop("toString")]
-    fn to_js_string(&self) -> String {
-        let inner = self.inner.borrow();
-
-        inner.boolean.to_string()
+    fn to_js_string(&self) -> YSString {
+        if self.boolean.get() {
+            YSString::new_inline("true").unwrap_or("true".into())
+        } else {
+            YSString::new_inline("false").unwrap_or("false".into())
+        }
     }
 }
