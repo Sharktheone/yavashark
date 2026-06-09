@@ -19,6 +19,7 @@ use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr};
+use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::props;
 use yavashark_string::YSString;
 
@@ -58,6 +59,12 @@ impl ZonedDateTime {
             .to_big_int()
             .and_then(|n| n.to_i128())
             .ok_or_else(|| Error::ty("Invalid nanoseconds value"))?;
+
+        EpochNanoseconds(nanos)
+            .check_validity()
+            .map_err(|_| Error::range("Nanoseconds value out of range"))?;
+
+
 
         let date = if let Some(cal) = calendar {
             temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
