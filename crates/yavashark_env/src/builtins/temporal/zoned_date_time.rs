@@ -66,11 +66,10 @@ impl ZonedDateTime {
 
 
 
-        let date = if let Some(cal) = calendar {
-            temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
-        } else {
-            temporal_rs::ZonedDateTime::try_new_iso(nanos, tz)
-        }
+        let date = calendar.map_or_else(
+            || temporal_rs::ZonedDateTime::try_new_iso(nanos, tz),
+            |cal| temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
+        )
         .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
