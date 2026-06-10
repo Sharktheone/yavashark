@@ -1,7 +1,7 @@
-use proc_macro2::TokenStream;
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro2::Ident;
+use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::spanned::Spanned;
 use syn::{Error, FieldsNamed, Path};
@@ -196,7 +196,6 @@ impl ItemArgs {
                     }
 
                     primitive = Some((ident, tokens)); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
-
 
                     return false;
                 }

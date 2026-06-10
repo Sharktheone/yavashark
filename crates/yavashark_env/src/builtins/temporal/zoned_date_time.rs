@@ -18,8 +18,8 @@ use num_traits::ToPrimitive;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
-use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr};
 use temporal_rs::unix_time::EpochNanoseconds;
+use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr};
 use yavashark_macro::props;
 use yavashark_string::YSString;
 
@@ -64,13 +64,12 @@ impl ZonedDateTime {
             .check_validity()
             .map_err(|_| Error::range("Nanoseconds value out of range"))?;
 
-
-
-        let date = calendar.map_or_else(
-            || temporal_rs::ZonedDateTime::try_new_iso(nanos, tz),
-            |cal| temporal_rs::ZonedDateTime::try_new(nanos, tz, cal)
-        )
-        .map_err(Error::from_temporal)?;
+        let date = calendar
+            .map_or_else(
+                || temporal_rs::ZonedDateTime::try_new_iso(nanos, tz),
+                |cal| temporal_rs::ZonedDateTime::try_new(nanos, tz, cal),
+            )
+            .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm)?.into_object())
     }

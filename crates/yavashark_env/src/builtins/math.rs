@@ -95,7 +95,6 @@ impl Math {
     #[configurable]
     const TO_STRING_TAG: &'static str = "Math";
 
-
     /// # 21.3.2.1 Math.abs ( x )
     /// https://262.ecma-international.org/#sec-math.abs
     ///
@@ -197,10 +196,8 @@ impl Math {
     ///
     /// This function returns the inverse tangent of the quotient y / x of the arguments y and x, where the signs of y and x are used to determine the quadrant of the result. Note that it is intentional and traditional for the two-argument inverse tangent function that the argument named y be first and the argument named x be second. The result is expressed in radians and is in the inclusive interval from -π to +π.
     fn atan2(ny: f64, nx: f64) -> f64 {
-
         // 1. Let ny be ? ToNumber(y).
         // 2. Let nx be ? ToNumber(x).
-
 
         // If ny is NaN or nx is NaN, return NaN.
         // 4. If ny is +∞𝔽, then
@@ -252,7 +249,6 @@ impl Math {
         // 15. Return an implementation-approximated Number value representing r.
         ny.atan2(nx)
     }
-
 
     /// # 21.3.2.9 Math.cbrt ( x )
     /// https://262.ecma-international.org/#sec-math.cbrt
@@ -388,7 +384,6 @@ impl Math {
         half::f16::from_f64(n).to_f64()
     }
 
-
     /// # 21.3.2.19 Math.hypot ( ...args )
     /// https://262.ecma-international.org/#sec-math.hypot
     ///
@@ -399,7 +394,6 @@ impl Math {
         // 2. For each element arg of args, do
         //     a. Let n be ? ToNumber(arg).
         //     b. Append n to coerced.
-
 
         // 3. For each element number of coerced, do
         //     a. a. If number is either +∞𝔽 or -∞𝔽, return +∞𝔽.
@@ -490,7 +484,6 @@ impl Math {
         n.log10()
     }
 
-
     /// # 21.3.2.24 Math.log2 ( x )
     /// https://262.ecma-international.org/#sec-math.log2
     ///
@@ -528,7 +521,11 @@ impl Math {
             }
 
             //b. If number is +0𝔽 and highest is -0𝔽, set highest to +0𝔽.
-            if number == 0.0 && number.is_sign_positive() && highest == -0.0 && highest.is_sign_negative() {
+            if number == 0.0
+                && number.is_sign_positive()
+                && highest == -0.0
+                && highest.is_sign_negative()
+            {
                 highest = 0.0;
             }
 
@@ -537,7 +534,6 @@ impl Math {
                 highest = number;
             }
         }
-
 
         // 5. Return highest.
         highest
@@ -565,7 +561,11 @@ impl Math {
             }
 
             //b. If number is -0𝔽 and lowest is +0𝔽, set lowest to -0𝔽.
-            if number == -0.0 && number.is_sign_negative() && lowest == 0.0 && lowest.is_sign_positive() {
+            if number == -0.0
+                && number.is_sign_negative()
+                && lowest == 0.0
+                && lowest.is_sign_positive()
+            {
                 lowest = -0.0;
             }
 
@@ -577,7 +577,6 @@ impl Math {
 
         // 5. Return lowest.
         lowest
-
     }
 
     /// # 21.3.2.27 Math.pow ( base, exponent )
@@ -684,7 +683,6 @@ impl Math {
         n.sqrt()
     }
 
-
     /// # 21.3.2.34 Math.tan ( x )
     /// https://262.ecma-international.org/#sec-math.tan
     ///
@@ -725,7 +723,6 @@ impl Math {
         // 5. Return the integral Number nearest n in the direction of +0𝔽.
         n.trunc()
     }
-
 
     #[prop("sumPrecise")]
     fn sum_precise(iter: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<f64> {

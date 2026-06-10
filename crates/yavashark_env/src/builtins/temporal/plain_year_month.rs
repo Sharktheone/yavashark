@@ -41,8 +41,14 @@ impl PlainYearMonth {
     ) -> Res<ObjectHandle> {
         let calendar = calendar.unwrap_or_default();
 
-        let year_month = temporal_rs::PlainYearMonth::new_with_overflow(year, month, reference_day, calendar, Overflow::Reject)
-            .map_err(Error::from_temporal)?;
+        let year_month = temporal_rs::PlainYearMonth::new_with_overflow(
+            year,
+            month,
+            reference_day,
+            calendar,
+            Overflow::Reject,
+        )
+        .map_err(Error::from_temporal)?;
 
         Ok(Self::new(year_month, realm)?.into_object())
     }
