@@ -10,6 +10,7 @@ use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::Calendar;
 use temporal_rs::fields::CalendarFields;
+use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialYearMonth;
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -40,7 +41,7 @@ impl PlainYearMonth {
     ) -> Res<ObjectHandle> {
         let calendar = calendar.unwrap_or_default();
 
-        let year_month = temporal_rs::PlainYearMonth::new(year, month, reference_day, calendar)
+        let year_month = temporal_rs::PlainYearMonth::new_with_overflow(year, month, reference_day, calendar, Overflow::Reject)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(year_month, realm)?.into_object())
