@@ -672,6 +672,7 @@ pub fn value_to_zoned_date_time_fields(
 }
 
 #[data_object]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct OverflowOptions {
     pub overflow: Option<options::Overflow>,
 }
