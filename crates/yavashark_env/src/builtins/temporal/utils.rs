@@ -49,7 +49,7 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
             Some(RelativeTo::ZonedDateTime(zdt))
         }
         Value::String(str) => {
-            Some(RelativeTo::try_from_str(&*str.as_str_lossy()).map_err(Error::from_temporal)?)
+            Some(RelativeTo::try_from_str(&str.as_str_lossy()).map_err(Error::from_temporal)?)
         }
 
         _ => None,

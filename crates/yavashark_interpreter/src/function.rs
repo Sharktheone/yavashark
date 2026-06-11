@@ -129,11 +129,10 @@ impl JSFunction {
                 .try_borrow_mut()?
                 .object
                 .force_update_property_cb("name".into(), |v| {
-                    if let Some(v) = v {
-                        if !v.value.is_string() {
+                    if let Some(v) = v
+                        && !v.value.is_string() {
                             return None;
                         }
-                    }
 
                     Some(YSString::from_ref(n).into())
                 })?;
@@ -210,8 +209,8 @@ impl RawJSFunction {
 
         scope.declare_var("arguments".to_string(), args.into(), realm);
 
-        if let Some(block) = &self.block {
-            if let Err(e) = Interpreter::run_block_this(realm, block, scope, this) {
+        if let Some(block) = &self.block
+            && let Err(e) = Interpreter::run_block_this(realm, block, scope, this) {
                 return match e {
                     ControlFlow::Error(e) => Err(e),
                     ControlFlow::Return(v) => Ok(v),
@@ -224,7 +223,6 @@ impl RawJSFunction {
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
                 };
             }
-        }
 
         Ok(Value::Undefined)
     }

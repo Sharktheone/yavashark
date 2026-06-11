@@ -863,11 +863,10 @@ impl<'a> VFlagValidator<'a> {
                     "Character `{ch}` must be escaped inside Unicode sets with the /v flag"
                 ));
             }
-            '&' => {
-                if self.peek_char(1) == Some('&') {
+            '&'
+                if self.peek_char(1) == Some('&') => {
                     return Err("Set operator `&&` is missing a left-hand operand".to_string());
                 }
-            }
             '-' => {
                 if allow_caret {
                     return Err("'-' cannot begin a set element under the /v flag; escape it or rearrange the expression".to_string());

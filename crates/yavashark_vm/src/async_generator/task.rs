@@ -175,8 +175,8 @@ impl AsyncGeneratorTask {
                     self.generator.state.replace(Some(state));
                     self.generator.notify.notify_one();
 
-                    if let Value::Object(obj) = &val {
-                        if let Some(promise) = obj.downcast::<Promise>() {
+                    if let Value::Object(obj) = &val
+                        && let Some(promise) = obj.downcast::<Promise>() {
                             let promise = promise.try_map_refed(|promise| {
                                 let Some(notify) = promise.notify.notified() else {
                                     return Err(());
@@ -202,7 +202,6 @@ impl AsyncGeneratorTask {
                                 }
                             }
                         }
-                    }
 
                     let obj = Object::new(realm);
 

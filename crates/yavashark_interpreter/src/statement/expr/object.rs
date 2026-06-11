@@ -64,7 +64,7 @@ impl Interpreter {
                                 #[cfg(feature = "vm")]
                                     let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                                         &method.function,
-                                        name.clone().to_string(),
+                                        name.clone().clone(),
                                         fn_scope,
                                         realm,
                                     )?;
@@ -81,7 +81,7 @@ impl Interpreter {
                                 f
                             } else {
                                 JSFunction::new(
-                                    name.clone().to_string(),
+                                    name.clone().clone(),
                                     method.function.params.clone(),
                                     method.function.body.clone(),
                                     fn_scope,

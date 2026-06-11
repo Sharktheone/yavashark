@@ -121,7 +121,7 @@ impl Interpreter {
                     e
                 })
         } else {
-            Err(Error::ty_error(format!("{callee} is not a function",)))
+            Err(Error::ty_error(format!("{callee} is not a function")))
         }
     }
 

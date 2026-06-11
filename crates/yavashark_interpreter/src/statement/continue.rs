@@ -14,14 +14,13 @@ impl Interpreter {
             return Err(ControlFlow::error_syn("Illegal continue statement"));
         }
 
-        if let Some(label) = &stmt.label {
-            if !scope.has_label(label.sym.as_ref())? {
+        if let Some(label) = &stmt.label
+            && !scope.has_label(label.sym.as_ref())? {
                 return Err(ControlFlow::error_reference(format!(
                     "Label {} not found",
                     label.sym
                 )));
             }
-        }
         Err(ControlFlow::Continue(
             stmt.label.as_ref().map(|l| l.sym.to_string()),
         ))

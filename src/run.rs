@@ -356,7 +356,7 @@ fn run_code(
         }
 
         let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
-        let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
+        let mut vm = OwnedVM::new(bc.instructions, data, path).unwrap();
 
         match vm.run() {
             Ok(()) => {}

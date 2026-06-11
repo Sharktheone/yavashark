@@ -213,18 +213,16 @@ impl InternalLexer {
             },
             Separators::Punct(p) => {
                 match &p {
-                    PunctKind::Slash => {
-                        if self.consumed.last() == Some(&b'/') {
+                    PunctKind::Slash
+                        if self.consumed.last() == Some(&b'/') => {
                             self.consumed.pop();
                             self.skipper = Some(Skipper::single_no_save(b'\n'));
                         }
-                    }
-                    PunctKind::Asterisk => {
-                        if self.consumed.last() == Some(&b'/') {
+                    PunctKind::Asterisk
+                        if self.consumed.last() == Some(&b'/') => {
                             self.consumed.pop();
                             self.skipper = Some(Skipper::multiple_no_save(vec![b'*', b'/']));
                         }
-                    }
                     _ => {}
                 }
                 let span = self.current_span.replace();

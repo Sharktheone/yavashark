@@ -41,8 +41,8 @@ impl Interpreter {
             }
         }
 
-        if ret.is_none() {
-            if let Some(default_index) = default {
+        if ret.is_none()
+            && let Some(default_index) = default {
                 for case in stmt.cases.iter().skip(default_index) {
                     match Self::run_statements(realm, &case.cons, scope) {
                         Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
@@ -57,7 +57,6 @@ impl Interpreter {
                     }
                 }
             }
-        }
 
         Ok(ret.unwrap_or(Value::Undefined))
     }
