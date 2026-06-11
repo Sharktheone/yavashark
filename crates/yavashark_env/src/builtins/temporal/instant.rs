@@ -76,9 +76,6 @@ impl Instant {
     #[prop("fromEpochMilliseconds")]
     fn from_epoch_milliseconds(epoch: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let stamp = match epoch {
-            Value::BigInt(bigint) => temporal_rs::Instant::from_epoch_milliseconds(
-                bigint.to_i64().ok_or(Error::range("epoch out of range"))?,
-            ),
             Value::Number(num) => temporal_rs::Instant::from_epoch_milliseconds(*num as i64),
             _ => {
                 return Err(Error::ty(
