@@ -3102,7 +3102,7 @@ impl ArrayConstructor {
         let is_proto = if let Value::Object(o) = &test {
             o == realm.intrinsics.clone_public().array.get(realm)?
         } else {
-            return Ok(false)
+            return Ok(false);
         };
 
         if is_proto {

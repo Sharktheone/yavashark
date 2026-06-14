@@ -176,32 +176,33 @@ impl AsyncGeneratorTask {
                     self.generator.notify.notify_one();
 
                     if let Value::Object(obj) = &val
-                        && let Some(promise) = obj.downcast::<Promise>() {
-                            let promise = promise.try_map_refed(|promise| {
-                                let Some(notify) = promise.notify.notified() else {
-                                    return Err(());
-                                };
+                        && let Some(promise) = obj.downcast::<Promise>()
+                    {
+                        let promise = promise.try_map_refed(|promise| {
+                            let Some(notify) = promise.notify.notified() else {
+                                return Err(());
+                            };
 
-                                Ok((promise, notify, true))
-                            });
+                            Ok((promise, notify, true))
+                        });
 
-                            match promise {
-                                Ok(promise) => {
-                                    self.await_promise = Some(promise);
-                                    return Poll::Pending;
-                                }
-                                Err((promise, ())) => {
-                                    let value = promise
-                                        .inner
-                                        .borrow()
-                                        .value
-                                        .clone()
-                                        .unwrap_or(Value::Undefined);
+                        match promise {
+                            Ok(promise) => {
+                                self.await_promise = Some(promise);
+                                return Poll::Pending;
+                            }
+                            Err((promise, ())) => {
+                                let value = promise
+                                    .inner
+                                    .borrow()
+                                    .value
+                                    .clone()
+                                    .unwrap_or(Value::Undefined);
 
-                                    val = value;
-                                }
+                                val = value;
                             }
                         }
+                    }
 
                     let obj = Object::new(realm);
 

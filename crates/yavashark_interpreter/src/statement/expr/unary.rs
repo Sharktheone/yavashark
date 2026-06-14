@@ -36,12 +36,10 @@ impl Interpreter {
                         if scope.is_strict_mode()?
                             && let Some(desc) =
                                 obj.get_own_property_no_get_set(key.clone(), realm)?
-                                && !desc.attributes().is_configurable() {
-                                    return Err(Error::ty(
-                                        "Cannot delete non-configurable property",
-                                    )
-                                    .into());
-                                }
+                            && !desc.attributes().is_configurable()
+                        {
+                            return Err(Error::ty("Cannot delete non-configurable property").into());
+                        }
                         return Ok(obj.delete_property(key, realm)?.is_some().into());
                     }
                 }

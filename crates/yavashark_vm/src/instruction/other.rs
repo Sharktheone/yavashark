@@ -228,9 +228,10 @@ pub fn await_no_output(data: impl Data, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
 
     if let Value::Object(obj) = result
-        && obj.downcast::<Promise>().is_some() {
-            return Err(ControlFlow::Await(obj));
-        }
+        && obj.downcast::<Promise>().is_some()
+    {
+        return Err(ControlFlow::Await(obj));
+    }
 
     Ok(())
 }

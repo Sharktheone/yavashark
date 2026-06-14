@@ -1,15 +1,19 @@
 use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{PlainTime, value_to_plain_time};
-use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, overflow_options, overflow_options_opt, rounding_options, string_rounding_mode_opts, value_to_date_time_fields, value_to_date_time_fields_no_validate, OverflowOptions};
+use crate::builtins::temporal::utils::{
+    OverflowOptions, difference_settings, disambiguation_opt, display_calendar, overflow_options,
+    overflow_options_opt, rounding_options, string_rounding_mode_opts, value_to_date_time_fields,
+    value_to_date_time_fields_no_validate,
+};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
+use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialDateTime;
 use temporal_rs::{Calendar, Temporal, TimeZone};
-use temporal_rs::options::Overflow;
 use yavashark_macro::props;
 use yavashark_string::YSString;
 
@@ -79,7 +83,11 @@ impl PlainDateTime {
         Ok(Self::new(datetime, realm)?.into_object())
     }
 
-    pub fn from(info: Value, options: OverflowOptions, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn from(
+        info: Value,
+        options: OverflowOptions,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let date = value_to_plain_date_time(info, options.overflow.map(Into::into), realm)?;
 
         Ok(Self::new(date, realm)?.into_object())
@@ -413,7 +421,11 @@ impl PlainDateTime {
     }
 }
 
-pub fn value_to_plain_date_time(info: Value, overflow: Option<Overflow>, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
+pub fn value_to_plain_date_time(
+    info: Value,
+    overflow: Option<Overflow>,
+    realm: &mut Realm,
+) -> Res<temporal_rs::PlainDateTime> {
     if let Value::Object(obj) = &info {
         if let Some(date) = obj.downcast::<NativeObject<PlainDateTime>>() {
             return Ok(date.date.clone());

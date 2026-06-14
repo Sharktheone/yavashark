@@ -42,21 +42,22 @@ impl Interpreter {
         }
 
         if ret.is_none()
-            && let Some(default_index) = default {
-                for case in stmt.cases.iter().skip(default_index) {
-                    match Self::run_statements(realm, &case.cons, scope) {
-                        Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
-                        Err(e) => return Err(e),
-                        Ok(v) => {
-                            if v.is_nullish() {
-                                ret = ret.or(Some(v));
-                            } else {
-                                ret = Some(v);
-                            }
+            && let Some(default_index) = default
+        {
+            for case in stmt.cases.iter().skip(default_index) {
+                match Self::run_statements(realm, &case.cons, scope) {
+                    Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
+                    Err(e) => return Err(e),
+                    Ok(v) => {
+                        if v.is_nullish() {
+                            ret = ret.or(Some(v));
+                        } else {
+                            ret = Some(v);
                         }
                     }
                 }
             }
+        }
 
         Ok(ret.unwrap_or(Value::Undefined))
     }

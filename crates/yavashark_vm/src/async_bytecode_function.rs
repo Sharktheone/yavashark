@@ -69,9 +69,10 @@ impl AsyncBytecodeFunction {
                 .object
                 .force_update_property_cb("name".into(), |v| {
                     if let Some(v) = v
-                        && !v.value.is_string() {
-                            return None;
-                        }
+                        && !v.value.is_string()
+                    {
+                        return None;
+                    }
 
                     Some(YSString::from_ref(n).into())
                 })?;
