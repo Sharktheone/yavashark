@@ -49,7 +49,7 @@ impl PlainTime {
         nanosecond: u16,
     ) -> Res<ObjectHandle> {
         let time =
-            temporal_rs::PlainTime::new(hour, minute, second, millisecond, microsecond, nanosecond)
+            temporal_rs::PlainTime::new_with_overflow(hour, minute, second, millisecond, microsecond, nanosecond, Overflow::Reject)
                 .map_err(Error::from_temporal)?;
 
         Ok(Self::new(time, realm)?.into_object())
