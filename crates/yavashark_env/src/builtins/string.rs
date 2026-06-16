@@ -204,12 +204,12 @@ impl StringConstructor {
     }
 
     #[prop("fromCodePoint")]
-    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> YSString {
+    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<YSString> {
         let mut units = ThinVec::with_capacity(args.len());
 
         for arg in args {
             let Some(code_point) =
-                CodePoint::from_u32(arg.to_number(realm).unwrap_or_default() as u32)
+                CodePoint::from_u32(arg.to_number(realm)? as u32)
             else {
                 continue;
             };
@@ -223,7 +223,7 @@ impl StringConstructor {
             }
         }
 
-        YSString::new_owned_utf16(units)
+        Ok(YSString::new_owned_utf16(units))
     }
 
     #[length(1)]
