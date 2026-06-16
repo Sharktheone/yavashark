@@ -204,7 +204,7 @@ impl StringConstructor {
     }
 
     #[prop("fromCodePoint")]
-    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<YSString> {
+    fn from_code_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<YSString> {
         let mut units = ThinVec::with_capacity(args.len());
 
         for arg in args {
