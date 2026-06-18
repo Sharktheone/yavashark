@@ -53,11 +53,8 @@ impl PlainYearMonth {
         Ok(Self::new(year_month, realm)?.into_object())
     }
 
-    pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
-        let left = value_to_plain_year_month(left, None, realm)?;
-        let right = value_to_plain_year_month(right, None, realm)?;
-
-        Ok(left.compare_iso(&right) as i8)
+    pub fn compare(left: temporal_rs::PlainYearMonth, right: temporal_rs::PlainYearMonth) -> i8 {
+        left.compare_iso(&right) as i8
     }
 
     pub fn from(
@@ -92,15 +89,13 @@ impl PlainYearMonth {
         Ok(Self::new(year_month, realm)?.into_object())
     }
 
-    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
-        let other = value_to_plain_year_month(other, None, realm)?;
-
-        Ok(self.year_month == other)
+    pub fn equals(&self, other: temporal_rs::PlainYearMonth) -> bool {
+        self.year_month == other
     }
 
     pub fn since(
         &self,
-        other: Value,
+        other: temporal_rs::PlainYearMonth,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
@@ -108,8 +103,6 @@ impl PlainYearMonth {
             .map(|opts| difference_settings(opts, realm))
             .transpose()?
             .unwrap_or_default();
-
-        let other = value_to_plain_year_month(other, None, realm)?;
 
         let duration = self
             .year_month
@@ -189,7 +182,7 @@ impl PlainYearMonth {
 
     pub fn until(
         &self,
-        other: Value,
+        other: temporal_rs::PlainYearMonth,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
@@ -197,8 +190,6 @@ impl PlainYearMonth {
             .map(|opts| difference_settings(opts, realm))
             .transpose()?
             .unwrap_or_default();
-
-        let other = value_to_plain_year_month(other, None, realm)?;
 
         let duration = self
             .year_month
