@@ -7,6 +7,7 @@ mod plain_date_time;
 mod plain_time;
 mod relative_to;
 mod timezone;
+mod plain_year_month;
 
 use crate::builtins::value_to_zoned_date_time;
 use crate::conversion::FromValueOutput;
