@@ -3,19 +3,17 @@ use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
-use crate::builtins::temporal::utils::{
-    difference_settings, display_calendar, overflow_options, overflow_options_opt,
-    value_to_calendar_fields,
-};
+use crate::builtins::temporal::utils::{value_to_calendar_fields, DisplayCalendarOptions, OverflowOptions};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use temporal_rs::options::DisplayCalendar;
+use temporal_rs::options::DifferenceSettings;
 use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::props;
 use yavashark_string::YSString;
+use crate::builtins::temporal::utils::options::DisplayCalendar;
 
 #[derive(Debug)]
 pub struct PlainDate {
@@ -73,13 +71,10 @@ impl PlainDate {
     pub fn since(
         &self,
         other: temporal_rs::PlainDate,
-        opts: Option<ObjectHandle>,
+        opts: Option<DifferenceSettings>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let settings = opts
-            .map(|s| difference_settings(s, realm))
-            .transpose()?
-            .unwrap_or_default();
+        let settings = opts.unwrap_or_default();
 
         let dur = self
             .date
@@ -92,13 +87,10 @@ impl PlainDate {
     pub fn until(
         &self,
         other: temporal_rs::PlainDate,
-        opts: Option<ObjectHandle>,
+        opts: Option<DifferenceSettings>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let settings = opts
-            .map(|s| difference_settings(s, realm))
-            .transpose()?
-            .unwrap_or_default();
+        let settings = opts.unwrap_or_default();
 
         let dur = self
             .date
@@ -111,16 +103,14 @@ impl PlainDate {
     pub fn add(
         &self,
         duration: Value,
-        opts: Option<ObjectHandle>,
+        opts: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
 
         let opts = opts
-            .as_ref()
-            .map(|s| overflow_options(s, realm))
-            .transpose()?
-            .flatten();
+            .and_then(|opts| opts.overflow)
+            .map(Into::into);
 
         let date = self.date.add(&dur, opts).map_err(Error::from_temporal)?;
 
@@ -130,16 +120,14 @@ impl PlainDate {
     pub fn subtract(
         &self,
         duration: Value,
-        opts: Option<ObjectHandle>,
+        opts: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
 
         let opts = opts
-            .as_ref()
-            .map(|s| overflow_options(s, realm))
-            .transpose()?
-            .flatten();
+            .and_then(|opts| opts.overflow)
+            .map(Into::into);
 
         let date = self
             .date
@@ -323,8 +311,11 @@ impl PlainDate {
     }
 
     #[prop("toString")]
-    pub fn to_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
-        let calendar = display_calendar(opts.as_ref(), realm)?;
+    pub fn to_string(&self, calendar: Option<DisplayCalendarOptions>) -> Res<String> {
+        let calendar = calendar
+            .and_then(|opts| opts.calendar_name)
+            .map(Into::into)
+            .unwrap_or_default();
 
         Ok(self.date.to_ixdtf_string(calendar))
     }
@@ -337,10 +328,13 @@ impl PlainDate {
     pub fn with(
         &self,
         other: &ObjectHandle,
-        overflow: Option<ObjectHandle>,
+        overflow: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let overflow = overflow_options_opt(overflow.as_ref(), realm)?;
+        let overflow = overflow
+            .and_then(|opts| opts.overflow)
+            .map(Into::into);
+
         let (fields, _) = value_to_calendar_fields(other, false, true, realm)?;
 
         let date = self
@@ -359,7 +353,7 @@ impl PrettyObjectOverride for PlainDate {
         not: &mut Vec<usize>,
         realm: &mut Realm,
     ) -> Option<String> {
-        let mut s = self.date.to_ixdtf_string(DisplayCalendar::Auto);
+        let mut s = self.date.to_ixdtf_string(temporal_rs::options::DisplayCalendar::Auto);
 
         fmt_properties_to(obj, &mut s, not, realm);
 
