@@ -1,13 +1,13 @@
 use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options, overflow_options_opt, value_to_year_month_fields, OverflowOptions};
+use crate::builtins::temporal::utils::{overflow_options, value_to_year_month_fields, OverflowOptions};
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use temporal_rs::Calendar;
 use temporal_rs::fields::CalendarFields;
-use temporal_rs::options::Overflow;
+use temporal_rs::options::{DifferenceSettings, Overflow};
 use temporal_rs::partial::PartialYearMonth;
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -92,13 +92,10 @@ impl PlainYearMonth {
     pub fn since(
         &self,
         other: temporal_rs::PlainYearMonth,
-        opts: Option<ObjectHandle>,
+        opts: Option<DifferenceSettings>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let opts = opts
-            .map(|opts| difference_settings(opts, realm))
-            .transpose()?
-            .unwrap_or_default();
+        let opts = opts.unwrap_or_default();
 
         let duration = self
             .year_month
@@ -176,13 +173,10 @@ impl PlainYearMonth {
     pub fn until(
         &self,
         other: temporal_rs::PlainYearMonth,
-        opts: Option<ObjectHandle>,
+        opts: Option<DifferenceSettings>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let opts = opts
-            .map(|opts| difference_settings(opts, realm))
-            .transpose()?
-            .unwrap_or_default();
+        let opts = opts.unwrap_or_default();
 
         let duration = self
             .year_month
