@@ -1,9 +1,6 @@
 use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{
-    difference_settings, display_calendar, overflow_options, overflow_options_opt,
-    value_to_year_month_fields,
-};
+use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options, overflow_options_opt, value_to_year_month_fields, OverflowOptions};
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
@@ -14,6 +11,7 @@ use temporal_rs::options::Overflow;
 use temporal_rs::partial::PartialYearMonth;
 use yavashark_macro::props;
 use yavashark_string::YSString;
+use crate::builtins::temporal::utils::options::DisplayCalendar;
 
 #[derive(Debug)]
 pub struct PlainYearMonth {
@@ -69,14 +67,12 @@ impl PlainYearMonth {
     pub fn add(
         &self,
         duration: Value,
-        opts: Option<ObjectHandle>,
+        opts: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let opts = opts
-            .as_ref()
-            .map(|opts| overflow_options(opts, realm))
-            .transpose()?
-            .flatten()
+            .and_then(|opts| opts.overflow)
+            .map(Into::into)
             .unwrap_or_default();
 
         let duration = value_to_duration(duration, realm)?;
@@ -115,14 +111,12 @@ impl PlainYearMonth {
     pub fn subtract(
         &self,
         duration: Value,
-        opts: Option<ObjectHandle>,
+        opts: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let opts = opts
-            .as_ref()
-            .map(|opts| overflow_options(opts, realm))
-            .transpose()?
-            .flatten()
+            .and_then(|opts| opts.overflow)
+            .map(Into::into)
             .unwrap_or_default();
 
         let duration = value_to_duration(duration, realm)?;
@@ -167,12 +161,11 @@ impl PlainYearMonth {
     #[prop("toString")]
     pub fn to_js_string(
         &self,
-        opts: Option<ObjectHandle>,
-        #[realm] realm: &mut Realm,
+        opts: Option<DisplayCalendar>,
     ) -> Res<String> {
-        let calendar = display_calendar(opts.as_ref(), realm)?;
+        let calendar = opts.unwrap_or_default();
 
-        Ok(self.year_month.to_ixdtf_string(calendar))
+        Ok(self.year_month.to_ixdtf_string(calendar.into()))
     }
 
     #[prop("toLocaleString")]
@@ -208,14 +201,17 @@ impl PlainYearMonth {
     pub fn with(
         &self,
         other: &ObjectHandle,
-        options: &Option<ObjectHandle>,
+        options: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         if other.contains_key("timeZone".into(), realm)? {
             return Err(Error::ty("Invalid property 'timeZone' for PlainYearMonth"));
         }
 
-        let overflow = overflow_options_opt(options.as_ref(), realm)?;
+        let overflow = options
+            .and_then(|opts| opts.overflow)
+            .map(Into::into);
+
         let year_month = value_to_year_month_fields(other, realm)?;
 
         let year_month = self
