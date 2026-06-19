@@ -1,6 +1,6 @@
 use crate::builtins::temporal::duration::{Duration, value_to_duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{overflow_options, value_to_year_month_fields, OverflowOptions};
+use crate::builtins::temporal::utils::{overflow_options, value_to_year_month_fields, DisplayCalendarOptions, OverflowOptions};
 use crate::native_obj::NativeObject;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::{Obj, Object};
@@ -11,7 +11,6 @@ use temporal_rs::options::{DifferenceSettings, Overflow};
 use temporal_rs::partial::PartialYearMonth;
 use yavashark_macro::props;
 use yavashark_string::YSString;
-use crate::builtins::temporal::utils::options::DisplayCalendar;
 
 #[derive(Debug)]
 pub struct PlainYearMonth {
@@ -158,11 +157,14 @@ impl PlainYearMonth {
     #[prop("toString")]
     pub fn to_js_string(
         &self,
-        opts: Option<DisplayCalendar>,
+        opts: Option<DisplayCalendarOptions>,
     ) -> Res<String> {
-        let calendar = opts.unwrap_or_default();
+        let calendar = opts
+            .and_then(|opts| opts.calendar_name)
+            .map(Into::into)
+            .unwrap_or_default();
 
-        Ok(self.year_month.to_ixdtf_string(calendar.into()))
+        Ok(self.year_month.to_ixdtf_string(calendar))
     }
 
     #[prop("toLocaleString")]
