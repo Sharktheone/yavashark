@@ -1146,7 +1146,7 @@ impl StringObj {
         Ok(YSString::from_ref(str.trim_end()).into())
     }
 
-    #[prop("trimStart")]
+    #[prop("trimStart", "trimLeft")]
     pub fn trim_start(#[this] str: &Stringable) -> ValueResult {
         Ok(YSString::from_ref(str.trim_start()).into())
     }
