@@ -7,7 +7,7 @@ impl FromValueOutput for temporal_rs::options::DifferenceSettings {
 
     fn from_value_out(value: Value, realm: &mut crate::Realm) -> Res<Self> {
         let opts = value.to_object()?;
-        
+
         difference_settings(opts, realm)
     }
 }

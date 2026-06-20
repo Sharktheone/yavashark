@@ -88,7 +88,11 @@ impl PlainDateTime {
         options: Option<OverflowOptions>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let date = value_to_plain_date_time(info, options.and_then(|opts| opts.overflow).map(Into::into), realm)?;
+        let date = value_to_plain_date_time(
+            info,
+            options.and_then(|opts| opts.overflow).map(Into::into),
+            realm,
+        )?;
 
         Ok(Self::new(date, realm)?.into_object())
     }

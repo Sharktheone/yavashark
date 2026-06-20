@@ -208,9 +208,7 @@ impl StringConstructor {
         let mut units = ThinVec::with_capacity(args.len());
 
         for arg in args {
-            let Some(code_point) =
-                CodePoint::from_u32(arg.to_number(realm)? as u32)
-            else {
+            let Some(code_point) = CodePoint::from_u32(arg.to_number(realm)? as u32) else {
                 continue;
             };
 
