@@ -5,6 +5,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::{ToTokens, quote};
 use syn::spanned::Spanned;
 use syn::{Expr, ImplItem, Lit, Path};
+use syn::punctuated::Punctuated;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -115,7 +116,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     for item in &mut item.items {
         match item {
             ImplItem::Fn(func) => {
-                let mut js_name = None;
+                let mut js_name = Vec::new();
                 let mut this = None;
                 let mut realm = None;
                 let mut variadic = None;
@@ -173,7 +174,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        js_name = Some(attr.parse_args().unwrap());
+                        match attr.parse_args_with(
+                            Punctuated::<Expr, syn::Token![,]>::parse_terminated,
+                        ) {
+                            Ok(names) => js_name = names.into_iter().collect(),
+                            Err(e) => {
+                                error = Some(e);
+                            }
+                        }
                         return false;
                     }
 
@@ -223,14 +231,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             }
                         };
 
-                        if js_name.is_some() {
+                        if !js_name.is_empty() {
                             error = Some(syn::Error::new(
                                 attr.span(),
                                 "Cannot have both prop and get on the same function",
                             ));
                         }
 
-                        js_name = Some(name);
+                        js_name = vec![name];
                         return false;
                     }
 
@@ -256,14 +264,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             }
                         };
 
-                        if js_name.is_some() {
+                        if !js_name.is_empty() {
                             error = Some(syn::Error::new(
                                 attr.span(),
                                 "Cannot have both prop and get on the same function",
                             ));
                         }
 
-                        js_name = Some(name);
+                        js_name = vec![name];
                         return false;
                     }
 
@@ -373,47 +381,56 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 (
                     constant.init_tokens(&config),
                     constant.name,
-                    constant.js_name,
+                    constant.js_name.into_iter().collect(),
                     Type::Normal,
                     variable_fn,
                 )
             }
         };
 
-        let name = js_name
-            .map(|js_name| quote! {#js_name})
-            .unwrap_or_else(|| quote! {stringify!(#name)});
+        let names: Vec<TokenStream> = if js_name.is_empty() {
+            vec![quote! {stringify!(#name)}]
+        } else {
+            js_name.iter().map(|js_name| quote! {#js_name}).collect()
+        };
 
-        match ty {
-            Type::Normal => {
-                init.extend(quote! {
-                    {
-                        let prop = #prop_tokens;
+        let mut elem = quote! {
+            let prop = #prop_tokens;
+        };
 
-                        obj.define_property_attributes(#name.into(), #variable_fn, realm)?;
-                    }
-                });
-            }
-            Type::Get => {
-                init.extend(quote! {
-                    {
-                        let prop = #prop_tokens;
-
-                        obj.define_getter(#name.into(), prop.into(), realm)?;
-                    }
-                });
-            }
-
-            Type::Set => {
-                init.extend(quote! {
-                    {
-                        let prop = #prop_tokens;
-
-                        obj.define_setter(#name.into(), prop.into(), realm)?;
-                    }
-                });
-            }
+        if ty == Type::Normal {
+            elem.extend(quote! {
+                let prop = #variable_fn;
+            });
         }
+
+        for (i, name) in names.iter().enumerate() {
+            let clone = if i == names.len() - 1 {
+                quote! {}
+            } else {
+                quote! { .clone() }
+            };
+
+            let tokens = match ty {
+                Type::Normal => quote! {
+                    obj.define_property_attributes(#name.into(), prop #clone, realm)?;
+                },
+                Type::Get => quote! {
+                    obj.define_getter(#name.into(), prop #clone.into(), realm)?;
+                },
+                Type::Set => quote! {
+                    obj.define_setter(#name.into(), prop #clone.into(), realm)?;
+                },
+            };
+
+            elem.extend(tokens);
+        }
+
+        init.extend(quote! {
+            {
+                #elem
+            }
+        });
     }
 
     let (constructor, proto_define) = if let Some(constructor) = constructor {
@@ -554,7 +571,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: Option<Expr>,
+    js_name: Vec<Expr>,
     args: Vec<syn::Type>,
     length: Option<usize>,
     this: Option<usize>,
@@ -659,7 +676,7 @@ impl Method {
 
         let name = self
             .js_name
-            .clone()
+            .first()
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
