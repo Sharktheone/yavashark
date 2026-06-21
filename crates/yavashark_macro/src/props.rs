@@ -3,9 +3,9 @@ use crate::deref_type;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{ToTokens, quote};
+use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{Expr, ImplItem, Lit, Path};
-use syn::punctuated::Punctuated;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -174,9 +174,9 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        match attr.parse_args_with(
-                            Punctuated::<Expr, syn::Token![,]>::parse_terminated,
-                        ) {
+                        match attr
+                            .parse_args_with(Punctuated::<Expr, syn::Token![,]>::parse_terminated)
+                        {
                             Ok(names) => js_name = names.into_iter().collect(),
                             Err(e) => {
                                 error = Some(e);
