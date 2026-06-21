@@ -20,9 +20,7 @@ pub struct YSString {
 
 impl Debug for YSString {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let inner = unsafe { &*self.inner.get() };
-
-        match inner {
+        match self.inner() {
             Inner::Heap(heap) => heap.fmt(f),
             Inner::InlineAscii(inline) => inline.fmt(f),
             Inner::InlineWtf16(inline) => inline.fmt(f),
@@ -72,9 +70,7 @@ impl Default for YSString {
 
 impl Clone for YSString {
     fn clone(&self) -> Self {
-        let inner = unsafe { &*self.inner.get() };
-
-        match inner {
+        match self.inner() {
             Inner::Heap(heap) => heap.clone().into(),
             Inner::InlineAscii(inline) => (*inline).into(),
             Inner::InlineWtf16(inline) => (*inline).into(),
@@ -92,6 +88,10 @@ impl YSString {
         Self {
             inner: UnsafeCell::new(inner),
         }
+    }
+
+    fn inner(&self) -> &Inner {
+        unsafe { &*self.inner.get() }
     }
 
     pub fn from_str(s: &str) -> Self {
@@ -115,9 +115,7 @@ impl YSString {
     }
 
     pub fn get_type(&self) -> Type {
-        let inner = unsafe { &*self.inner.get() };
-
-        match inner {
+        match self.inner() {
             Inner::Heap(heap) => heap.get_type(),
             Inner::InlineAscii(_) => Type::Ascii,
             Inner::InlineWtf16(_) => Type::Wtf16,
@@ -126,9 +124,7 @@ impl YSString {
     }
 
     pub fn len(&self) -> u32 {
-        let inner = unsafe { &*self.inner.get() };
-
-        match inner {
+        match self.inner() {
             Inner::Heap(heap) => heap.len(),
             Inner::InlineAscii(inline) => inline.len(),
             Inner::InlineWtf16(inline) => inline.len(),
