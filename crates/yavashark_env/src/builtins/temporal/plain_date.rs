@@ -3,7 +3,6 @@ use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
-use crate::builtins::temporal::utils::options::DisplayCalendar;
 use crate::builtins::temporal::utils::{
     DisplayCalendarOptions, OverflowOptions, value_to_calendar_fields,
 };
