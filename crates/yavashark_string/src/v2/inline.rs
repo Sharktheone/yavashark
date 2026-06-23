@@ -44,7 +44,7 @@ impl InlineAscii {
         })
     }
 
-    pub fn len(&self) -> u32 {
+    pub const fn len(&self) -> u32 {
         self.len.to_u32()
     }
 
@@ -111,7 +111,7 @@ impl InlineWtf16 {
         })
     }
 
-    pub fn len(&self) -> u32 {
+    pub const fn len(&self) -> u32 {
         self.len.to_u32()
     }
 
@@ -179,7 +179,7 @@ pub enum InlineLenWtf {
 }
 
 impl InlineLen {
-    pub fn from_u32(len: u32) -> Option<Self> {
+    pub const fn from_u32(len: u32) -> Option<Self> {
         match len {
             0 => Some(Self::Empty),
             1 => Some(Self::Len1),
@@ -209,13 +209,13 @@ impl InlineLen {
         }
     }
 
-    pub fn to_u32(self) -> u32 {
+    pub const fn to_u32(self) -> u32 {
         self as u32
     }
 }
 
 impl InlineLenWtf {
-    pub fn from_u32(len: u32) -> Option<Self> {
+    pub const fn from_u32(len: u32) -> Option<Self> {
         match len {
             0 => Some(Self::Empty),
             1 => Some(Self::Len1),
@@ -233,7 +233,7 @@ impl InlineLenWtf {
         }
     }
 
-    pub fn to_u32(self) -> u32 {
+    pub const fn to_u32(self) -> u32 {
         self as u32
     }
 }

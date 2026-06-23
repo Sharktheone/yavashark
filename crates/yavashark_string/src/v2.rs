@@ -74,7 +74,7 @@ impl Clone for YSString {
             Inner::Heap(heap) => heap.clone().into(),
             Inner::InlineAscii(inline) => (*inline).into(),
             Inner::InlineWtf16(inline) => (*inline).into(),
-            Inner::Rope(rope) => rope.clone().into(),
+            Inner::Rope(rope) => (*rope).into(),
         }
     }
 }
@@ -230,7 +230,7 @@ impl RopableStringRef<'_> {
         match self {
             RopableStringRef::Ascii(s) => {
                 for (i, byte) in s.as_bytes().iter().enumerate() {
-                    buffer[offset + i] = *byte as u16;
+                    buffer[offset + i] = u16::from(*byte);
                 }
             }
             RopableStringRef::Wtf16(units) => {

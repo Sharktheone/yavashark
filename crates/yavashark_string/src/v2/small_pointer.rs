@@ -64,7 +64,7 @@ pub struct GCAllocator {
 }
 
 impl GCAllocator {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { gcs: Vec::new() }
     }
 

@@ -248,7 +248,7 @@ impl<'a> RopeStringRef<'a> {
             match elem {
                 StringRef::Ascii(s) => {
                     for (i, &b) in s.as_bytes().iter().enumerate() {
-                        buffer[offset + i] = b as u16;
+                        buffer[offset + i] = u16::from(b);
                     }
 
                     offset += s.len();
