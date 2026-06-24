@@ -102,7 +102,7 @@ impl HeapString {
         }
     }
 
-    pub fn get_type(&self) -> Type {
+    pub const fn get_type(&self) -> Type {
         self.ty
     }
 
@@ -220,7 +220,7 @@ impl HeapString {
         }
     }
 
-    unsafe fn copy(&self) -> Self {
+    const unsafe fn copy(&self) -> Self {
         Self {
             ptr: self.ptr,
             len: self.len,
