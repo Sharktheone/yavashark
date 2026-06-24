@@ -653,7 +653,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
     if let Some(time_zone) = obj.extract_opt::<TimeZone>("timeZone", realm)? {
         partial.timezone = Some(time_zone);
     } else {
-        return Err(Error::ty("Expected timeZone to be defined"));
+        // return Err(Error::ty("Expected timeZone to be defined"));
     }
 
     Ok(partial)
