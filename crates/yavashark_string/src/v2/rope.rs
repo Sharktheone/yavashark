@@ -86,6 +86,7 @@ impl RopeString {
 
             let b = (*self.b).clone();
 
+            #[allow(clippy::expect_used)]
             return Err(b.slice(start, end).expect("can't ever happen"));
         }
 
@@ -97,6 +98,7 @@ impl RopeString {
 
             let a = (*self.a).clone();
 
+            #[allow(clippy::expect_used)]
             return Err(a.slice(start, end).expect("can't ever happen"));
         }
 
