@@ -957,6 +957,7 @@ impl YSString {
                 if let InnerString::OwnedUtf16(v) = inner {
                     CodeUnits::Utf16(v.iter().copied())
                 } else {
+                    #[allow(clippy::iter_on_empty_collections)]
                     CodeUnits::Utf16([].iter().copied()) // Unreachable
                 }
             }
