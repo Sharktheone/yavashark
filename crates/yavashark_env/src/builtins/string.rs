@@ -736,18 +736,18 @@ impl StringObj {
         let string = this.to_string();
         // 4. Let searchString be ? ToString(searchValue).
         let search_str = if search.is_undefined() {
-            "undefined".to_string()
+            "undefined".into()
         } else {
-            search.to_string(realm)?.to_string()
+            search.to_string(realm)?
         };
         // 5. Let functionalReplace be IsCallable(replaceValue).
         let functional_replace = replace.is_callable();
         // 6. If functionalReplace is false, then
-        let replace_str = if !functional_replace {
+        let replace_str = if functional_replace {
+            String::new()
+        } else {
             // a. Set replaceValue to ? ToString(replaceValue).
             replace.to_string(realm)?.to_string()
-        } else {
-            String::new()
         };
         // 7-15. Find first occurrence and replace
         if let Some(pos) = string.find(&search_str) {
