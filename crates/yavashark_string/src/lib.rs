@@ -456,7 +456,7 @@ impl YSString {
     #[must_use]
     pub fn new_static(s: &'static str) -> Self {
         if s.is_ascii() {
-            if let Some(str) InlineString::try_from_string(s).map(Self::from_inline) {
+            if let Some(str) = InlineString::try_from_string(s).map(Self::from_inline) {
                 return str;
             }
 
