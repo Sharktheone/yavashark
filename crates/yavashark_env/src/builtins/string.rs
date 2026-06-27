@@ -82,7 +82,7 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str(&*inner.string.as_str_lossy(), index)
+            let chr = Self::get_single_str(&inner.string.as_str_lossy(), index)
                 .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
@@ -101,13 +101,33 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str(&*inner.string.as_str_lossy(), index)
+            let chr = Self::get_single_str(&inner.string.as_str_lossy(), index)
                 .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
 
         self.get_wrapped_object().get_own_property(name, realm)
+    }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(n) = name {
+            let inner = self.inner.borrow();
+            if n < inner.string.len() {
+                return Ok(true);
+            }
+        }
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(n) = name {
+            let inner = self.inner.borrow();
+            if n < inner.string.len() {
+                return Ok(true);
+            }
+        }
+        self.get_wrapped_object().contains_key(name, realm)
     }
 
     fn get_array_or_done(
@@ -126,26 +146,6 @@ impl crate::value::ObjectImpl for StringObj {
         let value = c.to_string().into();
 
         Ok((true, Some(value)))
-    }
-
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if let InternalPropertyKey::Index(n) = name {
-            let inner = self.inner.borrow();
-            if n < inner.string.len() {
-                return Ok(true);
-            }
-        }
-        self.get_wrapped_object().contains_key(name, realm)
-    }
-
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if let InternalPropertyKey::Index(n) = name {
-            let inner = self.inner.borrow();
-            if n < inner.string.len() {
-                return Ok(true);
-            }
-        }
-        self.get_wrapped_object().contains_own_key(name, realm)
     }
 
     fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
@@ -169,10 +169,10 @@ impl CustomName for StringConstructor {
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
-                object: MutObject::with_proto(func.clone()),
+                object: MutObject::with_proto(func),
             }),
         };
 
@@ -263,7 +263,7 @@ impl StringConstructor {
             //b. Let nextLiteral be ? ToString(nextLiteralVal).
             let next_literal = next_literal_val.to_string(realm)?;
             // c. Set R to the string-concatenation of R and nextLiteral.
-            r.push_str(&*next_literal.as_str_lossy());
+            r.push_str(&next_literal.as_str_lossy());
 
             //d. If nextIndex + 1 = literalCount, return R.
             if next_index + 1 == literal_count {
@@ -279,7 +279,7 @@ impl StringConstructor {
                 let next_sub = next_sub_val.to_string(realm)?;
 
                 //iii. Set R to the string-concatenation of R and nextSub.
-                r.push_str(&*next_sub.as_str_lossy());
+                r.push_str(&next_sub.as_str_lossy());
             }
 
             //f. Set nextIndex to nextIndex + 1.
@@ -400,7 +400,7 @@ impl StringObj {
     }
 
     pub fn anchor(#[this] string: &Stringable, name: &Stringable) -> ValueResult {
-        Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), string,).into())
+        Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), string).into())
     }
 
     pub fn at(#[this] str: &Stringable, index: isize) -> Value {
@@ -449,7 +449,7 @@ impl StringObj {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         for arg in args {
-            string.push_str(&*arg.to_string(realm)?.as_str_lossy());
+            string.push_str(&arg.to_string(realm)?.as_str_lossy());
         }
 
         Ok(string.into())
@@ -483,12 +483,12 @@ impl StringObj {
 
     #[prop("fontcolor")]
     pub fn font_color(#[this] str: &Stringable, color: &Stringable) -> ValueResult {
-        Ok(format!("<font color=\"{color}\">{str}</font>",).into())
+        Ok(format!("<font color=\"{color}\">{str}</font>").into())
     }
 
     #[prop("fontsize")]
     pub fn font_size(#[this] str: &Stringable, size: &Stringable) -> ValueResult {
-        Ok(format!("<font size=\"{size}\">{str}</font>",).into())
+        Ok(format!("<font size=\"{size}\">{str}</font>").into())
     }
 
     #[prop("includes")]
@@ -565,7 +565,7 @@ impl StringObj {
 
     #[prop("localeCompare")]
     pub fn locale_compare(#[this] this: &Stringable, other: &str) -> isize {
-        (&***this).cmp(other) as isize
+        (***this).cmp(other) as isize
     }
 
     #[prop("match")]
