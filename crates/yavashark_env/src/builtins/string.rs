@@ -760,7 +760,7 @@ impl StringObj {
                 let result = replace.call(
                     realm,
                     vec![
-                        search_str.clone().into(),
+                        search_str.into(),
                         (pos as f64).into(),
                         string.clone().into(),
                     ],
