@@ -13,6 +13,7 @@ use crate::{
 use std::cell::{Cell, RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
+use egui::TextBuffer;
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::{CodePoint, ThinVec, ToYSString, YSString};
@@ -750,7 +751,7 @@ impl StringObj {
             replace.to_string(realm)?.to_string()
         };
         // 7-15. Find first occurrence and replace
-        if let Some(pos) = string.find(&search_str) {
+        if let Some(pos) = string.find(&*search_str.as_str_lossy()) {
             let before = &string[..pos];
             let after = &string[pos + search_str.len()..];
 
