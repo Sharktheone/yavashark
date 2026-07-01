@@ -688,9 +688,16 @@ impl StringObj {
 
         let pad_len = target_length.saturating_sub(str.len());
 
-        let pad = pad_string.repeat(pad_len);
 
-        Ok(format!("{str}{pad}").into())
+        let mut buffer = String::with_capacity(str.len() + pad_len * pad_string.len());
+
+        buffer.push_str(str);
+
+        for _ in 0..pad_len {
+            buffer.push_str(pad_string);
+        }
+
+        Ok(buffer.into())
     }
 
     #[prop("padStart")]
