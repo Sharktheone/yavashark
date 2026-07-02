@@ -682,7 +682,7 @@ impl StringObj {
     pub fn pad_end(
         #[this] str: &Stringable,
         target_length: usize,
-        pad_string: &Option<String>,
+        pad_string: &Option<YSString>,
     ) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
@@ -704,7 +704,7 @@ impl StringObj {
     pub fn pad_start(
         #[this] str: &Stringable,
         target_length: usize,
-        pad_string: &Option<String>,
+        pad_string: &Option<YSString>,
     ) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
