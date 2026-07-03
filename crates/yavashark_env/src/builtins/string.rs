@@ -686,16 +686,21 @@ impl StringObj {
     ) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
-        let pad_len = target_length.saturating_sub(str.len());
-
-
-        let mut buffer = String::with_capacity(str.len() + pad_len * pad_string.len());
+        let mut buffer = String::with_capacity(target_length.max(str.len()));
 
         buffer.push_str(str);
 
-        for _ in 0..pad_len {
-            buffer.push_str(pad_string);
+        while buffer.len() < target_length {
+            let remaining = target_length - buffer.len();
+            let pad_to_add = if remaining < pad_string.len() {
+                &pad_string[..remaining]
+            } else {
+                pad_string
+            };
+
+            buffer.push_str(pad_to_add);
         }
+
 
         Ok(buffer.into())
     }
@@ -711,6 +716,8 @@ impl StringObj {
         let pad_len = target_length.saturating_sub(str.len());
 
         let pad = pad_string.repeat(pad_len);
+
+
 
         Ok(format!("{pad}{str}").into())
     }
