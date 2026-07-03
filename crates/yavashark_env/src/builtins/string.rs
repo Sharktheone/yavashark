@@ -684,6 +684,7 @@ impl StringObj {
         target_length: usize,
         pad_string: &Option<YSString>,
     ) -> ValueResult {
+        let pad_string = pad_string.as_ref().map(|s| s.as_str_lossy());
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let mut buffer = String::with_capacity(target_length.max(str.len()));
@@ -711,6 +712,7 @@ impl StringObj {
         target_length: usize,
         pad_string: &Option<YSString>,
     ) -> ValueResult {
+        let pad_string = pad_string.as_ref().map(|s| s.as_str_lossy());
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let pad_len = target_length.saturating_sub(str.len());
