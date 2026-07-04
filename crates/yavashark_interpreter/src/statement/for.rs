@@ -1,5 +1,5 @@
 use crate::Interpreter;
-use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use swc_ecma_ast::{ForStmt, VarDeclKind, VarDeclOrExpr};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
@@ -8,6 +8,12 @@ impl Interpreter {
         let label = scope.last_label()?;
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_loop()?;
+
+        let per_iter_scope = matches!(
+            &stmt.init,
+            Some(VarDeclOrExpr::VarDecl(v))
+                if matches!(v.kind, VarDeclKind::Let | VarDeclKind::Const)
+        );
 
         if let Some(init) = &stmt.init {
             match init {
@@ -21,7 +27,13 @@ impl Interpreter {
         }
 
         loop {
-            let scope = &mut Scope::with_parent(scope)?;
+            let mut iter_scope;
+            let scope: &mut Scope = if per_iter_scope {
+                iter_scope = Scope::with_parent(scope)?;
+                &mut iter_scope
+            } else {
+                scope
+            };
 
             if let Some(test) = &stmt.test {
                 let value = Self::run_expr(realm, test, stmt.span, scope)?;
