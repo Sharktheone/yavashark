@@ -1519,6 +1519,14 @@ impl PartialEq<str> for YSString {
     }
 }
 
+
+impl PartialEq<&str> for YSString {
+    fn eq(&self, other: &&str) -> bool {
+        // Compare by code units
+        self.code_units().eq(other.encode_utf16())
+    }
+}
+
 impl Eq for YSString {}
 
 impl PartialOrd for YSString {
