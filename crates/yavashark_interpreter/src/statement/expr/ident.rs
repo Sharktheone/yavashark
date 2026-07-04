@@ -5,8 +5,8 @@ use yavashark_env::{ControlFlow, Realm, RuntimeResult};
 
 impl Interpreter {
     pub fn run_ident(realm: &mut Realm, stmt: &Ident, scope: &mut Scope) -> RuntimeResult {
-        let ident = stmt.sym.to_string();
-        let value = scope.resolve(&ident, realm)?;
+        let ident = stmt.sym.as_str();
+        let value = scope.resolve(ident, realm)?;
         value.map_or_else(
             || {
                 Err(ControlFlow::error_reference(format!(
