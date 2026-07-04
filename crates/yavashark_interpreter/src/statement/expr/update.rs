@@ -37,15 +37,15 @@ impl Interpreter {
 
         match &*stmt.arg {
             Expr::Ident(i) => {
-                let name = i.sym.to_string();
+                let name = i.sym.as_str();
                 let value = scope
-                    .resolve(&name, realm)?
+                    .resolve(name, realm)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(value, stmt.op, realm)?;
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
-                scope.update(&name, up.0, realm)?;
+                scope.update(name, up.0, realm)?;
 
                 Ok(ret)
             }
