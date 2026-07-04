@@ -265,15 +265,15 @@ impl Interpreter {
         match target {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
-                    let name = i.sym.to_string();
+                    let name = i.sym.as_str();
 
                     let left = scope
-                        .resolve(&name, realm)?
+                        .resolve(name, realm)?
                         .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
 
                     let value = Self::run_assign_op(op, left, right, realm)?;
 
-                    scope.update(&name, value.copy(), realm)?;
+                    scope.update(name, value.copy(), realm)?;
 
                     Ok(value)
                 }
