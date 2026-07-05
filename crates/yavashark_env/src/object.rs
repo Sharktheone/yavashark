@@ -1,5 +1,5 @@
 use crate::realm::Realm;
-use crate::value::property_key::{InternalPropertyKey, PropertyKey};
+use crate::value::property_key::{BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 use crate::value::{
     Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property,
     PropertyDescriptor,
@@ -840,11 +840,18 @@ impl MutObj for MutObject {
             //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
 
-        if let Some(prop) = self
-            .properties
-            .get::<PropertyKey>(&name.clone().into())
-            .and_then(|idx| self.values.get(*idx).map(ObjectProperty::property))
-        {
+        let idx = match &name {
+            InternalPropertyKey::String(s) => match s.as_str() {
+                Some(key) => self.properties.get(&BorrowedPropertyKey::String(key)),
+                None => self.properties.get::<PropertyKey>(&name.clone().into()),
+            },
+            InternalPropertyKey::Symbol(s) => {
+                self.properties.get(&BorrowedPropertyKey::Symbol(s))
+            }
+            InternalPropertyKey::Index(_) => self.properties.get::<PropertyKey>(&name.clone().into()),
+        };
+
+        if let Some(prop) = idx.and_then(|idx| self.values.get(*idx).map(ObjectProperty::property)) {
             return Ok(Some(prop));
         }
 
