@@ -9,10 +9,10 @@ impl Interpreter {
 
         let last_loop = scope.last_label()?;
 
-        loop {
-            let scope = &mut Scope::with_parent(scope)?;
-            scope.state_set_loop();
+        let scope = &mut Scope::with_parent(scope)?;
+        scope.state_set_loop();
 
+        loop {
             result = match Self::run_statement(realm, &stmt.body, scope) {
                 Ok(v) => v,
                 Err(c) => match c {
