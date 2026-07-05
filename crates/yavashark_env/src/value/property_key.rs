@@ -68,7 +68,7 @@ impl Hash for BorrowedPropertyKey<'_> {
 impl Equivalent<PropertyKey> for BorrowedPropertyKey<'_> {
     fn equivalent(&self, other: &PropertyKey) -> bool {
         match (self, other) {
-            (Self::String(s), PropertyKey::String(o)) => o.as_str().is_some_and(|o| *s == o),
+            (Self::String(s), PropertyKey::String(o)) => *o == **s,
             (Self::Symbol(s), PropertyKey::Symbol(o)) => *s == o,
             _ => false,
         }
@@ -115,9 +115,7 @@ impl Hash for BorrowedInternalPropertyKey<'_> {
 impl Equivalent<InternalPropertyKey> for BorrowedInternalPropertyKey<'_> {
     fn equivalent(&self, other: &InternalPropertyKey) -> bool {
         match (self, other) {
-            (Self::String(s), InternalPropertyKey::String(o)) => {
-                o.as_str().is_some_and(|o| *s == o)
-            }
+            (Self::String(s), InternalPropertyKey::String(o)) => *o == **s,
             (Self::Symbol(s), InternalPropertyKey::Symbol(o)) => *s == o,
             (Self::Index(i), InternalPropertyKey::Index(o)) => *i == *o,
             _ => false,
