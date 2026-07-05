@@ -736,12 +736,9 @@ impl Value {
     ) -> Result<Self, Error> {
         let name = name.into_property_key(realm)?;
         match self {
-            Self::Object(o) => {
-                o.resolve_property(name.clone(), realm)?
-                    .ok_or(Error::reference_error(format!(
-                        "{name} does not exist on object"
-                    )))
-            }
+            Self::Object(o) => o.resolve_property(name.clone(), realm)?.ok_or_else(|| {
+                Error::reference_error(format!("{name} does not exist on object"))
+            }),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
