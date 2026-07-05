@@ -8,10 +8,10 @@ impl Interpreter {
     pub fn run_while(realm: &mut Realm, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
         let label = scope.last_label()?;
 
-        loop {
-            let scope = &mut Scope::with_parent(scope)?;
-            scope.state_set_loop()?;
+        let scope = &mut Scope::with_parent(scope)?;
+        scope.state_set_loop()?;
 
+        loop {
             let cond = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
 
             if !cond.is_truthy() {
