@@ -110,6 +110,10 @@ pub fn create_class(
                 let raw_fn = RawJSFunction {
                     name: RefCell::new("constructor".into()),
                     params,
+                    needs_arguments: constructor
+                        .body
+                        .as_ref()
+                        .is_some_and(|block| block_needs_arguments(block)),
                     block: constructor.body.clone(),
                     scope: scope.clone(),
                     is_strict,

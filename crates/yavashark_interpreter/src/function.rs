@@ -3,7 +3,7 @@ use log::info;
 use std::any::Any;
 use std::cell::RefCell;
 use std::iter;
-use swc_ecma_ast::{BlockStmt, Param, Pat};
+use swc_ecma_ast::{BlockStmt, Callee, Expr, MemberProp, Param, Pat, Stmt};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Arguments;
 use yavashark_env::optimizer::FunctionCode;
@@ -35,6 +35,7 @@ pub struct RawJSFunction {
     pub block: Option<BlockStmt>,
     pub scope: Scope,
     pub is_strict: bool,
+    pub needs_arguments: bool,
 }
 
 #[derive(Debug)]
@@ -92,6 +93,9 @@ impl JSFunction {
             raw: RawJSFunction {
                 name: RefCell::new(name.clone()),
                 params,
+                needs_arguments: block
+                    .as_ref()
+                    .is_some_and(block_needs_arguments),
                 block,
                 scope,
                 is_strict,
@@ -171,7 +175,9 @@ impl Func for JSFunction {
 
 impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        let scope = &mut Scope::with_parent(&self.scope)?;
+        let arguments_args = self.needs_arguments.then(|| args.clone());
+
+        let scope = &mut Scope::with_parent_this(&self.scope, this.copy())?;
         if self.is_strict {
             scope.set_strict_mode();
         }
@@ -179,7 +185,7 @@ impl RawJSFunction {
         scope.state_set_function();
         scope.state_set_returnable();
 
-        let mut iter = args.clone().into_iter();
+        let mut iter = args.into_iter();
 
         for p in &self.params {
             Interpreter::run_pat(
@@ -194,24 +200,21 @@ impl RawJSFunction {
             )?;
         }
 
-        let scope = &mut Scope::with_parent(scope)?;
-        scope.state_set_function();
-        scope.state_set_returnable();
+        if let Some(arguments_args) = arguments_args {
+            let caller = if scope.is_strict_mode()? {
+                None
+            } else {
+                Some(this.copy())
+            };
 
-        let caller = if scope.is_strict_mode()? {
-            None
-        } else {
-            Some(this.copy())
-        };
+            let args = Arguments::new(arguments_args, caller, realm)?;
+            let args = ObjectHandle::new(args);
 
-        let args = Arguments::new(args, caller, realm)?;
-
-        let args = ObjectHandle::new(args);
-
-        scope.declare_var("arguments".to_string(), args.into(), realm);
+            scope.declare_var("arguments".to_string(), args.into(), realm);
+        }
 
         if let Some(block) = &self.block
-            && let Err(e) = Interpreter::run_block_this(realm, block, scope, this)
+            && let Err(e) = Interpreter::run_block(realm, block, scope)
         {
             return match e {
                 ControlFlow::Error(e) => Err(e),
@@ -227,6 +230,166 @@ impl RawJSFunction {
         }
 
         Ok(Value::Undefined)
+    }
+}
+
+pub(crate) fn block_needs_arguments(block: &BlockStmt) -> bool {
+    block.stmts.iter().any(stmt_needs_arguments)
+}
+
+fn stmt_needs_arguments(stmt: &Stmt) -> bool {
+    match stmt {
+        Stmt::Block(block) => block_needs_arguments(block),
+        Stmt::Expr(stmt) => expr_needs_arguments(&stmt.expr),
+        Stmt::If(stmt) => {
+            expr_needs_arguments(&stmt.test)
+                || stmt_needs_arguments(&stmt.cons)
+                || stmt.alt.as_deref().is_some_and(stmt_needs_arguments)
+        }
+        Stmt::While(stmt) => expr_needs_arguments(&stmt.test) || stmt_needs_arguments(&stmt.body),
+        Stmt::DoWhile(stmt) => stmt_needs_arguments(&stmt.body) || expr_needs_arguments(&stmt.test),
+        Stmt::For(stmt) => {
+            stmt.init.as_ref().is_some_and(|init| match init {
+                swc_ecma_ast::VarDeclOrExpr::VarDecl(var) => var.decls.iter().any(|decl| {
+                    decl.init
+                        .as_ref()
+                        .is_some_and(|expr| expr_needs_arguments(expr))
+                }),
+                swc_ecma_ast::VarDeclOrExpr::Expr(expr) => expr_needs_arguments(expr),
+            }) || stmt
+                .test
+                .as_ref()
+                .is_some_and(|expr| expr_needs_arguments(expr))
+                || stmt
+                    .update
+                    .as_ref()
+                    .is_some_and(|expr| expr_needs_arguments(expr))
+                || stmt_needs_arguments(&stmt.body)
+        }
+        Stmt::ForIn(stmt) => expr_needs_arguments(&stmt.right) || stmt_needs_arguments(&stmt.body),
+        Stmt::ForOf(stmt) => expr_needs_arguments(&stmt.right) || stmt_needs_arguments(&stmt.body),
+        Stmt::Return(stmt) => stmt
+            .arg
+            .as_ref()
+            .is_some_and(|expr| expr_needs_arguments(expr)),
+        Stmt::Throw(stmt) => expr_needs_arguments(&stmt.arg),
+        Stmt::Switch(stmt) => {
+            expr_needs_arguments(&stmt.discriminant)
+                || stmt.cases.iter().any(|case| {
+                    case.test
+                        .as_ref()
+                        .is_some_and(|expr| expr_needs_arguments(expr))
+                        || case.cons.iter().any(stmt_needs_arguments)
+                })
+        }
+        Stmt::Try(stmt) => {
+            block_needs_arguments(&stmt.block)
+                || stmt
+                    .handler
+                    .as_ref()
+                    .is_some_and(|handler| block_needs_arguments(&handler.body))
+                || stmt.finalizer.as_ref().is_some_and(block_needs_arguments)
+        }
+        Stmt::Decl(decl) => match decl {
+            swc_ecma_ast::Decl::Var(var) => var.decls.iter().any(|decl| {
+                decl.init
+                    .as_ref()
+                    .is_some_and(|expr| expr_needs_arguments(expr))
+            }),
+            swc_ecma_ast::Decl::Fn(_) | swc_ecma_ast::Decl::Class(_) => false,
+            _ => true,
+        },
+        Stmt::Labeled(stmt) => stmt_needs_arguments(&stmt.body),
+        Stmt::With(_) => true,
+        Stmt::Break(_) | Stmt::Continue(_) | Stmt::Debugger(_) | Stmt::Empty(_) => false,
+    }
+}
+
+fn expr_needs_arguments(expr: &Expr) -> bool {
+    match expr {
+        Expr::Ident(ident) => ident.sym == *"arguments" || ident.sym == *"eval",
+        Expr::This(_) | Expr::Lit(_) | Expr::PrivateName(_) | Expr::SuperProp(_) => false,
+        Expr::Array(expr) => expr
+            .elems
+            .iter()
+            .flatten()
+            .any(|elem| expr_needs_arguments(&elem.expr)),
+        Expr::Object(expr) => expr.props.iter().any(|prop| match prop {
+            swc_ecma_ast::PropOrSpread::Spread(spread) => expr_needs_arguments(&spread.expr),
+            swc_ecma_ast::PropOrSpread::Prop(prop) => match &**prop {
+                swc_ecma_ast::Prop::Shorthand(ident) => {
+                    ident.sym == *"arguments" || ident.sym == *"eval"
+                }
+                swc_ecma_ast::Prop::KeyValue(kv) => {
+                    prop_name_needs_arguments(&kv.key) || expr_needs_arguments(&kv.value)
+                }
+                swc_ecma_ast::Prop::Assign(assign) => expr_needs_arguments(&assign.value),
+                swc_ecma_ast::Prop::Getter(getter) => prop_name_needs_arguments(&getter.key),
+                swc_ecma_ast::Prop::Setter(setter) => prop_name_needs_arguments(&setter.key),
+                swc_ecma_ast::Prop::Method(method) => prop_name_needs_arguments(&method.key),
+            },
+        }),
+        Expr::Unary(expr) => expr_needs_arguments(&expr.arg),
+        Expr::Update(expr) => expr_needs_arguments(&expr.arg),
+        Expr::Bin(expr) => expr_needs_arguments(&expr.left) || expr_needs_arguments(&expr.right),
+        Expr::Assign(expr) => {
+            assign_target_needs_arguments(&expr.left) || expr_needs_arguments(&expr.right)
+        }
+        Expr::Member(expr) => {
+            expr_needs_arguments(&expr.obj)
+                || matches!(&expr.prop, MemberProp::Computed(prop) if expr_needs_arguments(&prop.expr))
+        }
+        Expr::Cond(expr) => {
+            expr_needs_arguments(&expr.test)
+                || expr_needs_arguments(&expr.cons)
+                || expr_needs_arguments(&expr.alt)
+        }
+        Expr::Call(expr) => {
+            matches!(&expr.callee, Callee::Expr(callee) if expr_needs_arguments(callee))
+                || expr.args.iter().any(|arg| expr_needs_arguments(&arg.expr))
+        }
+        Expr::New(expr) => {
+            expr_needs_arguments(&expr.callee)
+                || expr
+                    .args
+                    .as_ref()
+                    .is_some_and(|args| args.iter().any(|arg| expr_needs_arguments(&arg.expr)))
+        }
+        Expr::Seq(expr) => expr.exprs.iter().any(|expr| expr_needs_arguments(expr)),
+        Expr::Paren(expr) => expr_needs_arguments(&expr.expr),
+        Expr::Tpl(expr) => expr.exprs.iter().any(|expr| expr_needs_arguments(expr)),
+        Expr::TaggedTpl(expr) => expr_needs_arguments(&expr.tag),
+        Expr::Arrow(_) | Expr::Fn(_) | Expr::Class(_) => false,
+        Expr::Yield(expr) => expr
+            .arg
+            .as_ref()
+            .is_some_and(|expr| expr_needs_arguments(expr)),
+        Expr::Await(expr) => expr_needs_arguments(&expr.arg),
+        Expr::OptChain(_) => true,
+        Expr::Invalid(_) => false,
+        _ => true,
+    }
+}
+
+fn prop_name_needs_arguments(name: &swc_ecma_ast::PropName) -> bool {
+    matches!(name, swc_ecma_ast::PropName::Computed(computed) if expr_needs_arguments(&computed.expr))
+}
+
+fn assign_target_needs_arguments(target: &swc_ecma_ast::AssignTarget) -> bool {
+    match target {
+        swc_ecma_ast::AssignTarget::Simple(target) => match target {
+            swc_ecma_ast::SimpleAssignTarget::Ident(ident) => {
+                ident.sym == *"arguments" || ident.sym == *"eval"
+            }
+            swc_ecma_ast::SimpleAssignTarget::Member(member) => {
+                expr_needs_arguments(&member.obj)
+                    || matches!(&member.prop, MemberProp::Computed(prop) if expr_needs_arguments(&prop.expr))
+            }
+            swc_ecma_ast::SimpleAssignTarget::Paren(paren) => expr_needs_arguments(&paren.expr),
+            swc_ecma_ast::SimpleAssignTarget::OptChain(_) => true,
+            _ => false,
+        },
+        swc_ecma_ast::AssignTarget::Pat(_) => true,
     }
 }
 
