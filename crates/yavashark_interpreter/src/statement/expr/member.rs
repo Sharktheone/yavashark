@@ -4,8 +4,9 @@ use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Class, ClassInstance, ControlFlow, Error, InternalPropertyKey, PrivateMember, PropertyKey, Realm, RuntimeResult, Value};
-use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value,
+};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -33,8 +34,8 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
-            MemberProp::Ident(i) => InternalPropertyKey::from(YSString::from_ref(i.sym.as_str())),
-            MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?.into_internal_property_key(realm)?,
+            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+            MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
             MemberProp::PrivateName(p) => {
                 let name = p.name.as_str();
                 let obj = value.as_object()?;
@@ -61,45 +62,71 @@ impl Interpreter {
             }
         };
 
-        let proto = match value {
-            Value::Object(ref o) => return Ok((
-                o.resolve_property(name, realm)?
+        match value {
+            Value::Object(ref o) => Ok((
+                o.resolve_property(&name, realm)?
                     .unwrap_or(Value::Undefined),
                 Some(value),
             )),
-            Value::Undefined => return Err(ControlFlow::error_type(format!(
+            Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
             ))),
-            Value::Null => return Err(ControlFlow::error_type(format!(
+            Value::Null => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of null",
             ))),
-            Value::String(ref s) => {
-                if let InternalPropertyKey::Index(i) = name {
-                    let v = StringObj::get_single_str(&*s.as_str_lossy(), i as isize)
-                        .map_or(Value::Undefined, Into::into);
+            Value::String(s) => {
+                let str = Obj::into_object(StringObj::with_string(realm, s)?);
 
-                    return Ok((v, Some(value)));
-                }
-
-                if matches!(&name, InternalPropertyKey::String(k) if k == "length") {
-                    return Ok((Value::Number(s.len() as f64), Some(value)));
-                }
-
-                realm.intrinsics.clone_public().string.get(realm)?.clone()
+                Ok((
+                    str.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(str.into()),
+                ))
             }
-            Value::Number(_) => realm.intrinsics.clone_public().number.get(realm)?.clone(),
-            Value::Boolean(_) => realm.intrinsics.clone_public().boolean.get(realm)?.clone(),
-            Value::Symbol(_) => realm.intrinsics.clone_public().symbol.get(realm)?.clone(),
-            Value::BigInt(_) => realm.intrinsics.clone_public().bigint.get(realm)?.clone(),
-        };
 
-        let v = proto
-            .resolve_property_no_get_set(name, realm)?
-            .map(|prop| prop.get(value.copy(), realm))
-            .transpose()?
-            .unwrap_or(Value::Undefined);
+            Value::Number(n) => {
+                let num = NumberObj::with_number(realm, n)?;
 
-        Ok((v, Some(value)))
+                Ok((
+                    num.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(num.into()),
+                ))
+            }
+
+            Value::Boolean(b) => {
+                let boolean = BooleanObj::new(realm, b)?;
+
+                Ok((
+                    boolean
+                        .resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(boolean.into()),
+                ))
+            }
+
+            Value::Symbol(s) => {
+                let symbol = SymbolObj::new(realm, s)?;
+
+                Ok((
+                    symbol
+                        .resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(symbol.into()),
+                ))
+            }
+
+            Value::BigInt(big_int) => {
+                let big_int = BigIntObj::new(realm, big_int)?;
+
+                Ok((
+                    big_int
+                        .resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(big_int.into()),
+                ))
+            }
+        }
     }
 }
 
