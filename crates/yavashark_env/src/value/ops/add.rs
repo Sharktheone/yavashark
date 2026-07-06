@@ -1,3 +1,4 @@
+use num_traits::Zero;
 use crate::Realm;
 use crate::error::Error;
 use crate::value::ops::BigIntOrNumber;
@@ -5,6 +6,25 @@ use crate::value::{Hint, Value};
 
 impl Value {
     pub fn add(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
+        match (self, other) {
+            (Self::Number(left), Self::Number(right)) => {
+                return Ok((left + right).into())
+            }
+            (Self::BigInt(left), Self::BigInt(right)) => {
+                return Ok(((&**left) + (&**right)).into())
+            }
+            (Self::String(left), Self::String(right)) => {
+                let left = left.clone();
+
+                return Ok(Self::from(left + right))
+            }
+            _ => {}
+        }
+
+
+
+
+
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left = self.to_primitive(Hint::None, realm)?;
         let right = other.to_primitive(Hint::None, realm)?;
