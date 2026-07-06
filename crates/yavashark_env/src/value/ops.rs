@@ -391,13 +391,25 @@ impl Value {
     // }
 
     pub fn normal_eq(&self, rhs: &Self, realm: &mut Realm) -> Result<bool, Error> {
-        if let (Self::Object(lhs), Self::Object(rhs)) = (self, rhs) {
-            return Ok(lhs == rhs);
+        match (self, rhs) {
+            (Self::Object(lhs), Self::Object(rhs)) => {
+                return Ok(lhs == rhs);
+            }
+            (Self::Object(_), Self::Undefined | Self::Null) |
+            (Self::Undefined | Self::Null, Self::Object(_)) => {
+                return Ok(false);
+            }
+
+            (Self::Null | Self::Undefined, Self::Null | Self::Undefined) => return Ok(true),
+            (Self::Number(a), Self::Number(b)) => return Ok(a == b),
+            (Self::String(a), Self::String(b)) => return Ok(a == b),
+            (Self::Boolean(a), Self::Boolean(b)) => return Ok(a == b),
+            (Self::Symbol(a), Self::Symbol(b)) => return Ok(a == b),
+
+            _ => {}
+
         }
 
-        if (self.is_object() && rhs.is_nullish()) || (rhs.is_object() && self.is_nullish()) {
-            return Ok(false);
-        }
 
         let lhs = self.to_primitive(Hint::None, realm)?;
         let rhs = rhs.to_primitive(Hint::None, realm)?;
