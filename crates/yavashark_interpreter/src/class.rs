@@ -1,3 +1,4 @@
+use crate::function::block_needs_arguments;
 use crate::function::{JSFunction, RawJSFunction};
 use std::cell::RefCell;
 use swc_common::Span;
