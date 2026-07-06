@@ -415,32 +415,7 @@ impl ScopeInternal {
     }
 
     pub fn with_parent(parent: Gc<RefCell<Self>>) -> Res<Self> {
-        let mut variables = FxHashMap::with_capacity_and_hasher(8, Default::default());
-
-        variables.insert(
-            "undefined".to_string(),
-            Variable::new_read_only(Value::Undefined).into(),
-        );
-        variables.insert(
-            "NaN".to_string(),
-            Variable::new_read_only(Value::Number(f64::NAN)).into(),
-        );
-        variables.insert(
-            "Infinity".to_string(),
-            Variable::new_read_only(Value::Number(f64::INFINITY)).into(),
-        );
-        variables.insert(
-            "null".to_string(),
-            Variable::new_read_only(Value::Null).into(),
-        );
-        variables.insert(
-            "true".to_string(),
-            Variable::new_read_only(Value::Boolean(true)).into(),
-        );
-        variables.insert(
-            "false".to_string(),
-            Variable::new_read_only(Value::Boolean(false)).into(),
-        );
+        let variables = FxHashMap::with_capacity_and_hasher(8, Default::default());
 
         let state = parent.borrow()?.state.copy();
 
