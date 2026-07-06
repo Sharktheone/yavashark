@@ -8,10 +8,10 @@ impl Value {
     pub fn and(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
             (Self::Number(left), Self::Number(right)) => {
-                Self::from(left as i64 & right as i64)
+                return Ok(Self::from((*left) as i64 & (*right) as i64));
             }
             (Self::BigInt(left), Self::BigInt(right)) => {
-                Self::from((&*left) & (&*right))
+                return Ok(Self::from((&**left) & (&**right)))
             }
             _ => {}
         }
