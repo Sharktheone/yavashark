@@ -5,6 +5,24 @@ use num_traits::ToPrimitive;
 
 impl Value {
     pub fn shl(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
+        match (self, other) {
+            (Self::Number(left), Self::Number(right)) => {
+                return Ok(((*left as i64) << (*right as i64)).into())
+            }
+            (Self::BigInt(left), Self::BigInt(right)) => {
+                let Some(right) = right.to_isize() else {
+                    return Err(Error::range("BigInt shift by too many bits"));
+                };
+
+                return Ok(if right.is_negative() {
+                    (&**left >> (-right) as usize).into()
+                } else {
+                    (&**left << right as usize).into()
+                })
+            }
+            _ => {}
+        }
+
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left_num = self.to_numeric(realm)?;
         let right_num = other.to_numeric(realm)?;
