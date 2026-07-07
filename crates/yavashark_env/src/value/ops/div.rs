@@ -6,6 +6,20 @@ use num_traits::Zero;
 
 impl Value {
     pub fn div(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
+        match (self, other) {
+            (Self::Number(left), Self::Number(right)) => {
+                return Ok((left / right).into())
+            }
+            (Self::BigInt(left), Self::BigInt(right)) => {
+                if right.is_zero() {
+                    return Err(Error::range("Division by zero"));
+                }
+
+                return Ok(((&**left) / (&**right)).into())
+            }
+            _ => {}
+        }
+
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left_num = self.to_numeric(realm)?;
         let right_num = other.to_numeric(realm)?;
