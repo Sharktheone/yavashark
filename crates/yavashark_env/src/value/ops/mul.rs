@@ -5,6 +5,16 @@ use crate::value::ops::BigIntOrNumber;
 
 impl Value {
     pub fn mul(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
+        match (self, other) {
+            (Self::Number(left), Self::Number(right)) => {
+                return Ok((left * right).into())
+            }
+            (Self::BigInt(left), Self::BigInt(right)) => {
+                return Ok(((&**left) * (&**right)).into())
+            }
+            _ => {}
+        }
+
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left_num = self.to_numeric(realm)?;
         let right_num = other.to_numeric(realm)?;
