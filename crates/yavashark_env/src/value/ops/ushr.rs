@@ -5,6 +5,9 @@ use crate::value::ops::BigIntOrNumber;
 
 impl Value {
     pub fn ushr(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
+        if let (Self::Number(left), Self::Number(right)) = (self, other) {
+            return Ok(((*left as u64)  >> (*right as u64 % 64)).into())
+        }
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left_num = self.to_numeric(realm)?;
         let right_num = other.to_numeric(realm)?;
