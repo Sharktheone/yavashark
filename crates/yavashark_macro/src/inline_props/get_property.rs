@@ -31,6 +31,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
 
         let key = &prop.name;
         let field = &prop.field;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -109,6 +110,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
+                    #(#cfg_attrs)*
                     Some(#s) => {
                         #value_expr
                     }
@@ -116,6 +118,7 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
             }
             Name::Symbol(sym) => {
                 symbols.push(quote::quote! {
+                    #(#cfg_attrs)*
                     if symbol == #sym {
                         #value_expr
                     }

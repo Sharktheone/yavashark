@@ -28,6 +28,7 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
         }
 
         let field = &prop.field;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -108,7 +109,10 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
             }
         };
 
-        prop_items.push(value_expr);
+        prop_items.push(quote::quote! {
+            #(#cfg_attrs)*
+            #value_expr
+        });
     }
 
     if prop_items.is_empty() {
@@ -164,6 +168,7 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
         }
 
         let field = &prop.field;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -244,7 +249,10 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
             }
         };
 
-        prop_items.push(value_expr);
+        prop_items.push(quote::quote! {
+            #(#cfg_attrs)*
+            #value_expr
+        });
     }
 
     if prop_items.is_empty() {

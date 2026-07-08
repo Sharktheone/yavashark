@@ -27,6 +27,7 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
 
         let key = &prop.name;
         let field = &prop.field;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let partial_get = if prop.partial {
             quote! {
@@ -56,6 +57,7 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
+                    #(#cfg_attrs)*
                     Some(#s) => {
                         #value_expr
                     }
@@ -63,6 +65,7 @@ pub fn generate_set_property(props: &[Property], config: &Config) -> TokenStream
             }
             Name::Symbol(sym) => {
                 symbols.push(quote::quote! {
+                    #(#cfg_attrs)*
                     if symbol == #sym {
                         #value_expr
                     }

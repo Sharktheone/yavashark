@@ -5,6 +5,7 @@ use syn::spanned::Spanned;
 use syn::{Expr, Field, Path, Type};
 
 pub struct Property {
+    pub cfg_attrs: Vec<syn::Attribute>,
     pub copy: bool,
     pub readonly: bool,
     pub configurable: bool,
@@ -32,6 +33,7 @@ pub enum Name {
 impl Default for Property {
     fn default() -> Self {
         Self {
+            cfg_attrs: Vec::new(),
             copy: false,
             readonly: false,
             configurable: true,
@@ -68,6 +70,12 @@ impl Property {
 
         flags.name = Name::Str(name.to_string());
         flags.field = name.clone();
+        flags.cfg_attrs = field
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("cfg") || attr.path().is_ident("cfg_attr"))
+            .cloned()
+            .collect();
         if flags.partial {
             flags.ty = get_partial_type(&field.ty).clone();
         } else {

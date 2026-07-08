@@ -19,6 +19,7 @@ pub fn generate_get_descriptor(props: &[Property], config: &Config) -> proc_macr
     for prop in props {
         let key = &prop.name;
         let field = &prop.field;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -128,6 +129,7 @@ pub fn generate_get_descriptor(props: &[Property], config: &Config) -> proc_macr
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
+                    #(#cfg_attrs)*
                     Some(#s) => {
                         #descriptor_expr
                     }
@@ -135,6 +137,7 @@ pub fn generate_get_descriptor(props: &[Property], config: &Config) -> proc_macr
             }
             Name::Symbol(sym) => {
                 symbols.push(quote::quote! {
+                    #(#cfg_attrs)*
                     if symbol == #sym {
                         #descriptor_expr
                     }
