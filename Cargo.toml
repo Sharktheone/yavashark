@@ -53,7 +53,7 @@ yavashark_env = { path = "crates/yavashark_env" }
 crate-type = ["cdylib"]
 
 [features]
-default = ["simple_bytecode"]
+default = ["simple_bytecode", "temporal", "icu"]
 minimal = []
 memmap = []
 pprof = ["dep:pprof", "dep:flate2"]
