@@ -63,13 +63,17 @@ simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/
 out_of_spec_experiments = ["yavashark_env/out-of-spec-experiments"]
 gui = ["yavashark_env/gui"]
 obj_trace = ["yavashark_env/obj_trace"]
+temporal = ["yavashark_env/temporal"]
+icu = ["yavashark_env/icu"]
 
 
 [profile.release]
-opt-level = 3
+opt-level = "z"
 codegen-units = 1
+lto = "fat"
 debug = false
-strip = false
+strip = true
+panic = "abort"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
