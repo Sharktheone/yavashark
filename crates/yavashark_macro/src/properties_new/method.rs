@@ -7,6 +7,7 @@ use syn::{Expr, Lit, Pat};
 
 #[derive(Clone)]
 pub struct Method {
+    pub cfg_attrs: Vec<syn::Attribute>,
     pub name: syn::Ident,
     pub js_name: Option<Expr>,
     pub args: Vec<syn::Type>,
@@ -208,6 +209,12 @@ pub fn parse_method(
     let mut has_receiver = false;
     let mut ty = Type::Normal;
     let mut length = None;
+    let cfg_attrs = func
+        .attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("cfg") || attr.path().is_ident("cfg_attr"))
+        .cloned()
+        .collect();
 
     let mut maybe_static = MethodType::Static;
 
@@ -392,6 +399,7 @@ pub fn parse_method(
             MethodType::CallConstructor => MaybeConstructor::CallConstructor,
             MethodType::CallAndConstructor => MaybeConstructor::CallAndConstructor,
         }(Method {
+            cfg_attrs,
             name: func.sig.ident.clone(),
             js_name,
             args,
