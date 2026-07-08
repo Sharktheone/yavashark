@@ -15,7 +15,7 @@ pub struct InlineWtf16 {
 }
 
 impl InlineAscii {
-    pub const CAPACITY: usize = 23;
+    pub const CAPACITY: usize = 31;
 
     pub const fn new() -> Self {
         Self {
@@ -25,7 +25,7 @@ impl InlineAscii {
     }
 
     pub fn from_bytes(bytes: [u8; Self::CAPACITY], len: u32) -> Self {
-        let len = InlineLen::from_u32(len).unwrap_or(InlineLen::Len23);
+        let len = InlineLen::from_u32(len).unwrap_or(InlineLen::Len31);
 
         Self { len, bytes }
     }
@@ -82,7 +82,7 @@ impl Deref for InlineAscii {
 }
 
 impl InlineWtf16 {
-    pub const CAPACITY: usize = 11;
+    pub const CAPACITY: usize = 15;
 
     pub const fn new() -> Self {
         Self {
@@ -92,7 +92,7 @@ impl InlineWtf16 {
     }
 
     pub fn from_bytes(bytes: [u16; Self::CAPACITY], len: u32) -> Self {
-        let len = InlineLenWtf::from_u32(len).unwrap_or(InlineLenWtf::Len11);
+        let len = InlineLenWtf::from_u32(len).unwrap_or(InlineLenWtf::Len15);
 
         Self { len, bytes }
     }
@@ -160,6 +160,14 @@ pub enum InlineLen {
     Len21,
     Len22,
     Len23,
+    Len24,
+    Len25,
+    Len26,
+    Len27,
+    Len28,
+    Len29,
+    Len30,
+    Len31,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -176,6 +184,10 @@ pub enum InlineLenWtf {
     Len9,
     Len10,
     Len11,
+    Len12,
+    Len13,
+    Len14,
+    Len15,
 }
 
 impl InlineLen {
@@ -205,6 +217,14 @@ impl InlineLen {
             21 => Some(Self::Len21),
             22 => Some(Self::Len22),
             23 => Some(Self::Len23),
+            24 => Some(Self::Len24),
+            25 => Some(Self::Len25),
+            26 => Some(Self::Len26),
+            27 => Some(Self::Len27),
+            28 => Some(Self::Len28),
+            29 => Some(Self::Len29),
+            30 => Some(Self::Len30),
+            31 => Some(Self::Len31),
             _ => None,
         }
     }
@@ -229,6 +249,10 @@ impl InlineLenWtf {
             9 => Some(Self::Len9),
             10 => Some(Self::Len10),
             11 => Some(Self::Len11),
+            12 => Some(Self::Len12),
+            13 => Some(Self::Len13),
+            14 => Some(Self::Len14),
+            15 => Some(Self::Len15),
             _ => None,
         }
     }

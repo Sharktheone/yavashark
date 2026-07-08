@@ -29,7 +29,7 @@ impl Debug for YSString {
     }
 }
 
-const _: [(); 24] = [(); size_of::<YSString>()];
+const _: [(); 32] = [(); size_of::<YSString>()];
 
 enum Inner {
     Heap(HeapString),
