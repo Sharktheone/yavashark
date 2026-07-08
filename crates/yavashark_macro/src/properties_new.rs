@@ -266,12 +266,13 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
     let attributes = &config.attributes;
 
     for prop in props {
-        let (prop_tokens, name, js_name, prop_type, var_create) = match prop {
+        let (prop_tokens, name, js_name, prop_type, cfg_attrs, var_create) = match prop {
             Prop::Method(method) => (
                 method.init_tokens_self(config, self_ty.clone()),
                 method.name,
                 method.js_name,
                 method.ty,
+                method.cfg_attrs,
                 quote! {#variable::write_config(prop.into())},
             ),
             Prop::Constant(constant) => {
@@ -286,6 +287,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                     constant.name,
                     constant.js_name,
                     Type::Normal,
+                    Vec::new(),
                     variable_fn,
                 )
             }
@@ -343,6 +345,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
         }
 
         init.extend(quote! {
+            #(#cfg_attrs)*
             {
                 #elem
             }

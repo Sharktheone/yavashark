@@ -24,6 +24,7 @@ pub fn generate_keys(props: &[Property], config: &Config) -> proc_macro2::TokenS
         }
 
         let key = &prop.name;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -80,7 +81,10 @@ pub fn generate_keys(props: &[Property], config: &Config) -> proc_macro2::TokenS
             }
         };
 
-        prop_items.push(value_expr);
+        prop_items.push(quote::quote! {
+            #(#cfg_attrs)*
+            #value_expr
+        });
     }
 
     if prop_items.is_empty() {
@@ -140,6 +144,7 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
         }
 
         let key = &prop.name;
+        let cfg_attrs = &prop.cfg_attrs;
 
         let c = config_idx;
         if prop.configurable {
@@ -196,7 +201,10 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
             }
         };
 
-        prop_items.push(value_expr);
+        prop_items.push(quote::quote! {
+            #(#cfg_attrs)*
+            #value_expr
+        });
     }
 
     if prop_items.is_empty() {
