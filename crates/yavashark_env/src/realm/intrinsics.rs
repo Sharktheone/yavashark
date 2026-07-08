@@ -9,6 +9,8 @@ use crate::builtins::float64array::Float64Array;
 use crate::builtins::int8array::Int8Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
+#[cfg(feature = "icu")]
+use crate::builtins::intl;
 use crate::builtins::shared_buf::SharedArrayBuffer;
 use crate::builtins::typed_array::TypedArray;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
@@ -19,7 +21,7 @@ use crate::builtins::{
     AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date,
     DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp,
     Set, StringObj, SuppressedError, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError,
-    WeakMap, WeakRef, WeakSet, intl, iterator, signal, temporal,
+    WeakMap, WeakRef, WeakSet, iterator, signal, temporal,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
@@ -95,15 +97,25 @@ pub struct Intrinsics {
     pub signal_computed: PartialIntrinsic<signal::Computed>,
     pub arguments: PartialIntrinsic<Arguments>,
     pub proxy: PartialIntrinsic<Proxy>,
+    #[cfg(feature = "icu")]
     pub intl_collator: PartialIntrinsic<intl::Collator>,
+    #[cfg(feature = "icu")]
     pub intl_date_time_format: PartialIntrinsic<intl::DateTimeFormat>,
+    #[cfg(feature = "icu")]
     pub intl_display_names: PartialIntrinsic<intl::DisplayNames>,
+    #[cfg(feature = "icu")]
     pub intl_duration_format: PartialIntrinsic<intl::DurationFormat>,
+    #[cfg(feature = "icu")]
     pub intl_list_format: PartialIntrinsic<intl::ListFormat>,
+    #[cfg(feature = "icu")]
     pub intl_locale: PartialIntrinsic<intl::Locale>,
+    #[cfg(feature = "icu")]
     pub intl_number_format: PartialIntrinsic<intl::NumberFormat>,
+    #[cfg(feature = "icu")]
     pub intl_plural_rules: PartialIntrinsic<intl::PluralRules>,
+    #[cfg(feature = "icu")]
     pub intl_relative_time_format: PartialIntrinsic<intl::RelativeTimeFormat>,
+    #[cfg(feature = "icu")]
     pub intl_segmenter: PartialIntrinsic<intl::Segmenter>,
     pub throw_type_error: Partial<ObjectHandle, ThrowTypeError>,
 

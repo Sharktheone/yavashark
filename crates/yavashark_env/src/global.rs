@@ -9,6 +9,7 @@ use crate::builtins::float64array::Float64Array;
 use crate::builtins::int8array::Int8Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
+#[cfg(feature = "icu")]
 use crate::builtins::intl::Intl;
 use crate::builtins::iterator::Iterator as IteratorConstructor;
 use crate::builtins::shared_buf::SharedArrayBuffer;

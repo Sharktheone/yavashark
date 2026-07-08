@@ -8,6 +8,7 @@ mod date;
 mod disposable_stack;
 mod error;
 mod escape;
+#[cfg(feature = "icu")]
 pub(crate) mod intl;
 pub mod iterator;
 mod json;
