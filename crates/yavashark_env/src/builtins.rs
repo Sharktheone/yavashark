@@ -23,6 +23,7 @@ mod set;
 pub mod signal;
 mod string;
 mod symbol;
+#[cfg(feature = "temporal")]
 pub mod temporal;
 mod throw_type_error;
 mod weakmap;
@@ -51,6 +52,7 @@ pub use regex::*;
 pub use set::*;
 pub use string::*;
 pub use symbol::*;
+#[cfg(feature = "temporal")]
 pub use temporal::*;
 pub use throw_type_error::*;
 pub use weakmap::*;

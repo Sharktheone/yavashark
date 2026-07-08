@@ -1,4 +1,6 @@
 use crate::array::Array;
+#[cfg(feature = "temporal")]
+use crate::builtins::Temporal;
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
@@ -22,8 +24,8 @@ use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
     DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
     IsFinite, IsNan, JSON, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError,
-    Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, Temporal, TypeError,
-    URIError, Unescape, WeakMap, WeakRef, WeakSet,
+    Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, TypeError, URIError,
+    Unescape, WeakMap, WeakRef, WeakSet,
 };
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
@@ -223,6 +225,7 @@ pub struct GlobalProperties {
     #[prop("Proxy")]
     proxy: Partial<ObjectHandle, GlobalInitializer<Proxy>>,
 
+    #[cfg(feature = "temporal")]
     #[prop("Temporal")]
     temporal: Partial<ObjectHandle, Temporal>,
 
@@ -247,6 +250,7 @@ pub struct GlobalProperties {
     #[prop("isFinite")]
     is_finite: Partial<ObjectHandle, IsFinite>,
 
+    #[cfg(feature = "icu")]
     #[prop("Intl")]
     intl: Partial<ObjectHandle, Intl>,
 
@@ -318,6 +322,7 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         date: Partial::default(),
         reflect: Partial::default(),
         proxy: Partial::default(),
+        #[cfg(feature = "temporal")]
         temporal: Partial::default(),
         signal: Partial::default(),
         promise: Partial::default(),
@@ -326,6 +331,7 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         parse_float: Partial::default(),
         is_nan: Partial::default(),
         is_finite: Partial::default(),
+        #[cfg(feature = "icu")]
         intl: Partial::default(),
         disposable_stack: Partial::default(),
         async_disposable_stack: Partial::default(),

@@ -1,9 +1,12 @@
+#[cfg(feature = "temporal")]
+use crate::Error;
+#[cfg(feature = "temporal")]
 use crate::builtins::Instant;
 use crate::conversion::downcast_obj;
 use crate::print::{PrettyObjectOverride, fmt_properties_to};
 use crate::value::Hint;
 use crate::value::Obj;
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::{MutObject, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike, Utc};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -1063,6 +1066,7 @@ impl Date {
         }
     }
 
+    #[cfg(feature = "temporal")]
     #[prop("toTemporalInstant")]
     pub fn to_temporal_instant(&self, realm: &mut Realm) -> Res<ObjectHandle> {
         match self.date() {

@@ -468,6 +468,7 @@ impl<T: std::error::Error> From<T> for Error {
 
 impl Error {
     #[must_use]
+    #[cfg(feature = "temporal")]
     pub fn from_temporal(err: temporal_rs::TemporalError) -> Self {
         let kind = err.kind();
         let msg = err.into_message();

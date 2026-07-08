@@ -12,6 +12,8 @@ use crate::builtins::int32array::Int32Array;
 #[cfg(feature = "icu")]
 use crate::builtins::intl;
 use crate::builtins::shared_buf::SharedArrayBuffer;
+#[cfg(feature = "temporal")]
+use crate::builtins::temporal;
 use crate::builtins::typed_array::TypedArray;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::uint16array::Uint16Array;
@@ -21,7 +23,7 @@ use crate::builtins::{
     AggregateError, Arguments, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date,
     DisposableStack, EvalError, Map, NumberObj, Promise, Proxy, RangeError, ReferenceError, RegExp,
     Set, StringObj, SuppressedError, SymbolObj, SyntaxError, ThrowTypeError, TypeError, URIError,
-    WeakMap, WeakRef, WeakSet, iterator, signal, temporal,
+    WeakMap, WeakRef, WeakSet, iterator, signal,
 };
 use crate::error_obj::ErrorObj;
 use crate::partial_init::{DynamicPartial, Partial};
@@ -79,14 +81,23 @@ pub struct Intrinsics {
     pub weak_set: PartialIntrinsic<WeakSet>,
     pub weak_ref: PartialIntrinsic<WeakRef>,
     pub date: PartialIntrinsic<Date>,
+    #[cfg(feature = "temporal")]
     pub temporal_duration: PartialIntrinsic<temporal::Duration>,
+    #[cfg(feature = "temporal")]
     pub temporal_instant: PartialIntrinsic<temporal::Instant>,
+    #[cfg(feature = "temporal")]
     pub temporal_now: PartialIntrinsic<temporal::Now>,
+    #[cfg(feature = "temporal")]
     pub temporal_plain_date: PartialIntrinsic<temporal::PlainDate>,
+    #[cfg(feature = "temporal")]
     pub temporal_plain_time: PartialIntrinsic<temporal::PlainTime>,
+    #[cfg(feature = "temporal")]
     pub temporal_plain_date_time: PartialIntrinsic<temporal::PlainDateTime>,
+    #[cfg(feature = "temporal")]
     pub temporal_plain_month_day: PartialIntrinsic<temporal::PlainMonthDay>,
+    #[cfg(feature = "temporal")]
     pub temporal_plain_year_month: PartialIntrinsic<temporal::PlainYearMonth>,
+    #[cfg(feature = "temporal")]
     pub temporal_zoned_date_time: PartialIntrinsic<temporal::ZonedDateTime>,
     pub promise: PartialIntrinsic<Promise>,
     pub generator_function: DynamicPartial<ObjectHandle>,
@@ -184,14 +195,23 @@ impl Intrinsics {
             weak_set: Partial::default(),
             weak_ref: Partial::default(),
             date: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_duration: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_instant: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_now: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_date: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_time: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_date_time: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_month_day: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_year_month: Partial::default(),
+            #[cfg(feature = "temporal")]
             temporal_zoned_date_time: Partial::default(),
             promise: Partial::default(),
             generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
@@ -202,15 +222,25 @@ impl Intrinsics {
             signal_computed: Partial::default(),
             arguments: Partial::default(),
             proxy: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_collator: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_date_time_format: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_display_names: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_duration_format: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_list_format: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_locale: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_number_format: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_plural_rules: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_relative_time_format: Partial::default(),
+            #[cfg(feature = "icu")]
             intl_segmenter: Partial::default(),
             throw_type_error: Partial::default(),
             iterator: Partial::default(),
@@ -284,14 +314,23 @@ impl Default for Intrinsics {
             weak_set: Default::default(),
             weak_ref: Default::default(),
             date: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_duration: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_instant: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_now: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_date: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_time: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_date_time: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_month_day: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_plain_year_month: Default::default(),
+            #[cfg(feature = "temporal")]
             temporal_zoned_date_time: Default::default(),
             promise: Default::default(),
             generator_function: DynamicPartial::from_initializer::<NullObjInitializer>(),
@@ -302,15 +341,25 @@ impl Default for Intrinsics {
             signal_computed: Default::default(),
             arguments: Default::default(),
             proxy: Default::default(),
+            #[cfg(feature = "icu")]
             intl_collator: Default::default(),
+            #[cfg(feature = "icu")]
             intl_date_time_format: Default::default(),
+            #[cfg(feature = "icu")]
             intl_display_names: Default::default(),
+            #[cfg(feature = "icu")]
             intl_duration_format: Default::default(),
+            #[cfg(feature = "icu")]
             intl_list_format: Default::default(),
+            #[cfg(feature = "icu")]
             intl_locale: Default::default(),
+            #[cfg(feature = "icu")]
             intl_number_format: Default::default(),
+            #[cfg(feature = "icu")]
             intl_plural_rules: Default::default(),
+            #[cfg(feature = "icu")]
             intl_relative_time_format: Default::default(),
+            #[cfg(feature = "icu")]
             intl_segmenter: Default::default(),
             throw_type_error: Default::default(),
             iterator: Default::default(),
