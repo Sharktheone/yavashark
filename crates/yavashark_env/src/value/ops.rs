@@ -395,8 +395,8 @@ impl Value {
             (Self::Object(lhs), Self::Object(rhs)) => {
                 return Ok(lhs == rhs);
             }
-            (Self::Object(_), Self::Undefined | Self::Null) |
-            (Self::Undefined | Self::Null, Self::Object(_)) => {
+            (Self::Object(_), Self::Undefined | Self::Null)
+            | (Self::Undefined | Self::Null, Self::Object(_)) => {
                 return Ok(false);
             }
 
@@ -407,9 +407,7 @@ impl Value {
             (Self::Symbol(a), Self::Symbol(b)) => return Ok(a == b),
 
             _ => {}
-
         }
-
 
         let lhs = self.to_primitive(Hint::None, realm)?;
         let rhs = rhs.to_primitive(Hint::None, realm)?;
@@ -539,4 +537,3 @@ impl Value {
         Ok(false)
     }
 }
-

@@ -1519,7 +1519,6 @@ impl PartialEq<str> for YSString {
     }
 }
 
-
 impl PartialEq<&str> for YSString {
     fn eq(&self, other: &&str) -> bool {
         // Compare by code units

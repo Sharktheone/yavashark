@@ -2393,7 +2393,7 @@ dependencies = [
  "log",
  "presser",
  "thiserror 2.0.18",
- "windows 0.58.0",
+ "windows 0.62.2",
 ]
 
 [[package]]
@@ -3199,9 +3199,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
-version = "0.2.180"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcc35a38544a891a5f7c865aca548a982ccb3b8650a5b06d0fd33a10283c56fc"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "libloading"
@@ -3274,6 +3274,31 @@ name = "log"
 version = "0.4.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+
+[[package]]
+name = "lunagc"
+version = "0.1.0"
+dependencies = [
+ "lunagc-derive",
+ "lunalloc",
+]
+
+[[package]]
+name = "lunagc-derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "lunalloc"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "winapi",
+]
 
 [[package]]
 name = "malloc_buf"
@@ -7572,6 +7597,7 @@ dependencies = [
 name = "yavashark_string"
 version = "0.1.0"
 dependencies = [
+ "lunagc",
  "thin-vec",
 ]
 

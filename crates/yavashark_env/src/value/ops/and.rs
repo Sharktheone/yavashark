@@ -1,4 +1,3 @@
-use num_traits::Zero;
 use crate::Realm;
 use crate::error::Error;
 use crate::value::Value;
@@ -11,7 +10,7 @@ impl Value {
                 return Ok(Self::from((*left) as i64 & (*right) as i64));
             }
             (Self::BigInt(left), Self::BigInt(right)) => {
-                return Ok(Self::from((&**left) & (&**right)))
+                return Ok(Self::from((&**left) & (&**right)));
             }
             _ => {}
         }

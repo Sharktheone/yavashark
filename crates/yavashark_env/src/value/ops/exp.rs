@@ -7,15 +7,13 @@ use num_traits::ToPrimitive;
 impl Value {
     pub fn exp(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
-            (Self::Number(left), Self::Number(right)) => {
-                return Ok(left.powf(*right).into())
-            }
+            (Self::Number(left), Self::Number(right)) => return Ok(left.powf(*right).into()),
             (Self::BigInt(left), Self::BigInt(right)) => {
                 let Some(right) = right.to_u32() else {
                     return Err(Error::range("exponent too large"));
                 };
 
-                return Ok(left.pow(right).into())
+                return Ok(left.pow(right).into());
             }
             _ => {}
         }

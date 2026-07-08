@@ -7,11 +7,9 @@ impl Value {
     pub fn or(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
             (Self::Number(left), Self::Number(right)) => {
-                return Ok((*left as i64 | *right as i64).into())
+                return Ok((*left as i64 | *right as i64).into());
             }
-            (Self::BigInt(left), Self::BigInt(right)) => {
-                return Ok((&**left | &**right).into())
-            }
+            (Self::BigInt(left), Self::BigInt(right)) => return Ok((&**left | &**right).into()),
             _ => {}
         }
 

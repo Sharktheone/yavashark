@@ -7,15 +7,13 @@ use num_traits::Zero;
 impl Value {
     pub fn div(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
-            (Self::Number(left), Self::Number(right)) => {
-                return Ok((left / right).into())
-            }
+            (Self::Number(left), Self::Number(right)) => return Ok((left / right).into()),
             (Self::BigInt(left), Self::BigInt(right)) => {
                 if right.is_zero() {
                     return Err(Error::range("Division by zero"));
                 }
 
-                return Ok(((&**left) / (&**right)).into())
+                return Ok(((&**left) / (&**right)).into());
             }
             _ => {}
         }

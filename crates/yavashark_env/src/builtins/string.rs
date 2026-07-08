@@ -702,7 +702,6 @@ impl StringObj {
             buffer.push_str(pad_to_add);
         }
 
-
         Ok(buffer.into())
     }
 
@@ -718,8 +717,6 @@ impl StringObj {
         let pad_len = target_length.saturating_sub(str.len());
 
         let pad = pad_string.repeat(pad_len);
-
-
 
         Ok(format!("{pad}{str}").into())
     }

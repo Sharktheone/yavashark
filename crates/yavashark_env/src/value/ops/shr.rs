@@ -8,7 +8,7 @@ impl Value {
     pub fn shr(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
             (Self::Number(left), Self::Number(right)) => {
-                return Ok(((*left as i64) >> (*right as i64)).into())
+                return Ok(((*left as i64) >> (*right as i64)).into());
             }
             (Self::BigInt(left), Self::BigInt(right)) => {
                 let Some(right) = right.to_isize() else {
@@ -19,7 +19,7 @@ impl Value {
                     (&**left << (-right) as usize).into()
                 } else {
                     (&**left >> right as usize).into()
-                })
+                });
             }
             _ => {}
         }

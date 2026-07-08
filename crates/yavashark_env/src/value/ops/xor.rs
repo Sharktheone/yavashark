@@ -9,9 +9,7 @@ impl Value {
             (Self::Number(left), Self::Number(right)) => {
                 return Ok(((*left) as i64 ^ (*right) as i64).into());
             }
-            (Self::BigInt(left), Self::BigInt(right)) => {
-                return Ok(((&**left) ^ (&**right)).into())
-            }
+            (Self::BigInt(left), Self::BigInt(right)) => return Ok(((&**left) ^ (&**right)).into()),
             _ => {}
         }
 

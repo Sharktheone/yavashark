@@ -845,13 +845,14 @@ impl MutObj for MutObject {
                 Some(key) => self.properties.get(&BorrowedPropertyKey::String(key)),
                 None => self.properties.get::<PropertyKey>(&name.clone().into()),
             },
-            InternalPropertyKey::Symbol(s) => {
-                self.properties.get(&BorrowedPropertyKey::Symbol(s))
+            InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
+            InternalPropertyKey::Index(_) => {
+                self.properties.get::<PropertyKey>(&name.clone().into())
             }
-            InternalPropertyKey::Index(_) => self.properties.get::<PropertyKey>(&name.clone().into()),
         };
 
-        if let Some(prop) = idx.and_then(|idx| self.values.get(*idx).map(ObjectProperty::property)) {
+        if let Some(prop) = idx.and_then(|idx| self.values.get(*idx).map(ObjectProperty::property))
+        {
             return Ok(Some(prop));
         }
 

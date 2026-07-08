@@ -6,12 +6,8 @@ use crate::value::ops::BigIntOrNumber;
 impl Value {
     pub fn sub(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match (self, other) {
-            (Self::Number(left), Self::Number(right)) => {
-                return Ok((left - right).into())
-            }
-            (Self::BigInt(left), Self::BigInt(right)) => {
-                return Ok(((&**left) - (&**right)).into())
-            }
+            (Self::Number(left), Self::Number(right)) => return Ok((left - right).into()),
+            (Self::BigInt(left), Self::BigInt(right)) => return Ok(((&**left) - (&**right)).into()),
             _ => {}
         }
 

@@ -93,9 +93,7 @@ impl JSFunction {
             raw: RawJSFunction {
                 name: RefCell::new(name.clone()),
                 params,
-                needs_arguments: block
-                    .as_ref()
-                    .is_some_and(block_needs_arguments),
+                needs_arguments: block.as_ref().is_some_and(block_needs_arguments),
                 block,
                 scope,
                 is_strict,
