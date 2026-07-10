@@ -8,3 +8,5 @@
 // - Rope
 // - External
 // The data will be unsized, since all strings will be now stored inline.
+
+// There should also be an optimization which the interpreter can do when it sees that a string is being mutated while not being shared.

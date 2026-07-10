@@ -20,6 +20,7 @@ pub(crate) mod smallvec;
 mod utf16;
 pub(crate) mod uz;
 mod v2;
+mod v3;
 
 use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, is_surrogate};
 use crate::iter::{CodePoints, CodeUnits};
