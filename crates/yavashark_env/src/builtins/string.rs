@@ -716,9 +716,11 @@ impl StringObj {
 
         let pad_len = target_length.saturating_sub(str.len());
 
-        let pad = pad_string.repeat(pad_len);
+        let mut pad = pad_string.repeat(pad_len);
+        pad.drain(pad_len..); // Ensure pad is exactly pad_len long
+        pad.push_str(str);
 
-        Ok(format!("{pad}{str}").into())
+        Ok(pad.into())
     }
 
     pub fn repeat(#[this] str: &Stringable, count: usize) -> ValueResult {
