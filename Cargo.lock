@@ -3276,31 +3276,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
-name = "lunagc"
-version = "0.1.0"
-dependencies = [
- "lunagc-derive",
- "lunalloc",
-]
-
-[[package]]
-name = "lunagc-derive"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "lunalloc"
-version = "0.1.0"
-dependencies = [
- "libc",
- "winapi",
-]
-
-[[package]]
 name = "malloc_buf"
 version = "0.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5611,9 +5586,9 @@ dependencies = [
 
 [[package]]
 name = "temporal_rs"
-version = "0.2.3"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a902a45282e5175186b21d355efc92564601efe6e2d92818dc9e333d50bd4de"
+checksum = "b1afc06e45b0d63943c777d0233523fa2e23a12431a73c37b1c0366777b31717"
 dependencies = [
  "calendrical_calculations",
  "core_maths",
@@ -7597,7 +7572,6 @@ dependencies = [
 name = "yavashark_string"
 version = "0.1.0"
 dependencies = [
- "lunagc",
  "thin-vec",
 ]
 
