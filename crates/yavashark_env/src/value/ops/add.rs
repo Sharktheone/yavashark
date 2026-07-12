@@ -21,6 +21,10 @@ impl Value {
         let right = other.to_primitive(Hint::None, realm)?;
 
         Ok(if left.is_string() || right.is_string() {
+            if left.is_symbol() || right.is_symbol() {
+                return Err(Error::ty("Cannot convert a Symbol to a string"));
+            }
+
             let left_str = left.into_string(realm)?;
             let right_str = right.into_string(realm)?;
             Self::from(left_str + &right_str)
