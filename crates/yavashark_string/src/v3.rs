@@ -1,4 +1,3 @@
-
 // TODO: string v3 should store the string data inline to the definition
 //       this will allow for faster access to the string data and less memory allocations
 // There will be one pointer and which has an tag to what the string actually is. That can be
@@ -15,9 +14,7 @@ use std::mem::ManuallyDrop;
 
 type Gc<T> = *mut T;
 
-pub struct YSString {
-
-}
+pub struct YSString {}
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -34,7 +31,6 @@ enum Type {
     RopeSlice,
     External,
 }
-
 
 #[repr(C)]
 #[derive(Debug)]
@@ -60,7 +56,6 @@ struct SliceString {
     len: u32,
     ptr: Gc<YSString>,
 }
-
 
 #[repr(C)]
 #[derive(Debug)]
