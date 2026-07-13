@@ -319,7 +319,11 @@ fn run_code(
                 }
             };
         if !result.is_undefined() {
-            println!("Interpreter: {result:?}");
+            if bytecode && interpreter {
+                println!("Interpreter: {result:?}");
+            } else {
+                println!("{result:?}");
+            }
         }
 
         rt.block_on(realm.run_event_loop());
@@ -398,7 +402,11 @@ fn run_code(
         let ret = vm.acc();
 
         if !ret.is_undefined() {
-            println!("Bytecode: {:?}", ret);
+            if bytecode && interpreter {
+                println!("Bytecode: {ret:?}");
+            } else {
+                println!("{ret:?}");
+            }
         }
     }
 
