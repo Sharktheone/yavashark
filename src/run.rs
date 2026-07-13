@@ -21,6 +21,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
+use yavashark_vm::VM;
 
 #[allow(clippy::unwrap_used)]
 pub fn main() {
@@ -317,7 +318,9 @@ fn run_code(
                     return;
                 }
             };
-        println!("Interpreter: {result:?}");
+        if !result.is_undefined() {
+            println!("Interpreter: {result:?}");
+        }
 
         rt.block_on(realm.run_event_loop());
 
@@ -392,7 +395,11 @@ fn run_code(
 
         rt.block_on(vm.get_realm().run_event_loop());
 
-        println!("Bytecode: {:?}", vm.acc());
+        let ret = vm.acc();
+
+        if !ret.is_undefined() {
+            println!("Bytecode: {:?}", ret);
+        }
     }
 
     #[cfg(feature = "vm")]
