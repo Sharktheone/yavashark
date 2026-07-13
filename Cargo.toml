@@ -15,8 +15,8 @@ members = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-swc_common = "21.0.2"
-swc_ecma_parser = "39.1.0"
+swc_common = "23.0.2"
+swc_ecma_parser = "41.1.2"
 yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
 yavashark_vm = { path = "crates/yavashark_vm", optional = true }
@@ -24,7 +24,7 @@ yavashark_env = { path = "crates/yavashark_env" }
 yavashark_profiler = { path = "crates/yavashark_profiler", optional = true }
 yavashark_swc_validator = { path = "crates/yavashark_swc_validator" }
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
-swc_ecma_ast = "23.0.1"
+swc_ecma_ast = "25.0.0"
 memmap2 = "0.9.9"
 half = "2.7.1"
 
