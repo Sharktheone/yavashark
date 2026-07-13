@@ -21,7 +21,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
-use yavashark_vm::VM;
 
 #[allow(clippy::unwrap_used)]
 pub fn main() {
