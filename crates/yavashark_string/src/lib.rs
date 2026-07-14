@@ -507,9 +507,7 @@ impl YSString {
 
             // Fall back to heap
             Self {
-                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(
-                    s.to_string(),
-                ))),
+                inner: UnsafeCell::new(InnerString::RcUtf8(Rc::from(s))),
             }
         } else {
             // Convert to UTF-16
@@ -563,7 +561,7 @@ impl YSString {
 
             // Fall back to heap
             Self {
-                inner: UnsafeCell::new(InnerString::OwnedUtf16(units.into())),
+                inner: UnsafeCell::new(InnerString::RcUtf16(units.into())),
             }
         }
     }
