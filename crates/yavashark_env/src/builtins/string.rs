@@ -687,6 +687,10 @@ impl StringObj {
         let pad_string = pad_string.as_ref().map(|s| s.as_str_lossy());
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
+        if pad_string.is_empty() {
+            return Ok(YSString::from_ref(str.as_str()).into());
+        }
+
         let mut buffer = String::with_capacity(target_length.max(str.len()));
 
         buffer.push_str(str);
@@ -713,6 +717,10 @@ impl StringObj {
     ) -> ValueResult {
         let pad_string = pad_string.as_ref().map(|s| s.as_str_lossy());
         let pad_string = pad_string.as_deref().unwrap_or(" ");
+
+        if pad_string.is_empty() {
+            return Ok(YSString::from_ref(str.as_str()).into());
+        }
 
         let pad_len = target_length.saturating_sub(str.len());
 
