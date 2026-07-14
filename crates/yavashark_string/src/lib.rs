@@ -40,6 +40,7 @@ pub use thin_vec::ThinVec;
 
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
+use crate::utils::units_to_ascii_rc;
 
 /// A JavaScript-compatible string with dual UTF-8/UTF-16 storage.
 ///
@@ -569,12 +570,12 @@ impl YSString {
 
     /// Creates a string from a UTF-16 iterator.
     pub fn from_utf16_iter(iter: impl Iterator<Item = u16>) -> Self {
-        let units: ThinVec<u16> = iter.collect();
+        let units: Rc<[u16]> = iter.collect();
+
 
         // Check if it's ASCII-representable
-        if units.iter().all(|&u| u < 128) {
-            let ascii: String = units.iter().map(|&u| u as u8 as char).collect();
-            Self::from_string(ascii)
+        if let Some(ascii) = units_to_ascii_rc(&units) {
+            Self::from_rc(ascii)
         } else {
             // Try inline first
             if let Some(inline) = InlineUtf16String::try_from_slice(&units) {
@@ -584,7 +585,7 @@ impl YSString {
             }
 
             Self {
-                inner: UnsafeCell::new(InnerString::OwnedUtf16(units)),
+                inner: UnsafeCell::new(InnerString::RcUtf16(units)),
             }
         }
     }
