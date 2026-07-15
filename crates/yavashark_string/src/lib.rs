@@ -488,7 +488,7 @@ impl YSString {
 
             // Fall back to heap
             Self {
-                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(s))),
+                inner: UnsafeCell::new(InnerString::OwnedUtf8(SmallString::from_string(s))), //TODO: we might want to directly covert this to a shared string
             }
         } else {
             // Convert to UTF-16
@@ -538,6 +538,7 @@ impl YSString {
     }
 
     #[must_use]
+    //TODO: remove this function and replace with a shared-only version
     pub const fn new_owned_utf16(vec: ThinVec<u16>) -> Self {
         Self {
             inner: UnsafeCell::new(InnerString::OwnedUtf16(vec)),
@@ -604,6 +605,7 @@ impl YSString {
             }
         }
 
+        //TODO: we need to put this into a shared version
         Self {
             inner: UnsafeCell::new(InnerString::OwnedUtf16(units)),
         }
@@ -816,6 +818,7 @@ impl YSString {
                     let s = rope.to_string();
                     let inner = unsafe { self.inner_mut_ref() };
 
+                    //TODO: flattening should be put into a Shared Buffer
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
 
                     match inner {
@@ -956,6 +959,7 @@ impl YSString {
                 // Need to flatten rope for iteration
                 let units = rope.to_utf16_vec();
                 // This is inefficient, but ropes should be flattened before heavy iteration
+                // TODO: flattening should be put into a shared buffer, we might also just change the iterator
                 let inner = unsafe { self.inner_mut_ref() };
                 *inner = InnerString::OwnedUtf16(units);
 
@@ -1046,6 +1050,7 @@ impl YSString {
                     let mut s = inline.as_str().to_string();
                     s.push(ch);
 
+                    //TODO: we might change the push to have shared be able to push to some capacity
                     *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
                 }
                 InnerString::Static(s) => {
@@ -1109,6 +1114,7 @@ impl YSString {
         let encoded = ch.encode_utf16(&mut buf);
         units.extend_from_slice(encoded);
 
+        //TODO: this should be shared
         *inner = InnerString::OwnedUtf16(units);
     }
 
@@ -1440,6 +1446,7 @@ impl YSString {
             };
 
             units.push(unit);
+            //TODO: this should be shared
             *inner = InnerString::OwnedUtf16(units);
         }
     }
