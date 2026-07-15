@@ -34,6 +34,7 @@ use std::cell::UnsafeCell;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
+use std::mem::MaybeUninit;
 use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
@@ -364,6 +365,79 @@ impl RopeStr {
 
         None
     }
+
+    #[must_use]
+    pub fn flatten(&self) -> Flattened {
+        if self.is_utf8() {
+            Flattened::Utf8(self.flatten_utf8())
+        } else {
+            Flattened::Wtf16(self.flatten_utf16())
+        }
+    }
+
+    fn flatten_utf8(&self) -> Rc<str> {
+        let storage = unsafe {
+            Rc::<[u8]>::new_uninit_slice(self.len())
+        };
+
+
+        let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u8>];
+        let slice = unsafe { &mut *(ptr as *mut [u8]) };
+        let mut offset = 0;
+
+        self.for_each_elem(&mut |w| {
+            match w {
+                Wtf::Utf8(s) => {
+                    slice[offset..offset + s.len()].copy_from_slice(s.as_bytes());
+                    offset += s.len();
+                }
+                Wtf::Utf16(s) => {
+                    unreachable!()
+                }
+            }
+
+            None::<()>
+        });
+
+
+
+        unsafe {
+            (&mut * ptr).assume_init_mut();
+
+            Rc::from_raw(ptr as *mut str as *const str)
+        }
+    }
+
+    fn flatten_utf16(&self) -> Rc<[u16]> {
+        let storage = unsafe {
+            Rc::<[u16]>::new_uninit_slice(self.len())
+        };
+
+        let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u16>];
+        let slice = unsafe { &mut *(ptr as *mut [u16]) };
+        let mut offset = 0;
+
+        self.for_each_elem(&mut |w| {
+            match w {
+                Wtf::Utf8(s) => {
+                    unreachable!()
+                }
+                Wtf::Utf16(s) => {
+                    slice[offset..offset + s.len()].copy_from_slice(s);
+                }
+            }
+
+            None::<()>
+        });
+
+
+        unsafe {
+            (&mut * ptr).assume_init_mut();
+
+
+            Rc::from_raw(ptr as *const _)
+        }
+    }
 }
 
 // this has the reason, so we can control how large the backing buffer is as we'll know how large it is
@@ -420,6 +494,11 @@ pub enum StrRef<'a> {
 pub enum Wtf<'a> {
     Utf8(&'a str),
     Utf16(&'a [u16]),
+}
+
+pub enum Flattened {
+    Utf8(Rc<str>),
+    Wtf16(Rc<[u16]>),
 }
 
 impl YSString {
