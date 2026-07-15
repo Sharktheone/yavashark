@@ -62,17 +62,32 @@ impl<T: Default> Iterator for TwoIter<T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            TwoIter::Two(a, b) => {
+            Self::Two(a, b) => {
                 let a = mem::take(a);
-                *self = TwoIter::One(mem::take(b));
+                *self = Self::One(mem::take(b));
                 Some(a)
             }
-            TwoIter::One(a) => {
+            Self::One(a) => {
                 let a = mem::take(a);
-                *self = TwoIter::None;
+                *self = Self::None;
                 Some(a)
             }
-            TwoIter::None => None,
+            Self::None => None,
         }
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len(), Some(self.len()))
+    }
+}
+
+impl<T: Default> ExactSizeIterator for TwoIter<T> {
+    fn len(&self) -> usize {
+        match self {
+            Self::Two(_, _) => 2,
+            Self::One(_) => 1,
+            Self::None => 0,
+        }
+    }
+
 }
