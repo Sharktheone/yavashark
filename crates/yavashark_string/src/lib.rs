@@ -1035,17 +1035,21 @@ impl YSString {
 
             InnerString::Rope(rope) => {
                 // Need to flatten rope for iteration
-                let units = rope.to_utf16_vec();
+                let units = rope.flatten();
                 // This is inefficient, but ropes should be flattened before heavy iteration
                 // TODO: flattening should be put into a shared buffer, we might also just change the iterator
                 let inner = unsafe { self.inner_mut_ref() };
-                *inner = InnerString::OwnedUtf16(units);
+                *inner = match units {
+                    Flattened::Utf8(utf8) => InnerString::RcUtf8(utf8),
+                    Flattened::Wtf16(wtf16) => InnerString::RcUtf16(wtf16),
+                };
 
-                if let InnerString::OwnedUtf16(v) = inner {
-                    CodeUnits::Utf16(v.iter().copied())
-                } else {
+
+                match inner {
+                    InnerString::RcUtf8(utf8) => CodeUnits::Utf8(utf8.bytes()),
+                    InnerString::RcUtf16(wtf16) => CodeUnits::Utf16(wtf16.iter().copied()),
                     #[allow(clippy::iter_on_empty_collections)]
-                    CodeUnits::Utf16([].iter().copied()) // Unreachable
+                    _ => CodeUnits::Utf16([].iter().copied()) // Unreachable
                 }
             }
         }
