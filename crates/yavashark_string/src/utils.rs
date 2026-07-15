@@ -15,7 +15,7 @@ pub fn units_to_ascii_rc(
     for (i, unit) in units.iter().enumerate() {
         mut_slice[i].write(*unit as u8);
     }
-    
+
     unsafe {
         mut_slice.assume_init_mut();
     }
@@ -24,4 +24,27 @@ pub fn units_to_ascii_rc(
     Some(unsafe {
         Rc::from_raw(ptr as *const [u8] as *const str)
     })
+}
+
+
+pub fn units_iter_to_rc(iter: impl ExactSizeIterator<Item = u16>) -> Rc<[u16]> {
+    let len = iter.len();
+
+    let mut ptr = Rc::into_raw(Rc::<[u16]>::new_uninit_slice(len));
+
+    let mut mut_slice = unsafe { &mut *ptr.cast_mut() };
+
+    for (i, unit) in iter.enumerate() {
+        mut_slice[i].write(unit);
+    }
+
+
+    unsafe {
+        mut_slice.assume_init_mut();
+    }
+
+
+    unsafe {
+        Rc::from_raw(ptr as *const [u16])
+    }
 }
