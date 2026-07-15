@@ -1,3 +1,4 @@
+use std::mem;
 use std::mem::MaybeUninit;
 use std::rc::Rc;
 
@@ -46,5 +47,32 @@ pub fn units_iter_to_rc(iter: impl ExactSizeIterator<Item = u16>) -> Rc<[u16]> {
 
     unsafe {
         Rc::from_raw(ptr as *const [u16])
+    }
+}
+
+
+pub enum TwoIter<T> {
+    Two(T, T),
+    One(T),
+    None
+}
+
+impl<T: Default> Iterator for TwoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            TwoIter::Two(a, b) => {
+                let a = mem::take(a);
+                *self = TwoIter::One(mem::take(b));
+                Some(a)
+            }
+            TwoIter::One(a) => {
+                let a = mem::take(a);
+                *self = TwoIter::None;
+                Some(a)
+            }
+            TwoIter::None => None,
+        }
     }
 }
