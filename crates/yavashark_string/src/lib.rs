@@ -41,7 +41,7 @@ pub use thin_vec::ThinVec;
 
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
-use crate::utils::units_to_ascii_rc;
+use crate::utils::{units_iter_to_rc, units_to_ascii_rc, TwoIter};
 
 /// A JavaScript-compatible string with dual UTF-8/UTF-16 storage.
 ///
@@ -670,25 +670,22 @@ impl YSString {
         }
     }
 
-    pub fn from_codepoint_iter(iter: impl Iterator<Item = CodePoint>) -> Self {
-        let mut units = ThinVec::new();
-
-        for cp in iter {
-            match cp {
-                CodePoint::Unicode(c) => {
-                    let mut buf = [0u16; 2];
-                    let encoded = c.encode_utf16(&mut buf);
-                    units.extend_from_slice(encoded);
-                }
-                CodePoint::UnpairedSurrogate(s) => units.push(s),
-            }
-        }
-
-        //TODO: we need to put this into a shared version
-        Self {
-            inner: UnsafeCell::new(InnerString::OwnedUtf16(units)),
-        }
-    }
+    // pub fn from_codepoint_iter(iter: impl ExactSizeIterator<Item = CodePoint>) -> Self {
+    //     let iter = iter.map(|cp| match cp {
+    //         CodePoint::Unicode(c) => {
+    //             let mut buf = [0u16; 2];
+    //             let encoded = c.encode_utf16(&mut buf);
+    //
+    //             match encoded.len() {
+    //                 1 => TwoIter::One(encoded[0]),
+    //                 _ => TwoIter::Two(encoded[0], encoded[1]),
+    //             }
+    //         }
+    //         CodePoint::UnpairedSurrogate(s) => TwoIter::One(s),
+    //     }).flatten();
+    //
+    //     let units = units_iter_to_rc(iter);
+    // }
 
     /// Creates a string from a single UTF-16 code unit.
     #[must_use]
