@@ -894,14 +894,16 @@ impl YSString {
             InnerString::Rope(rope) => {
                 if rope.is_utf8() {
                     // Flatten to UTF-8
-                    let s = rope.to_string();
+                    let s = rope.flatten();
                     let inner = unsafe { self.inner_mut_ref() };
 
-                    //TODO: flattening should be put into a Shared Buffer
-                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
+                    *inner = match s {
+                        Flattened::Utf8(utf8) => InnerString::RcUtf8(utf8),
+                        Flattened::Wtf16(wtf16) => InnerString::RcUtf16(wtf16)
+                    };
 
                     match inner {
-                        InnerString::OwnedUtf8(s) => Some(s.as_str()),
+                        InnerString::RcUtf8(utf8) => Some(utf8),
                         _ => None,
                     }
                 } else {
