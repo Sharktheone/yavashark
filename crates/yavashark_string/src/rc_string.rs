@@ -151,4 +151,22 @@ impl Header {
             std::slice::from_raw_parts(data_ptr, cap)
         }
     }
+
+    unsafe fn drop<T>(ptr: NonNull<Self>) {
+        let capacity = unsafe { (*ptr.as_ptr()).capacity };
+
+        let layout = Self::layout::<T>(capacity);
+
+        unsafe {
+            std::alloc::dealloc(ptr.as_ptr().cast::<u8>(), layout);
+        }
+    }
+
+    unsafe fn drop_u8(ptr: NonNull<Self>) {
+        unsafe { Self::drop::<u8>(ptr) }
+    }
+
+    unsafe fn drop_u16(ptr: NonNull<Self>) {
+        unsafe { Self::drop::<u16>(ptr) }
+    }
 }
