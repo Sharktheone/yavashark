@@ -63,6 +63,19 @@ impl RcAsciiString {
 
         if init_to != self.len {
             // there already is something behind us
+
+            let additional = unsafe {
+                &Header::data_slice_u8(self.header)[self.len as usize..init_to as usize]
+            };
+
+            if additional.starts_with(str.as_bytes()) {
+                let mut new = self.clone();
+
+                new.len += str.len() as u32;
+
+                return Some(new);
+            }
+
             return None;
         }
 
