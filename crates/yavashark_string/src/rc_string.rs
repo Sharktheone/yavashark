@@ -56,6 +56,38 @@ impl RcAsciiString {
     pub fn new(str: &str) -> Self {
         Self::new_with_extra(str, 0)
     }
+
+    pub fn extend(&self, str: &str) -> Option<Self> {
+        let cap = unsafe { (*self.header.as_ptr()).capacity };
+        let init_to = unsafe { (*self.header.as_ptr()).init_to };
+
+        if init_to != self.len {
+            // there already is something behind us
+            return None;
+        }
+
+        let remaining = cap - init_to;
+
+        if str.len() > remaining as usize {
+            return None;
+        }
+
+        unsafe {
+            let mut data = Header::data_slice_u8_mut(self.header);
+
+            let it = init_to as usize;
+
+            data[it..(it + str.len())].copy_from_slice(str.as_bytes());
+
+            (*self.header.as_ptr()).init_to += str.len() as u32;
+        }
+
+        let mut new = self.clone();
+
+        new.len += str.len() as u32;
+
+        Some(new)
+    }
 }
 
 impl Drop for RcAsciiString {
