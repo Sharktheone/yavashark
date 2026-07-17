@@ -143,6 +143,129 @@ impl Deref for RcAsciiString {
     }
 }
 
+
+
+impl RcWtf16String {
+    pub fn with_capacity(capacity: u32) -> Self {
+        let header = Header::alloc_u16(capacity);
+
+        Self {
+            header,
+            len: 0,
+            phantom: PhantomData,
+        }
+    }
+
+    pub fn new_with_extra(str: &[u16], extra: u32) -> Self {
+        let header = Header::alloc_u16((str.len() as u32).saturating_add(extra));
+        let mut rc_string = Self {
+            header,
+            len: str.len() as u32,
+            phantom: PhantomData,
+        };
+
+        unsafe {
+            (*header.as_ptr()).init_to = str.len() as u32;
+        }
+
+        unsafe {
+            let data_slice = Header::data_slice_u16_mut(header);
+            data_slice[..str.len().min(u32::MAX as usize)].copy_from_slice(str);
+        }
+
+        rc_string
+    }
+
+    pub fn new(str: &[u16]) -> Self {
+        Self::new_with_extra(str, 0)
+    }
+
+    pub fn extend(&self, str: &[u16]) -> Option<Self> {
+        let cap = unsafe { (*self.header.as_ptr()).capacity };
+        let init_to = unsafe { (*self.header.as_ptr()).init_to };
+
+        if init_to != self.len {
+            // there already is something behind us
+
+            let additional = unsafe {
+                &Header::data_slice_u16(self.header)[self.len as usize..init_to as usize]
+            };
+
+            if additional.starts_with(str) {
+                let mut new = self.clone();
+
+                new.len += str.len() as u32;
+
+                return Some(new);
+            }
+
+            return None;
+        }
+
+        let remaining = cap - init_to;
+
+        if str.len() > remaining as usize {
+            return None;
+        }
+
+        unsafe {
+            let mut data = Header::data_slice_u16_mut(self.header);
+
+            let it = init_to as usize;
+
+            data[it..(it + str.len())].copy_from_slice(str);
+
+            (*self.header.as_ptr()).init_to += str.len() as u32;
+        }
+
+        let mut new = self.clone();
+
+        new.len += str.len() as u32;
+
+        Some(new)
+    }
+}
+
+impl Drop for RcWtf16String {
+    fn drop(&mut self) {
+        unsafe {
+            (*self.header.as_ptr()).count -= 1;
+        }
+
+        unsafe {
+            if (*self.header.as_ptr()).count == 0 {
+                Header::drop_u16(self.header);
+            }
+        }
+    }
+}
+
+impl Clone for RcWtf16String {
+    fn clone(&self) -> Self {
+        unsafe {
+            (*self.header.as_ptr()).count += 1;
+        }
+
+        Self {
+            header: self.header,
+            len: self.len,
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl Deref for RcWtf16String {
+    type Target = [u16];
+
+    fn deref(&self) -> &Self::Target {
+        unsafe {
+            let data_slice = Header::data_slice_u16(self.header);
+
+            &data_slice[..(self.len as usize)]
+        }
+    }
+}
+
 impl Header {
     fn layout<T>(cap: u32) -> Layout {
         #[allow(clippy::expect_used)]
