@@ -71,13 +71,17 @@ impl Deref for RcAsciiString {
 }
 
 impl Header {
-    unsafe fn alloc<T>(capacity: u32) -> NonNull<Self> {
+    fn layout<T>(cap: u32) -> Layout {
         #[allow(clippy::expect_used)]
-        let layout = Layout::new::<Self>()
-            .extend(Layout::array::<T>(capacity as usize).expect("layout failed"))
+        Layout::new::<Self>()
+            .extend(Layout::array::<T>(cap as usize).expect("layout failed"))
             .expect("layout failed")
             .0
-            .pad_to_align();
+            .pad_to_align()
+    }
+
+    unsafe fn alloc<T>(capacity: u32) -> NonNull<Self> {
+        let layout = Self::layout::<T>(capacity);
 
         #[allow(clippy::cast_ptr_alignment)]
         let ptr = unsafe { std::alloc::alloc(layout).cast::<Self>() };
