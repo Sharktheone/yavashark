@@ -58,6 +58,20 @@ impl RcAsciiString {
     }
 }
 
+impl Drop for RcAsciiString {
+    fn drop(&mut self) {
+        unsafe {
+            self.header.as_mut().count -= 1;
+        }
+
+        unsafe {
+            if (*self.header.as_ptr()).count == 0 {
+                Header::drop_u8(self.header);
+            }
+        }
+    }
+}
+
 impl Deref for RcAsciiString {
     type Target = str;
 
