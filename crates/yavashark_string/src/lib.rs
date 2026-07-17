@@ -15,14 +15,14 @@
 mod codepoint;
 mod const_string;
 mod iter;
+mod rc_string;
 mod smallstring;
 pub(crate) mod smallvec;
 mod utf16;
+mod utils;
 pub(crate) mod uz;
 mod v2;
 mod v3;
-mod utils;
-mod rc_string;
 
 use crate::codepoint::{decode_surrogate_pair, is_high_surrogate, is_low_surrogate, is_surrogate};
 use crate::iter::{CodePoints, CodeUnits};
@@ -40,9 +40,9 @@ use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
 
+use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc};
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
-use crate::utils::{units_iter_to_rc, units_to_ascii_rc, TwoIter};
 
 /// A JavaScript-compatible string with dual UTF-8/UTF-16 storage.
 ///
@@ -377,10 +377,7 @@ impl RopeStr {
     }
 
     fn flatten_utf8(&self) -> Rc<str> {
-        let storage = unsafe {
-            Rc::<[u8]>::new_uninit_slice(self.len())
-        };
-
+        let storage = unsafe { Rc::<[u8]>::new_uninit_slice(self.len()) };
 
         let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u8>];
         let slice = unsafe { &mut *(ptr as *mut [u8]) };
@@ -400,19 +397,15 @@ impl RopeStr {
             None::<()>
         });
 
-
-
         unsafe {
-            (&mut * ptr).assume_init_mut();
+            (&mut *ptr).assume_init_mut();
 
             Rc::from_raw(ptr as *mut str as *const str)
         }
     }
 
     fn flatten_utf16(&self) -> Rc<[u16]> {
-        let storage = unsafe {
-            Rc::<[u16]>::new_uninit_slice(self.len())
-        };
+        let storage = unsafe { Rc::<[u16]>::new_uninit_slice(self.len()) };
 
         let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u16>];
         let slice = unsafe { &mut *(ptr as *mut [u16]) };
@@ -431,10 +424,8 @@ impl RopeStr {
             None::<()>
         });
 
-
         unsafe {
-            (&mut * ptr).assume_init_mut();
-
+            (&mut *ptr).assume_init_mut();
 
             Rc::from_raw(ptr as *const _)
         }
@@ -652,7 +643,6 @@ impl YSString {
     /// Creates a string from a UTF-16 iterator.
     pub fn from_utf16_iter(iter: impl Iterator<Item = u16>) -> Self {
         let units: Rc<[u16]> = iter.collect();
-
 
         // Check if it's ASCII-representable
         if let Some(ascii) = units_to_ascii_rc(&units) {
@@ -897,7 +887,7 @@ impl YSString {
 
                     *inner = match s {
                         Flattened::Utf8(utf8) => InnerString::RcUtf8(utf8),
-                        Flattened::Wtf16(wtf16) => InnerString::RcUtf16(wtf16)
+                        Flattened::Wtf16(wtf16) => InnerString::RcUtf16(wtf16),
                     };
 
                     match inner {
@@ -1045,12 +1035,11 @@ impl YSString {
                     Flattened::Wtf16(wtf16) => InnerString::RcUtf16(wtf16),
                 };
 
-
                 match inner {
                     InnerString::RcUtf8(utf8) => CodeUnits::Utf8(utf8.bytes()),
                     InnerString::RcUtf16(wtf16) => CodeUnits::Utf16(wtf16.iter().copied()),
                     #[allow(clippy::iter_on_empty_collections)]
-                    _ => CodeUnits::Utf16([].iter().copied()) // Unreachable
+                    _ => CodeUnits::Utf16([].iter().copied()), // Unreachable
                 }
             }
         }
