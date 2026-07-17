@@ -64,9 +64,8 @@ impl RcAsciiString {
         if init_to != self.len {
             // there already is something behind us
 
-            let additional = unsafe {
-                &Header::data_slice_u8(self.header)[self.len as usize..init_to as usize]
-            };
+            let additional =
+                unsafe { &Header::data_slice_u8(self.header)[self.len as usize..init_to as usize] };
 
             if additional.starts_with(str.as_bytes()) {
                 let mut new = self.clone();
@@ -142,8 +141,6 @@ impl Deref for RcAsciiString {
         }
     }
 }
-
-
 
 impl RcWtf16String {
     pub fn with_capacity(capacity: u32) -> Self {
