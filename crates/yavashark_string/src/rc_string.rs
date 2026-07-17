@@ -61,13 +61,27 @@ impl RcAsciiString {
 impl Drop for RcAsciiString {
     fn drop(&mut self) {
         unsafe {
-            self.header.as_mut().count -= 1;
+            (*self.header.as_ptr()).count -= 1;
         }
 
         unsafe {
             if (*self.header.as_ptr()).count == 0 {
                 Header::drop_u8(self.header);
             }
+        }
+    }
+}
+
+impl Clone for RcAsciiString {
+    fn clone(&self) -> Self {
+        unsafe {
+            (*self.header.as_ptr()).count += 1;
+        }
+
+        Self {
+            header: self.header,
+            len: self.len,
+            phantom: PhantomData,
         }
     }
 }
