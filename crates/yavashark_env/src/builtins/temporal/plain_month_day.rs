@@ -113,7 +113,7 @@ impl PlainMonthDay {
 
     #[prop("valueOf")]
     #[nonstatic]
-    pub const fn value_of() -> Res<()> {
+    pub fn value_of() -> Res<()> {
         Err(Error::ty(
             "Called valueOf on a Temporal.PlainMonthDay object",
         ))

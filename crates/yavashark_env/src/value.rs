@@ -453,7 +453,7 @@ impl Value {
         obj.prototype(realm)
     }
 
-    pub const fn as_object(&self) -> Res<&Object> {
+    pub fn as_object(&self) -> Res<&Object> {
         let Self::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };
@@ -523,7 +523,7 @@ impl Value {
         matches!(self, Self::BigInt(_))
     }
 
-    pub const fn as_string(&self) -> Result<&YSString, Error> {
+    pub fn as_string(&self) -> Result<&YSString, Error> {
         let Self::String(s) = self else {
             return Err(Error::ty("Value is not a string"));
         };
@@ -531,7 +531,7 @@ impl Value {
         Ok(s)
     }
 
-    pub const fn as_boolean(&self) -> Result<bool, Error> {
+    pub fn as_boolean(&self) -> Result<bool, Error> {
         let Self::Boolean(b) = self else {
             return Err(Error::ty("Value is not a boolean"));
         };
@@ -539,7 +539,7 @@ impl Value {
         Ok(*b)
     }
 
-    pub const fn as_symbol(&self) -> Result<&Symbol, Error> {
+    pub fn as_symbol(&self) -> Result<&Symbol, Error> {
         let Self::Symbol(s) = self else {
             return Err(Error::ty("Value is not a symbol"));
         };
@@ -547,7 +547,7 @@ impl Value {
         Ok(s)
     }
 
-    pub const fn as_bigint(&self) -> Result<&Rc<BigInt>, Error> {
+    pub fn as_bigint(&self) -> Result<&Rc<BigInt>, Error> {
         let Self::BigInt(b) = self else {
             return Err(Error::ty("Value is not a bigint"));
         };

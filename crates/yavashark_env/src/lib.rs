@@ -81,7 +81,7 @@ impl ControlFlow {
         Self::Error(Error::reference_error(e))
     }
     #[must_use]
-    pub const fn error_syn(e: &'static str) -> Self {
+    pub fn error_syn(e: &'static str) -> Self {
         Self::Error(Error::syn(e))
     }
 

@@ -189,7 +189,7 @@ impl PlainYearMonth {
 
     #[prop("valueOf")]
     #[nonstatic]
-    pub const fn value_of() -> Res<()> {
+    pub fn value_of() -> Res<()> {
         Err(Error::ty("`valueOf` is not supported for PlainYearMonth"))
     }
 

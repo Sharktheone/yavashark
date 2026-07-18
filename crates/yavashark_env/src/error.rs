@@ -16,7 +16,7 @@ pub struct Error {
 
 impl Error {
     #[must_use]
-    pub const fn new(error: &'static str) -> Self {
+    pub fn new(error: &'static str) -> Self {
         Self {
             kind: ErrorKind::Runtime(YSString::new_static_ascii(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -32,7 +32,7 @@ impl Error {
     }
 
     #[must_use]
-    pub const fn reference(error: &'static str) -> Self {
+    pub fn reference(error: &'static str) -> Self {
         Self {
             kind: ErrorKind::Reference(YSString::new_static_ascii(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -48,7 +48,7 @@ impl Error {
     }
 
     #[must_use]
-    pub const fn syn(error: &'static str) -> Self {
+    pub fn syn(error: &'static str) -> Self {
         Self {
             kind: ErrorKind::Syntax(YSString::new_static_ascii(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -112,7 +112,7 @@ impl Error {
     }
 
     #[must_use]
-    pub const fn ty(error: &'static str) -> Self {
+    pub fn ty(error: &'static str) -> Self {
         Self {
             kind: ErrorKind::Type(YSString::new_static_ascii(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -128,7 +128,7 @@ impl Error {
     }
 
     #[must_use]
-    pub const fn range(error: &'static str) -> Self {
+    pub fn range(error: &'static str) -> Self {
         Self {
             kind: ErrorKind::Range(YSString::new_static_ascii(error)),
             stacktrace: StackTrace { frames: vec![] },

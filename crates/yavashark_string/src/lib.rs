@@ -91,6 +91,7 @@ enum InnerString {
     OwnedUtf8(SmallString),
     /// Reference-counted UTF-8 string
     RcUtf8(Rc<str>),
+    // RcUtf8(RcAsciiString),
     // UTF-16 variants (non-ASCII or lone surrogates)
     /// Inline UTF-16 string (up to 11 code units)
     InlineUtf16(InlineUtf16String),
@@ -98,6 +99,7 @@ enum InnerString {
     OwnedUtf16(ThinVec<u16>),
     /// Reference-counted UTF-16 string
     RcUtf16(Rc<[u16]>),
+    // RcUtf16(RcWtf16String),
 
     // Lazy concatenation
     /// Rope string for lazy concatenation
@@ -517,7 +519,14 @@ impl YSString {
     ///
     /// For non-ASCII static strings, use `new_static` instead.
     #[must_use]
-    pub const fn new_static_ascii(s: &'static str) -> Self {
+    pub fn new_static_ascii(s: &'static str) -> Self {
+        if let Some(inline) = InlineString::try_from_string(s) {
+            return Self {
+                inner: UnsafeCell::new(InnerString::InlineUtf8(inline)),
+            }
+        }
+
+
         Self {
             inner: UnsafeCell::new(InnerString::Static(s)),
         }

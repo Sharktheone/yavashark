@@ -258,7 +258,7 @@ impl ZonedDateTime {
 
     #[prop("valueOf")]
     #[nonstatic]
-    pub const fn value_of() -> Res<()> {
+    pub fn value_of() -> Res<()> {
         Err(Error::ty("ZonedDateTime does not support valueOf"))
     }
 
