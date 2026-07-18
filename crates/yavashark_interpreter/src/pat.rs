@@ -228,8 +228,8 @@ impl Interpreter {
                 if let Some(s) = str_.value.as_str() {
                     PropertyKey::String(YSString::from_ref(s))
                 } else {
-                    let utf16_units: Vec<u16> = str_.value.to_ill_formed_utf16().collect();
-                    PropertyKey::String(YSString::from_utf16(&utf16_units))
+                    let utf16_units = str_.value.to_ill_formed_utf16();
+                    PropertyKey::String(YSString::from_utf16_iter(&utf16_units))
                 }
             }
             PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
