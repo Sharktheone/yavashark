@@ -622,9 +622,8 @@ impl YSString {
     #[must_use]
     pub fn from_utf16(units: &[u16]) -> Self {
         // Check if it's ASCII-representable
-        if units.iter().all(|&u| u < 128) {
-            let ascii: String = units.iter().map(|&u| u as u8 as char).collect();
-            Self::from_string(ascii)
+        if let Some(rc) = units_to_ascii_rc(units) {
+            Self::from_rc(rc)
         } else {
             // Try inline first
             if let Some(inline) = InlineUtf16String::try_from_slice(units) {
