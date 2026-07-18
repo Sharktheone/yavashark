@@ -14,7 +14,7 @@ impl Interpreter {
                     YSString::from_ref(str_ref)
                 } else {
                     let utf16_units = s.value.to_ill_formed_utf16();
-                    YSString::from_utf16_iter(&utf16_units)
+                    YSString::from_utf16_iter(utf16_units)
                 };
                 Value::String(ys_string)
             }

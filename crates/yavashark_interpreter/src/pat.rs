@@ -229,7 +229,7 @@ impl Interpreter {
                     PropertyKey::String(YSString::from_ref(s))
                 } else {
                     let utf16_units = str_.value.to_ill_formed_utf16();
-                    PropertyKey::String(YSString::from_utf16_iter(&utf16_units))
+                    PropertyKey::String(YSString::from_utf16_iter(utf16_units))
                 }
             }
             PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
