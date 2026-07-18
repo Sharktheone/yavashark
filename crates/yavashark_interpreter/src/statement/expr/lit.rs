@@ -13,8 +13,8 @@ impl Interpreter {
                 let ys_string = if let Some(str_ref) = s.value.as_str() {
                     YSString::from_ref(str_ref)
                 } else {
-                    let utf16_units: Vec<u16> = s.value.to_ill_formed_utf16().collect();
-                    YSString::from_utf16(&utf16_units)
+                    let utf16_units = s.value.to_ill_formed_utf16();
+                    YSString::from_utf16_iter(&utf16_units)
                 };
                 Value::String(ys_string)
             }
