@@ -79,10 +79,21 @@ struct RopeSliceString {
 }
 
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 struct ExternalString {
     header: StringHeader,
     len: u32,
     data: *const u8,
-    drop: Option<unsafe extern "C" fn(*const u8)>,
+    drop: Option<unsafe extern "C" fn(*const u8, u32)>,
+}
+
+impl Drop for ExternalString {
+    fn drop(&mut self) {
+        if let Some(drop) = self.drop {
+            unsafe {
+                drop(self.data, self.len);
+            }
+        }
+    }
+
 }
