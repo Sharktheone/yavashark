@@ -42,6 +42,7 @@ enum Type {
 #[derive(Debug)]
 struct AsciiString {
     header: StringHeader,
+    cap: u32,
     len: u32,
     phantom: PhantomData<[u8]>,
 }
@@ -50,6 +51,7 @@ struct AsciiString {
 #[derive(Debug)]
 struct Wtf16String {
     header: StringHeader,
+    cap: u32,
     len: u32,
     phantom: PhantomData<[u16]>,
 }
