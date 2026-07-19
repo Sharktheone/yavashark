@@ -10,11 +10,17 @@
 
 // There should also be an optimization which the interpreter can do when it sees that a string is being mutated while not being shared.
 
+use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
+use std::ptr::NonNull;
 
 type Gc<T> = *mut T;
 
-pub struct YSString {}
+pub struct YSString {
+    data: NonNull<StringHeader>,
+    phantom: PhantomData<StringHeader>,
+}
+
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -37,6 +43,7 @@ enum Type {
 struct AsciiString {
     header: StringHeader,
     len: u32,
+    phantom: PhantomData<[u8]>,
 }
 
 #[repr(C)]
@@ -44,6 +51,7 @@ struct AsciiString {
 struct Wtf16String {
     header: StringHeader,
     len: u32,
+    phantom: PhantomData<[u16]>,
 }
 
 #[repr(C)]
@@ -95,5 +103,4 @@ impl Drop for ExternalString {
             }
         }
     }
-
 }
