@@ -10,13 +10,15 @@ struct Header {
     init_to: u32,
 }
 
-struct RcAsciiString {
+#[repr(Rust, packed)]
+pub struct RcAsciiString {
     header: NonNull<Header>,
     len: u32,
     phantom: PhantomData<[u8]>,
 }
 
-struct RcWtf16String {
+#[repr(Rust, packed)]
+pub struct RcWtf16String {
     header: NonNull<Header>,
     len: u32,
     phantom: PhantomData<[u16]>,
