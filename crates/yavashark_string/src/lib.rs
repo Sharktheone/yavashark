@@ -35,12 +35,13 @@ use std::cell::UnsafeCell;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
+use std::io::Read;
 use std::mem::MaybeUninit;
 use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
 
-use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc};
+use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc};
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
 
@@ -1185,7 +1186,7 @@ impl YSString {
                 inline.as_slice().into()
             }
             InnerString::OwnedUtf16(v) => std::mem::take(v),
-            InnerString::RcUtf16(v) => v.to_vec().into(),
+            InnerString::RcUtf16(v) => v.as_ref().into(),
             InnerString::Rope(rope) => rope.to_utf16_vec(),
         };
 
