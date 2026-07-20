@@ -23,6 +23,30 @@ pub fn units_to_ascii_rc(units: &[u16]) -> Option<Rc<str>> {
     Some(unsafe { Rc::from_raw(ptr as *const [u8] as *const str) })
 }
 
+
+
+pub fn char_iter_to_ascii_rc(units: impl ExactSizeIterator<Item = char>) -> Rc<str> {
+    let mut ptr = Rc::into_raw(Rc::<[u8]>::new_uninit_slice(units.len()));
+
+    let mut mut_slice =
+        unsafe { std::slice::from_raw_parts_mut::<MaybeUninit<u8>>(ptr as *mut _, units.len()) };
+
+    for (i, unit) in units.enumerate() {
+        if unit.is_ascii() {
+            mut_slice[i].write(unit as u8);
+        } else {
+            mut_slice[i].write(b'?');
+        }
+        
+    }
+
+    unsafe {
+        mut_slice.assume_init_mut();
+    }
+
+    unsafe { Rc::from_raw(ptr as *const [u8] as *const str) }
+}
+
 pub fn units_iter_to_rc(iter: impl ExactSizeIterator<Item = u16>) -> Rc<[u16]> {
     let len = iter.len();
 
