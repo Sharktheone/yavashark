@@ -1131,20 +1131,21 @@ impl YSString {
                     let mut buf = [0u8; 4];
                     let ch = ch.encode_utf8(&mut buf);
 
-
-
-                    // Need to upgrade to heap
-                    let mut s = inline.as_str();
+                    let s = inline.as_str();
 
                     let rc = str_push_to_rc(s, ch);
 
                     *inner = InnerString::RcUtf8(rc);
                 }
                 InnerString::Static(s) => {
-                    let mut string = (**s).to_string();
-                    string.push(ch);
+                    let mut buf = [0u8; 4];
+                    let ch = ch.encode_utf8(&mut buf);
 
-                    *inner = InnerString::OwnedUtf8(SmallString::from_string(string));
+                    let s = (**s).as_ref();
+
+                    let rc = str_push_to_rc(s, ch);
+
+                    *inner = InnerString::RcUtf8(rc);
                 }
                 InnerString::OwnedUtf8(s) => {
                     s.push(ch);
