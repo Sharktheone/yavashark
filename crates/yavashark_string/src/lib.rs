@@ -1151,10 +1151,14 @@ impl YSString {
                     s.push(ch);
                 }
                 InnerString::RcUtf8(rc) => {
-                    let mut s = rc.to_string();
-                    s.push(ch);
+                    let mut buf = [0u8; 4];
+                    let ch = ch.encode_utf8(&mut buf);
 
-                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
+                    let s = (**rc).as_ref();
+
+                    let rc = str_push_to_rc(s, ch);
+
+                    *inner = InnerString::RcUtf8(rc);
                 }
                 _ => {} // unreachable
             }
