@@ -65,6 +65,24 @@ pub fn units_iter_to_rc(iter: impl ExactSizeIterator<Item = u16>) -> Rc<[u16]> {
     unsafe { Rc::from_raw(ptr as *const [u16]) }
 }
 
+
+pub fn str_push_to_rc(str: &str, str2: &str) -> Rc<str> {
+    let len = str.len() + str2.len();
+
+    let mut ptr = Rc::into_raw(Rc::<[u8]>::new_uninit_slice(len));
+
+    let mut mut_slice = unsafe { &mut *(ptr.cast_mut() as *mut [u8]) };
+
+    mut_slice[..str.len()].copy_from_slice(str.as_bytes());
+    mut_slice[str.len()..].copy_from_slice(str2.as_bytes());
+
+    unsafe {
+        (&mut *ptr.cast_mut()).assume_init_mut();
+    }
+
+    unsafe { Rc::from_raw(ptr as *const [u8] as *const str) }
+}
+
 pub enum TwoIter<T> {
     Two(T, T),
     One(T),
