@@ -41,7 +41,7 @@ use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
 
-use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc};
+use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc, str_push_to_rc};
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
 
@@ -1127,12 +1127,18 @@ impl YSString {
                     if inline.push_ascii(ch as u8) {
                         return;
                     }
-                    // Need to upgrade to heap
-                    let mut s = inline.as_str().to_string();
-                    s.push(ch);
 
-                    //TODO: we might change the push to have shared be able to push to some capacity
-                    *inner = InnerString::OwnedUtf8(SmallString::from_string(s));
+                    let mut buf = [0u8; 4];
+                    let ch = ch.encode_utf8(&mut buf);
+
+
+
+                    // Need to upgrade to heap
+                    let mut s = inline.as_str();
+
+                    let rc = str_push_to_rc(s, ch);
+
+                    *inner = InnerString::RcUtf8(rc);
                 }
                 InnerString::Static(s) => {
                     let mut string = (**s).to_string();
