@@ -41,7 +41,7 @@ use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
 
-use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc, str_push_to_rc};
+use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc, str_push_to_rc, wtf16_join_to_rc};
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
 
@@ -1207,7 +1207,7 @@ impl YSString {
         units.extend_from_slice(encoded);
 
         //TODO: this should be shared
-        *inner = InnerString::OwnedUtf16(units);
+        *inner = InnerString::RcUtf16(units.as_slice().into());
     }
 
     /// Pushes a string to the end of this string.
