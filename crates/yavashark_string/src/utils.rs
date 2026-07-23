@@ -83,6 +83,24 @@ pub fn str_push_to_rc(str: &str, str2: &str) -> Rc<str> {
     unsafe { Rc::from_raw(ptr as *const [u8] as *const str) }
 }
 
+pub fn wtf16_join_to_rc(str: impl ExactSizeIterator<Item = u16>, str2: &[u16]) -> Rc<[u16]> {
+    let len = str.len() + str2.len();
+
+    let mut ptr = Rc::into_raw(Rc::<[u16]>::new_uninit_slice(len));
+
+    let mut mut_slice = unsafe { &mut *ptr.cast_mut() };
+
+    for (i, unit) in str.chain(str2.iter().copied()).enumerate() {
+        mut_slice[i].write(unit);
+    }
+    
+    unsafe {
+        (&mut *ptr.cast_mut()).assume_init_mut();
+    }
+
+    unsafe { Rc::from_raw(ptr as *const [u16]) }
+}
+
 pub enum TwoIter<T> {
     Two(T, T),
     One(T),
