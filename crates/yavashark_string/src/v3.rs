@@ -157,6 +157,93 @@ struct Wtf16String {
     phantom: PhantomData<[u16]>,
 }
 
+impl Wtf16String {
+    fn layout(cap: u32) -> Layout {
+        let layout = Layout::new::<Self>();
+
+        #[allow(clippy::expect_used)]
+        layout.extend(Layout::array::<u16>(cap as usize)
+            .expect("cannot happen")
+        ).expect("cannot happen")
+            .0.pad_to_align()
+    }
+
+    fn with_capacity(cap: u32) -> Option<NonNull<Self>> {
+        let layout = Self::layout(cap);
+
+        let ptr = unsafe {
+            #[allow(clippy::cast_ptr_alignment)]
+            alloc::alloc(layout).cast::<Self>()
+        };
+
+        let ptr = NonNull::new(ptr)?;
+
+        unsafe {
+            ptr.write(Self {
+                header: StringHeader { ty: Type::Wtf16 },
+                cap,
+                len: 0,
+                phantom: PhantomData,
+            });
+        }
+
+        Some(ptr)
+    }
+
+    fn new_with_extra(str: &[u16], extra: u32) -> Option<NonNull<Self>> {
+        let cap = str.len().saturating_add(extra as usize).min(u32::MAX as usize) as u32;
+
+        let slf = Self::with_capacity(cap)?;
+
+
+        unsafe {
+            Self::write(slf, str);
+        }
+
+
+        Some(slf)
+    }
+
+
+    fn new(str: &[u16]) -> Option<NonNull<Self>> {
+        Self::new_with_extra(str, 0)
+    }
+
+    unsafe fn get_data_ptr(slf: NonNull<Self>) -> &'static mut [u16] {
+        unsafe {
+            let ptr = slf.offset(1).cast::<u16>();
+
+            slice::from_raw_parts_mut(ptr.as_ptr(), (*slf.as_ptr()).cap as usize)
+        }
+    }
+
+    unsafe fn get_data_ptr_ref(slf: NonNull<Self>) -> &'static [u16] {
+        unsafe {
+            let ptr = slf.offset(1).cast::<u16>();
+
+            slice::from_raw_parts(ptr.as_ptr(), (*slf.as_ptr()).cap as usize)
+        }
+    }
+
+    unsafe fn write(slf: NonNull<Self>, str: &[u16]) {
+        unsafe {
+            let offset = (*slf.as_ptr()).len as usize;
+
+            let data = Self::get_data_ptr(slf);
+
+            data[offset..offset + str.len()].copy_from_slice(str);
+        }
+    }
+
+    unsafe fn drop(slf: NonNull<Self>) {
+        unsafe {
+            let layout = Self::layout((*slf.as_ptr()).cap);
+
+            alloc::dealloc(slf.cast().as_ptr(), layout);
+        }
+    }
+}
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 struct SliceString {
