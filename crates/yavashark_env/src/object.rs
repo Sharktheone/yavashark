@@ -365,6 +365,21 @@ impl MutObject {
             return (0, false);
         }
 
+        if self
+            .array
+            .get(index)
+            .is_some_and(|(stored_index, _)| *stored_index == index)
+        {
+            return (index, true);
+        }
+
+        let last_position = self.array.len() - 1;
+        match index.cmp(&self.array[last_position].0) {
+            std::cmp::Ordering::Equal => return (last_position, true),
+            std::cmp::Ordering::Greater => return (self.array.len(), false),
+            std::cmp::Ordering::Less => {}
+        }
+
         if self.array.len() > 100 {
             return self
                 .array
