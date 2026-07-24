@@ -9,11 +9,17 @@ impl Interpreter {
         fn update(value: Value, op: UpdateOp, realm: &mut Realm) -> Res<(Value, Value)> {
             Ok(match op {
                 UpdateOp::PlusPlus => {
-                    if let Value::BigInt(orig) = value {
-                        let b = (*orig).clone() + 1;
+                    let value = match value {
+                        Value::Number(orig) => {
+                            return Ok((Value::Number(orig + 1.0), Value::Number(orig)));
+                        }
+                        Value::BigInt(orig) => {
+                            let b = (*orig).clone() + 1;
 
-                        return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
-                    }
+                            return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
+                        }
+                        value => value,
+                    };
 
                     (
                         value.sub(&Value::Number(-1.0), realm)?,
@@ -21,11 +27,17 @@ impl Interpreter {
                     )
                 }
                 UpdateOp::MinusMinus => {
-                    if let Value::BigInt(orig) = value {
-                        let b = (*orig).clone() - 1;
+                    let value = match value {
+                        Value::Number(orig) => {
+                            return Ok((Value::Number(orig - 1.0), Value::Number(orig)));
+                        }
+                        Value::BigInt(orig) => {
+                            let b = (*orig).clone() - 1;
 
-                        return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
-                    }
+                            return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
+                        }
+                        value => value,
+                    };
 
                     (
                         value.sub(&Value::Number(1.0), realm)?,
@@ -40,7 +52,7 @@ impl Interpreter {
                 let name = i.sym.as_str();
                 let value = scope
                     .resolve(name, realm)?
-                    .ok_or(Error::reference_error(format!("{name} is not defined")))?;
+                    .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(value, stmt.op, realm)?;
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
