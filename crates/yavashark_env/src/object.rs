@@ -318,6 +318,19 @@ impl Obj for Object {
 }
 
 impl MutObject {
+    fn property_index(&self, name: &InternalPropertyKey) -> Option<usize> {
+        match name {
+            InternalPropertyKey::String(s) => s.as_str()
+                .map_or_else(
+                    || self.properties.get::<PropertyKey>(&name.clone().into()),
+                    |key| self.properties.get(&BorrowedPropertyKey::String(key))
+                ),
+            InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
+            InternalPropertyKey::Index(_) => None,
+        }
+        .copied()
+    }
+
     #[must_use]
     pub fn new(realm: &Realm) -> Self {
         let prototype = realm.intrinsics.obj.clone().into();
@@ -855,18 +868,9 @@ impl MutObj for MutObject {
             //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
 
-        let idx = match &name {
-            InternalPropertyKey::String(s) => match s.as_str() {
-                Some(key) => self.properties.get(&BorrowedPropertyKey::String(key)),
-                None => self.properties.get::<PropertyKey>(&name.clone().into()),
-            },
-            InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
-            InternalPropertyKey::Index(_) => {
-                self.properties.get::<PropertyKey>(&name.clone().into())
-            }
-        };
-
-        if let Some(prop) = idx.and_then(|idx| self.values.get(*idx).map(ObjectProperty::property))
+        if let Some(prop) = self
+            .property_index(&name)
+            .and_then(|idx| self.values.get(idx).map(ObjectProperty::property))
         {
             return Ok(Some(prop));
         }
@@ -894,8 +898,8 @@ impl MutObj for MutObject {
             return Ok(self.get_array(n));
         }
 
-        if let Some(prop) = self.properties.get::<PropertyKey>(&name.into()) {
-            return Ok(self.values.get(*prop).map(|v| v.property()));
+        if let Some(prop) = self.property_index(&name) {
+            return Ok(self.values.get(prop).map(|v| v.property()));
         }
 
         Ok(None)
@@ -1027,7 +1031,7 @@ impl MutObj for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        Ok(self.properties.contains_key::<PropertyKey>(&name.into()))
+        Ok(self.property_index(&name).is_some())
     }
 
     fn contains_key(
@@ -1049,10 +1053,7 @@ impl MutObj for MutObject {
             return Ok(false);
         }
 
-        if self
-            .properties
-            .contains_key::<PropertyKey>(&name.clone().into())
-        {
+        if self.property_index(&name).is_some() {
             return Ok(true);
         }
 
