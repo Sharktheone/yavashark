@@ -1,5 +1,5 @@
 use crate::value::{CustomGcRefUntyped, DefinePropertyResult};
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::collections::hash_map::Entry;
@@ -225,6 +225,22 @@ impl VariableOrRef {
 
         Ok(())
     }
+
+    #[must_use]
+    fn copy_value(&self, realm: &mut Realm) -> Value {
+        match self {
+            Self::Variable(v) => v.value.copy(),
+            Self::Ref(r) => r.get(realm).value,
+        }
+    }
+
+    #[must_use]
+    fn is_writable(&self, realm: &mut Realm) -> bool {
+        match self {
+            Self::Variable(v) => v.properties.is_writable(),
+            Self::Ref(r) => r.get(realm).properties.is_writable(),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -285,24 +301,24 @@ impl ObjectOrVariables {
         Ok(())
     }
 
-    fn get(&self, name: &str, realm: &mut Realm) -> Option<Variable> {
+    fn get_value(&self, name: &str, realm: &mut Realm) -> Option<Value> {
         match self {
             Self::Object(o) => o
-                .get_own_property_no_get_set(YSString::from_ref(name), realm)
+                .get_own_property_no_get_set(
+                    InternalPropertyKey::String(YSString::from_ref(name)),
+                    realm,
+                )
                 .ok()
                 .flatten()
-                .map(|x| {
-                    let x = x.assert_value();
-                    Variable::with_attributes(x.value, x.properties)
-                }),
-            Self::Variables(v) => v.get(name).map(|v| VariableOrRef::get(v, realm)),
+                .map(|x| x.assert_value().value),
+            Self::Variables(v) => v.get(name).map(|v| v.copy_value(realm)),
         }
     }
 
     fn contains_key(&self, name: &str, realm: &mut Realm) -> bool {
         match self {
             Self::Object(o) => o
-                .contains_own_key(YSString::from_ref(name).into(), realm)
+                .contains_own_key(InternalPropertyKey::String(YSString::from_ref(name)), realm)
                 .unwrap_or_default(),
             Self::Variables(v) => v.contains_key(name),
         }
@@ -333,7 +349,7 @@ impl ObjectOrVariables {
 pub struct ScopeInternal {
     parent: Option<Gc<RefCell<ScopeInternal>>>,
     variables: ObjectOrVariables,
-    hoisted: HashSet<String>,
+    hoisted: FxHashSet<String>,
     pub available_labels: Vec<String>,
     pub last_label_is_current: bool,
     pub state: ScopeState,
@@ -388,7 +404,7 @@ impl ScopeInternal {
         Self {
             parent: None,
             variables: ObjectOrVariables::Object(global),
-            hoisted: HashSet::new(),
+            hoisted: FxHashSet::default(),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::new(),
@@ -404,7 +420,7 @@ impl ScopeInternal {
         Self {
             parent: None,
             variables: ObjectOrVariables::Object(realm.global.clone()),
-            hoisted: HashSet::new(),
+            hoisted: FxHashSet::default(),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::STATE_NONE,
@@ -417,9 +433,8 @@ impl ScopeInternal {
     pub fn with_parent(parent: Gc<RefCell<Self>>) -> Res<Self> {
         let variables = FxHashMap::with_capacity_and_hasher(8, Default::default());
 
-        let state = parent.borrow()?.state.copy();
-
         let par_scope = parent.borrow()?;
+        let state = par_scope.state.copy();
         let available_labels = par_scope.available_labels.clone();
 
         let this = par_scope.this.copy();
@@ -429,7 +444,7 @@ impl ScopeInternal {
         Ok(Self {
             parent: Some(parent),
             variables: ObjectOrVariables::Variables(variables),
-            hoisted: HashSet::new(),
+            hoisted: FxHashSet::default(),
             available_labels,
             last_label_is_current: false,
             state,
@@ -520,8 +535,8 @@ impl ScopeInternal {
     }
 
     pub fn resolve(&self, name: &str, realm: &mut Realm) -> Res<Option<Value>> {
-        if let Some(v) = self.variables.get(name, realm) {
-            return Ok(Some(v.copy()));
+        if let Some(v) = self.variables.get_value(name, realm) {
+            return Ok(Some(v));
         }
 
         if self.hoisted.contains(name) {
@@ -630,7 +645,7 @@ impl ScopeInternal {
     pub fn update(&mut self, name: &str, value: Value, realm: &mut Realm) -> Res<bool> {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
-                let name: InternalPropertyKey = YSString::from_ref(name).into();
+                let name = InternalPropertyKey::String(YSString::from_ref(name));
                 if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
@@ -651,7 +666,7 @@ impl ScopeInternal {
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(name) {
-                    if !var.get(realm).properties.is_writable() {
+                    if !var.is_writable(realm) {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
@@ -687,7 +702,7 @@ impl ScopeInternal {
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
-                    if !var.get(realm).properties.is_writable() {
+                    if !var.is_writable(realm) {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
@@ -804,7 +819,7 @@ impl Scope {
             scope: Gc::new(RefCell::new(ScopeInternal {
                 parent: Some(Gc::clone(&parent.scope)),
                 variables: ObjectOrVariables::Object(object),
-                hoisted: HashSet::new(),
+                hoisted: FxHashSet::default(),
                 available_labels: Vec::new(),
                 last_label_is_current: false,
                 state: ScopeState::new(),
