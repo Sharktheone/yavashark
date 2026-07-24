@@ -4,8 +4,10 @@ use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::{
-    Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value,
+    Class, ClassInstance, ControlFlow, Error, InternalPropertyKey, PrivateMember, Realm,
+    RuntimeResult, Value,
 };
 use yavashark_string::YSString;
 
@@ -34,8 +36,10 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
-            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-            MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
+            MemberProp::Ident(i) => InternalPropertyKey::String(YSString::from_ref(&i.sym)),
+            MemberProp::Computed(e) => {
+                Self::run_expr(realm, &e.expr, span, scope)?.into_internal_property_key(realm)?
+            }
             MemberProp::PrivateName(p) => {
                 let name = p.name.as_str();
                 let obj = value.as_object()?;
@@ -64,8 +68,7 @@ impl Interpreter {
 
         match value {
             Value::Object(ref o) => Ok((
-                o.resolve_property(&name, realm)?
-                    .unwrap_or(Value::Undefined),
+                o.resolve_property(name, realm)?.unwrap_or(Value::Undefined),
                 Some(value),
             )),
             Value::Undefined => Err(ControlFlow::error_type(format!(
@@ -78,7 +81,7 @@ impl Interpreter {
                 let str = Obj::into_object(StringObj::with_string(realm, s)?);
 
                 Ok((
-                    str.resolve_property(&name, realm)?
+                    str.resolve_property(name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(str.into()),
                 ))
@@ -88,7 +91,7 @@ impl Interpreter {
                 let num = NumberObj::with_number(realm, n)?;
 
                 Ok((
-                    num.resolve_property(&name, realm)?
+                    num.resolve_property(name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(num.into()),
                 ))
@@ -99,7 +102,7 @@ impl Interpreter {
 
                 Ok((
                     boolean
-                        .resolve_property(&name, realm)?
+                        .resolve_property(name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(boolean.into()),
                 ))
@@ -110,7 +113,7 @@ impl Interpreter {
 
                 Ok((
                     symbol
-                        .resolve_property(&name, realm)?
+                        .resolve_property(name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(symbol.into()),
                 ))
@@ -121,7 +124,7 @@ impl Interpreter {
 
                 Ok((
                     big_int
-                        .resolve_property(&name, realm)?
+                        .resolve_property(name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(big_int.into()),
                 ))

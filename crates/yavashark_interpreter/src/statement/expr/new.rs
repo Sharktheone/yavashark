@@ -9,7 +9,7 @@ impl Interpreter {
     pub fn run_new(realm: &mut Realm, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
         let callee = Self::run_expr(realm, &stmt.callee, stmt.span, scope)?;
 
-        let Value::Object(constructor) = callee.copy() else {
+        let Value::Object(constructor) = callee else {
             return Err(ControlFlow::error_type(format!(
                 "{:?} is not a constructor",
                 stmt.callee

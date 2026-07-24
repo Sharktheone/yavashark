@@ -16,7 +16,10 @@ impl Interpreter {
             Callee::Expr(callee_expr) => {
                 let (callee, this) = Self::run_call_expr(realm, callee_expr, stmt.span, scope)?;
 
-                let this = this.unwrap_or(scope.fn_this()?);
+                let this = match this {
+                    Some(this) => this,
+                    None => scope.fn_this()?,
+                };
 
                 Self::run_call_on(realm, &callee, this, &stmt.args, stmt.span, scope)
             }
@@ -113,7 +116,7 @@ impl Interpreter {
             }
         }
 
-        if let Value::Object(f) = callee.copy() {
+        if let Value::Object(f) = callee {
             f.call(values, this, realm) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));

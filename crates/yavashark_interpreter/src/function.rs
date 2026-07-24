@@ -174,8 +174,9 @@ impl Func for JSFunction {
 impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let arguments_args = self.needs_arguments.then(|| args.clone());
+        let caller = (self.needs_arguments && !self.is_strict).then(|| this.copy());
 
-        let scope = &mut Scope::with_parent_this(&self.scope, this.copy())?;
+        let scope = &mut Scope::with_parent_this(&self.scope, this)?;
         if self.is_strict {
             scope.set_strict_mode();
         }
@@ -199,12 +200,6 @@ impl RawJSFunction {
         }
 
         if let Some(arguments_args) = arguments_args {
-            let caller = if scope.is_strict_mode()? {
-                None
-            } else {
-                Some(this.copy())
-            };
-
             let args = Arguments::new(arguments_args, caller, realm)?;
             let args = ObjectHandle::new(args);
 

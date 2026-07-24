@@ -186,7 +186,10 @@ impl Interpreter {
                     return Ok(());
                 }
 
-                let this = this.unwrap_or(scope.fn_this()?);
+                let this = match this {
+                    Some(this) => this,
+                    None => scope.fn_this()?,
+                };
 
                 Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?
@@ -498,7 +501,10 @@ impl Interpreter {
                     return Ok(right);
                 }
 
-                let this = this.unwrap_or(scope.fn_this()?);
+                let this = match this {
+                    Some(this) => this,
+                    None => scope.fn_this()?,
+                };
 
                 let left = Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?
