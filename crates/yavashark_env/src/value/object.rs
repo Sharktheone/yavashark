@@ -1176,12 +1176,10 @@ impl Object {
 
     pub fn get_own_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Value> {
         let name = name.into_internal_property_key(realm)?;
-        let property =
-            self.0
-                .get_own_property(name.clone(), realm)?
-                .ok_or(Error::reference_error(format!(
-                    "{name} does not exist on object"
-                )))?;
+        let property = self
+            .0
+            .get_own_property(name.clone(), realm)?
+            .ok_or_else(|| Error::reference_error(format!("{name} does not exist on object")))?;
 
         match property {
             Property::Value(v, _) => Ok(v),
