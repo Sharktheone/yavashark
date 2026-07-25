@@ -49,9 +49,10 @@ tokio = { version = "1.47.1", default-features = false, features = ["sync", "fs"
 
 
 [features]
-default = ["temporal", "icu"]
+default = ["temporal", "icu", "annex_b"]
 temporal = ["dep:temporal_rs", "dep:icu"]
 icu = ["dep:icu"]
+annex_b = []
 tests = []
 profiler = ["dep:yavashark_profiler"]
 out-of-spec-experiments = ["tokio/time"]
