@@ -399,6 +399,7 @@ impl StringObj {
         self.inner.borrow().string.len()
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn anchor(#[this] string: &Stringable, name: &Stringable) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), string).into())
     }
@@ -407,14 +408,17 @@ impl StringObj {
         Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn big(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<big>{str}</big>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn blink(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<blink>{str}</blink>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn bold(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<b>{str}</b>").into())
     }
@@ -481,11 +485,13 @@ impl StringObj {
         Ok(format!("<tt>{str}</tt>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("fontcolor")]
     pub fn font_color(#[this] str: &Stringable, color: &Stringable) -> ValueResult {
         Ok(format!("<font color=\"{color}\">{str}</font>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("fontsize")]
     pub fn font_size(#[this] str: &Stringable, size: &Stringable) -> ValueResult {
         Ok(format!("<font size=\"{size}\">{str}</font>").into())
@@ -535,6 +541,7 @@ impl StringObj {
         str.chars().all(|c| !is_lone_surrogate(c))
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("italics")]
     pub fn italics(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<i>{str}</i>").into())
@@ -558,6 +565,7 @@ impl StringObj {
         str[..from].rfind(&**search).map_or(-1, |i| i as isize)
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("link")]
     pub fn link(#[this] str: &Stringable, url: &Stringable) -> ValueResult {
         Ok(format!("<a href=\"{url}\">{str}</a>").into())
@@ -974,6 +982,7 @@ impl StringObj {
         Ok(YSString::from_ref(string.unwrap_or_default()).into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn small(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<small>{str}</small>").into())
     }
@@ -1073,14 +1082,17 @@ impl StringObj {
         Ok(str.starts_with(&*search_str.as_str_lossy()).into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn strike(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<strike>{str}</strike>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn sub(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<sub>{str}</sub>").into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn substr(#[this] str: &Stringable, start: isize, len: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
@@ -1121,6 +1133,7 @@ impl StringObj {
         Ok(YSString::from_ref(string.unwrap_or_default()).into())
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn sup(#[this] str: &Stringable) -> ValueResult {
         Ok(format!("<sup>{str}</sup>").into())
     }
