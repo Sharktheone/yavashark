@@ -257,6 +257,7 @@ impl Date {
         self.date().map_or(f64::NAN, |d| d.to_utc().second() as f64)
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("getYear")]
     pub fn get_year(&self) -> f64 {
         self.date().map_or(f64::NAN, |d| (d.year() - 1900) as f64)
@@ -994,6 +995,7 @@ impl Date {
         Ok(result.unwrap_or(f64::NAN).into())
     }
 
+    #[cfg(feature = "annex_b")]
     #[prop("setYear")]
     pub fn set_year(&self, year: Value, #[realm] realm: &mut Realm) -> ValueResult {
         // Per spec: If t is NaN, let t be +0; otherwise, let t be LocalTime(t)
