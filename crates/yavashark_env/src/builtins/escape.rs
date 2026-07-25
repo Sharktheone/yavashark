@@ -5,6 +5,7 @@ use std::fmt::Write;
 use std::str::Chars;
 
 #[must_use]
+#[cfg(feature = "annex_b")]
 pub fn get_escape(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "escape",
@@ -39,8 +40,10 @@ pub fn get_escape(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+#[cfg(feature = "annex_b")]
 pub struct Escape;
 
+#[cfg(feature = "annex_b")]
 impl Initializer<ObjectHandle> for Escape {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(get_escape(realm))
@@ -99,6 +102,7 @@ impl Initializer<ObjectHandle> for EncodeURIComponent {
     }
 }
 
+#[cfg(feature = "annex_b")]
 #[must_use]
 pub fn get_unescape(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -129,8 +133,10 @@ pub fn get_unescape(realm: &mut Realm) -> ObjectHandle {
     )
 }
 
+#[cfg(feature = "annex_b")]
 pub struct Unescape;
 
+#[cfg(feature = "annex_b")]
 impl Initializer<ObjectHandle> for Unescape {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(get_unescape(realm))

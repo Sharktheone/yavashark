@@ -22,11 +22,13 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
-    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, Escape, EvalError,
+    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, EvalError,
     IsFinite, IsNan, JSON, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError,
     Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, TypeError, URIError,
-    Unescape, WeakMap, WeakRef, WeakSet,
+    WeakMap, WeakRef, WeakSet,
 };
+#[cfg(feature = "annex_b")]
+use crate::builtins::{Escape, Unescape};
 use crate::error_obj::ErrorObj;
 use crate::function::function_prototype::GlobalFunctionConstructor;
 use crate::inline_props::InlineObject;
@@ -185,6 +187,7 @@ pub struct GlobalProperties {
     #[prop("Atomics")]
     atomics: Partial<ObjectHandle, GlobalInitializer<Atomics>>,
 
+    #[cfg(feature = "annex_b")]
     escape: Partial<ObjectHandle, Escape>,
 
     unescape: Partial<ObjectHandle, Unescape>,
@@ -308,7 +311,9 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
         bigint64_array: Partial::default(),
         biguint64_array: Partial::default(),
         atomics: Partial::default(),
+        #[cfg(feature = "annex_b")]
         escape: Partial::default(),
+        #[cfg(feature = "annex_b")]
         unescape: Partial::default(),
         encode_uri: Partial::default(),
         decode_uri: Partial::default(),
