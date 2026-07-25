@@ -124,6 +124,12 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut has_receiver = false;
                 let mut ty = Type::Normal;
                 let mut length = None;
+                let cfg_attrs = func
+                    .attrs
+                    .iter()
+                    .filter(|attr| attr.path().is_ident("cfg") || attr.path().is_ident("cfg_attr"))
+                    .cloned()
+                    .collect();
 
                 let mut args = Vec::new();
 
@@ -292,6 +298,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     has_receiver,
                     ty,
                     length,
+                    cfg_attrs,
                 }))
             }
 
@@ -363,12 +370,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut init = TokenStream::new();
 
     for prop in props {
-        let (prop_tokens, name, js_name, ty, variable_fn) = match prop {
+        let (prop_tokens, name, js_name, ty, cfg_attrs, variable_fn) = match prop {
             Prop::Method(method) => (
                 method.init_tokens(&config, proto_default.as_ref()),
                 method.name,
                 method.js_name,
                 method.ty,
+                method.cfg_attrs,
                 quote! {#variable::write_config(prop.into())},
             ),
             Prop::Constant(constant) => {
@@ -383,6 +391,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     constant.name,
                     constant.js_name.into_iter().collect(),
                     Type::Normal,
+                    Vec::new(),
                     variable_fn,
                 )
             }
@@ -427,6 +436,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
 
         init.extend(quote! {
+            #(#cfg_attrs)*
             {
                 #elem
             }
@@ -580,6 +590,7 @@ struct Method {
     mode: Mode,
     has_receiver: bool,
     ty: Type,
+    cfg_attrs: Vec<syn::Attribute>,
 }
 
 #[allow(unused)]
