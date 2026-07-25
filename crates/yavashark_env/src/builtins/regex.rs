@@ -348,6 +348,7 @@ impl RegExp {
         Ok(Value::Boolean(!result.is_nullish()))
     }
 
+    #[cfg(feature = "annex_b")]
     pub fn compile(&self, _a: Value, _b: Value) {}
 
     #[prop(Symbol::MATCH)]
