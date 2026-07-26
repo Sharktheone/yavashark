@@ -57,6 +57,8 @@ pub struct YSString {
     inner: UnsafeCell<InnerString>,
 }
 
+const ASSERT_SIZE: () = assert!(size_of::<YSString>() == 24);
+
 impl Display for YSString {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_str_lossy())
