@@ -37,7 +37,6 @@ enum Type {
 struct AsciiString {
     header: StringHeader,
     len: u32,
-    data: [u8],
 }
 
 #[repr(C)]
@@ -45,7 +44,6 @@ struct AsciiString {
 struct Wtf16String {
     header: StringHeader,
     len: u32,
-    data: [u16],
 }
 
 #[repr(C)]
