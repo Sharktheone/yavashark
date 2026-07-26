@@ -314,7 +314,7 @@ impl Header {
         unsafe { ptr.as_ptr().add(1).cast::<u16>() }
     }
 
-    unsafe fn data_slice_u8_mut(ptr: NonNull<Self>) -> &'static mut [u8] {
+    unsafe fn data_slice_u8_mut<'a>(ptr: NonNull<Self>) -> &'a mut [u8] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
 
@@ -323,7 +323,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u16_mut(ptr: NonNull<Self>) -> &'static mut [u16] {
+    unsafe fn data_slice_u16_mut<'a>(ptr: NonNull<Self>) -> &'a mut [u16] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
 
@@ -332,7 +332,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u8(ptr: NonNull<Self>) -> &'static [u8] {
+    unsafe fn data_slice_u8<'a>(ptr: NonNull<Self>) -> &'a  [u8] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
 
@@ -341,7 +341,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u16(ptr: NonNull<Self>) -> &'static [u16] {
+    unsafe fn data_slice_u16<'a>(ptr: NonNull<Self>) -> &'a [u16] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
 
@@ -350,7 +350,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u8_to(ptr: NonNull<Self>, to: usize) -> &'static [u8] {
+    unsafe fn data_slice_u8_to<'a>(ptr: NonNull<Self>, to: usize) -> &'a [u8] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
             debug_assert!(to <= cap, "to is greater than capacity");
@@ -360,7 +360,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u16_to(ptr: NonNull<Self>, to: usize) -> &'static [u16] {
+    unsafe fn data_slice_u16_to<'a>(ptr: NonNull<Self>, to: usize) -> &'a [u16] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
             debug_assert!(to <= cap, "to is greater than capacity");
