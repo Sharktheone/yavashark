@@ -61,8 +61,8 @@ struct SliceString {
 #[derive(Debug)]
 struct RopeString {
     header: StringHeader,
-    elems: u32,
-    ropes: [Gc<YSString>],
+    left: Gc<YSString>,
+    right: Gc<YSString>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -76,8 +76,8 @@ struct RopeSliceElem {
 #[derive(Debug)]
 struct RopeSliceString {
     header: StringHeader,
-    elems: u32,
-    ropes: [RopeSliceElem], //TODO: We need to test if more than 2 ropes actually is better for perf
+    left: RopeSliceElem,
+    right: RopeSliceElem,
 }
 
 #[repr(C)]
