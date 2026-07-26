@@ -137,9 +137,9 @@ impl Deref for RcAsciiString {
 
     fn deref(&self) -> &Self::Target {
         unsafe {
-            let data_slice = Header::data_slice_u8(self.header);
             let len = self.len as usize;
-            std::str::from_utf8_unchecked(&data_slice[..len])
+            let data_slice = Header::data_slice_u8_to(self.header, len);
+            std::str::from_utf8_unchecked(data_slice)
         }
     }
 }
@@ -258,9 +258,8 @@ impl Deref for RcWtf16String {
 
     fn deref(&self) -> &Self::Target {
         unsafe {
-            let data_slice = Header::data_slice_u16(self.header);
-
-            &data_slice[..(self.len as usize)]
+            let len = self.len as usize;
+            Header::data_slice_u16_to(self.header, len)
         }
     }
 }
@@ -348,6 +347,26 @@ impl Header {
 
             let data_ptr = Self::get_data_u16(ptr);
             std::slice::from_raw_parts(data_ptr, cap)
+        }
+    }
+
+    unsafe fn data_slice_u8_to(ptr: NonNull<Self>, to: usize) -> &'static [u8] {
+        unsafe {
+            let cap = (*ptr.as_ptr()).capacity as usize;
+            debug_assert!(to <= cap, "to is greater than capacity");
+
+            let data_ptr = Self::get_data_u8(ptr);
+            std::slice::from_raw_parts(data_ptr, to)
+        }
+    }
+
+    unsafe fn data_slice_u16_to(ptr: NonNull<Self>, to: usize) -> &'static [u16] {
+        unsafe {
+            let cap = (*ptr.as_ptr()).capacity as usize;
+            debug_assert!(to <= cap, "to is greater than capacity");
+
+            let data_ptr = Self::get_data_u16(ptr);
+            std::slice::from_raw_parts(data_ptr, to)
         }
     }
 
