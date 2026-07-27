@@ -37,20 +37,23 @@ impl RcAsciiString {
     }
 
     pub fn new_with_extra(str: &str, extra: u32) -> Self {
-        let header = Header::alloc_u8((str.len() as u32).saturating_add(extra));
+        let len = str.len().min(u32::MAX as usize) as u32;
+
+        let header = Header::alloc_u8((len).saturating_add(extra));
         let mut rc_string = Self {
             header,
-            len: str.len() as u32,
+            len,
             phantom: PhantomData,
         };
 
         unsafe {
-            (*header.as_ptr()).init_to = str.len() as u32;
+            (*header.as_ptr()).init_to = len;
         }
 
         unsafe {
-            let data_slice = Header::data_slice_u8_mut(header);
-            data_slice[..str.len().min(u32::MAX as usize)].copy_from_slice(str.as_bytes());
+            let ptr = Header::get_data_u8(header);
+
+            ptr::copy_nonoverlapping(str.as_ptr(), ptr, len as usize);
         }
 
         rc_string
