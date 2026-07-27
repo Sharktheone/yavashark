@@ -214,11 +214,17 @@ impl RcWtf16String {
         }
 
         unsafe {
-            let mut data = Header::data_slice_u16_mut(self.header);
+            let mut data = Header::get_data_u16(self.header);
 
             let it = init_to as usize;
+            let to = it + str.len();
 
-            data[it..(it + str.len())].copy_from_slice(str);
+            if to >= self.len as usize {
+                return None;
+            }
+
+            ptr::copy_nonoverlapping(str.as_ptr(), data.add(it), str.len());
+
 
             (*self.header.as_ptr()).init_to += str.len() as u32;
         }
