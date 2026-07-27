@@ -162,20 +162,23 @@ impl RcWtf16String {
     }
 
     pub fn new_with_extra(str: &[u16], extra: u32) -> Self {
-        let header = Header::alloc_u16((str.len() as u32).saturating_add(extra));
+        let len = str.len().min(u32::MAX as usize) as u32;
+
+        let header = Header::alloc_u16((len).saturating_add(extra));
         let mut rc_string = Self {
             header,
-            len: str.len() as u32,
+            len,
             phantom: PhantomData,
         };
 
         unsafe {
             (*header.as_ptr()).init_to = str.len() as u32;
-        }
 
-        unsafe {
-            let data_slice = Header::data_slice_u16_mut(header);
-            data_slice[..str.len().min(u32::MAX as usize)].copy_from_slice(str);
+            let data = Header::get_data_u16(header);
+
+
+
+            ptr::copy_nonoverlapping(str.as_ptr(), data, len as usize);
         }
 
         rc_string
