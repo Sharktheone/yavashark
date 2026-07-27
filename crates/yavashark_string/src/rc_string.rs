@@ -1,6 +1,7 @@
 use std::alloc::Layout;
 use std::marker::PhantomData;
 use std::ops::Deref;
+use std::ptr;
 use std::ptr::NonNull;
 
 #[repr(C)]
@@ -86,12 +87,17 @@ impl RcAsciiString {
             return None;
         }
 
+        let mut data = Header::get_data_u8(self.header);
+
+        let it = init_to as usize;
+        let to = it + str.len();
+
+        if to >= self.len as usize {
+            return None;
+        }
+
         unsafe {
-            let mut data = Header::data_slice_u8_mut(self.header);
-
-            let it = init_to as usize;
-
-            data[it..(it + str.len())].copy_from_slice(str.as_bytes());
+            ptr::copy_nonoverlapping(str.as_ptr(), data.add(it), str.len());
 
             (*self.header.as_ptr()).init_to += str.len() as u32;
         }
@@ -332,7 +338,7 @@ impl Header {
         }
     }
 
-    unsafe fn data_slice_u8<'a>(ptr: NonNull<Self>) -> &'a  [u8] {
+    unsafe fn data_slice_u8<'a>(ptr: NonNull<Self>) -> &'a [u8] {
         unsafe {
             let cap = (*ptr.as_ptr()).capacity as usize;
 
