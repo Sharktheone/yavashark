@@ -116,7 +116,7 @@ impl RcAsciiString {
 impl Drop for RcAsciiString {
     fn drop(&mut self) {
         unsafe {
-            (*self.header.as_ptr()).count -= 1;
+            (*self.header.as_ptr()).count = (*self.header.as_ptr()).count.saturating_sub(1);
         }
 
         unsafe {
