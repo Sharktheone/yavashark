@@ -257,6 +257,8 @@ impl Drop for RcWtf16String {
 impl Clone for RcWtf16String {
     fn clone(&self) -> Self {
         unsafe {
+            assert_ne!((*self.header.as_ptr()).count, usize::MAX, "RcWtf16String count overflow");
+
             (*self.header.as_ptr()).count += 1;
         }
 
