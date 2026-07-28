@@ -130,6 +130,8 @@ impl Drop for RcAsciiString {
 impl Clone for RcAsciiString {
     fn clone(&self) -> Self {
         unsafe {
+            assert_ne!((*self.header.as_ptr()).count, usize::MAX, "RcAsciiString count overflow");
+
             (*self.header.as_ptr()).count += 1;
         }
 
