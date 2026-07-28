@@ -179,8 +179,6 @@ impl RcWtf16String {
 
             let data = Header::get_data_u16(header);
 
-
-
             ptr::copy_nonoverlapping(str.as_ptr(), data, len as usize);
         }
 
@@ -230,7 +228,6 @@ impl RcWtf16String {
             }
 
             ptr::copy_nonoverlapping(str.as_ptr(), data.add(it), str.len());
-
 
             (*self.header.as_ptr()).init_to += str.len() as u32;
         }

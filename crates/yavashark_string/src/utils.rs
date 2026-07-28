@@ -23,8 +23,6 @@ pub fn units_to_ascii_rc(units: &[u16]) -> Option<Rc<str>> {
     Some(unsafe { Rc::from_raw(ptr as *const [u8] as *const str) })
 }
 
-
-
 pub fn char_iter_to_ascii_rc(units: impl ExactSizeIterator<Item = char>) -> Rc<str> {
     let mut ptr = Rc::into_raw(Rc::<[u8]>::new_uninit_slice(units.len()));
 
@@ -37,7 +35,6 @@ pub fn char_iter_to_ascii_rc(units: impl ExactSizeIterator<Item = char>) -> Rc<s
         } else {
             mut_slice[i].write(b'?');
         }
-        
     }
 
     unsafe {
@@ -64,7 +61,6 @@ pub fn units_iter_to_rc(iter: impl ExactSizeIterator<Item = u16>) -> Rc<[u16]> {
 
     unsafe { Rc::from_raw(ptr as *const [u16]) }
 }
-
 
 pub fn str_push_to_rc(str: &str, str2: &str) -> Rc<str> {
     let len = str.len() + str2.len();
@@ -93,7 +89,7 @@ pub fn wtf16_join_to_rc(str: impl ExactSizeIterator<Item = u16>, str2: &[u16]) -
     for (i, unit) in str.chain(str2.iter().copied()).enumerate() {
         mut_slice[i].write(unit);
     }
-    
+
     unsafe {
         (&mut *ptr.cast_mut()).assume_init_mut();
     }

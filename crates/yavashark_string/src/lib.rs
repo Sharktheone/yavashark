@@ -41,7 +41,10 @@ use std::ops::{Add, AddAssign, Bound, Deref, DerefMut, RangeBounds};
 use std::rc::Rc;
 pub use thin_vec::ThinVec;
 
-use crate::utils::{TwoIter, units_iter_to_rc, units_to_ascii_rc, char_iter_to_ascii_rc, str_push_to_rc, wtf16_join_to_rc};
+use crate::utils::{
+    TwoIter, char_iter_to_ascii_rc, str_push_to_rc, units_iter_to_rc, units_to_ascii_rc,
+    wtf16_join_to_rc,
+};
 pub use codepoint::CodePoint;
 pub use const_string::ConstString;
 
@@ -526,9 +529,8 @@ impl YSString {
         if let Some(inline) = InlineString::try_from_string(s) {
             return Self {
                 inner: UnsafeCell::new(InnerString::InlineUtf8(inline)),
-            }
+            };
         }
-
 
         Self {
             inner: UnsafeCell::new(InnerString::Static(s)),

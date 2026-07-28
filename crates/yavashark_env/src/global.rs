@@ -22,10 +22,10 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
 use crate::builtins::{
     AggregateError, AsyncDisposableStack, Atomics, BigIntObj, BooleanObj, Date, DecodeURI,
-    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, EvalError,
-    IsFinite, IsNan, JSON, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError,
-    Reflect, RegExp, Set, StringObj, SuppressedError, SymbolObj, SyntaxError, TypeError, URIError,
-    WeakMap, WeakRef, WeakSet,
+    DecodeURIComponent, DisposableStack, EncodeURI, EncodeURIComponent, EvalError, IsFinite, IsNan,
+    JSON, Map, Math, NumberObj, Promise, Proxy, RangeError, ReferenceError, Reflect, RegExp, Set,
+    StringObj, SuppressedError, SymbolObj, SyntaxError, TypeError, URIError, WeakMap, WeakRef,
+    WeakSet,
 };
 #[cfg(feature = "annex_b")]
 use crate::builtins::{Escape, Unescape};

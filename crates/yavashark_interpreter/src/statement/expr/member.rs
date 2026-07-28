@@ -5,7 +5,10 @@ use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, Symbo
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::{Class, ClassInstance, ControlFlow, Error, InternalPropertyKey, PrivateMember, PropertyKey, Realm, RuntimeResult, Value};
+use yavashark_env::{
+    Class, ClassInstance, ControlFlow, Error, InternalPropertyKey, PrivateMember, PropertyKey,
+    Realm, RuntimeResult, Value,
+};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -34,9 +37,7 @@ impl Interpreter {
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
             MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-            MemberProp::Computed(e) => {
-                Self::run_expr(realm, &e.expr, span, scope)?
-            }
+            MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
             MemberProp::PrivateName(p) => {
                 let name = p.name.as_str();
                 let obj = value.as_object()?;

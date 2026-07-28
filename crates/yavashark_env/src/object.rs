@@ -320,11 +320,10 @@ impl Obj for Object {
 impl MutObject {
     fn property_index(&self, name: &InternalPropertyKey) -> Option<usize> {
         match name {
-            InternalPropertyKey::String(s) => s.as_str()
-                .map_or_else(
-                    || self.properties.get::<PropertyKey>(&name.clone().into()),
-                    |key| self.properties.get(&BorrowedPropertyKey::String(key))
-                ),
+            InternalPropertyKey::String(s) => s.as_str().map_or_else(
+                || self.properties.get::<PropertyKey>(&name.clone().into()),
+                |key| self.properties.get(&BorrowedPropertyKey::String(key)),
+            ),
             InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
             InternalPropertyKey::Index(_) => None,
         }
