@@ -387,7 +387,7 @@ impl RopeStr {
     fn flatten_utf8(&self) -> Rc<str> {
         let storage = unsafe { Rc::<[u8]>::new_uninit_slice(self.len()) };
 
-        let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u8>];
+        let ptr = Rc::into_raw(storage).cast_mut();
         let slice = unsafe { &mut *(ptr as *mut [u8]) };
         let mut offset = 0;
 
@@ -408,14 +408,14 @@ impl RopeStr {
         unsafe {
             (&mut *ptr).assume_init_mut();
 
-            Rc::from_raw(ptr as *mut str as *const str)
+            Rc::from_raw((ptr as *mut str).cast_const())
         }
     }
 
     fn flatten_utf16(&self) -> Rc<[u16]> {
         let storage = unsafe { Rc::<[u16]>::new_uninit_slice(self.len()) };
 
-        let ptr = Rc::into_raw(storage) as *mut [MaybeUninit<u16>];
+        let ptr = Rc::into_raw(storage).cast_mut();
         let slice = unsafe { &mut *(ptr as *mut [u16]) };
         let mut offset = 0;
 

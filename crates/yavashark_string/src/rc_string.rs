@@ -325,11 +325,11 @@ impl Header {
         unsafe { Self::alloc::<u16>(capacity) }
     }
 
-    fn get_data_u8(ptr: NonNull<Self>) -> *mut u8 {
+    const fn get_data_u8(ptr: NonNull<Self>) -> *mut u8 {
         unsafe { ptr.as_ptr().add(1).cast::<u8>() }
     }
 
-    fn get_data_u16(ptr: NonNull<Self>) -> *mut u16 {
+    const fn get_data_u16(ptr: NonNull<Self>) -> *mut u16 {
         unsafe { ptr.as_ptr().add(1).cast::<u16>() }
     }
 
