@@ -3,7 +3,8 @@ use swc_ecma_ast::{SuperProp, SuperPropExpr};
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Obj, Value};
-use yavashark_env::{Realm, RuntimeResult};
+use yavashark_env::{InternalPropertyKey, Realm, RuntimeResult};
+use yavashark_string::YSString;
 
 impl Interpreter {
     pub fn run_super_prop(
@@ -17,7 +18,7 @@ impl Interpreter {
 
         match &stmt.prop {
             SuperProp::Ident(i) => {
-                let name = i.sym.to_string();
+                let name = InternalPropertyKey::String(YSString::from_ref(&i.sym));
 
                 Ok(sup
                     .resolve_property(name, realm)?
