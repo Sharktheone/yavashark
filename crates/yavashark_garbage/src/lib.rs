@@ -119,8 +119,7 @@ impl<T: Collectable> Debug for Weak<T> {
 impl<T: Collectable> Clone for Weak<T> {
     fn clone(&self) -> Self {
         unsafe {
-            (*self.inner.as_ptr())
-                .refs.inc_weak();
+            (*self.inner.as_ptr()).refs.inc_weak();
         };
 
         Self { inner: self.inner }
@@ -560,7 +559,9 @@ impl<T: Collectable> Gc<T> {
         let inner = self.inner;
 
         // Increment the weak reference count
-        unsafe { (*inner.as_ptr()).refs.inc_weak(); }
+        unsafe {
+            (*inner.as_ptr()).refs.inc_weak();
+        }
 
         Weak { inner }
     }
@@ -590,9 +591,7 @@ impl<T: Collectable> Drop for Weak<T> {
     fn drop(&mut self) {
         // Decrement the weak reference count
         unsafe {
-            (*self.inner.as_ptr())
-                .refs
-                .dec_weak();
+            (*self.inner.as_ptr()).refs.dec_weak();
         }
 
         // If the weak reference count reaches 0 and the strong ref count is 0, we can deallocate the GcBox
@@ -712,11 +711,7 @@ struct Refs {
 #[cfg(not(feature = "actual_gc"))]
 impl Refs {
     const fn new() -> Self {
-        Self {
-            strong: 1,
-            weak: 0,
-        }
-
+        Self { strong: 1, weak: 0 }
     }
     const fn strong(&self) -> u32 {
         self.strong
@@ -763,7 +758,6 @@ impl Refs {
         }
     }
 }
-
 
 #[cfg(feature = "actual_gc")]
 impl<T: Collectable> Refs<T> {
