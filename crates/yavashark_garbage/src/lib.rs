@@ -115,9 +115,7 @@ impl<T: Collectable> Clone for Weak<T> {
     fn clone(&self) -> Self {
         unsafe {
             (*self.inner.as_ptr())
-                .refs
-                .weak
-                .fetch_add(1, Ordering::Relaxed)
+                .refs.inc_weak();
         };
 
         Self { inner: self.inner }
@@ -543,7 +541,7 @@ impl<T: Collectable> Gc<T> {
         let inner = self.inner;
 
         // Increment the weak reference count
-        unsafe { (*inner.as_ptr()).refs.weak.fetch_add(1, Ordering::Relaxed) };
+        unsafe { (*inner.as_ptr()).refs.inc_weak(); }
 
         Weak { inner }
     }
@@ -575,8 +573,7 @@ impl<T: Collectable> Drop for Weak<T> {
         unsafe {
             (*self.inner.as_ptr())
                 .refs
-                .weak
-                .fetch_sub(1, Ordering::Relaxed);
+                .dec_weak();
         }
 
         // If the weak reference count reaches 0 and the strong ref count is 0, we can deallocate the GcBox
@@ -677,6 +674,7 @@ impl<T: Collectable> Gc<T> {
 type MaybeNull<T> = NonNull<T>;
 
 #[allow(unused)]
+#[cfg(feature = "actual_gc")]
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<GcRef<T>>>,
     ref_to: RwLock<Vec<GcRef<T>>>,
@@ -686,6 +684,69 @@ struct Refs<T: Collectable> {
     trace: TraceID,
 }
 
+#[cfg(not(feature = "actual_gc"))]
+struct Refs {
+    strong: u32,
+    weak: u32,
+}
+
+#[cfg(not(feature = "actual_gc"))]
+impl Refs {
+    const fn new() -> Self {
+        Self {
+            strong: 1,
+            weak: 0,
+        }
+
+    }
+    const fn strong(&self) -> u32 {
+        self.strong
+    }
+
+    const fn weak(&self) -> u32 {
+        self.weak
+    }
+
+    #[allow(clippy::panic)]
+    fn inc_strong(&mut self) {
+        if let Some(strong) = self.strong.checked_add(1) {
+            self.strong = strong;
+        } else {
+            panic!("Strong reference count overflow");
+        }
+    }
+
+    #[allow(clippy::panic)]
+    fn inc_weak(&mut self) {
+        if let Some(weak) = self.weak.checked_add(1) {
+            self.weak = weak;
+        } else {
+            panic!("Weak reference count overflow");
+        }
+    }
+
+    #[allow(clippy::panic)]
+    fn dec_strong(&mut self) -> u32 {
+        if let Some(strong) = self.strong.checked_sub(1) {
+            self.strong = strong;
+            strong
+        } else {
+            panic!("Strong reference count underflow");
+        }
+    }
+
+    #[allow(clippy::panic)]
+    fn dec_weak(&mut self) {
+        if let Some(weak) = self.weak.checked_sub(1) {
+            self.weak = weak;
+        } else {
+            panic!("Weak reference count underflow");
+        }
+    }
+}
+
+
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> Refs<T> {
     #[allow(clippy::missing_const_for_fn)]
     fn new() -> Self {
@@ -735,8 +796,18 @@ impl<T: Collectable> Refs<T> {
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
+    fn inc_weak(&mut self) -> u32 {
+        self.weak.fetch_add(1, Ordering::Relaxed)
+    }
+
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn dec_strong(&mut self) -> u32 {
         self.strong.fetch_sub(1, Ordering::Relaxed)
+    }
+
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    fn dec_weak(&mut self) -> u32 {
+        self.weak.fetch_sub(1, Ordering::Relaxed)
     }
 
     fn weak(&self) -> u32 {
@@ -766,7 +837,10 @@ impl<T: Collectable> Refs<T> {
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
 struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
+    #[cfg(feature = "actual_gc")]
     refs: Refs<T>,
+    #[cfg(not(feature = "actual_gc"))]
+    refs: Refs,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
     #[cfg(feature = "easy_debug")]
     #[allow(dead_code)]
