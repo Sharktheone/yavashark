@@ -15,7 +15,9 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
+#[cfg(feature = "actual_gc")]
+use yavashark_garbage::GcRef;
+use yavashark_garbage::{Collectable, Gc, Weak};
 use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -687,6 +689,7 @@ pub trait Obj: Debug + 'static {
         Ok(())
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 
     fn into_object(self) -> Object
@@ -967,6 +970,7 @@ pub trait MutObj: Debug + 'static {
         Ok(())
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 }
 #[cfg(feature = "dbg_object_gc")]
@@ -1014,6 +1018,7 @@ impl DerefMut for BoxedObj {
 }
 
 unsafe impl Collectable for BoxedObj {
+    #[cfg(feature = "actual_gc")]
     fn get_refs(&self) -> Vec<GcRef<Self>> {
         self.gc_refs()
     }
@@ -1688,6 +1693,7 @@ impl Object {
     }
 
     #[must_use]
+    #[cfg(feature = "actual_gc")]
     pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
         Some(self.get_ref())
     }

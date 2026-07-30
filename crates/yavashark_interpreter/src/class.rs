@@ -5,12 +5,15 @@ use swc_common::Span;
 use swc_ecma_ast::{
     BlockStmt, Class, ClassMember, Expr, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
 };
+#[cfg(feature = "actual_gc")]
+use yavashark_env::value::BoxedObj;
 use yavashark_env::value::property_key::{BorrowedInternalPropertyKey, IntoPropertyKey};
-use yavashark_env::value::{BoxedObj, CustomGcRefUntyped, InstanceFieldInitializer, Obj};
+use yavashark_env::value::{CustomGcRefUntyped, InstanceFieldInitializer, Obj};
 use yavashark_env::{
     Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey, Realm, Res,
     Value, ValueResult, Variable, scope::Scope,
 };
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 use yavashark_string::{ToYSString, YSString};
 
@@ -26,6 +29,7 @@ pub struct ExprFieldInitializer {
 }
 
 impl InstanceFieldInitializer for ExprFieldInitializer {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         self.scope.gc_untyped_ref()
     }

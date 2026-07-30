@@ -3,11 +3,14 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::collections::hash_map::Entry;
+#[cfg(feature = "actual_gc")]
 use std::ops::Deref;
 use std::path::PathBuf;
 use std::rc::Rc;
+use yavashark_garbage::Gc;
 use yavashark_garbage::collectable::CellCollectable;
-use yavashark_garbage::{Collectable, Gc, GcRef};
+#[cfg(feature = "actual_gc")]
+use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::YSString;
 
 use crate::realm::Realm;
@@ -359,6 +362,7 @@ pub struct ScopeInternal {
 }
 
 unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
+    #[cfg(feature = "actual_gc")]
     fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
         let mut refs = match &self.variables {
             ObjectOrVariables::Object(o) => vec![o.get_untyped_ref()],
@@ -1061,6 +1065,7 @@ impl Scope {
 }
 
 impl CustomGcRefUntyped for Scope {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         Some(self.scope.get_untyped_ref())
     }

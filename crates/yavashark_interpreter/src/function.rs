@@ -9,13 +9,16 @@ use yavashark_env::builtins::Arguments;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
+#[cfg(feature = "actual_gc")]
+use yavashark_env::value::BoxedObj;
 use yavashark_env::value::{
-    BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty,
+    Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty,
 };
 use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
     Variable,
 };
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_string::YSString;
@@ -387,6 +390,7 @@ fn assign_target_needs_arguments(target: &swc_ecma_ast::AssignTarget) -> bool {
 }
 
 impl CustomGcRefUntyped for RawJSFunction {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         self.scope.gc_untyped_ref()
     }
@@ -417,6 +421,7 @@ impl Constructor for JSFunction {
 }
 
 impl ConstructorFn for RawJSFunction {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         self.scope.gc_untyped_ref()
     }

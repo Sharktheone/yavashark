@@ -18,6 +18,7 @@ swc_ecma_ast = "25.0.0"
 [features]
 default = []
 profiler = ["yavashark_env/profiler"]
+actual_gc = ["yavashark_env/actual_gc", "yavashark_garbage/actual_gc"]
 simple_bytecode = ["yavashark_bytecode/simple_bytecode"]
 
 

@@ -482,6 +482,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #obj_path.seal()
             }
 
+            #[cfg(feature = "actual_gc")]
             fn gc_refs(&self) -> ::std::vec::Vec<yavashark_garbage::GcRef<#env::value::BoxedObj>> {
                 #inner_borrow
                 #obj_path.gc_refs()

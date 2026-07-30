@@ -6,6 +6,7 @@ use crate::{ObjectHandle, PreHashedPropertyKey, Realm, Res};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 
 pub enum DefinePropertyResult {
@@ -196,5 +197,6 @@ pub trait ObjV2: Debug + 'static {
 
     fn seal(&self) -> Res;
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 }

@@ -1,7 +1,9 @@
 use crate::array::Array;
 use crate::scope::Scope;
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
 use crate::value::{
-    BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull,
+    Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull,
 };
 use crate::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, RuntimeResult, Value,
@@ -11,6 +13,7 @@ use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use swc_ecma_ast::{Param, Pat};
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 
@@ -156,6 +159,7 @@ impl RawOptimFunction {
 }
 
 impl CustomGcRefUntyped for RawOptimFunction {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         self.scope.gc_untyped_ref()
     }
@@ -178,6 +182,7 @@ impl Constructor for OptimFunction {
 }
 
 impl ConstructorFn for RawOptimFunction {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         self.scope.gc_untyped_ref()
     }

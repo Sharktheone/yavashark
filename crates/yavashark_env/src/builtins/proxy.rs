@@ -13,6 +13,7 @@ use std::cell::{Cell, RefCell};
 use std::ops::Deref;
 use std::ptr::NonNull;
 use swc_ecma_ast::Prop;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 use yavashark_macro::props;
 use yavashark_string::YSString;
@@ -502,6 +503,7 @@ impl Obj for Proxy {
         unsafe { self.inner.inner_downcast(ty) }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         vec![self.inner.get_ref(), self.handler.get_ref()]
     }

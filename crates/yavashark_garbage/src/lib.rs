@@ -2,6 +2,7 @@
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
 use log::warn;
+#[cfg(feature = "actual_gc")]
 use parking_lot::RwLock;
 #[cfg(feature = "actual_gc")]
 use parking_lot::{RwLockReadGuard, RwLockWriteGuard};
@@ -10,12 +11,14 @@ use std::future::Future;
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::ptr::NonNull;
+#[cfg(feature = "actual_gc")]
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::task::{Context, Poll};
 
 #[cfg(feature = "actual_gc")]
 use spin_lock::SpinLock;
 
+#[cfg(feature = "actual_gc")]
 use crate::tagged_ptr::TaggedPtr;
 #[cfg(feature = "easy_debug")]
 use crate::trace::{TRACER, TraceID};
@@ -25,6 +28,7 @@ pub(crate) mod spin_lock;
 
 pub mod collectable;
 mod open;
+#[cfg(feature = "actual_gc")]
 pub(crate) mod tagged_ptr;
 #[cfg(all(
     any(feature = "easy_debug", feature = "trace"),
@@ -37,6 +41,7 @@ mod trace_gui;
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait Collectable: Sized {
+    #[cfg(feature = "actual_gc")]
     fn get_refs(&self) -> Vec<GcRef<Self>>;
 
     /// Execute the destructor and free the value
@@ -141,13 +146,16 @@ impl<T: Collectable> PartialEq<Weak<T>> for Gc<T> {
 }
 
 ///Function to completely deallocate the value, including freeing the memory!
+#[cfg(feature = "actual_gc")]
 type DeallocFn = unsafe fn(NonNull<[(); 0]>);
 
+#[cfg(feature = "actual_gc")]
 pub struct UntypedGcRef {
     gc_box: NonNull<GcBox<()>>,
     dealloc_value: DeallocFn,
 }
 
+#[cfg(feature = "actual_gc")]
 impl Clone for UntypedGcRef {
     fn clone(&self) -> Self {
         Self {
@@ -157,6 +165,7 @@ impl Clone for UntypedGcRef {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl UntypedGcRef {
     fn new<T: Collectable>(ptr: NonNull<GcBox<T>>) -> Self {
         Self {
@@ -166,12 +175,14 @@ impl UntypedGcRef {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 pub struct GcRef<T: Collectable> {
     /// # Safety
     /// this pointer might not be a pointer to a `GcBox`, but also ca be a pointer to a `UntypedGcRef`
     ptr: TaggedPtr<GcBox<T>>,
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> Drop for GcRef<T> {
     fn drop(&mut self) {
         if self.ptr.tag() {
@@ -182,6 +193,7 @@ impl<T: Collectable> Drop for GcRef<T> {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> Debug for GcRef<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("GcRef")
@@ -191,6 +203,7 @@ impl<T: Collectable> Debug for GcRef<T> {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> Clone for GcRef<T> {
     fn clone(&self) -> Self {
         if self.ptr.tag() {
@@ -210,8 +223,8 @@ impl<T: Collectable> Clone for GcRef<T> {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> GcRef<T> {
-    #[cfg(feature = "actual_gc")]
     fn add_ref_by(&self, r: impl Into<Self>) {
         let r = r.into();
 
@@ -230,7 +243,6 @@ impl<T: Collectable> GcRef<T> {
         }
     }
 
-    #[cfg(feature = "actual_gc")]
     fn cast<U: Collectable>(&self) -> GcRef<U> {
         if self.ptr.tag() {
             let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
@@ -303,26 +315,31 @@ impl<T: Collectable> GcRef<T> {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> PartialEq for GcRef<T> {
     fn eq(&self, other: &Self) -> bool {
         self.box_ptr() == other.box_ptr()
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> Eq for GcRef<T> {}
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> PartialEq<Gc<T>> for GcRef<T> {
     fn eq(&self, other: &Gc<T>) -> bool {
         self.ptr.as_ptr() == other.inner.as_ptr()
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> PartialEq<GcRef<T>> for Gc<T> {
     fn eq(&self, other: &GcRef<T>) -> bool {
         self.inner.as_ptr() == other.ptr.as_ptr()
     }
 }
 
+#[cfg(feature = "actual_gc")]
 impl<T: Collectable> From<NonNull<GcBox<T>>> for GcRef<T> {
     fn from(inner: NonNull<GcBox<T>>) -> Self {
         Self { ptr: inner.into() }
@@ -515,12 +532,14 @@ impl<T: Collectable> Gc<T> {
         unsafe { (*self.inner.as_ptr()).value.as_ptr() }
     }
 
+    #[cfg(feature = "actual_gc")]
     ///Just a reference without incrementing the reference count.
     #[must_use]
     pub fn get_ref(&self) -> GcRef<T> {
         self.inner.into()
     }
 
+    #[cfg(feature = "actual_gc")]
     #[must_use]
     pub fn get_untyped_ref<O: Collectable>(&self) -> GcRef<O> {
         unsafe {
@@ -1466,7 +1485,7 @@ impl<T: Collectable> Drop for Gc<T> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "actual_gc"))]
 #[allow(clippy::items_after_statements, dead_code)]
 mod tests {
     use std::cell::RefCell;

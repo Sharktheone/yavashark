@@ -5,11 +5,15 @@ use std::sync::{Mutex as StdMutex, RwLock as StdRwLock};
 
 use parking_lot::{Mutex, RwLock};
 
-use super::{Collectable, Gc, GcBox, GcRef};
+use super::{Collectable, Gc, GcBox};
+
+#[cfg(feature = "actual_gc")]
+use super::GcRef;
 
 macro_rules! collect {
     ($ty:ty) => {
         unsafe impl Collectable for $ty {
+            #[cfg(feature = "actual_gc")]
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 Vec::new()
             }
@@ -42,6 +46,7 @@ collect!(String);
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
+    #[cfg(feature = "actual_gc")]
     fn get_refs(&self) -> Vec<GcRef<T>>;
 
     #[cfg(feature = "easy_debug")]
@@ -54,6 +59,7 @@ pub unsafe trait CellCollectable<T: Collectable> {
 macro_rules! cell {
     ($ty:ident,$lock:ident) => {
         unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
+            #[cfg(feature = "actual_gc")]
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }

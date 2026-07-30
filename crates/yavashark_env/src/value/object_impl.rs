@@ -1,6 +1,7 @@
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
 use crate::value::{
-    Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value,
-    Variable,
+    Attributes, DefinePropertyResult, MutObj, Obj, Property, PropertyDescriptor, Value, Variable,
 };
 use crate::{
     InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue,
@@ -10,6 +11,7 @@ use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 
 pub trait ObjectImpl: Debug + 'static {
@@ -301,6 +303,7 @@ pub trait ObjectImpl: Debug + 'static {
         self.get_wrapped_object().seal()
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         self.get_wrapped_object().gc_refs()
     }
@@ -584,6 +587,7 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::seal(self)
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         ObjectImpl::gc_refs(self)
     }

@@ -1,8 +1,9 @@
 use crate::realm::Realm;
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
 use crate::value::property_key::{BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 use crate::value::{
-    Attributes, BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property,
-    PropertyDescriptor,
+    Attributes, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property, PropertyDescriptor,
 };
 use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
@@ -13,6 +14,7 @@ use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use std::mem;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 
 pub mod array;
@@ -248,6 +250,7 @@ impl Obj for Object {
         self.inner_mut()?.set_prototype(prototype.into(), realm)
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         self.inner.borrow().gc_refs()
     }
@@ -1223,6 +1226,7 @@ impl MutObj for MutObject {
         Ok(None)
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         let mut refs = Vec::new();
 

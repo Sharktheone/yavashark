@@ -1,7 +1,9 @@
 use crate::realm::Realm;
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
 use crate::value::{
-    Attributes, BoxedObj, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue,
-    Obj, Property, Variable,
+    Attributes, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue, Obj,
+    Property, Variable,
 };
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
@@ -14,6 +16,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::Entry;
 use std::ops::Deref;
 use std::ptr::NonNull;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
@@ -422,6 +425,7 @@ impl Obj for Class {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         Vec::new() //TODO
     }
@@ -805,6 +809,7 @@ impl Obj for ClassInstance {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         Vec::new() //TODO
     }

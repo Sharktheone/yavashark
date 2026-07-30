@@ -1,7 +1,10 @@
 use crate::error::Error;
-use crate::value::{BoxedObj, Obj, Value};
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
+use crate::value::{Obj, Value};
 use crate::{ObjectHandle, Realm};
 use std::fmt::Debug;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 
 pub trait Constructor: Debug + Obj {
@@ -13,11 +16,13 @@ pub trait Constructor: Debug + Obj {
 }
 
 pub trait ConstructorFn: Debug {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>>;
     fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<(), Error>;
 }
 
 pub trait InstanceFieldInitializer: Debug {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>>;
     fn initialize(&self, this: Value, realm: &mut Realm) -> Result<(), Error>;
 }
@@ -26,6 +31,7 @@ pub trait InstanceFieldInitializer: Debug {
 pub struct NoOpConstructorFn;
 
 impl ConstructorFn for NoOpConstructorFn {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         None
     }
@@ -43,6 +49,7 @@ pub struct ConstantFieldInitializer {
 }
 
 impl InstanceFieldInitializer for ConstantFieldInitializer {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         None
     }

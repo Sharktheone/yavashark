@@ -1,6 +1,8 @@
+#[cfg(feature = "actual_gc")]
+use crate::value::BoxedObj;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{
-    Attributes, BoxedObj, DefinePropertyResult, MutObj, ObjectImpl, Property, PropertyDescriptor,
+    Attributes, DefinePropertyResult, MutObj, ObjectImpl, Property, PropertyDescriptor,
 };
 use crate::{MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, Variable};
 use std::any::TypeId;
@@ -8,6 +10,7 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
+#[cfg(feature = "actual_gc")]
 use yavashark_garbage::GcRef;
 
 pub enum UpdatePropertyResult {
@@ -69,6 +72,7 @@ pub trait PropertiesHook {
         Ok(None)
     }
 
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>> {
         ::core::iter::empty()
     }
@@ -280,6 +284,7 @@ impl<P: PropertiesHook + Debug + 'static> ObjectImpl for InlineObject<P> {
                 .get_property_descriptor(name, realm)?,
         })
     }
+    #[cfg(feature = "actual_gc")]
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         let mut inner_refs = self.get_inner().gc_refs();
         let props_refs = self.props.gc_refs();

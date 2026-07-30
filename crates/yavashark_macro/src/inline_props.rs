@@ -169,6 +169,7 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
             #delete_property
 
 
+            #[cfg(feature = "actual_gc")]
             fn gc_refs(&self) -> impl Iterator<Item = yavashark_garbage::GcRef<#env::value::BoxedObj>> {
                 ::core::iter::empty()
             }

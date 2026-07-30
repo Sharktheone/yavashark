@@ -16,7 +16,9 @@ use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 pub use symbol::*;
 pub use variable::*;
-use yavashark_garbage::{Collectable, GcRef};
+use yavashark_garbage::Collectable;
+#[cfg(feature = "actual_gc")]
+use yavashark_garbage::GcRef;
 use yavashark_string::{ToYSString, YSString};
 
 mod bigint;
@@ -440,6 +442,7 @@ impl Value {
     }
 
     #[must_use]
+    #[cfg(feature = "actual_gc")]
     pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
         match self {
             Self::Object(o) => Some(o.get_ref()),
@@ -652,6 +655,7 @@ impl ToYSString for Value {
 }
 
 impl CustomGcRefUntyped for Value {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         match self {
             Self::Object(o) => Some(o.get_untyped_ref()),
@@ -1079,9 +1083,11 @@ impl Object {
 }
 
 pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
+    #[cfg(feature = "actual_gc")]
     fn gc_ref(&self) -> Option<GcRef<Self>>;
 }
 
 pub trait CustomGcRefUntyped {
+    #[cfg(feature = "actual_gc")]
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>>;
 }
