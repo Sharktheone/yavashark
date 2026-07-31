@@ -1,5 +1,6 @@
 #![allow(unused)]
 use crate::array::Array;
+use crate::conversion::FromValueOutput;
 use crate::value::{
     Attributes, BoxedObj, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor,
     WeakObject,
@@ -27,6 +28,35 @@ pub struct Proxy {
 }
 
 impl Obj for Proxy {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+        if self.revoke.get() {
+            return Err(Error::ty(
+                "Cannot perform 'getOwnPropertyDescriptor' on a revoked proxy",
+            ));
+        }
+        if let Some(trap) = self.handler.get_opt("getOwnPropertyDescriptor", realm)? {
+            let result = trap.to_object()?.call(
+                vec![
+                    self.inner.clone().into(),
+                    Value::from(PropertyKey::from(name)),
+                ],
+                self.handler.clone().into(),
+                realm,
+            )?;
+
+            if result.is_undefined() {
+                return Ok(None);
+            }
+
+            return PropertyDescriptor::from_value_out(result, realm).map(Some);
+        }
+        self.inner.property_descriptor(name, realm)
+    }
+
     fn define_property(
         &self,
         name: InternalPropertyKey,
