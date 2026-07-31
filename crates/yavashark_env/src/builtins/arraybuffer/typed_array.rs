@@ -126,7 +126,7 @@ impl crate::value::ObjectImpl for TypedArray {
                 if let Some(slot) = slice.get_mut(idx) {
                     slot.0 = value;
                 } else {
-                    return Err(Error::range("Index out of bounds"));
+                    return Err(Error::ty("Invalid typed array index"));
                 }
             });
 
@@ -155,7 +155,7 @@ impl crate::value::ObjectImpl for TypedArray {
                 if let Some(slot) = slice.get_mut(idx) {
                     slot.0 = value;
                 } else {
-                    return Err(Error::range("Index out of bounds"));
+                    return Err(Error::ty("Invalid typed array index"));
                 }
             });
 
