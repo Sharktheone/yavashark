@@ -7,8 +7,8 @@ use crate::realm::{Intrinsic, Realm};
 use crate::utils::{ArrayLike, ProtoDefault, ValueIterator, coerce_object_strict};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{
-    Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj,
-    Obj, ObjectImpl, ObjectOrNull, Property,
+    Attributes, BoxedObj, Constructor, CustomName, DefinePropertyDescriptor, DefinePropertyResult,
+    Func, IntoValue, MutObj, Obj, ObjectImpl, ObjectOrNull, Property, PropertyDescriptor,
 };
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, Symbol};
@@ -23,6 +23,7 @@ use yavashark_string::YSString;
 pub struct Array {
     inner: RefCell<MutObject>,
     length: Cell<usize>,
+    length_writable: Cell<bool>,
 }
 
 impl ObjectImpl for Array {
@@ -47,17 +48,31 @@ impl ObjectImpl for Array {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            let length = value.as_number() as usize;
-
-            self.set_len(length)?;
-
-            return Ok(DefinePropertyResult::Handled);
+            return self.define_length_descriptor(
+                DefinePropertyDescriptor::Data {
+                    value: Some(value),
+                    writable: None,
+                    enumerable: None,
+                    configurable: None,
+                },
+                realm,
+            );
         }
 
-        self.get_wrapped_object()
-            .define_property(name, value, realm)?;
+        if matches!(&name, InternalPropertyKey::Index(index) if *index >= self.length.get())
+            && !self.length_writable.get()
+        {
+            return Ok(DefinePropertyResult::ReadOnly);
+        }
 
-        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let result = self
+            .get_wrapped_object()
+            .define_property(name, value, realm)?;
+        if result != DefinePropertyResult::Handled {
+            return Ok(result);
+        }
+
+        let new_len = self.indexed_storage_len();
         let current_len = self.length.get();
         if new_len > current_len {
             self.length.set(new_len);
@@ -73,22 +88,32 @@ impl ObjectImpl for Array {
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            let length = value.value.as_number() as usize;
-
-            self.set_len(length)?;
-
-            return Ok(DefinePropertyResult::Handled);
+            return self.define_length_descriptor(
+                DefinePropertyDescriptor::Data {
+                    value: Some(value.value),
+                    writable: None,
+                    enumerable: None,
+                    configurable: None,
+                },
+                realm,
+            );
         }
 
-        if self
-            .get_wrapped_object()
-            .define_property_attributes(name, value, realm)?
-            == DefinePropertyResult::ReadOnly
+        if matches!(&name, InternalPropertyKey::Index(index) if *index >= self.length.get())
+            && !self.length_writable.get()
         {
             return Ok(DefinePropertyResult::ReadOnly);
         }
 
-        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let result = self
+            .get_wrapped_object()
+            .define_property_attributes(name, value, realm)?;
+
+        if result != DefinePropertyResult::Handled {
+            return Ok(result);
+        }
+
+        let new_len = self.indexed_storage_len();
         let current_len = self.length.get();
         if new_len > current_len {
             self.length.set(new_len);
@@ -107,7 +132,7 @@ impl ObjectImpl for Array {
         self.get_wrapped_object()
             .define_getter_attributes(name, callback, attributes, realm)?;
 
-        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let new_len = self.indexed_storage_len();
         let current_len = self.length.get();
         if new_len > current_len {
             self.length.set(new_len);
@@ -126,7 +151,7 @@ impl ObjectImpl for Array {
         self.get_wrapped_object()
             .define_setter_attributes(name, callback, attributes, realm)?;
 
-        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let new_len = self.indexed_storage_len();
         let current_len = self.length.get();
         if new_len > current_len {
             self.length.set(new_len);
@@ -144,7 +169,7 @@ impl ObjectImpl for Array {
         self.get_wrapped_object()
             .define_empty_accessor(name, attributes, realm)?;
 
-        let new_len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        let new_len = self.indexed_storage_len();
         let current_len = self.length.get();
         if new_len > current_len {
             self.length.set(new_len);
@@ -161,7 +186,7 @@ impl ObjectImpl for Array {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             return Ok(Some(Property::Value(
                 self.length.get().into(),
-                Attributes::write(),
+                Attributes::from_values(self.length_writable.get(), false, false),
             )));
         }
 
@@ -176,7 +201,7 @@ impl ObjectImpl for Array {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             return Ok(Some(Property::Value(
                 self.length.get().into(),
-                Attributes::write(),
+                Attributes::from_values(self.length_writable.get(), false, false),
             )));
         }
 
@@ -276,6 +301,16 @@ impl ProtoDefault for Array {
 }
 
 impl Array {
+    fn indexed_storage_len(&self) -> usize {
+        self.inner
+            .borrow()
+            .array
+            .iter()
+            .rev()
+            .find_map(|(index, _)| (*index < u32::MAX as usize).then_some(index + 1))
+            .unwrap_or(0)
+    }
+
     pub fn with_elements(realm: &mut Realm, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(realm.intrinsics.clone_public().array.get(realm)?.clone());
 
@@ -489,6 +524,7 @@ impl Array {
         Self {
             inner: RefCell::new(MutObject::with_proto(proto)),
             length: Cell::new(0),
+            length_writable: Cell::new(true),
         }
     }
 
@@ -587,6 +623,104 @@ impl Array {
         self.inner.try_borrow_mut()?.resize_array(len);
 
         Ok(())
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.length.get()
+    }
+
+    #[must_use]
+    pub fn is_length_writable(&self) -> bool {
+        self.length_writable.get()
+    }
+
+    pub fn define_length_descriptor(
+        &self,
+        desc: DefinePropertyDescriptor,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        let DefinePropertyDescriptor::Data {
+            value,
+            writable,
+            enumerable,
+            configurable,
+        } = desc
+        else {
+            return Err(Error::ty(
+                "Cannot convert array length to an accessor property",
+            ));
+        };
+
+        if configurable == Some(true) || enumerable == Some(true) {
+            return Err(Error::ty("Cannot redefine array length attributes"));
+        }
+        if !self.length_writable.get() && writable == Some(true) {
+            return Err(Error::ty("Cannot make array length writable"));
+        }
+
+        let old_len = self.length.get();
+        let Some(value) = value else {
+            if writable == Some(false) {
+                self.length_writable.set(false);
+            }
+            return Ok(DefinePropertyResult::Handled);
+        };
+
+        let number = value.to_number(realm)?;
+        if !number.is_finite()
+            || number < 0.0
+            || number > u32::MAX as f64
+            || number.trunc() != number
+        {
+            return Err(Error::range("Invalid array length"));
+        }
+        let new_len = number as usize;
+
+        if !self.length_writable.get() {
+            if new_len != old_len {
+                return Ok(DefinePropertyResult::ReadOnly);
+            }
+            return Ok(DefinePropertyResult::Handled);
+        }
+
+        if new_len >= old_len {
+            self.length.set(new_len);
+            if writable == Some(false) {
+                self.length_writable.set(false);
+            }
+            return Ok(DefinePropertyResult::Handled);
+        }
+
+        let indices = {
+            let inner = self.inner.try_borrow()?;
+            inner
+                .array
+                .iter()
+                .map(|(index, _)| *index)
+                .filter(|index| *index >= new_len)
+                .rev()
+                .collect::<Vec<_>>()
+        };
+
+        let mut inner = self.inner.try_borrow_mut()?;
+
+
+        for index in indices {
+            if inner.delete_array(index).is_none() {
+                self.length.set(index + 1);
+                if writable == Some(false) {
+                    self.length_writable.set(false);
+                }
+                return Ok(DefinePropertyResult::ReadOnly);
+            }
+        }
+
+        self.length.set(new_len);
+        if writable == Some(false) {
+            self.length_writable.set(false);
+        }
+        Ok(DefinePropertyResult::Handled)
     }
 
     pub fn shallow_clone(&self, realm: &mut Realm) -> Res<Self> {
