@@ -1128,6 +1128,13 @@ impl PartialEq for Object {
 }
 
 impl Object {
+    pub fn property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+        self.0.get_property_descriptor(name, realm)
+    }
     pub fn resolve_property(
         &self,
         name: impl IntoPropertyKey,
