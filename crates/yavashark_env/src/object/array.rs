@@ -191,6 +191,12 @@ impl ObjectImpl for Array {
         self.get_wrapped_object().contains_key(name, realm)
     }
 
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(true);
+        }
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
     fn name(&self) -> String {
         "Array".to_string()
     }
