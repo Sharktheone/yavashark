@@ -306,7 +306,7 @@ impl IntoPropertyKey for Value {
                 if !n.is_nan()
                     && !n.is_infinite()
                     && n.fract() == 0.0
-                    && n.is_sign_positive()
+                    && (n.is_sign_positive() || n == 0.0)
                     && n as usize <= MAX_INDEX
                 {
                     InternalPropertyKey::Index(n as usize)
@@ -351,7 +351,7 @@ impl IntoPropertyKey for PrimitiveValue {
                 if !n.is_nan()
                     && !n.is_infinite()
                     && n.fract() == 0.0
-                    && n.is_sign_positive()
+                    && (n.is_sign_positive() || n == 0.0)
                     && n as usize <= MAX_INDEX
                 {
                     InternalPropertyKey::Index(n as usize)
