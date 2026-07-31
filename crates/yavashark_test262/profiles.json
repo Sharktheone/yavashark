@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "fast2": {
+    "fast": {
       "test_root": "../../test262/test/",
       "noskip": true,
       "workers": 1024,
