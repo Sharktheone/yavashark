@@ -5,7 +5,7 @@ use crate::value::{
 };
 use crate::{
     InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult,
-    Variable,
+    Variable, scope::Scope,
 };
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
@@ -18,10 +18,22 @@ pub struct Arguments {
     pub length: RefCell<Value>,
     pub args: RefCell<Vec<Value>>,
     pub unmapped: RefCell<Vec<usize>>,
+    pub parameter_scope: Option<RefCell<Scope>>,
+    pub parameter_names: Vec<Option<String>>,
 }
 
 impl Arguments {
     pub fn new(args: Vec<Value>, callee: Option<Value>, realm: &mut Realm) -> Res<Self> {
+        Self::new_mapped(args, callee, None, Vec::new(), realm)
+    }
+
+    pub fn new_mapped(
+        args: Vec<Value>,
+        callee: Option<Value>,
+        parameter_scope: Option<Scope>,
+        parameter_names: Vec<Option<String>>,
+        realm: &mut Realm,
+    ) -> Res<Self> {
         Ok(Self {
             inner: RefCell::new(MutObject::with_proto(
                 realm
@@ -35,6 +47,8 @@ impl Arguments {
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
             unmapped: RefCell::new(Vec::new()),
+            parameter_scope: parameter_scope.map(RefCell::new),
+            parameter_names,
         })
     }
 
@@ -66,6 +80,15 @@ impl Arguments {
         }
         Err(Error::new("Index out of bounds or unmapped"))
     }
+
+    fn update_parameter(&self, idx: usize, value: Value, realm: &mut Realm) -> Res {
+        if let (Some(scope), Some(Some(name))) =
+            (&self.parameter_scope, self.parameter_names.get(idx))
+        {
+            scope.borrow_mut().update(name, value, realm)?;
+        }
+        Ok(())
+    }
 }
 
 impl ObjectImpl for Arguments {
@@ -92,7 +115,8 @@ impl ObjectImpl for Arguments {
         if let InternalPropertyKey::Index(idx) = name {
             if self.is_mapped(idx) {
                 if let Some(v) = self.args.borrow_mut().get_mut(idx) {
-                    *v = value;
+                    *v = value.clone();
+                    self.update_parameter(idx, value, realm)?;
                     return Ok(DefinePropertyResult::Handled);
                 }
             }
@@ -124,16 +148,19 @@ impl ObjectImpl for Arguments {
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(idx) = name {
             if self.is_mapped(idx) {
+                if let Some(v) = self.args.borrow_mut().get_mut(idx) {
+                    *v = value.value.clone();
+                }
+                self.update_parameter(idx, value.value.clone(), realm)?;
+                let result = self.get_wrapped_object().define_property_attributes(
+                    name,
+                    value.clone(),
+                    realm,
+                )?;
                 if !value.properties.is_writable() {
                     self.unmap_index(idx);
-                    return self
-                        .get_wrapped_object()
-                        .define_property_attributes(name, value, realm);
                 }
-                if let Some(v) = self.args.borrow_mut().get_mut(idx) {
-                    *v = value.value;
-                    return Ok(DefinePropertyResult::Handled);
-                }
+                return Ok(result);
             }
             return self
                 .get_wrapped_object()
@@ -202,6 +229,32 @@ impl ObjectImpl for Arguments {
             .define_empty_accessor(name, attributes, realm)
     }
 
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if self.is_mapped(idx) {
+                if self
+                    .get_wrapped_object()
+                    .get_property_descriptor(name.clone(), realm)?
+                    .is_some_and(|descriptor| match descriptor {
+                        PropertyDescriptor::Data { configurable, .. }
+                        | PropertyDescriptor::Accessor { configurable, .. } => !configurable,
+                    })
+                {
+                    return Ok(None);
+                }
+                let old = self.resolve_array(idx).map(Property::from);
+                self.unmap_index(idx);
+                let _ = self.get_wrapped_object().delete_property(name, realm)?;
+                return Ok(old);
+            }
+        }
+        self.get_wrapped_object().delete_property(name, realm)
+    }
+
     fn resolve_property(
         &self,
         name: InternalPropertyKey,
@@ -209,7 +262,19 @@ impl ObjectImpl for Arguments {
     ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
-                return Ok(Some(Property::Value(value, Attributes::new())));
+                let attributes = self
+                    .get_wrapped_object()
+                    .get_property_descriptor(name.clone(), realm)?
+                    .map_or(Attributes::new(), |descriptor| match descriptor {
+                        PropertyDescriptor::Data {
+                            writable,
+                            enumerable,
+                            configurable,
+                            ..
+                        } => Attributes::from_values(writable, enumerable, configurable),
+                        PropertyDescriptor::Accessor { .. } => Attributes::new(),
+                    });
+                return Ok(Some(Property::Value(value, attributes)));
             }
         }
 
@@ -250,7 +315,19 @@ impl ObjectImpl for Arguments {
     ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
-                return Ok(Some(value.into()));
+                let attributes = self
+                    .get_wrapped_object()
+                    .get_property_descriptor(name.clone(), realm)?
+                    .map_or(Attributes::new(), |descriptor| match descriptor {
+                        PropertyDescriptor::Data {
+                            writable,
+                            enumerable,
+                            configurable,
+                            ..
+                        } => Attributes::from_values(writable, enumerable, configurable),
+                        PropertyDescriptor::Accessor { .. } => Attributes::new(),
+                    });
+                return Ok(Some(Property::Value(value, attributes)));
             }
         }
 
@@ -283,7 +360,7 @@ impl ObjectImpl for Arguments {
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::Index(idx) = name {
-            if idx < self.args.borrow().len() {
+            if self.is_mapped(idx) {
                 return Ok(true);
             }
         }
@@ -302,7 +379,7 @@ impl ObjectImpl for Arguments {
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::Index(idx) = name {
-            if idx < self.args.borrow().len() {
+            if self.is_mapped(idx) {
                 return Ok(true);
             }
         }
@@ -429,6 +506,22 @@ impl ObjectImpl for Arguments {
     ) -> Res<Option<PropertyDescriptor>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
+                if let Some(PropertyDescriptor::Data {
+                    writable,
+                    enumerable,
+                    configurable,
+                    ..
+                }) = self
+                    .get_wrapped_object()
+                    .get_property_descriptor(name.clone(), realm)?
+                {
+                    return Ok(Some(PropertyDescriptor::Data {
+                        value,
+                        writable,
+                        enumerable,
+                        configurable,
+                    }));
+                }
                 return Ok(Some(PropertyDescriptor::Data {
                     value,
                     writable: true,
