@@ -1,9 +1,10 @@
 use crate::Interpreter;
+use std::collections::HashSet;
 use std::iter;
 use swc_ecma_ast::{ForHead, ForInStmt, VarDeclKind};
 use yavashark_env::scope::Scope;
-use yavashark_env::value::Obj;
-use yavashark_env::{ControlFlow, Error, PropertyKey, Realm, Res, RuntimeResult, Value};
+use yavashark_env::value::{Obj, PropertyDescriptor};
+use yavashark_env::{ControlFlow, Error, ObjectOrNull, PropertyKey, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
@@ -21,7 +22,49 @@ impl Interpreter {
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        for key in obj.enumerable_keys(realm)? {
+        let mut keys = Vec::new();
+        let mut visited = HashSet::new();
+
+        for key in obj.keys(realm)? {
+            if key.is_symbol() || !visited.insert(key.clone()) {
+                continue;
+            }
+
+            if obj
+                .get_property_descriptor(key.clone().into(), realm)?
+                .is_some_and(|descriptor| match descriptor {
+                    PropertyDescriptor::Data { enumerable, .. }
+                    | PropertyDescriptor::Accessor { enumerable, .. } => enumerable
+                })
+            {
+                keys.push(key);
+            }
+        }
+
+        let mut prototype = obj.prototype(realm)?;
+
+        while let ObjectOrNull::Object(proto) = prototype {
+            for key in proto.keys(realm)? {
+                if key.is_symbol() || !visited.insert(key.clone()) {
+                    continue;
+                }
+
+                if proto
+                    .property_descriptor(key.clone().into(), realm)?
+                    .is_some_and(|descriptor| match descriptor {
+                        PropertyDescriptor::Data { enumerable, .. }
+                        | PropertyDescriptor::Accessor {
+                            enumerable, ..
+                        } => enumerable,
+                    })
+                {
+                    keys.push(key);
+                }
+            }
+            prototype = proto.prototype(realm)?;
+        }
+
+        for key in keys {
             let scope = &mut Scope::with_parent(scope)?;
             let label = scope.last_label()?;
             scope.state_set_loop()?;
