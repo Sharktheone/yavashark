@@ -197,6 +197,24 @@ impl ObjectImpl for Array {
         }
         self.get_wrapped_object().contains_own_key(name, realm)
     }
+
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(Some(PropertyDescriptor::Data {
+                value: self.length.get().into(),
+                writable: self.length_writable.get(),
+                enumerable: false,
+                configurable: false,
+            }));
+        }
+        self.get_wrapped_object()
+            .get_property_descriptor(name, realm)
+    }
+
     fn name(&self) -> String {
         "Array".to_string()
     }
