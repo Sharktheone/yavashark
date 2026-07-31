@@ -747,9 +747,10 @@ impl Refs {
 
     #[allow(clippy::panic)]
     fn dec_strong(&mut self) -> u32 {
-        if let Some(strong) = self.strong.checked_sub(1) {
+        let previous = self.strong;
+        if let Some(strong) = previous.checked_sub(1) {
             self.strong = strong;
-            strong
+            previous
         } else {
             panic!("Strong reference count underflow");
         }
@@ -1503,6 +1504,23 @@ impl<T: Collectable> Drop for Gc<T> {
             #[cfg(feature = "actual_gc")]
             GcBox::collect(&self.inner.into());
         }
+    }
+}
+
+#[cfg(all(test, not(feature = "actual_gc")))]
+mod ref_count_tests {
+    use super::Gc;
+
+    #[test]
+    fn dropping_a_clone_keeps_the_inline_value_alive() {
+        let first = Gc::new(String::from("still alive"));
+        let second = first.clone();
+
+        assert_eq!(first.strong(), 2);
+        drop(first);
+
+        assert_eq!(second.strong(), 1);
+        assert_eq!(&*second, "still alive");
     }
 }
 
