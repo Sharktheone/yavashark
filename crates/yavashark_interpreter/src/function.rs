@@ -152,15 +152,7 @@ impl JSFunction {
 
         let proto = inner.prototype.value.clone().to_object()?;
 
-        let obj = Object::with_proto(proto);
-
-        obj.set(
-            "name",
-            Value::String(self.raw.name.borrow().clone().into()),
-            realm,
-        )?;
-
-        Ok(obj.into())
+        Ok(Object::with_proto(proto).into())
     }
 }
 
@@ -203,7 +195,23 @@ impl RawJSFunction {
         }
 
         if let Some(arguments_args) = arguments_args {
-            let args = Arguments::new(arguments_args, caller, realm)?;
+            let parameter_names = self
+                .params
+                .iter()
+                .map(|param| match &param.pat {
+                    Pat::Ident(ident) => Some(ident.id.sym.to_string()),
+                    _ => None,
+                })
+                .collect();
+
+            let parameter_scope = (!self.is_strict).then(|| scope.clone());
+            let args = Arguments::new_mapped(
+                arguments_args,
+                caller,
+                parameter_scope,
+                parameter_names,
+                realm,
+            )?;
             let args = ObjectHandle::new(args);
 
             scope.declare_var("arguments".to_string(), args.into(), realm);
