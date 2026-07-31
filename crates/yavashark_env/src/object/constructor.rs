@@ -5,10 +5,7 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::{coerce_object, coerce_object_strict};
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{
-    Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj,
-    ObjectOrNull, Property,
-};
+use crate::value::{Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj, ObjectOrNull, Property, PropertyDescriptor};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,
@@ -170,17 +167,29 @@ impl ObjectConstructor {
     #[prop("defineProperties")]
     fn define_properties(
         obj: ObjectHandle,
-        props: ObjectHandle,
+        props: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
+        let props = coerce_object_strict(props, realm)?;
         let mut descriptors = Vec::new();
 
-        for (key, value) in props.enumerable_properties(realm)? {
-            let value = value.get(props.clone().into(), realm)?;
-            if value.is_undefined() {
+        for key in props.keys(realm)? {
+            //TODO: this should be switched to props.enumerable_properties() at some point again
+            let Some(property) = props.property_descriptor(key.clone().into(), realm)? else {
+                continue;
+            };
+            let enumerable = match property {
+                PropertyDescriptor::Data { enumerable, .. } => enumerable,
+                PropertyDescriptor::Accessor { enumerable, .. } => enumerable,
+            };
+
+            if !enumerable {
                 continue;
             }
 
+            let value = props
+                .resolve_property(key.clone(), realm)?
+                .unwrap_or(Value::Undefined);
             let descriptor = DefinePropertyDescriptor::from_value_out(value, realm)?;
 
             descriptors.push((key.into(), descriptor));
