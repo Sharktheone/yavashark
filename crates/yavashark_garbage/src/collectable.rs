@@ -305,7 +305,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcMutRefCellGuard<'a, T, V> {
 impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
     pub fn borrow(&self) -> Result<GcRefCellGuard<'_, T>, BorrowError> {
         unsafe {
-            let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
+            let value = (*GcBox::value_ptr(self.inner)).try_borrow()?;
 
             Ok(GcRefCellGuard {
                 value: Some(value),
@@ -316,7 +316,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 
     pub fn own<'b>(&self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
         unsafe {
-            let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
+            let value = (*GcBox::value_ptr(self.inner)).try_borrow()?;
 
             Ok(OwningGcRefCellGuard {
                 value: Some(value),
@@ -327,7 +327,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 
     pub fn borrow_mut(&self) -> Result<GcMutRefCellGuard<'_, T>, BorrowMutError> {
         unsafe {
-            let value = Some((*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?);
+            let value = Some((*GcBox::value_ptr(self.inner)).try_borrow_mut()?);
 
             Ok(GcMutRefCellGuard {
                 value,
@@ -338,7 +338,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 
     pub fn own_mut<'b>(&self) -> Result<OwningGcMutRefCellGuard<'b, T>, BorrowMutError> {
         unsafe {
-            let value = Some((*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?);
+            let value = Some((*GcBox::value_ptr(self.inner)).try_borrow_mut()?);
 
             Ok(OwningGcMutRefCellGuard {
                 value,

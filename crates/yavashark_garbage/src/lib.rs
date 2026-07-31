@@ -8,6 +8,7 @@ use parking_lot::RwLock;
 use parking_lot::{RwLockReadGuard, RwLockWriteGuard};
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
+use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::pin::Pin;
 use std::ptr::NonNull;
@@ -44,14 +45,14 @@ pub unsafe trait Collectable: Sized {
     #[cfg(feature = "actual_gc")]
     fn get_refs(&self) -> Vec<GcRef<Self>>;
 
-    /// Execute the destructor and free the value
+    /// Execute the destructor for the value in place.
     /// # Safety
     /// this actually needs to be non-null
     unsafe fn deallocate(this: NonNull<[(); 0]>) {
         let this: NonNull<Self> = this.cast();
 
         unsafe {
-            let _ = Box::from_raw(this.as_ptr());
+            std::ptr::drop_in_place(this.as_ptr());
         }
     }
 
@@ -69,7 +70,7 @@ impl<T: Collectable> Deref for Gc<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { (*self.inner.as_ptr()).value.as_ref() }
+        unsafe { &*GcBox::value_ptr(self.inner) }
     }
 }
 
@@ -92,7 +93,7 @@ impl<T: Collectable> Clone for Gc<T> {
 impl<T: Collectable + Debug> Debug for Gc<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Gc")
-            .field("data", unsafe { (*self.inner.as_ptr()).value.as_ref() })
+            .field("data", unsafe { &*GcBox::value_ptr(self.inner) })
             .field("strong", &unsafe { (*self.inner.as_ptr()).refs.strong() })
             .field("weak", &unsafe { (*self.inner.as_ptr()).refs.weak() })
             .finish()
@@ -144,14 +145,18 @@ impl<T: Collectable> PartialEq<Weak<T>> for Gc<T> {
     }
 }
 
-///Function to completely deallocate the value, including freeing the memory!
+/// Type-erased function that runs the inline value's destructor.
 #[cfg(feature = "actual_gc")]
-type DeallocFn = unsafe fn(NonNull<[(); 0]>);
+type DeallocFn = unsafe fn(NonNull<GcBox<()>>);
+
+#[cfg(feature = "actual_gc")]
+type DeallocBoxFn = unsafe fn(NonNull<GcBox<()>>);
 
 #[cfg(feature = "actual_gc")]
 pub struct UntypedGcRef {
     gc_box: NonNull<GcBox<()>>,
     dealloc_value: DeallocFn,
+    dealloc_box: DeallocBoxFn,
 }
 
 #[cfg(feature = "actual_gc")]
@@ -160,6 +165,7 @@ impl Clone for UntypedGcRef {
         Self {
             gc_box: self.gc_box,
             dealloc_value: self.dealloc_value,
+            dealloc_box: self.dealloc_box,
         }
     }
 }
@@ -169,7 +175,8 @@ impl UntypedGcRef {
     fn new<T: Collectable>(ptr: NonNull<GcBox<T>>) -> Self {
         Self {
             gc_box: ptr.cast(),
-            dealloc_value: T::deallocate,
+            dealloc_value: GcBox::<T>::deallocate_value,
+            dealloc_box: GcBox::<T>::deallocate,
         }
     }
 }
@@ -269,7 +276,11 @@ impl<T: Collectable> GcRef<T> {
     }
 
     #[cfg(feature = "actual_gc")]
-    fn cast_with_dealloc<U: Collectable>(&self, dealloc: DeallocFn) -> GcRef<U> {
+    fn cast_with_dealloc<U: Collectable>(
+        &self,
+        dealloc: DeallocFn,
+        dealloc_box: DeallocBoxFn,
+    ) -> GcRef<U> {
         if self.ptr.tag() {
             let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
 
@@ -287,6 +298,7 @@ impl<T: Collectable> GcRef<T> {
             let untyped = Box::new(UntypedGcRef {
                 gc_box: self.ptr.ptr().cast(),
                 dealloc_value: dealloc,
+                dealloc_box,
             });
 
             // Unsafe because Box::into_raw guarantees the returned ptr is non-null
@@ -505,7 +517,7 @@ impl<T: Collectable> Gc<T> {
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
     pub fn guard(&self) -> GcGuard<'_, T> {
-        let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
+        let value_ptr = unsafe { &*GcBox::value_ptr(self.inner) };
         GcGuard {
             value_ptr,
             gc: self.inner,
@@ -514,7 +526,7 @@ impl<T: Collectable> Gc<T> {
 
     #[must_use]
     pub fn get_owning<'b>(&self) -> OwningGcGuard<'b, T> {
-        let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
+        let value_ptr = unsafe { &*GcBox::value_ptr(self.inner) };
         OwningGcGuard {
             value_ptr,
             gc: self.clone(),
@@ -528,7 +540,7 @@ impl<T: Collectable> Gc<T> {
 
     #[must_use]
     pub fn as_ptr(&self) -> *mut T {
-        unsafe { (*self.inner.as_ptr()).value.as_ptr() }
+        GcBox::value_ptr(self.inner)
     }
 
     #[cfg(feature = "actual_gc")]
@@ -583,7 +595,7 @@ impl<T: Collectable> Weak<T> {
 
     #[must_use]
     pub fn as_ptr(&self) -> *mut T {
-        unsafe { (*self.inner.as_ptr()).value.as_ptr() }
+        GcBox::value_ptr(self.inner)
     }
 }
 
@@ -620,17 +632,14 @@ impl<T: Collectable> Gc<T> {
         #[cfg(feature = "actual_gc")]
         let ref_to = value.get_refs();
 
-        let value = Box::new(value);
-        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
-
         let gc_box = GcBox {
-            value,
             refs: Refs::new(),
             flags: Flags::new(),
             #[cfg(feature = "easy_debug")]
             ty_name: std::any::type_name::<T>(),
             #[cfg(feature = "easy_debug")]
             name,
+            value: ManuallyDrop::new(value),
         };
 
         let gc_box = Box::new(gc_box);
@@ -659,17 +668,14 @@ impl<T: Collectable> Gc<T> {
         #[cfg(feature = "easy_debug")]
         let name = value.trace_name();
 
-        let value = Box::new(value);
-        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
-
         let gc_box = GcBox {
-            value,
             refs: Refs::new(),
             flags: Flags::root(),
             #[cfg(feature = "easy_debug")]
             ty_name: std::any::type_name::<T>(),
             #[cfg(feature = "easy_debug")]
             name,
+            value: ManuallyDrop::new(value),
         };
 
         let gc_box = Box::new(gc_box);
@@ -689,10 +695,9 @@ impl<T: Collectable> Gc<T> {
     }
 }
 
-type MaybeNull<T> = NonNull<T>;
-
 #[allow(unused)]
 #[cfg(feature = "actual_gc")]
+#[repr(C)]
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<GcRef<T>>>,
     ref_to: RwLock<Vec<GcRef<T>>>,
@@ -703,6 +708,7 @@ struct Refs<T: Collectable> {
 }
 
 #[cfg(not(feature = "actual_gc"))]
+#[repr(C)]
 struct Refs {
     strong: u32,
     weak: u32,
@@ -848,8 +854,8 @@ impl<T: Collectable> Refs<T> {
 }
 
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
+#[repr(C)]
 struct GcBox<T: Collectable> {
-    value: MaybeNull<T>, // This value might be null
     #[cfg(feature = "actual_gc")]
     refs: Refs<T>,
     #[cfg(not(feature = "actual_gc"))]
@@ -861,6 +867,7 @@ struct GcBox<T: Collectable> {
     #[cfg(feature = "easy_debug")]
     #[allow(dead_code)]
     name: &'static str,
+    value: ManuallyDrop<T>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -982,6 +989,25 @@ pub struct WeakGc<T: Collectable> {
 }
 
 impl<T: Collectable> GcBox<T> {
+    fn value_ptr(this: NonNull<Self>) -> *mut T {
+        unsafe { std::ptr::addr_of_mut!((*this.as_ptr()).value).cast::<T>() }
+    }
+
+    #[cfg(feature = "actual_gc")]
+    unsafe fn deallocate_value(this: NonNull<GcBox<()>>) {
+        let this = this.cast::<Self>();
+        unsafe {
+            T::deallocate(NonNull::new_unchecked(Self::value_ptr(this)).cast());
+        }
+    }
+
+    #[cfg(feature = "actual_gc")]
+    unsafe fn deallocate(this: NonNull<GcBox<()>>) {
+        unsafe {
+            let _ = Box::from_raw(this.cast::<Self>().as_ptr());
+        }
+    }
+
     #[cfg(feature = "actual_gc")]
     fn shake_tree(this_ref: &GcRef<T>) {
         let mut unmark = Vec::new();
@@ -1035,7 +1061,7 @@ impl<T: Collectable> GcBox<T> {
             }
 
             for d in &drop {
-                Self::nuke(d.box_ptr());
+                Self::nuke(d.ptr);
             }
         }
     }
@@ -1120,9 +1146,7 @@ impl<T: Collectable> GcBox<T> {
                 {
                     TRACER.remove((*(*this).gc_box.as_ptr()).refs.trace);
                 }
-                let value = (*(*this).gc_box.as_ptr()).value.cast();
-
-                ((*this).dealloc_value)(value);
+                ((*this).dealloc_value)((*this).gc_box);
             }
 
             (*(*this).gc_box.as_ptr()).flags.set_value_dropped();
@@ -1130,9 +1154,7 @@ impl<T: Collectable> GcBox<T> {
         }
 
         unsafe {
-            let value = (*this_ptr.as_ptr()).value;
-
-            let _ = Box::from_raw(value.as_ptr());
+            ManuallyDrop::drop(&mut (*this_ptr.as_ptr()).value);
             (*this_ptr.as_ptr()).flags.set_value_dropped();
             #[cfg(feature = "easy_debug")]
             {
@@ -1143,11 +1165,14 @@ impl<T: Collectable> GcBox<T> {
 
     #[cfg(feature = "actual_gc")]
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
-    unsafe fn nuke(this_ptr: NonNull<GcBox<()>>) {
+    unsafe fn nuke(this_ptr: TaggedPtr<Self>) {
         unsafe {
-            let this = this_ptr.as_ptr();
-            // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
-            let _ = Box::from_raw(this);
+            if this_ptr.tag() {
+                let this: NonNull<UntypedGcRef> = this_ptr.ptr().cast();
+                ((*this.as_ptr()).dealloc_box)((*this.as_ptr()).gc_box);
+            } else {
+                let _ = Box::from_raw(this_ptr.as_ptr());
+            }
         }
     }
 
@@ -1205,8 +1230,12 @@ impl<T: Collectable> GcBox<T> {
                     //we know that this_ptr hasn't T as the real type
                     let ptr: NonNull<UntypedGcRef> = this_ptr.ptr.ptr().cast();
                     let dealloc = (*ptr.as_ptr()).dealloc_value;
+                    let dealloc_box = (*ptr.as_ptr()).dealloc_box;
 
-                    let root = Self::you_have_root(&r.clone().cast_with_dealloc(dealloc), unmark);
+                    let root = Self::you_have_root(
+                        &r.clone().cast_with_dealloc(dealloc, dealloc_box),
+                        unmark,
+                    );
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
                         return RootStatus::HasRoot;
@@ -1242,7 +1271,7 @@ impl<T: Collectable> GcBox<T> {
 
     #[cfg(feature = "actual_gc")]
     unsafe fn update_refs(this_ptr: NonNull<Self>) {
-        let value = (*this_ptr.as_ptr()).value.as_ref();
+        let value = &*Self::value_ptr(this_ptr);
 
         let all_refs = value.get_refs();
 
@@ -1394,9 +1423,8 @@ impl<T: Collectable> Drop for GcBox<T> {
         }
 
         if !self.flags.is_value_dropped() {
-            let ptr = &mut self.value;
             unsafe {
-                let _ = Box::from_raw(ptr.as_ptr());
+                ManuallyDrop::drop(&mut self.value);
                 #[cfg(feature = "easy_debug")]
                 {
                     TRACER.remove(self.refs.trace);
@@ -1418,8 +1446,6 @@ impl<T: Collectable> Drop for Gc<T> {
 
             if old_strong == 1 {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
-                let ptr = (*self.inner.as_ptr()).value.as_ptr();
-
                 //Drop all references
                 #[cfg(feature = "actual_gc")]
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
@@ -1450,7 +1476,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     warn!("Dropping value that was already dropped!");
                 }
 
-                let _ = Box::from_raw(ptr);
+                ManuallyDrop::drop(&mut (*self.inner.as_ptr()).value);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
 
                 #[cfg(feature = "actual_gc")]
@@ -1469,6 +1495,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     drop(refs);
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
+                    return;
                 } // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
                 //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
