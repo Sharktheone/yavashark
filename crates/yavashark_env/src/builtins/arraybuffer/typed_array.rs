@@ -120,8 +120,16 @@ impl crate::value::ObjectImpl for TypedArray {
 
         if let InternalPropertyKey::Index(idx) = name {
             typed_array_run_mut!({
-                let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
-                    .ok_or(Error::ty("Failed to convert to value"))?;
+                let value: TY = match self.ty {
+                    Type::U64 => FromPrimitive::from_u64(
+                        value.to_big_int(realm)?.to_u64().unwrap_or_default(),
+                    ),
+                    Type::I64 => FromPrimitive::from_i64(
+                        value.to_big_int(realm)?.to_i64().unwrap_or_default(),
+                    ),
+                    _ => FromPrimitive::from_f64(value.to_number_or_null()),
+                }
+                .ok_or(Error::ty("Failed to convert to value"))?;
 
                 if let Some(slot) = slice.get_mut(idx) {
                     slot.0 = value;
@@ -149,8 +157,16 @@ impl crate::value::ObjectImpl for TypedArray {
 
         if let InternalPropertyKey::Index(idx) = name {
             typed_array_run_mut!({
-                let value: TY = FromPrimitive::from_f64(value.value.to_number_or_null())
-                    .ok_or(Error::ty("Failed to convert to value"))?;
+                let value: TY = match self.ty {
+                    Type::U64 => FromPrimitive::from_u64(
+                        value.value.to_big_int(realm)?.to_u64().unwrap_or_default(),
+                    ),
+                    Type::I64 => FromPrimitive::from_i64(
+                        value.value.to_big_int(realm)?.to_i64().unwrap_or_default(),
+                    ),
+                    _ => FromPrimitive::from_f64(value.value.to_number_or_null()),
+                }
+                .ok_or(Error::ty("Failed to convert to value"))?;
 
                 if let Some(slot) = slice.get_mut(idx) {
                     slot.0 = value;
