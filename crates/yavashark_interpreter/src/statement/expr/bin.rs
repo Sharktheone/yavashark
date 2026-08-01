@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use swc_ecma_ast::{BinExpr, BinaryOp, Expr, PrivateName};
 
 use yavashark_env::scope::Scope;
@@ -32,22 +33,34 @@ impl Interpreter {
             BinaryOp::Lt => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                Value::Boolean(left < right)
+                Value::Boolean(matches!(
+                    left.relational_cmp(&right, realm)?,
+                    Some(Ordering::Less)
+                ))
             }
             BinaryOp::LtEq => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                Value::Boolean(left <= right)
+                Value::Boolean(matches!(
+                    left.relational_cmp(&right, realm)?,
+                    Some(Ordering::Less | Ordering::Equal)
+                ))
             }
             BinaryOp::Gt => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                Value::Boolean(left > right)
+                Value::Boolean(matches!(
+                    left.relational_cmp(&right, realm)?,
+                    Some(Ordering::Greater)
+                ))
             }
             BinaryOp::GtEq => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                Value::Boolean(left >= right)
+                Value::Boolean(matches!(
+                    left.relational_cmp(&right, realm)?,
+                    Some(Ordering::Greater | Ordering::Equal)
+                ))
             }
             BinaryOp::LShift => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
@@ -147,8 +160,11 @@ impl Interpreter {
             }
             BinaryOp::NullishCoalescing => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
-                let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                if left.is_nullish() { right } else { left }
+                if !left.is_nullish() {
+                    return Ok(left);
+                }
+
+                return Self::run_expr(realm, &stmt.right, stmt.span, scope);
             }
         })
     }

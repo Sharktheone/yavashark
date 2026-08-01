@@ -15,7 +15,7 @@ mod xor;
 
 use super::{Hint, Value};
 use crate::error::Error;
-use crate::{ObjectOrNull, Realm};
+use crate::{ObjectOrNull, Realm, Res};
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
@@ -114,6 +114,13 @@ impl BigIntOrNumber {
 }
 
 impl Value {
+    pub fn relational_cmp(&self, rhs: &Self, realm: &mut Realm) -> Res<Option<Ordering>> {
+        let lhs = self.to_primitive(Hint::Number, realm)?;
+        let rhs = rhs.to_primitive(Hint::Number, realm)?;
+
+        Ok(lhs.partial_cmp(&rhs))
+    }
+
     #[must_use]
     pub fn to_number_or_null(&self) -> f64 {
         match self {

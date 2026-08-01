@@ -1,5 +1,6 @@
 use crate::VM;
 use crate::data::{Data, OutputData};
+use std::cmp::Ordering;
 use yavashark_env::Res;
 
 pub fn eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
@@ -47,7 +48,11 @@ pub fn strict_ne(
 pub fn lt(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = (left < right).into();
+    let result = matches!(
+        left.relational_cmp(&right, vm.get_realm())?,
+        Some(Ordering::Less)
+    )
+    .into();
 
     output.set(result, vm)
 }
@@ -55,7 +60,11 @@ pub fn lt(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut i
 pub fn lt_eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = (left <= right).into();
+    let result = matches!(
+        left.relational_cmp(&right, vm.get_realm())?,
+        Some(Ordering::Less | Ordering::Equal)
+    )
+    .into();
 
     output.set(result, vm)
 }
@@ -63,7 +72,11 @@ pub fn lt_eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mu
 pub fn gt(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = (left > right).into();
+    let result = matches!(
+        left.relational_cmp(&right, vm.get_realm())?,
+        Some(Ordering::Greater)
+    )
+    .into();
 
     output.set(result, vm)
 }
@@ -71,7 +84,11 @@ pub fn gt(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut i
 pub fn gt_eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = (left >= right).into();
+    let result = matches!(
+        left.relational_cmp(&right, vm.get_realm())?,
+        Some(Ordering::Greater | Ordering::Equal)
+    )
+    .into();
 
     output.set(result, vm)
 }
