@@ -1,5 +1,4 @@
-use crate::builtins::temporal::utils::overflow_options;
-use crate::builtins::{PlainDate, value_to_partial_date};
+use crate::builtins::{PlainDate, PlainDateTime, ZonedDateTime, value_to_partial_date};
 use crate::conversion::FromValueOutput;
 use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
@@ -14,21 +13,16 @@ impl FromValueOutput for temporal_rs::PlainDate {
                     return Ok(plain_date.date.clone());
                 }
 
-                // Check if it's a property bag with year/month/day
-                if obj.contains_key("year".into(), realm)?
-                    && (obj.contains_key("month".into(), realm)?
-                        || obj.contains_key("monthCode".into(), realm)?)
-                    && obj.contains_key("day".into(), realm)?
-                {
-                    let partial = value_to_partial_date(&obj, realm)?;
-                    let overflow = overflow_options(&obj, realm)?;
-
-                    return Self::from_partial(partial, overflow).map_err(Error::from_temporal);
+                if let Some(date_time) = obj.downcast::<NativeObject<PlainDateTime>>() {
+                    return Ok(date_time.date.to_plain_date());
                 }
 
-                Err(Error::ty(
-                    "PlainDate object must have year, month (or monthCode), and day properties",
-                ))
+                if let Some(zoned_date_time) = obj.downcast::<NativeObject<ZonedDateTime>>() {
+                    return Ok(zoned_date_time.date.to_plain_date());
+                }
+
+                let partial = value_to_partial_date(&obj, realm)?;
+                Self::from_partial(partial, None).map_err(Error::from_temporal)
             }
             Value::String(s) => s.parse().map_err(Error::from_temporal),
             _ => Err(Error::ty(
