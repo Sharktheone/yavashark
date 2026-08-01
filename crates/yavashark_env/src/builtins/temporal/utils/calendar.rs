@@ -9,23 +9,23 @@ impl FromValueOutput for Calendar {
     fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(obj) => {
-                if let Some(calendar_like) = obj.downcast::<PlainDate>() {
+                if let Some(calendar_like) = obj.downcast::<NativeObject<PlainDate>>() {
                     return Ok(calendar_like.date.calendar().clone());
                 }
 
-                if let Some(calendar_like) = obj.downcast::<PlainDateTime>() {
+                if let Some(calendar_like) = obj.downcast::<NativeObject<PlainDateTime>>() {
                     return Ok(calendar_like.date.calendar().clone());
                 }
 
-                if let Some(calendar_like) = obj.downcast::<PlainYearMonth>() {
+                if let Some(calendar_like) = obj.downcast::<NativeObject<PlainYearMonth>>() {
                     return Ok(calendar_like.year_month.calendar().clone());
                 }
 
-                if let Some(calendar_like) = obj.downcast::<PlainMonthDay>() {
+                if let Some(calendar_like) = obj.downcast::<NativeObject<PlainMonthDay>>() {
                     return Ok(calendar_like.month_day.calendar().clone());
                 }
 
-                if let Some(calendar_like) = obj.downcast::<ZonedDateTime>() {
+                if let Some(calendar_like) = obj.downcast::<NativeObject<ZonedDateTime>>() {
                     return Ok(calendar_like.date.calendar().clone());
                 }
 
