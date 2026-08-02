@@ -804,7 +804,7 @@ impl MutObj for MutObject {
                     }
                 }
             }
-            return Ok(self.insert_array(n, value));
+            return Ok(self.insert_array_force(n, value));
         }
 
         if let InternalPropertyKey::String(s) = &name {
