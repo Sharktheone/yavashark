@@ -1,7 +1,28 @@
 use crate::builtins::{PlainDate, PlainDateTime, PlainMonthDay, PlainYearMonth, ZonedDateTime};
 use crate::conversion::FromValueOutput;
+use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
 use temporal_rs::Calendar;
+
+pub struct CalendarIdentifier(pub Calendar);
+
+impl FromValueOutput for CalendarIdentifier {
+    type Output = Self;
+
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
+        let Value::String(identifier) = value else {
+            return Err(Error::ty("Calendar identifier must be a string"));
+        };
+        let calendar: Calendar = identifier.parse().map_err(Error::from_temporal)?;
+        if !identifier
+            .as_str_lossy()
+            .eq_ignore_ascii_case(calendar.identifier())
+        {
+            return Err(Error::range("Invalid calendar identifier"));
+        }
+        Ok(Self(calendar))
+    }
+}
 
 impl FromValueOutput for Calendar {
     type Output = Self;
