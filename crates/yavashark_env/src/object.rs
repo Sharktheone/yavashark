@@ -472,12 +472,7 @@ impl MutObject {
                 let Some(v) = self.values.get_mut(vi.1) else {
                     return DefinePropertyResult::Handled;
                 };
-
-                if v.attributes.is_configurable() || v.attributes.is_writable() {
-                    *v = value.into();
-                } else {
-                    return DefinePropertyResult::ReadOnly;
-                }
+                *v = value.into();
                 return DefinePropertyResult::Handled;
             }
         }
