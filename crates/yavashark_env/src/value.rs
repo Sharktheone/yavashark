@@ -862,7 +862,7 @@ impl Value {
             Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert a Symbol value to a string")),
             Self::BigInt(b) => b.to_string().into(),
         })
     }
@@ -878,7 +878,7 @@ impl Value {
             Self::Number(n) => fmt_num(n),
             Self::String(s) => s,
             Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert a Symbol value to a string")),
             Self::BigInt(b) => b.to_string().into(),
         })
     }

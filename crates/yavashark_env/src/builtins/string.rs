@@ -304,6 +304,7 @@ impl Constructor for StringConstructor {
 impl Func for StringConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
+            Some(Value::Symbol(symbol)) => format!("Symbol({})", symbol.as_ref()).into(),
             Some(v) => v.to_string(realm)?,
             None => YSString::new(),
         };
