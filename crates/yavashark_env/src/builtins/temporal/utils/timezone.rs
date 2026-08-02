@@ -1,6 +1,8 @@
 use crate::conversion::FromValueOutput;
 use crate::{Error, Realm, Res, Value};
 use temporal_rs::TimeZone;
+use crate::builtins::ZonedDateTime;
+use crate::native_obj::NativeObject;
 
 impl FromValueOutput for TimeZone {
     type Output = Self;
