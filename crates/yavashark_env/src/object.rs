@@ -831,12 +831,9 @@ impl MutObj for MutObject {
                     return Ok(DefinePropertyResult::ReadOnly);
                 }
 
-                return Ok(if e.attributes.is_writable() {
-                    e.value = value.value;
-                    DefinePropertyResult::Handled
-                } else {
-                    DefinePropertyResult::ReadOnly
-                });
+                e.value = value.value;
+                e.attributes = value.properties;
+                return Ok(DefinePropertyResult::Handled);
             }
             Entry::Vacant(entry) => {
                 let idx = self.values.len();
