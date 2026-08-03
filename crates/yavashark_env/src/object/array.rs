@@ -705,7 +705,6 @@ impl Array {
 
         let mut inner = self.inner.try_borrow_mut()?;
 
-
         for index in indices {
             if inner.delete_array(index).is_none() {
                 self.length.set(index + 1);

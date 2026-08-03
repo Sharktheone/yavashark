@@ -4,7 +4,9 @@ use std::iter;
 use swc_ecma_ast::{ForHead, ForInStmt, VarDeclKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Obj, PropertyDescriptor};
-use yavashark_env::{ControlFlow, Error, ObjectOrNull, PropertyKey, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{
+    ControlFlow, Error, ObjectOrNull, PropertyKey, Realm, Res, RuntimeResult, Value,
+};
 
 impl Interpreter {
     pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
@@ -34,7 +36,7 @@ impl Interpreter {
                 .get_property_descriptor(key.clone().into(), realm)?
                 .is_some_and(|descriptor| match descriptor {
                     PropertyDescriptor::Data { enumerable, .. }
-                    | PropertyDescriptor::Accessor { enumerable, .. } => enumerable
+                    | PropertyDescriptor::Accessor { enumerable, .. } => enumerable,
                 })
             {
                 keys.push(key);
@@ -53,9 +55,7 @@ impl Interpreter {
                     .property_descriptor(key.clone().into(), realm)?
                     .is_some_and(|descriptor| match descriptor {
                         PropertyDescriptor::Data { enumerable, .. }
-                        | PropertyDescriptor::Accessor {
-                            enumerable, ..
-                        } => enumerable,
+                        | PropertyDescriptor::Accessor { enumerable, .. } => enumerable,
                     })
                 {
                     keys.push(key);

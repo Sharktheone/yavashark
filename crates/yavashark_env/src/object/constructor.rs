@@ -5,7 +5,10 @@ use crate::object::prototype::common;
 use crate::partial_init::Initializer;
 use crate::utils::{coerce_object, coerce_object_strict};
 use crate::value::property_key::IntoPropertyKey;
-use crate::value::{Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj, ObjectOrNull, Property, PropertyDescriptor};
+use crate::value::{
+    Constructor, DefinePropertyDescriptor, DefinePropertyResult, Func, IntoValue, Iter, Obj,
+    ObjectOrNull, Property, PropertyDescriptor,
+};
 use crate::{
     Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,

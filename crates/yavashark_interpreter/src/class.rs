@@ -82,8 +82,14 @@ pub fn create_class(
     for item in &stmt.body {
         match item {
             ClassMember::Method(method) => {
-                let (name, func) =
-                    create_method(&method.key, &method.function, scope, realm, stmt.span, false)?;
+                let (name, func) = create_method(
+                    &method.key,
+                    &method.function,
+                    scope,
+                    realm,
+                    stmt.span,
+                    false,
+                )?;
 
                 define_method_on_class(
                     name.into_internal_property_key(realm)?,
@@ -274,7 +280,11 @@ fn create_method(
                 name,
                 (yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                     func,
-                    if is_private { format!("#{name_str}") } else { name_str.to_string() },
+                    if is_private {
+                        format!("#{name_str}")
+                    } else {
+                        name_str.to_string()
+                    },
                     scope.clone(),
                     realm,
                 )?
@@ -286,7 +296,11 @@ fn create_method(
     let str = name.to_string(realm)?;
 
     let func = JSFunction::new(
-        if is_private { format!("#{str}") } else { str.to_string() },
+        if is_private {
+            format!("#{str}")
+        } else {
+            str.to_string()
+        },
         func.params.clone(),
         func.body.clone(),
         scope.clone(),

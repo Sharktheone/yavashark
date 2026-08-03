@@ -10,12 +10,12 @@
 
 // There should also be an optimization which the interpreter can do when it sees that a string is being mutated while not being shared.
 
-use std::{alloc, slice};
 use std::alloc::Layout;
 use std::marker::PhantomData;
 use std::mem::ManuallyDrop;
 use std::ops::Deref;
 use std::ptr::NonNull;
+use std::{alloc, slice};
 
 type Gc<T> = *mut T;
 
@@ -23,7 +23,6 @@ pub struct YSString {
     data: NonNull<StringHeader>,
     phantom: PhantomData<StringHeader>,
 }
-
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -55,10 +54,11 @@ impl AsciiString {
         let layout = Layout::new::<Self>();
 
         #[allow(clippy::expect_used)]
-        layout.extend(Layout::array::<u8>(cap as usize)
+        layout
+            .extend(Layout::array::<u8>(cap as usize).expect("cannot happen"))
             .expect("cannot happen")
-        ).expect("cannot happen")
-            .0.pad_to_align()
+            .0
+            .pad_to_align()
     }
 
     fn with_capacity(cap: u32) -> Option<NonNull<Self>> {
@@ -84,19 +84,19 @@ impl AsciiString {
     }
 
     fn new_with_extra(str: &str, extra: u32) -> Option<NonNull<Self>> {
-        let cap = str.len().saturating_add(extra as usize).min(u32::MAX as usize) as u32;
+        let cap = str
+            .len()
+            .saturating_add(extra as usize)
+            .min(u32::MAX as usize) as u32;
 
         let slf = Self::with_capacity(cap)?;
-
 
         unsafe {
             Self::write(slf, str);
         }
 
-
         Some(slf)
     }
-
 
     fn new(str: &str) -> Option<NonNull<Self>> {
         Self::new_with_extra(str, 0)
@@ -162,10 +162,11 @@ impl Wtf16String {
         let layout = Layout::new::<Self>();
 
         #[allow(clippy::expect_used)]
-        layout.extend(Layout::array::<u16>(cap as usize)
+        layout
+            .extend(Layout::array::<u16>(cap as usize).expect("cannot happen"))
             .expect("cannot happen")
-        ).expect("cannot happen")
-            .0.pad_to_align()
+            .0
+            .pad_to_align()
     }
 
     fn with_capacity(cap: u32) -> Option<NonNull<Self>> {
@@ -191,19 +192,19 @@ impl Wtf16String {
     }
 
     fn new_with_extra(str: &[u16], extra: u32) -> Option<NonNull<Self>> {
-        let cap = str.len().saturating_add(extra as usize).min(u32::MAX as usize) as u32;
+        let cap = str
+            .len()
+            .saturating_add(extra as usize)
+            .min(u32::MAX as usize) as u32;
 
         let slf = Self::with_capacity(cap)?;
-
 
         unsafe {
             Self::write(slf, str);
         }
 
-
         Some(slf)
     }
-
 
     fn new(str: &[u16]) -> Option<NonNull<Self>> {
         Self::new_with_extra(str, 0)
