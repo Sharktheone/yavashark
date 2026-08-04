@@ -1496,6 +1496,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     drop(refs);
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
+                    #[cfg(feature = "actual_gc")]
                     return;
                 } // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
                 //it also would be highly unsafe to continue, since we might have already dropped the GcBox
