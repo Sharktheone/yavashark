@@ -39,7 +39,14 @@ impl Constructor for BoundFunction {
         crate::profiler::profile_call(
             realm,
             || self.name(),
-            |realm| self.func.as_object()?.construct(args, realm),
+            |realm| {
+                let mut bound_args = Vec::with_capacity(self.bound_args.len() + args.len());
+
+                bound_args.extend(self.bound_args.iter().cloned());
+                bound_args.extend(args);
+
+                self.func.as_object()?.construct(bound_args, realm)
+            },
         )
     }
 }
