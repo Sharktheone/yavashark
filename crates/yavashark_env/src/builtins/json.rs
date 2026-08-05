@@ -89,25 +89,29 @@ impl JSON {
                             break;
                         }
 
-                        let val;
-
-                        if let Some(value) = value {
-                            val = Self::value_to_serde(value, realm, visited)?
-                                .unwrap_or(serde_json::Value::Null);
-                        } else {
-                            val = serde_json::Value::Null;
-                        }
+                        let val =
+                            if let Some(value) = value {
+                                Self::value_to_serde(value, realm, visited)?
+                                .unwrap_or(serde_json::Value::Null)
+                            } else {
+                                serde_json::Value::Null
+                            };
 
                         array.push(val);
 
                         index += 1;
                     }
 
+                    visited.pop();
                     return Ok(Some(serde_json::Value::Array(array)));
                 }
 
                 if let Some(prim) = o.primitive(realm)? {
-                    return Self::value_to_serde(prim.into(), realm, visited);
+                    let res = Self::value_to_serde(prim.into(), realm, visited)?;
+
+                    visited.pop();
+
+                    return Ok(res);
                 }
 
                 let props = o.enum_properties(realm)?;
@@ -120,10 +124,10 @@ impl JSON {
                         continue;
                     };
 
-                    let k = k.to_string();
-
                     map.insert(k.to_string(), val);
                 }
+
+                visited.pop();
 
                 serde_json::Value::Object(map)
             }
