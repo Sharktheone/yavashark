@@ -4,8 +4,8 @@ use crate::value::{
     Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
 };
 use crate::{
-    Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, Res, Value,
-    ValueResult, Variable,
+    Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res,
+    Value, ValueResult, Variable,
 };
 pub use class::*;
 pub use constructor::*;
@@ -141,6 +141,24 @@ impl ObjectImpl for NativeFunction {
         }
 
         self.get_wrapped_object().delete_property(name, realm)
+    }
+
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
+        let mut result = self.get_wrapped_object().properties(realm)?;
+        result.extend(self.props.properties(realm)?);
+        Ok(result)
+    }
+
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let mut result = self.get_wrapped_object().keys(realm)?;
+        result.extend(self.props.keys(realm)?);
+        Ok(result)
+    }
+
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
+        let mut result = self.get_wrapped_object().values(realm)?;
+        result.extend(self.props.values(realm)?);
+        Ok(result)
     }
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
