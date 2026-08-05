@@ -72,6 +72,36 @@ impl crate::value::ObjectImpl for StringObj {
         self.inner.borrow_mut()
     }
 
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        if matches!(&name, InternalPropertyKey::Index(index) if *index < self.inner.borrow().string.len())
+            || matches!(&name, InternalPropertyKey::String(name) if name == "length")
+        {
+            return Ok(DefinePropertyResult::ReadOnly);
+        }
+        self.get_wrapped_object()
+            .define_property(name, value, realm)
+    }
+
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        if matches!(&name, InternalPropertyKey::Index(index) if *index < self.inner.borrow().string.len())
+            || matches!(&name, InternalPropertyKey::String(name) if name == "length")
+        {
+            return Ok(DefinePropertyResult::ReadOnly);
+        }
+        self.get_wrapped_object()
+            .define_property_attributes(name, value, realm)
+    }
+
     fn resolve_property(
         &self,
         name: InternalPropertyKey,
