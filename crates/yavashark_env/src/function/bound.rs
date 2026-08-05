@@ -23,7 +23,9 @@ impl Func for BoundFunction {
                 let args = if self.bound_args.is_empty() {
                     args
                 } else {
-                    let mut bound_args = self.bound_args.clone();
+                    let mut bound_args = Vec::with_capacity(self.bound_args.len() + args.len());
+
+                    bound_args.extend(self.bound_args.iter().cloned());
                     bound_args.extend(args);
                     bound_args
                 };
