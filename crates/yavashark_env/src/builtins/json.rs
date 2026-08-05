@@ -70,9 +70,8 @@ impl JSON {
             Value::BigInt(_) => return Err(Error::ty("Do not know how to serialize a BigInt")),
             Value::Object(ref o) => {
                 if o.is_callable() {
-                    return Ok(None)
+                    return Ok(None);
                 }
-
 
                 if visited.contains(&o.as_ptr().addr()) {
                     return Err(Error::ty(
@@ -94,13 +93,12 @@ impl JSON {
                             break;
                         }
 
-                        let val =
-                            if let Some(value) = value {
-                                Self::value_to_serde(value, realm, visited)?
+                        let val = if let Some(value) = value {
+                            Self::value_to_serde(value, realm, visited)?
                                 .unwrap_or(serde_json::Value::Null)
-                            } else {
-                                serde_json::Value::Null
-                            };
+                        } else {
+                            serde_json::Value::Null
+                        };
 
                         array.push(val);
 
@@ -113,6 +111,16 @@ impl JSON {
 
                 if let Some(prim) = o.primitive(realm)? {
                     let res = Self::value_to_serde(prim.into(), realm, visited)?;
+
+                    visited.pop();
+
+                    return Ok(res);
+                }
+
+                if let Some(to_json) = o.get_opt("toJSON", realm)? {
+                    let val = to_json.call(realm, Vec::new(), o.clone().into())?;
+
+                    let res = Self::value_to_serde(val, realm, visited)?;
 
                     visited.pop();
 
