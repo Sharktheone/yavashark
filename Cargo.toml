@@ -71,7 +71,7 @@ icu = ["yavashark_env/icu"]
 [profile.release]
 opt-level = 3
 codegen-units = 1
-lto = "fat"
+#lto = "fat"
 debug = false
 strip = true
 panic = "abort"
