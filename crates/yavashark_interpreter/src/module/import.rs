@@ -25,9 +25,9 @@ impl Interpreter {
                         Some(ModuleExportName::Str(str)) => {
                             str.value.to_string_lossy().into_owned()
                         }
-                        None => named.local.to_string(),
+                        None => named.local.sym.to_string(),
                     };
-                    let local = named.local.to_string();
+                    let local = named.local.sym.to_string();
 
                     let val = module
                         .exports
@@ -45,12 +45,12 @@ impl Interpreter {
                         return Err(Error::reference("Module has no default export").into());
                     };
 
-                    scope.declare_var(default.local.to_string(), val.copy(), realm)?;
+                    scope.declare_var(default.local.sym.to_string(), val.copy(), realm)?;
                 }
 
                 ImportSpecifier::Namespace(ns) => {
                     scope.declare_var(
-                        ns.local.to_string(),
+                        ns.local.sym.to_string(),
                         module.exports.clone().into(),
                         realm,
                     )?;
