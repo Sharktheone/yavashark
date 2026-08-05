@@ -223,6 +223,17 @@ impl ObjectImpl for Array {
         self.get_wrapped_object().contains_own_key(name, realm)
     }
 
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(name) if name == "length") {
+            return Ok(None);
+        }
+        self.get_wrapped_object().delete_property(name, realm)
+    }
+
     fn get_property_descriptor(
         &self,
         name: InternalPropertyKey,
