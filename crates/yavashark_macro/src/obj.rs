@@ -396,7 +396,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn enumerable_properties(&self, realm: &mut #realm) -> #res<::std::vec::Vec<(#property_key, #property)>> {
                 let inner = self.inner.borrow();
-                let mut props = #obj_path.properties(realm)?;
+                let mut props = #obj_path.enumerable_properties(realm)?;
                 #properties
 
                 Ok(props)
@@ -404,7 +404,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn enumerable_keys(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#property_key>> {
                 let inner = self.inner.borrow();
-                let mut keys = #obj_path.keys(realm)?;
+                let mut keys = #obj_path.enumerable_keys(realm)?;
                 #keys
 
                 Ok(keys)
@@ -412,7 +412,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn enumerable_values(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#property>> {
                 let inner = self.inner.borrow();
-                let mut values = #obj_path.values(realm)?;
+                let mut values = #obj_path.enumerable_values(realm)?;
                 #values
 
                 Ok(values)
