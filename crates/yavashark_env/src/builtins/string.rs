@@ -147,6 +147,9 @@ impl crate::value::ObjectImpl for StringObj {
                 return Ok(true);
             }
         }
+        if matches!(&name, InternalPropertyKey::String(name) if name == "length") {
+            return Ok(true);
+        }
         self.get_wrapped_object().contains_own_key(name, realm)
     }
 
@@ -156,6 +159,9 @@ impl crate::value::ObjectImpl for StringObj {
             if n < inner.string.len() {
                 return Ok(true);
             }
+        }
+        if matches!(&name, InternalPropertyKey::String(name) if name == "length") {
+            return Ok(true);
         }
         self.get_wrapped_object().contains_key(name, realm)
     }
