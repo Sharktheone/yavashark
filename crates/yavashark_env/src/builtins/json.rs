@@ -69,6 +69,11 @@ impl JSON {
             Value::String(s) => serde_json::Value::String(s.to_string()),
             Value::BigInt(_) => return Err(Error::ty("Do not know how to serialize a BigInt")),
             Value::Object(ref o) => {
+                if o.is_callable() {
+                    return Ok(None)
+                }
+
+
                 if visited.contains(&o.as_ptr().addr()) {
                     return Err(Error::ty(
                         "Circular reference detected in JSON serialization",
