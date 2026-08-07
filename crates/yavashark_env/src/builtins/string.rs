@@ -5,7 +5,9 @@ use crate::conversion::{ActualString, Stringable};
 use crate::realm::Intrinsic;
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj, Obj, Property, Symbol};
+use crate::value::{
+    Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj, Obj, Property, Symbol,
+};
 use crate::{
     Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
     Variable,

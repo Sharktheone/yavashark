@@ -117,7 +117,9 @@ impl JSON {
                     return Ok(res);
                 }
 
-                if let Some(to_json) = o.get_opt("toJSON", realm)? && to_json.is_callable() {
+                if let Some(to_json) = o.get_opt("toJSON", realm)?
+                    && to_json.is_callable()
+                {
                     let val = to_json.call(realm, Vec::new(), o.clone().into())?;
 
                     let res = Self::value_to_serde(val, realm, visited)?;
