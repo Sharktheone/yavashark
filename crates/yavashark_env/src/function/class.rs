@@ -109,7 +109,7 @@ impl Obj for Class {
     ) -> Res<Option<Property>> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             let val: Value = self.prototype.borrow().clone().into();
-            Ok(Some(val.into()))
+            Ok(Some(Variable::new_read_only(val).into()))
         } else {
             self.inner.deref().resolve_property(name, realm)
         }
@@ -122,7 +122,7 @@ impl Obj for Class {
     ) -> Res<Option<Property>> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == Some("prototype")) {
             let val: Value = self.prototype.borrow().clone().into();
-            Ok(Some(val.into()))
+            Ok(Some(Variable::new_read_only(val).into()))
         } else {
             self.inner.deref().get_own_property(name, realm)
         }
@@ -230,7 +230,7 @@ impl Obj for Class {
 
         props.push((
             PropertyKey::String("prototype".into()),
-            self.prototype.borrow().clone().into_value().into(),
+            Variable::new_read_only(self.prototype.borrow().clone().into_value()).into(),
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
@@ -264,11 +264,7 @@ impl Obj for Class {
     fn values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
         let mut values = self.inner.deref().values(realm)?;
 
-        values.push(self.prototype.borrow().clone().into_value().into());
-
-        for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_property()); //TODO: is this correct?
-        }
+        values.push(Variable::new_read_only(self.prototype.borrow().clone().into_value()).into());
 
         Ok(values)
     }
