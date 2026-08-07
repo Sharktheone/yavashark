@@ -233,11 +233,6 @@ impl Obj for Class {
             Variable::new_read_only(self.prototype.borrow().clone().into_value()).into(),
         ));
 
-        for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_property()));
-            //TODO: is this correct?
-        }
-
         Ok(props)
     }
 
@@ -254,10 +249,6 @@ impl Obj for Class {
 
         keys.push(PropertyKey::String("prototype".into()));
 
-        for key in self.private_props.try_borrow()?.keys() {
-            keys.push(PropertyKey::String(key.clone().into())); //TODO: is this correct?
-        }
-
         Ok(keys)
     }
 
@@ -270,43 +261,15 @@ impl Obj for Class {
     }
 
     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
-        let mut props = self.inner.enumerable_properties(realm)?;
-
-        props.push((
-            PropertyKey::String("prototype".into()),
-            self.prototype.borrow().clone().into_value().into(),
-        ));
-
-        for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_property()));
-            //TODO: is this correct?
-        }
-
-        Ok(props)
+        self.inner.enumerable_properties(realm)
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        let mut keys = self.inner.enumerable_keys(realm)?;
-
-        keys.push(PropertyKey::String("prototype".into()));
-
-        for key in self.private_props.try_borrow()?.keys() {
-            keys.push(PropertyKey::String(key.clone().into())); //TODO: is this correct?
-        }
-
-        Ok(keys)
+        self.inner.enumerable_keys(realm)
     }
 
     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Property>> {
-        let mut values = self.inner.enumerable_values(realm)?;
-
-        values.push(self.prototype.borrow().clone().into_value().into());
-
-        for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_property()); //TODO: is this correct?
-        }
-
-        Ok(values)
+        self.inner.enumerable_values(realm)
     }
 
     fn clear_properties(&self, realm: &mut Realm) -> Res {
