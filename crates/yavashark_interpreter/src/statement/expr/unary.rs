@@ -2,7 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::{Expr, UnaryExpr, UnaryOp};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::{Error, PrimitiveValue, Realm, RuntimeResult, Value};
+use yavashark_env::{Error, InternalPropertyKey, PrimitiveValue, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -20,27 +20,26 @@ impl Interpreter {
                     if let Value::Object(obj) = obj {
                         let name = match &m.prop {
                             swc_ecma_ast::MemberProp::Ident(i) => {
-                                Value::String(YSString::from_ref(&i.sym))
+                                InternalPropertyKey::String(YSString::from_ref(&i.sym))
                             }
                             swc_ecma_ast::MemberProp::PrivateName(p) => {
-                                Value::String(YSString::from_ref(&p.name))
+                                InternalPropertyKey::String(YSString::from_ref(&p.name))
                             }
                             swc_ecma_ast::MemberProp::Computed(c) => {
                                 Self::run_expr(realm, &c.expr, c.span, scope)?
+                                    .into_internal_property_key(realm)?
                             }
                         };
-
-                        let key = name.into_internal_property_key(realm)?;
 
                         //TODO: this is a hack
                         if scope.is_strict_mode()?
                             && let Some(desc) =
-                                obj.get_own_property_no_get_set(key.clone(), realm)?
+                                obj.get_own_property_no_get_set(name.clone(), realm)?
                             && !desc.attributes().is_configurable()
                         {
                             return Err(Error::ty("Cannot delete non-configurable property").into());
                         }
-                        return Ok(obj.delete_property(key, realm)?.is_some().into());
+                        return Ok(obj.delete_property(name, realm)?.is_some().into());
                     }
                 }
                 Expr::Call(call) => {
@@ -64,8 +63,8 @@ impl Interpreter {
 
                     return match &sp.prop {
                         swc_ecma_ast::SuperProp::Ident(i) => {
-                            let name = i.sym.to_string();
-                            Ok(sup.delete_property(name.into(), realm)?.is_some().into())
+                            let name = InternalPropertyKey::String(YSString::from_ref(&i.sym));
+                            Ok(sup.delete_property(name, realm)?.is_some().into())
                         }
                         swc_ecma_ast::SuperProp::Computed(p) => {
                             let name = Self::run_expr(realm, &p.expr, p.span, scope)?;
