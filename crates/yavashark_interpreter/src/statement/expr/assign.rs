@@ -79,8 +79,8 @@ impl Interpreter {
     ) -> Res {
         let obj = coerce_object_strict(obj, realm)?;
 
-        let name = match m {
-            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+        let key = match m {
+            MemberProp::Ident(i) => InternalPropertyKey::String(YSString::from_ref(&i.sym)),
             MemberProp::PrivateName(p) => {
                 let name = p.name.as_str();
 
@@ -116,10 +116,10 @@ impl Interpreter {
                     "Private name {name} can only be used in class"
                 )));
             }
-            MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
+            MemberProp::Computed(c) => {
+                Self::run_expr(realm, &c.expr, c.span, scope)?.into_internal_property_key(realm)?
+            }
         };
-
-        let key = name.into_internal_property_key(realm)?;
 
         match obj.define_property(key, value, realm)? {
             DefinePropertyResult::Handled => {}
@@ -149,9 +149,9 @@ impl Interpreter {
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
-                let name = i.sym.to_string();
+                let name = InternalPropertyKey::String(YSString::from_ref(&i.sym));
 
-                sup.define_property(name.into(), value, realm)?;
+                sup.define_property(name, value, realm)?;
             }
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
@@ -318,7 +318,7 @@ impl Interpreter {
     ) -> RuntimeResult {
         if let Value::Object(obj) = obj {
             let name = match m {
-                MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+                MemberProp::Ident(i) => InternalPropertyKey::String(YSString::from_ref(&i.sym)),
                 MemberProp::PrivateName(p) => {
                     let name = p.name.as_str();
 
@@ -391,10 +391,9 @@ impl Interpreter {
                     ))
                     .into());
                 }
-                MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
+                MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?
+                    .into_internal_property_key(realm)?,
             };
-
-            let name = name.into_internal_property_key(realm)?;
 
             let (left, writable) =
                 (if let Some(v) = obj.resolve_property_no_get_set(name.clone(), realm)? {
@@ -449,7 +448,7 @@ impl Interpreter {
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
-                let name: InternalPropertyKey = i.sym.to_string().into();
+                let name = InternalPropertyKey::String(YSString::from_ref(&i.sym));
 
                 let left = sup
                     .resolve_property(name.clone(), realm)?
