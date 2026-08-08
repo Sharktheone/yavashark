@@ -254,49 +254,6 @@ impl ObjectImpl for Array {
     fn name(&self) -> String {
         "Array".to_string()
     }
-
-    // fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
-    //     let mut buf = String::new();
-    //
-    //     let inner = self.inner.try_borrow()?;
-    //
-    //     for (_, value) in &inner.array {
-    //         let Some(value) = inner.values.get(*value) else {
-    //             continue;
-    //         };
-    //
-    //         buf.push_str(value.value.to_string(realm)?.as_str());
-    //         buf.push_str(", ");
-    //     }
-    //
-    //     buf.pop();
-    //     buf.pop();
-    //
-    //     Ok(buf.into())
-    // }
-    //
-    // fn to_string_internal(&self) -> Res<YSString> {
-    //     use std::fmt::Write as _;
-    //
-    //     let mut buf = String::new();
-    //
-    //     let inner = self.inner.try_borrow()?;
-    //
-    //     for (_, value) in &inner.array {
-    //         let Some(value) = inner.values.get(*value) else {
-    //             continue;
-    //         };
-    //
-    //         let _ = write!(buf, "{}", value.value);
-    //
-    //         buf.push_str(", ");
-    //     }
-    //
-    //     buf.pop();
-    //     buf.pop();
-    //
-    //     Ok(buf.into())
-    // }
 }
 
 impl ProtoDefault for Array {
