@@ -171,13 +171,7 @@ impl RawJSFunction {
         let arguments_args = self.needs_arguments.then(|| args.clone());
         let caller = (self.needs_arguments && !self.is_strict).then(|| this.copy());
 
-        let scope = &mut Scope::with_parent_this(&self.scope, this)?;
-        if self.is_strict {
-            scope.set_strict_mode();
-        }
-
-        scope.state_set_function();
-        scope.state_set_returnable();
+        let scope = &mut Scope::function_with_parent_this(&self.scope, this, self.is_strict)?;
 
         let mut iter = args.into_iter();
 
