@@ -36,8 +36,10 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
-            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-            MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
+            MemberProp::Ident(i) => InternalPropertyKey::String(YSString::from_ref(&i.sym)),
+            MemberProp::Computed(e) => {
+                Self::run_expr(realm, &e.expr, span, scope)?.into_internal_property_key(realm)?
+            }
             MemberProp::PrivateName(p) => {
                 let name = p.name.as_str();
                 let obj = value.as_object()?;
