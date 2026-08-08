@@ -238,7 +238,7 @@ impl IntoPropertyKey for String {
         Ok(PropertyKey::String(self.into()))
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(string_to_internal_property_key(self.into()))
+        Ok(InternalPropertyKey::from_ys_string(self.into()))
     }
 }
 
@@ -247,7 +247,7 @@ impl IntoPropertyKey for YSString {
         Ok(PropertyKey::String(self))
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(string_to_internal_property_key(self))
+        Ok(InternalPropertyKey::from_ys_string(self))
     }
 }
 
@@ -273,21 +273,12 @@ impl IntoPropertyKey for Value {
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
         Ok(match self {
-            Self::String(s) => string_to_internal_property_key(s),
+            Self::String(s) => InternalPropertyKey::from_ys_string(s),
             Self::Symbol(s) => InternalPropertyKey::Symbol(s),
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
             Self::Number(n) => {
-                if !n.is_nan()
-                    && !n.is_infinite()
-                    && n.fract() == 0.0
-                    && (n.is_sign_positive() || n == 0.0)
-                    && n as usize <= MAX_INDEX
-                {
-                    InternalPropertyKey::Index(n as usize)
-                } else {
-                    InternalPropertyKey::String(fmt_num(n))
-                }
+                InternalPropertyKey::from_float(n)
             }
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
@@ -297,7 +288,7 @@ impl IntoPropertyKey for Value {
                     InternalPropertyKey::Symbol(s)
                 } else {
                     let s = prim.to_string(realm)?;
-                    string_to_internal_property_key(s)
+                    InternalPropertyKey::from_ys_string(s)
                 }
             }
         })
@@ -318,21 +309,12 @@ impl IntoPropertyKey for PrimitiveValue {
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
         Ok(match self {
-            Self::String(s) => string_to_internal_property_key(s),
+            Self::String(s) => InternalPropertyKey::from_ys_string(s),
             Self::Symbol(s) => InternalPropertyKey::Symbol(s),
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
             Self::Number(n) => {
-                if !n.is_nan()
-                    && !n.is_infinite()
-                    && n.fract() == 0.0
-                    && (n.is_sign_positive() || n == 0.0)
-                    && n as usize <= MAX_INDEX
-                {
-                    InternalPropertyKey::Index(n as usize)
-                } else {
-                    InternalPropertyKey::String(fmt_num(n))
-                }
+                InternalPropertyKey::from_float(n)
             }
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
@@ -340,21 +322,39 @@ impl IntoPropertyKey for PrimitiveValue {
     }
 }
 
-fn string_to_internal_property_key(s: YSString) -> InternalPropertyKey {
-    if s.starts_with("+") || s.starts_with("-") {
-        return InternalPropertyKey::String(s);
-    }
-    let Ok(i) = s.parse::<usize>() else {
-        return InternalPropertyKey::String(s);
-    };
 
-    if i <= MAX_INDEX {
-        InternalPropertyKey::Index(i)
-    } else {
-        InternalPropertyKey::String(s)
+
+impl InternalPropertyKey {
+    #[must_use]
+    pub fn from_float(n: f64) -> InternalPropertyKey {
+        if !n.is_nan()
+            && !n.is_infinite()
+            && n.fract() == 0.0
+            && (n.is_sign_positive() || n == 0.0)
+            && n as usize <= MAX_INDEX
+        {
+            Self::Index(n as usize)
+        } else {
+            Self::String(fmt_num(n))
+        }
     }
 
-    //TODO: this is a hack, we should not parse strings to usize
+    fn from_ys_string(s: YSString) -> InternalPropertyKey {
+        if s.starts_with("+") || s.starts_with("-") {
+            return InternalPropertyKey::String(s);
+        }
+        let Ok(i) = s.parse::<usize>() else {
+            return InternalPropertyKey::String(s);
+        };
+
+        if i <= MAX_INDEX {
+            InternalPropertyKey::Index(i)
+        } else {
+            InternalPropertyKey::String(s)
+        }
+
+        //TODO: this is a hack, we should not parse strings to usize
+    }
 }
 
 impl IntoPropertyKey for &Value {
@@ -401,13 +401,13 @@ impl From<&'static str> for InternalPropertyKey {
 
 impl From<String> for InternalPropertyKey {
     fn from(s: String) -> Self {
-        string_to_internal_property_key(s.into())
+        InternalPropertyKey::from_ys_string(s.into())
     }
 }
 
 impl From<YSString> for InternalPropertyKey {
     fn from(s: YSString) -> Self {
-        string_to_internal_property_key(s.into())
+        InternalPropertyKey::from_ys_string(s)
     }
 }
 
