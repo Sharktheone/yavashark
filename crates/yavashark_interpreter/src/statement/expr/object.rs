@@ -27,32 +27,36 @@ impl Interpreter {
                 PropOrSpread::Prop(prop) => {
                     match &**prop {
                         Prop::Shorthand(ident) => {
-                            let name = ident.sym.to_string();
-                            let value = scope.resolve(&name, realm)?.ok_or(
-                                ControlFlow::error_reference(format!("{name} is not defined")),
-                            )?;
+                            let name = ident.sym.as_str();
+                            let value = scope.resolve(name, realm)?.ok_or_else(|| {
+                                ControlFlow::error_reference(format!("{name} is not defined"))
+                            })?;
 
-                            obj.define_property(name.into(), value, realm);
+                            obj.define_property(
+                                InternalPropertyKey::String(YSString::from_ref(name)),
+                                value,
+                                realm,
+                            );
                         }
                         Prop::KeyValue(kv) => {
-                            let key = Self::run_prop_name(realm, &kv.key, scope)?
-                                .into_internal_property_key(realm)?;
+                            let key = Self::run_prop_key(realm, &kv.key, scope)?;
 
                             let value = Self::run_expr(realm, &kv.value, prop.span(), scope)?;
 
                             obj.define_property(key, value, realm);
                         }
                         Prop::Assign(assign) => {
-                            let key = assign.key.sym.to_string();
+                            let key = InternalPropertyKey::String(YSString::from_ref(
+                                assign.key.sym.as_str(),
+                            ));
 
                             let value = Self::run_expr(realm, &assign.value, prop.span(), scope)?;
 
-                            obj.define_property(key.into(), value, realm);
+                            obj.define_property(key, value, realm);
                         }
 
                         Prop::Method(method) => {
-                            let key = Self::run_prop_name(realm, &method.key, scope)?
-                                .into_internal_property_key(realm)?;
+                            let key = Self::run_prop_key(realm, &method.key, scope)?;
                             let mut fn_scope = Scope::with_parent(scope)?;
 
                             fn_scope.state_set_function();
@@ -94,8 +98,7 @@ impl Interpreter {
                             obj.define_property(key, value, realm);
                         }
                         Prop::Setter(set) => {
-                            let key = Self::run_prop_name(realm, &set.key, scope)?
-                                .into_internal_property_key(realm)?;
+                            let key = Self::run_prop_key(realm, &set.key, scope)?;
 
                             let param = Param::from((*set.param).clone());
                             let params = vec![param];
@@ -115,8 +118,7 @@ impl Interpreter {
                             obj.define_setter(key, func, realm)?;
                         }
                         Prop::Getter(get) => {
-                            let key = Self::run_prop_name(realm, &get.key, scope)?
-                                .into_internal_property_key(realm)?;
+                            let key = Self::run_prop_key(realm, &get.key, scope)?;
 
                             let mut fn_scope = Scope::with_parent(scope)?;
 
