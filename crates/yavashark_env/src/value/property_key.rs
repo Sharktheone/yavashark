@@ -163,31 +163,6 @@ impl From<PropertyKey> for Value {
     }
 }
 
-// impl From<Value> for InternalPropertyKey {
-//     fn from(value: Value) -> Self {
-//         match value {
-//             Value::String(s) => {
-//                 s.parse::<usize>()
-//                     .map_or_else(|_| Self::String(s), Self::Index)
-//                 //TODO: this is a hack, we should not parse strings to usize
-//             }
-//             Value::Symbol(s) => Self::Symbol(s),
-//             Value::Null => Self::String("null".into()),
-//             Value::Undefined => Self::String("undefined".into()),
-//             Value::Number(n) => {
-//                 if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
-//                     Self::Index(n as usize)
-//                 } else {
-//                     Self::String(fmt_num(n))
-//                 }
-//             }
-//             Value::Boolean(b) => Self::String(b.to_string().into()),
-//             Value::BigInt(b) => Self::String(b.to_string().into()),
-//             Value::Object(obj) => Self::String(obj.to_ys_string()),
-//         }
-//     }
-// }
-
 impl From<PropertyKey> for InternalPropertyKey {
     fn from(key: PropertyKey) -> Self {
         match key {
