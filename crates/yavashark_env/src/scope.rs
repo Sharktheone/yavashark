@@ -843,6 +843,18 @@ impl Scope {
         })
     }
 
+    pub fn function_with_parent_this(parent: &Self, this: Value, strict: bool) -> Res<Self> {
+        let mut scope = ScopeInternal::with_parent_this(Gc::clone(&parent.scope), this)?;
+        scope.state.set_function();
+        if strict {
+            scope.state.set_strict_mode();
+        }
+
+        Ok(Self {
+            scope: Gc::new(RefCell::new(scope)),
+        })
+    }
+
     pub fn declare_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
         self.scope.borrow_mut()?.declare_var(name, value, realm)
     }
