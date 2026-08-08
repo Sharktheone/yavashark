@@ -146,12 +146,14 @@ impl Interpreter {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
             PropName::Str(str_) => {
-                if let Some(s) = str_.value.as_str() {
+                str_.value.as_str().map_or_else(|| {
+                    let utf16_units = str_.value.to_ill_formed_utf16();
+                    Value::String(YSString::from_utf16_iter(utf16_units))
+                },
+                |s|
                     Value::String(YSString::from_ref(s))
-                } else {
-                    let utf16_units: Vec<u16> = str_.value.to_ill_formed_utf16().collect();
-                    Value::String(YSString::from_utf16(&utf16_units))
-                }
+                )
+
             }
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
