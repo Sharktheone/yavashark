@@ -179,7 +179,7 @@ impl Interpreter {
                     Ok(InternalPropertyKey::String(YSString::from_ref(s)))
                 )
             }
-            PropName::Num(num) => Ok(InternalPropertyKey::Index(num.value as usize)),
+            PropName::Num(num) => Ok(InternalPropertyKey::from_float(num.value)),
             PropName::Computed(expr) => {
                 let value = Self::run_expr(realm, &expr.expr, expr.span, scope)?;
                 Ok(value.into_internal_property_key(realm)?)
