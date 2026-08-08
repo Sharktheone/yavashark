@@ -5,7 +5,7 @@ use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::{ControlFlow, Error, Object, Realm, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, InternalPropertyKey, Object, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -155,5 +155,32 @@ impl Interpreter {
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),
         })
+    }
+
+    fn run_prop_key(
+        realm: &mut Realm,
+        prop: &PropName,
+        scope: &mut Scope,
+    ) -> Result<InternalPropertyKey, ControlFlow> {
+        match prop {
+            PropName::Ident(ident) => Ok(InternalPropertyKey::String(YSString::from_ref(
+                ident.sym.as_str(),
+            ))),
+            PropName::Str(str_) => {
+                str_.value.as_str().map_or_else(|| {
+                    let utf16_units = str_.value.to_ill_formed_utf16();
+                    Ok(InternalPropertyKey::String(YSString::from_utf16_iter(utf16_units)))
+                },
+                |s|
+                    Ok(InternalPropertyKey::String(YSString::from_ref(s)))
+                )
+            }
+            PropName::Num(num) => Ok(InternalPropertyKey::Index(num.value as usize)),
+            PropName::Computed(expr) => {
+                let value = Self::run_expr(realm, &expr.expr, expr.span, scope)?;
+                Ok(value.into_internal_property_key(realm)?)
+            }
+            PropName::BigInt(b) => Ok(InternalPropertyKey::String(YSString::from_ref(&b.value.to_string()))),
+        }
     }
 }
