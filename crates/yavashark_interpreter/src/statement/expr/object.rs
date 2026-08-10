@@ -167,16 +167,16 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<InternalPropertyKey, ControlFlow> {
         match prop {
-            PropName::Ident(ident) => Ok(InternalPropertyKey::String(YSString::from_ref(
+            PropName::Ident(ident) => Ok(InternalPropertyKey::from_str(
                 ident.sym.as_str(),
-            ))),
+            )),
             PropName::Str(str_) => {
                 str_.value.as_str().map_or_else(|| {
                     let utf16_units = str_.value.to_ill_formed_utf16();
-                    Ok(InternalPropertyKey::String(YSString::from_utf16_iter(utf16_units)))
+                    Ok(InternalPropertyKey::from_ys_string(YSString::from_utf16_iter(utf16_units)))
                 },
                 |s|
-                    Ok(InternalPropertyKey::String(YSString::from_ref(s)))
+                    Ok(InternalPropertyKey::from_str(s))
                 )
             }
             PropName::Num(num) => Ok(InternalPropertyKey::from_float(num.value)),
@@ -184,7 +184,7 @@ impl Interpreter {
                 let value = Self::run_expr(realm, &expr.expr, expr.span, scope)?;
                 Ok(value.into_internal_property_key(realm)?)
             }
-            PropName::BigInt(b) => Ok(InternalPropertyKey::String(YSString::from_ref(&b.value.to_string()))),
+            PropName::BigInt(b) => Ok(InternalPropertyKey::from_ys_string(b.value.to_string().into())),
         }
     }
 }
