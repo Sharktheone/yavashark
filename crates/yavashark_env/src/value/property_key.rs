@@ -31,15 +31,15 @@ impl PropertyKey {
         Self::String(YSString::new_static(s))
     }
 
-    pub fn from_symbol(s: Symbol) -> Self {
+    pub const fn from_symbol(s: Symbol) -> Self {
         Self::Symbol(s)
     }
 
-    pub fn is_symbol(&self) -> bool {
+    pub const fn is_symbol(&self) -> bool {
         matches!(self, Self::Symbol(_))
     }
 
-    pub fn is_string(&self) -> bool {
+    pub const fn is_string(&self) -> bool {
         matches!(self, Self::String(_))
     }
 }
