@@ -145,16 +145,13 @@ impl Interpreter {
     pub fn run_prop_name(realm: &mut Realm, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => {
-                str_.value.as_str().map_or_else(|| {
+            PropName::Str(str_) => str_.value.as_str().map_or_else(
+                || {
                     let utf16_units = str_.value.to_ill_formed_utf16();
                     Value::String(YSString::from_utf16_iter(utf16_units))
                 },
-                |s|
-                    Value::String(YSString::from_ref(s))
-                )
-
-            }
+                |s| Value::String(YSString::from_ref(s)),
+            ),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),
@@ -167,24 +164,24 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<InternalPropertyKey, ControlFlow> {
         match prop {
-            PropName::Ident(ident) => Ok(InternalPropertyKey::from_str(
-                ident.sym.as_str(),
-            )),
-            PropName::Str(str_) => {
-                str_.value.as_str().map_or_else(|| {
+            PropName::Ident(ident) => Ok(InternalPropertyKey::from_str(ident.sym.as_str())),
+            PropName::Str(str_) => str_.value.as_str().map_or_else(
+                || {
                     let utf16_units = str_.value.to_ill_formed_utf16();
-                    Ok(InternalPropertyKey::from_ys_string(YSString::from_utf16_iter(utf16_units)))
+                    Ok(InternalPropertyKey::from_ys_string(
+                        YSString::from_utf16_iter(utf16_units),
+                    ))
                 },
-                |s|
-                    Ok(InternalPropertyKey::from_str(s))
-                )
-            }
+                |s| Ok(InternalPropertyKey::from_str(s)),
+            ),
             PropName::Num(num) => Ok(InternalPropertyKey::from_float(num.value)),
             PropName::Computed(expr) => {
                 let value = Self::run_expr(realm, &expr.expr, expr.span, scope)?;
                 Ok(value.into_internal_property_key(realm)?)
             }
-            PropName::BigInt(b) => Ok(InternalPropertyKey::from_ys_string(b.value.to_string().into())),
+            PropName::BigInt(b) => Ok(InternalPropertyKey::from_ys_string(
+                b.value.to_string().into(),
+            )),
         }
     }
 }

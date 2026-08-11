@@ -277,9 +277,7 @@ impl IntoPropertyKey for Value {
             Self::Symbol(s) => InternalPropertyKey::Symbol(s),
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
-            Self::Number(n) => {
-                InternalPropertyKey::from_float(n)
-            }
+            Self::Number(n) => InternalPropertyKey::from_float(n),
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::Object(obj) => {
@@ -313,16 +311,12 @@ impl IntoPropertyKey for PrimitiveValue {
             Self::Symbol(s) => InternalPropertyKey::Symbol(s),
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),
-            Self::Number(n) => {
-                InternalPropertyKey::from_float(n)
-            }
+            Self::Number(n) => InternalPropertyKey::from_float(n),
             Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
             Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
         })
     }
 }
-
-
 
 impl InternalPropertyKey {
     #[must_use]
@@ -355,8 +349,6 @@ impl InternalPropertyKey {
 
         //TODO: this is a hack, we should not parse strings to usize
     }
-
-
 
     pub fn from_str(s: &str) -> InternalPropertyKey {
         if s.starts_with("+") || s.starts_with("-") {
