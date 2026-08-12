@@ -61,35 +61,35 @@ jobs:
         run: wasm-pack build --target web --release
 
       - name: Upload artifact (Linux x86_64)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: yavashark-linux-x86_64-${{ github.sha }}
           if-no-files-found: error
           path: target/release/yavashark
 
       - name: Upload artifact (Windows x86_64)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: yavashark-windows-x86_64-gnu-${{ github.sha }}
           if-no-files-found: error
           path: target/x86_64-pc-windows-gnu/release/yavashark.exe
 
 #      - name: Upload artifact (macOS x86_64)
-#        uses: actions/upload-artifact@v4
+#        uses: actions/upload-artifact@v7
 #        with:
 #          name: yavashark-macos-x86_64-${{ github.sha }}
 #          if-no-files-found: error
 #          path: target/x86_64-apple-darwin/release/yavashark
 #
 #      - name: Upload artifact (macOS aarch64)
-#        uses: actions/upload-artifact@v4
+#        uses: actions/upload-artifact@v7
 #        with:
 #          name: yavashark-macos-aarch64-${{ github.sha }}
 #          if-no-files-found: error
 #          path: target/aarch64-apple-darwin/release/yavashark
 
       - name: Upload artifact (wasm pkg)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: yavashark-wasm-web-pkg-${{ github.sha }}
           if-no-files-found: error
