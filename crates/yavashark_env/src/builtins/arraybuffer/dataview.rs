@@ -2,7 +2,7 @@ mod from_bytes;
 
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::from_bytes::FromBytes;
-use crate::conversion::downcast_obj;
+use crate::conversion::{downcast_obj, NonNegative};
 use crate::error::Error;
 use crate::value::Obj;
 use crate::{GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
@@ -25,9 +25,10 @@ impl DataView {
         realm: &mut Realm,
         buffer: Value,
         byte_offset: Option<usize>,
-        byte_length: Option<usize>,
+        byte_length: Option<NonNegative<usize>>,
     ) -> Res<Self> {
         let buf = downcast_obj::<ArrayBuffer>(buffer)?;
+        let byte_length = byte_length.map(|bl| bl.0);
 
         let inner = buf.inner.borrow();
 
@@ -154,8 +155,9 @@ impl DataView {
             None => None,
         };
 
-        let byte_length = match args.get(2).map(|v| v.to_number(realm).map(|v| v as usize)) {
-            Some(Ok(v)) => Some(v),
+        let byte_length = match args.get(2).map(|v| v.to_number(realm)) {
+            Some(Ok(v)) if v.is_sign_positive() => Some(NonNegative(v as usize)),
+            Some(Ok(v)) => return Err(Error::range("Expected non-negative number")),
             Some(Err(e)) => return Err(e),
             None => None,
         };
