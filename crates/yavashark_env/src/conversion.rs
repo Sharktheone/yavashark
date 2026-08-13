@@ -14,6 +14,7 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::slice::IterMut;
+use num_traits::Signed;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
 
@@ -425,6 +426,8 @@ impl FromValueOutput for &ActualString {
 
 pub struct NonFract<T>(pub T);
 
+pub struct NonNegative<T>(pub T);
+
 // impl<T: From<f64>> FromValueOutput for NonFract<T> {
 //     type Output = T;
 //
@@ -594,11 +597,56 @@ macro_rules! impl_from_value_float_output_nonfract {
     () => {};
 }
 
+macro_rules! impl_from_value_output_nonnegative {
+($($t:ty),*) => {
+        $(
+            impl FromValueOutput for NonNegative<$t> {
+                type Output = NonNegative<$t>;
+
+                fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+                    match value {
+                        Value::Number(n) => {
+                            if n.is_sign_negative() {
+                                return Err(Error::range("Expected positive number"));
+                            }
+                            Ok(NonNegative(n as $t))
+                        },
+                        Value::String(ref s) => {
+                            let n = (&*s.as_str_lossy()).num();
+                            if n.is_sign_negative() {
+                                return Err(Error::range("Expected positive number"));
+                            }
+
+                            Ok(NonNegative(n as $t))
+                        }
+                        Value::Boolean(b) => Ok(NonNegative(b.into())),
+                        Value::Undefined => Ok(NonNegative(0 as $t)),
+                        #[allow(clippy::cast_lossless)]
+                        Value::Null => Ok(NonNegative(0 as $t)),
+                        Value::Object(_) => {
+                            let v = value.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+                            return Self::from_value_out(v, realm);
+                        }
+                        _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
+                    }
+                }
+            }
+        )*
+    };
+    () => {};
+}
+
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize);
 impl_from_value_float_output!(f32, f64);
 impl_from_value_output_nonfract!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize);
 
 impl_from_value_float_output_nonfract!(f32, f64);
+
+impl_from_value_output_nonnegative!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize);
+
+
+
 
 pub struct Extractor<'a> {
     values: IterMut<'a, Value>,
