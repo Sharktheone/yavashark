@@ -90,17 +90,16 @@ jobs:
 
       - name: Update results
         working-directory: data
+        env:
+          COMMIT_TITLE: ${{ steps.commit_info.outputs.title }}
+          COMMIT_SHA: ${{ steps.commit_info.outputs.sha }}
+          COMMIT_COUNT: ${{ steps.commit_info.outputs.count }}
         run: |
           git pull
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
           git add .
-          
-          # Build commit message
-          COMMIT_TITLE='${{ steps.commit_info.outputs.title }}'
-          COMMIT_SHA='${{ steps.commit_info.outputs.sha }}'
-          COMMIT_COUNT='${{ steps.commit_info.outputs.count }}'
-          
+
           # Create commit message file
           {
             echo "$COMMIT_TITLE"
