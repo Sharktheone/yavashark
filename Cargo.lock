@@ -421,9 +421,9 @@ dependencies = [
 
 [[package]]
 name = "ast_node"
-version = "5.0.0"
+version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2eb025ef00a6da925cf40870b9c8d008526b6004ece399cb0974209720f0b194"
+checksum = "edf54a7a1bf98e127c22e9e2b9d19619092c74283fdc14e4d67da69780f90db6"
 dependencies = [
  "quote",
  "swc_macros_common",
@@ -1083,6 +1083,19 @@ checksum = "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
 dependencies = [
  "bytes",
  "memchr",
+]
+
+[[package]]
+name = "compact_str"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f86b9c4c00838774a6d902ef931eff7470720c51d90c2e32cfe15dc304737b3f"
+dependencies = [
+ "castaway",
+ "cfg-if",
+ "itoa",
+ "ryu",
+ "static_assertions",
 ]
 
 [[package]]
@@ -2512,9 +2525,9 @@ dependencies = [
 
 [[package]]
 name = "hstr"
-version = "3.0.6"
+version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83bb87e4b300d73412f6dcc7022ee7741452b51b155c2b06e5994d0770c2dbe2"
+checksum = "23efb2e58d2f27a96edfa907c26016deb120b7ac8c66a19d2748f0e9c145f3cb"
 dependencies = [
  "hashbrown 0.14.5",
  "new_debug_unreachable",
@@ -2734,7 +2747,7 @@ dependencies = [
  "icu_properties",
  "icu_provider",
  "litemap",
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-rational",
  "num-traits",
  "potential_utf",
@@ -3528,6 +3541,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-bigint"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
 name = "num-integer"
 version = "0.1.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3542,7 +3565,7 @@ version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f83d14da390562dca69fc84082e73e548e1ad308d24accdedd2720017cb37824"
 dependencies = [
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-integer",
  "num-traits",
 ]
@@ -4081,7 +4104,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9db328a0a6163105e188e2ff4620fb4a065daf2001e4a7318b3342605bacaa9e"
 dependencies = [
  "cow-utils",
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-traits",
  "oxc_allocator",
  "oxc_ast",
@@ -4115,7 +4138,7 @@ dependencies = [
  "bitflags 2.10.0",
  "cow-utils",
  "memchr",
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-traits",
  "oxc_allocator",
  "oxc_ast",
@@ -4174,7 +4197,7 @@ version = "0.129.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dff4df78f3fd004daf1dd0301cac40b34451c42e56dd46f7a7dcefd0cc582ef3"
 dependencies = [
- "compact_str",
+ "compact_str 0.9.0",
  "oxc-miette",
  "oxc_allocator",
  "oxc_ast_macros",
@@ -4188,7 +4211,7 @@ version = "0.129.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0273521fbd4655da9c5b2f659f4cc7f2e5370a573b54d37a4456c336c7bc8af6"
 dependencies = [
- "compact_str",
+ "compact_str 0.9.0",
  "hashbrown 0.17.0",
  "oxc_allocator",
  "oxc_estree",
@@ -5194,17 +5217,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
-name = "smartstring"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fb72c633efbaa2dd666986505016c32c3044395ceaf881518399d2f4127ee29"
-dependencies = [
- "autocfg",
- "static_assertions",
- "version_check",
-]
-
-[[package]]
 name = "smawk"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5404,9 +5416,9 @@ dependencies = [
 
 [[package]]
 name = "swc_atoms"
-version = "9.0.3"
+version = "10.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "845f31910b5236db42dba106e8277681098d183b9b65b8dfa88ca8abe464aeff"
+checksum = "c70a493080ceb12dabddb96905a3ddac679fbe9c71ddc81a2a769126e8cde7c4"
 dependencies = [
  "hstr",
  "once_cell",
@@ -5415,9 +5427,9 @@ dependencies = [
 
 [[package]]
 name = "swc_common"
-version = "23.0.2"
+version = "26.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "176fb11b1abd0a175e8ac47d4b061c5c8a9ae13b9196f30d44fe5db9cb7dfcbd"
+checksum = "142d2a06cafce623859ca799f5d1935bb8a886f18b66a2585ddeadff210121d0"
 dependencies = [
  "anyhow",
  "ast_node",
@@ -5425,7 +5437,7 @@ dependencies = [
  "bytes-str",
  "either",
  "from_variant",
- "num-bigint",
+ "num-bigint 0.4.6",
  "once_cell",
  "rustc-hash 2.1.1",
  "serde",
@@ -5440,13 +5452,13 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_ast"
-version = "25.0.0"
+version = "29.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a207e09f23885ff1f4354ebfdd4e715ccd4a68fca2e7e0df09baafbca850762e"
+checksum = "5a6fd43fc7e90b9d5b252af666c147f5e2ee692add2b075f7f0d6fc2f5357bb6"
 dependencies = [
  "bitflags 2.10.0",
  "is-macro",
- "num-bigint",
+ "num-bigint 0.4.6",
  "once_cell",
  "phf 0.11.3",
  "rustc-hash 2.1.1",
@@ -5459,18 +5471,18 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_parser"
-version = "41.1.2"
+version = "45.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0f6c9c63026f4d1a70c3c6703446d42ce7b0fe83d4c33b6fe985faf96753f3e"
+checksum = "75a380e3e36a2167f1a2c6fd725c87a3aee60d404505667ea2c7c9e85763a70e"
 dependencies = [
  "bitflags 2.10.0",
+ "compact_str 0.7.1",
  "either",
- "num-bigint",
+ "num-bigint 0.4.6",
  "phf 0.11.3",
  "rustc-hash 2.1.1",
  "seq-macro",
  "serde",
- "smartstring",
  "stacker",
  "swc_atoms",
  "swc_common",
@@ -5481,12 +5493,12 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_visit"
-version = "25.0.0"
+version = "29.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f9cb1e958e57fa6427c106674a12190c4578684beee783e3a0508f048d1b372"
+checksum = "a830a070fea84a3a8a8c556463f0551e3bfc6cf2f8bdeecd62fa753e22a72289"
 dependencies = [
  "new_debug_unreachable",
- "num-bigint",
+ "num-bigint 0.4.6",
  "swc_atoms",
  "swc_common",
  "swc_ecma_ast",
@@ -7408,7 +7420,7 @@ name = "yavashark_bytecode"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "num-bigint",
+ "num-bigint 0.4.6",
  "swc_ecma_ast",
  "yavashark_string",
 ]
@@ -7467,7 +7479,7 @@ dependencies = [
  "icu",
  "indexmap",
  "log",
- "num-bigint",
+ "num-bigint 0.5.1",
  "num-traits",
  "paste",
  "pin-project",
@@ -7529,7 +7541,7 @@ name = "yavashark_ir"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
- "num-bigint",
+ "num-bigint 0.4.6",
  "regress",
  "yavashark_string",
 ]
@@ -7627,7 +7639,7 @@ dependencies = [
  "anyhow",
  "equivalent",
  "half",
- "num-bigint",
+ "num-bigint 0.4.6",
  "num-traits",
  "rand 0.10.1",
  "yavashark_garbage",
