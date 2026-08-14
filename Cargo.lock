@@ -5586,9 +5586,9 @@ dependencies = [
 
 [[package]]
 name = "temporal_rs"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7042abba568ddedd9b9e49b8c2bea3746a33676946d06ad45c7f11e16776b7df"
+checksum = "1a978fef907a27736827d336c0bfaab14fb8a7509dd6dc2b43c44e51d59aca5b"
 dependencies = [
  "calendrical_calculations",
  "core_maths",
@@ -5685,9 +5685,9 @@ dependencies = [
 
 [[package]]
 name = "timezone_provider"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46d2bbd4e9d17c5613c946429ff7cb358abde34785189ed393b09a572504dcc9"
+checksum = "89ec4f4eebb4817fde02a411aedc7ac5f66c89c68c49e5d4b17a8139f077af52"
 dependencies = [
  "combine",
  "jiff-tzdb",
