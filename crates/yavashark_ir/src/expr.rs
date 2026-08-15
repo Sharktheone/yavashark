@@ -6,6 +6,7 @@ use yavashark_string::YSString;
 pub enum Expression<'alloc> {
     BooleanLit(bool),
     NullLit,
+    UndefinedLit,
     FloatLit(f64),
     Int32Lit(i32),
     StringLit(YSString),
