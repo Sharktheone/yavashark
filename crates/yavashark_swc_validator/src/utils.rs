@@ -256,21 +256,7 @@ impl<'a> Validator<'a> {
 }
 
 pub fn block_has_use_strict(block: &BlockStmt) -> bool {
-    for stmt in &block.stmts {
-        match stmt {
-            Stmt::Empty(_) => continue,
-            Stmt::Expr(ExprStmt { expr, .. }) => match &**expr {
-                Expr::Lit(Lit::Str(str_lit)) if str_lit.value == *"use strict" => {
-                    return true;
-                }
-                Expr::Lit(Lit::Str(_)) => continue,
-                _ => break,
-            },
-            _ => break,
-        }
-    }
-
-    false
+    statements_have_use_strict(&block.stmts)
 }
 
 pub fn statements_have_use_strict(stmts: &[Stmt]) -> bool {
