@@ -7475,7 +7475,7 @@ name = "yavashark_bytecode"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "num-bigint 0.4.6",
+ "num-bigint 0.5.1",
  "swc_ecma_ast",
  "yavashark_string",
 ]
@@ -7596,7 +7596,7 @@ name = "yavashark_ir"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
- "num-bigint 0.4.6",
+ "num-bigint 0.5.1",
  "regress",
  "yavashark_string",
 ]
@@ -7694,7 +7694,7 @@ dependencies = [
  "anyhow",
  "equivalent",
  "half",
- "num-bigint 0.4.6",
+ "num-bigint 0.5.1",
  "num-traits",
  "rand 0.10.1",
  "yavashark_garbage",
