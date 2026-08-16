@@ -5,9 +5,7 @@ use std::rc::Rc;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_bytecode::data::{OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
-use yavashark_bytecode::{
-    BytecodeFunctionCode, ConstValue, DataTypeValue, FunctionBlueprint, ObjectLiteralBlueprint,
-};
+use yavashark_bytecode::{BigInt, BytecodeFunctionCode, ConstValue, DataTypeValue, FunctionBlueprint, ObjectLiteralBlueprint};
 
 impl Compiler {
     pub fn compile_object(
@@ -46,16 +44,7 @@ impl Compiler {
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
 
-                        let bp = FunctionBlueprint {
-                            name: None,
-                            params: Vec::new(),
-                            is_async: false,
-                            is_generator: false,
-                            code: Rc::new(g.body.as_ref().map_or(
-                                Ok(BytecodeFunctionCode::default()),
-                                Self::create_bytecode_from_block,
-                            )?),
-                        };
+                        let bp = self.create_function_blueprint(&g.function, None)?;
 
                         properties.push((prop, DataTypeValue::Get(bp)));
                     }
@@ -65,22 +54,7 @@ impl Compiler {
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
 
-                        let param = Param {
-                            span: s.span,
-                            decorators: vec![],
-                            pat: (*s.param).clone(),
-                        };
-
-                        let bp = FunctionBlueprint {
-                            name: None,
-                            params: vec![param],
-                            is_async: false,
-                            is_generator: false,
-                            code: Rc::new(s.body.as_ref().map_or(
-                                Ok(BytecodeFunctionCode::default()),
-                                Self::create_bytecode_from_block,
-                            )?),
-                        };
+                        let bp = self.create_function_blueprint(&s.function, None)?;
 
                         properties.push((prop, DataTypeValue::Set(bp)));
                     }
@@ -90,13 +64,7 @@ impl Compiler {
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
 
-                        let bp = FunctionBlueprint {
-                            name: None,
-                            params: m.function.params.clone(),
-                            is_async: m.function.is_async,
-                            is_generator: m.function.is_generator,
-                            code: Rc::new(Self::create_bytecode(&m.function)?),
-                        };
+                        let bp = self.create_function_blueprint(&m.function, None)?;
 
                         properties.push((prop, DataTypeValue::Function(bp)));
                     }

@@ -6,7 +6,15 @@ use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
+
     pub fn create_function(&mut self, f: &Function, name: Option<String>) -> Res<ConstIdx> {
+        let bp = self.create_function_blueprint(f, name)?;
+        
+        Ok(self.alloc_const(ConstValue::Function(bp)))
+        
+    }
+    
+    pub fn create_function_blueprint(&mut self, f: &Function, name: Option<String>) -> Res<FunctionBlueprint> {
         let name = name.or(self.current_fn_name.take());
 
         let bp = FunctionBlueprint {
@@ -17,7 +25,7 @@ impl Compiler {
             code: Rc::new(Self::create_bytecode(f)?),
         };
 
-        Ok(self.alloc_const(ConstValue::Function(bp)))
+        Ok(bp)
     }
 
     pub fn create_bytecode(f: &Function) -> Res<BytecodeFunctionCode> {
