@@ -44,10 +44,7 @@ impl Compiler {
     pub fn create_function_bytecode(body: &FunctionBody) -> Res<BytecodeFunctionCode> {
         let mut this = Self::new();
 
-        this.instructions.push(Instruction::PushScope);
-        this.compile_stmts(&body.stmts)?;
-        this.instructions.push(Instruction::PopScope);
-
+        this.compile_stmt_block(&body.stmts)?;
 
         let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
