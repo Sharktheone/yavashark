@@ -142,7 +142,7 @@ impl<'a> Validator<'a> {
                     }
 
                     if let Some(body) = &constructor.body {
-                        self.validate_block(body)?;
+                        self.validate_block_with_shadow(&body.stmts, true)?;
                     }
 
                     Ok(())
