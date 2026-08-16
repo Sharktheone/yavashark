@@ -46,51 +46,28 @@ impl<'a> Validator<'a> {
             }
             Prop::Getter(getter) => {
                 self.validate_prop_name(&getter.key)?;
-                if let Some(body) = &getter.body {
-                    let scope = self.enter_function_context(false, false);
-                    self.set_super_property_allowed(true);
-                    self.set_super_call_allowed(true);
-                    let super_prop_guard = self.enter_super_property_scope();
-                    let super_call_guard = self.enter_super_call_scope();
+                    if getter.function.is_async {
+                        return Err("Getter methods cannot be async".to_string());
+                    }
 
-                    let result = self.validate_block(body);
+                    if getter.function.is_generator {
+                        return Err("Getter methods cannot be generators".to_string());
+                    }
 
-                    super_call_guard.exit(self);
-                    super_prop_guard.exit(self);
-                    scope.exit(self);
-                    result?;
-                }
+                    self.validate_function(&getter.function, None, true, true)?;
             }
             Prop::Setter(setter) => {
                 self.validate_prop_name(&setter.key)?;
 
-                if let Some(this_param) = &setter.this_param {
-                    self.validate_pat(this_param)?;
+
+                if setter.function.is_async {
+                    return Err("Setter methods cannot be async".to_string());
                 }
 
-                if let Some(body) = &setter.body {
-                    let scope = self.enter_function_context(false, false);
-
-                    if crate::utils::block_has_use_strict(body) {
-                        self.set_current_function_strict();
-                    }
-
-                    self.validate_pat(&setter.param)?;
-
-                    self.set_super_property_allowed(true);
-                    self.set_super_call_allowed(true);
-                    let super_prop_guard = self.enter_super_property_scope();
-                    let super_call_guard = self.enter_super_call_scope();
-
-                    let result = self.validate_block(body);
-
-                    super_call_guard.exit(self);
-                    super_prop_guard.exit(self);
-                    scope.exit(self);
-                    result?;
-                } else {
-                    self.validate_pat(&setter.param)?;
+                if setter.function.is_generator {
+                    return Err("Setter methods cannot be generators".to_string());
                 }
+
             }
             Prop::Method(method) => {
                 self.validate_prop_name(&method.key)?;
