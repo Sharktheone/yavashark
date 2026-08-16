@@ -2,7 +2,7 @@ use crate::compiler::statement::expr::MoveOptimization;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::rc::Rc;
-use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr, Param, Pat};
+use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody, BlockStmtOrExpr, Param, Pat};
 use yavashark_bytecode::data::{DataSection, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ArrowFunctionBlueprint, BytecodeFunctionCode, ConstValue};
@@ -20,10 +20,10 @@ impl Compiler {
         let mut this = Self::new();
 
         match &*expr.body {
-            BlockStmtOrExpr::BlockStmt(block) => {
-                this.compile_block(block)?;
+            ArrowFunctionBody::FunctionBody(body) => {
+                this.compile_stmt_block(&body.stmts)?;
             }
-            BlockStmtOrExpr::Expr(expr) => {
+            ArrowFunctionBody::Expr(expr) => {
                 let out = this.compile_expr_data_acc(expr)?;
 
                 this.instructions.push(Instruction::return_value(out));
