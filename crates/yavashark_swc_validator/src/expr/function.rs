@@ -1,6 +1,6 @@
 use crate::Validator;
 use crate::pat::collect_bound_names;
-use crate::utils::block_has_use_strict;
+use crate::utils::statements_have_use_strict;
 use swc_ecma_ast::{FnExpr, Function, Ident, Param, Pat};
 
 impl<'a> Validator<'a> {
@@ -25,7 +25,7 @@ impl<'a> Validator<'a> {
         self.set_super_call_allowed(allow_super_call);
 
         if let Some(body) = &function.body
-            && block_has_use_strict(body)
+            && statements_have_use_strict(&body.stmts)
         {
             self.set_current_function_strict();
         }
@@ -73,7 +73,7 @@ impl<'a> Validator<'a> {
         }
 
         if let Some(body) = &function.body
-            && let Err(e) = self.validate_block_with_shadow(body, false)
+            && let Err(e) = self.validate_block_with_shadow(&body.stmts, false)
         {
             if let Some(relax) = relaxed_await {
                 relax.exit(self);
