@@ -100,18 +100,15 @@ impl Interpreter {
                         Prop::Setter(set) => {
                             let key = Self::run_prop_key(realm, &set.key, scope)?;
 
-                            let param = Param::from((*set.param).clone());
-                            let params = vec![param];
-
                             let mut fn_scope = Scope::with_parent(scope)?;
 
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
                                 key.to_string(),
-                                params,
-                                set.body.clone(),
-                                fn_scope,
+                                set.function.params.clone(),
+                                set.function.body.clone(),
+                                fn_scope.clone(),
                                 realm,
                             )?;
 
