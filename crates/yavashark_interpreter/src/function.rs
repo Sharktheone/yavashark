@@ -3,7 +3,7 @@ use log::info;
 use std::any::Any;
 use std::cell::RefCell;
 use std::iter;
-use swc_ecma_ast::{BlockStmt, Callee, Expr, MemberProp, Param, Pat, Stmt};
+use swc_ecma_ast::{BlockStmt, Callee, Expr, FunctionBody, MemberProp, Param, Pat, Stmt};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Arguments;
 use yavashark_env::optimizer::FunctionCode;
@@ -35,7 +35,7 @@ pub struct JSFunction {
 pub struct RawJSFunction {
     pub name: RefCell<String>,
     pub params: Vec<Param>,
-    pub block: Option<BlockStmt>,
+    pub block: Option<FunctionBody>,
     pub scope: Scope,
     pub is_strict: bool,
     pub needs_arguments: bool,
@@ -67,7 +67,7 @@ impl JSFunction {
     pub fn new(
         name: String,
         params: Vec<Param>,
-        block: Option<BlockStmt>,
+        block: Option<FunctionBody>,
         scope: Scope,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
@@ -96,7 +96,7 @@ impl JSFunction {
             raw: RawJSFunction {
                 name: RefCell::new(name.clone()),
                 params,
-                needs_arguments: block.as_ref().is_some_and(block_needs_arguments),
+                needs_arguments: block.as_ref().is_some_and(|b| stmts_need_arguments(&b.stmts)),
                 block,
                 scope,
                 is_strict,
@@ -212,7 +212,7 @@ impl RawJSFunction {
         }
 
         if let Some(block) = &self.block
-            && let Err(e) = Interpreter::run_block(realm, block, scope)
+            && let Err(e) = Interpreter::run_block_stmts(realm, &block.stmts, scope)
         {
             return match e {
                 ControlFlow::Error(e) => Err(e),
@@ -232,7 +232,12 @@ impl RawJSFunction {
 }
 
 pub(crate) fn block_needs_arguments(block: &BlockStmt) -> bool {
-    block.stmts.iter().any(stmt_needs_arguments)
+    stmts_need_arguments(&block.stmts)
+}
+
+
+pub(crate) fn stmts_need_arguments(stmts: &[Stmt]) -> bool {
+    stmts.iter().any(stmt_needs_arguments)
 }
 
 fn stmt_needs_arguments(stmt: &Stmt) -> bool {
