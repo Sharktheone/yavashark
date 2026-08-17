@@ -1,4 +1,4 @@
-use crate::function::block_needs_arguments;
+use crate::function::{block_needs_arguments, stmts_need_arguments};
 use crate::function::{JSFunction, RawJSFunction};
 use std::cell::RefCell;
 use swc_common::Span;
@@ -124,7 +124,7 @@ pub fn create_class(
                     needs_arguments: constructor
                         .body
                         .as_ref()
-                        .is_some_and(|block| block_needs_arguments(block)),
+                        .is_some_and(|block| stmts_need_arguments(&block.stmts)),
                     block: constructor.body.clone(),
                     scope: scope.clone(),
                     is_strict,
