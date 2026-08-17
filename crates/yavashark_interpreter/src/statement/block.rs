@@ -14,14 +14,18 @@ fn needs_block_scope(stmts: &[Stmt]) -> bool {
 }
 
 impl Interpreter {
-    pub fn run_block(realm: &mut Realm, stmt: &BlockStmt, scope: &mut Scope) -> RuntimeResult {
-        if !needs_block_scope(&stmt.stmts) {
-            return Self::run_statements(realm, &stmt.stmts, scope);
+    pub fn run_block(realm: &mut Realm, block: &BlockStmt, scope: &mut Scope) -> RuntimeResult {
+        Self::run_block_stmts(realm, &block.stmts, scope)
+    }
+
+    pub fn run_block_stmts(realm: &mut Realm, stmts: &[Stmt], scope: &mut Scope) -> RuntimeResult {
+        if !needs_block_scope(stmts) {
+            return Self::run_statements(realm, stmts, scope);
         }
 
         let scope = &mut Scope::with_parent(scope)?;
 
-        Self::run_statements(realm, &stmt.stmts, scope)
+        Self::run_statements(realm, stmts, scope)
     }
     pub fn run_block_this(
         realm: &mut Realm,
