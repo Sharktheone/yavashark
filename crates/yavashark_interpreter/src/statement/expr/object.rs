@@ -123,8 +123,8 @@ impl Interpreter {
 
                             let func = JSFunction::new(
                                 key.to_string(),
-                                vec![],
-                                get.body.clone(),
+                                get.function.params.clone(),
+                                get.function.body.clone(),
                                 fn_scope,
                                 realm,
                             )?;
