@@ -62,7 +62,7 @@ impl Interpreter {
 
     pub fn run_statements(
         realm: &mut Realm,
-        script: &Vec<Stmt>,
+        script: &[Stmt],
         scope: &mut Scope,
     ) -> RuntimeResult {
         Self::hoist_statements(realm, script, scope)?;
@@ -80,7 +80,7 @@ impl Interpreter {
         Ok(last_value)
     }
 
-    fn hoist_statements(realm: &mut Realm, script: &Vec<Stmt>, scope: &mut Scope) -> Res<()> {
+    fn hoist_statements(realm: &mut Realm, script: &[Stmt], scope: &mut Scope) -> Res<()> {
         for stmt in script {
             match stmt {
                 Stmt::Decl(decl) => {
