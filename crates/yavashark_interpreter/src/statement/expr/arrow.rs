@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
+use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Func;
@@ -44,8 +44,8 @@ impl Func for ArrowFunction {
         scope.state_set_returnable()?;
 
         let res = match &*self.expr.body {
-            BlockStmtOrExpr::BlockStmt(stmt) => Interpreter::run_block(realm, stmt, scope),
-            BlockStmtOrExpr::Expr(expr) => {
+            ArrowFunctionBody::FunctionBody(stmt) => Interpreter::run_block_stmts(realm, &stmt.stmts, scope),
+            ArrowFunctionBody::Expr(expr) => {
                 match Interpreter::run_expr(realm, expr, self.expr.span, scope) {
                     Ok(value) => return Ok(value),
                     other => other,
