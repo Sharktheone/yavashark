@@ -173,7 +173,7 @@ impl ObjectConstructor {
         props: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let props = coerce_object(props, realm)?;
+        let props = coerce_object_strict(props, realm)?;
         let mut descriptors = Vec::new();
 
         for key in props.keys(realm)? {
