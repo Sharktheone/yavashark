@@ -60,11 +60,7 @@ impl Interpreter {
         })
     }
 
-    pub fn run_statements(
-        realm: &mut Realm,
-        script: &[Stmt],
-        scope: &mut Scope,
-    ) -> RuntimeResult {
+    pub fn run_statements(realm: &mut Realm, script: &[Stmt], scope: &mut Scope) -> RuntimeResult {
         Self::hoist_statements(realm, script, scope)?;
 
         let mut last_value = Value::Undefined;

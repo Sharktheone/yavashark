@@ -44,7 +44,9 @@ impl Func for ArrowFunction {
         scope.state_set_returnable()?;
 
         let res = match &*self.expr.body {
-            ArrowFunctionBody::FunctionBody(stmt) => Interpreter::run_block_stmts(realm, &stmt.stmts, scope),
+            ArrowFunctionBody::FunctionBody(stmt) => {
+                Interpreter::run_block_stmts(realm, &stmt.stmts, scope)
+            }
             ArrowFunctionBody::Expr(expr) => {
                 match Interpreter::run_expr(realm, expr, self.expr.span, scope) {
                     Ok(value) => return Ok(value),

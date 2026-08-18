@@ -5,7 +5,9 @@ use std::rc::Rc;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_bytecode::data::{OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
-use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, DataTypeValue, FunctionBlueprint, ObjectLiteralBlueprint};
+use yavashark_bytecode::{
+    BytecodeFunctionCode, ConstValue, DataTypeValue, FunctionBlueprint, ObjectLiteralBlueprint,
+};
 
 impl Compiler {
     pub fn compile_object(

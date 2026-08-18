@@ -1,5 +1,5 @@
-use swc_ecma_ast::Stmt;
 use crate::{Compiler, Res};
+use swc_ecma_ast::Stmt;
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {

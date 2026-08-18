@@ -96,7 +96,9 @@ impl JSFunction {
             raw: RawJSFunction {
                 name: RefCell::new(name.clone()),
                 params,
-                needs_arguments: block.as_ref().is_some_and(|b| stmts_need_arguments(&b.stmts)),
+                needs_arguments: block
+                    .as_ref()
+                    .is_some_and(|b| stmts_need_arguments(&b.stmts)),
                 block,
                 scope,
                 is_strict,
@@ -234,7 +236,6 @@ impl RawJSFunction {
 pub(crate) fn block_needs_arguments(block: &BlockStmt) -> bool {
     stmts_need_arguments(&block.stmts)
 }
-
 
 pub(crate) fn stmts_need_arguments(stmts: &[Stmt]) -> bool {
     stmts.iter().any(stmt_needs_arguments)

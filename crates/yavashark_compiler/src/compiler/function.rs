@@ -2,19 +2,21 @@ use crate::{Compiler, Res};
 use std::rc::Rc;
 use swc_ecma_ast::{BlockStmt, Function, FunctionBody};
 use yavashark_bytecode::data::{ConstIdx, DataSection};
-use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 use yavashark_bytecode::instructions::Instruction;
+use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 
 impl Compiler {
-
     pub fn create_function(&mut self, f: &Function, name: Option<String>) -> Res<ConstIdx> {
         let bp = self.create_function_blueprint(f, name)?;
-        
+
         Ok(self.alloc_const(ConstValue::Function(bp)))
-        
     }
-    
-    pub fn create_function_blueprint(&mut self, f: &Function, name: Option<String>) -> Res<FunctionBlueprint> {
+
+    pub fn create_function_blueprint(
+        &mut self,
+        f: &Function,
+        name: Option<String>,
+    ) -> Res<FunctionBlueprint> {
         let name = name.or(self.current_fn_name.take());
 
         let bp = FunctionBlueprint {

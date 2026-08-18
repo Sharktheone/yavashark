@@ -9,12 +9,12 @@ use crate::{
     ValueResult,
 };
 use num_bigint::BigInt;
+use num_traits::Signed;
 use std::fmt::Display;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::slice::IterMut;
-use num_traits::Signed;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
 
@@ -644,9 +644,6 @@ impl_from_value_output_nonfract!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usi
 impl_from_value_float_output_nonfract!(f32, f64);
 
 impl_from_value_output_nonnegative!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize);
-
-
-
 
 pub struct Extractor<'a> {
     values: IterMut<'a, Value>,

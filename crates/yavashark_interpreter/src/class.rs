@@ -1,5 +1,5 @@
-use crate::function::{block_needs_arguments, stmts_need_arguments};
 use crate::function::{JSFunction, RawJSFunction};
+use crate::function::{block_needs_arguments, stmts_need_arguments};
 use std::cell::RefCell;
 use swc_common::Span;
 use swc_ecma_ast::{

@@ -46,19 +46,18 @@ impl<'a> Validator<'a> {
             }
             Prop::Getter(getter) => {
                 self.validate_prop_name(&getter.key)?;
-                    if getter.function.is_async {
-                        return Err("Getter methods cannot be async".to_string());
-                    }
+                if getter.function.is_async {
+                    return Err("Getter methods cannot be async".to_string());
+                }
 
-                    if getter.function.is_generator {
-                        return Err("Getter methods cannot be generators".to_string());
-                    }
+                if getter.function.is_generator {
+                    return Err("Getter methods cannot be generators".to_string());
+                }
 
-                    self.validate_function(&getter.function, None, true, true)?;
+                self.validate_function(&getter.function, None, true, true)?;
             }
             Prop::Setter(setter) => {
                 self.validate_prop_name(&setter.key)?;
-
 
                 if setter.function.is_async {
                     return Err("Setter methods cannot be async".to_string());
@@ -67,7 +66,6 @@ impl<'a> Validator<'a> {
                 if setter.function.is_generator {
                     return Err("Setter methods cannot be generators".to_string());
                 }
-
             }
             Prop::Method(method) => {
                 self.validate_prop_name(&method.key)?;

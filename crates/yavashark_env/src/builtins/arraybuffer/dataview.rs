@@ -2,7 +2,7 @@ mod from_bytes;
 
 use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::from_bytes::FromBytes;
-use crate::conversion::{downcast_obj, NonNegative};
+use crate::conversion::{NonNegative, downcast_obj};
 use crate::error::Error;
 use crate::value::Obj;
 use crate::{GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};

@@ -29,7 +29,9 @@ impl<'a> Validator<'a> {
         }
 
         let res = match &*arrow.body {
-            ArrowFunctionBody::FunctionBody(block) => self.validate_block_with_shadow(&block.stmts, false),
+            ArrowFunctionBody::FunctionBody(block) => {
+                self.validate_block_with_shadow(&block.stmts, false)
+            }
             ArrowFunctionBody::Expr(expr) => self.validate_expr(expr),
         };
 
