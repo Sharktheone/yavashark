@@ -169,11 +169,12 @@ impl ObjectConstructor {
 
     #[prop("defineProperties")]
     fn define_properties(
-        obj: ObjectHandle,
+        obj: Value,
         props: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let props = coerce_object_strict(props, realm)?;
+        let obj = coerce_object_strict(obj, realm)?;
         let mut descriptors = Vec::new();
 
         for key in props.keys(realm)? {
