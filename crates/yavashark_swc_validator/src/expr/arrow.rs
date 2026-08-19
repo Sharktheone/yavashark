@@ -1,6 +1,6 @@
 use crate::Validator;
-use crate::utils::{block_has_use_strict, statements_have_use_strict};
-use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody, BlockStmtOrExpr};
+use crate::utils::statements_have_use_strict;
+use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody};
 
 impl<'a> Validator<'a> {
     pub fn validate_arrow_expr(&mut self, arrow: &'a ArrowExpr) -> Result<(), String> {

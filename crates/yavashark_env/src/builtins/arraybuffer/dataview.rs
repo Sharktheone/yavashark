@@ -157,7 +157,7 @@ impl DataView {
 
         let byte_length = match args.get(2).map(|v| v.to_number(realm)) {
             Some(Ok(v)) if v.is_sign_positive() => Some(NonNegative(v as usize)),
-            Some(Ok(v)) => return Err(Error::range("Expected non-negative number")),
+            Some(Ok(_)) => return Err(Error::range("Expected non-negative number")),
             Some(Err(e)) => return Err(e),
             None => None,
         };

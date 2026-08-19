@@ -2,7 +2,7 @@ use crate::compiler::statement::expr::MoveOptimization;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::rc::Rc;
-use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody, BlockStmtOrExpr, Param, Pat};
+use swc_ecma_ast::{ArrowExpr, ArrowFunctionBody, Param, Pat};
 use yavashark_bytecode::data::{DataSection, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ArrowFunctionBlueprint, BytecodeFunctionCode, ConstValue};

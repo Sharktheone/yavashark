@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::Validator;
-use swc_ecma_ast::{BlockStmt, Expr, ExprStmt, Lit, Stmt};
+use swc_ecma_ast::{Expr, ExprStmt, Lit, Stmt};
 use unicode_ident::{is_xid_continue, is_xid_start};
 
 #[must_use]
@@ -253,10 +253,6 @@ impl<'a> Validator<'a> {
             ctx.allow_super_call = allowed;
         }
     }
-}
-
-pub fn block_has_use_strict(block: &BlockStmt) -> bool {
-    statements_have_use_strict(&block.stmts)
 }
 
 pub fn statements_have_use_strict(stmts: &[Stmt]) -> bool {

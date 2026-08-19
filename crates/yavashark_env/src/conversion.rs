@@ -9,7 +9,6 @@ use crate::{
     ValueResult,
 };
 use num_bigint::BigInt;
-use num_traits::Signed;
 use std::fmt::Display;
 use std::mem;
 use std::ops::{Deref, DerefMut};
