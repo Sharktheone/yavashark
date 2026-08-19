@@ -350,18 +350,18 @@ impl InternalPropertyKey {
         //TODO: this is a hack, we should not parse strings to usize
     }
 
-    pub fn from_str(s: &str) -> InternalPropertyKey {
+    pub fn from_str(s: &str) -> Self {
         if s.starts_with("+") || s.starts_with("-") {
-            return InternalPropertyKey::String(YSString::from_ref(s));
+            return Self::String(YSString::from_ref(s));
         }
         let Ok(i) = s.parse::<usize>() else {
-            return InternalPropertyKey::String(YSString::from_ref(s));
+            return Self::String(YSString::from_ref(s));
         };
 
         if i <= MAX_INDEX {
-            InternalPropertyKey::Index(i)
+            Self::Index(i)
         } else {
-            InternalPropertyKey::String(YSString::from_ref(s))
+            Self::String(YSString::from_ref(s))
         }
 
         //TODO: this is a hack, we should not parse strings to usize
