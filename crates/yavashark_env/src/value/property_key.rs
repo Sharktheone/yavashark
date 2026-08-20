@@ -321,7 +321,7 @@ impl IntoPropertyKey for PrimitiveValue {
 
 impl InternalPropertyKey {
     #[must_use]
-    pub fn from_float(n: f64) -> InternalPropertyKey {
+    pub fn from_float(n: f64) -> Self {
         if !n.is_nan()
             && !n.is_infinite()
             && n.fract() == 0.0
