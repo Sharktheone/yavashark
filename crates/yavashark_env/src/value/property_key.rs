@@ -3,6 +3,7 @@ use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
+use std::str::FromStr;
 use yavashark_string::YSString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -333,18 +334,18 @@ impl InternalPropertyKey {
         }
     }
 
-    pub fn from_ys_string(s: YSString) -> InternalPropertyKey {
+    pub fn from_ys_string(s: YSString) -> Self {
         if s.starts_with("+") || s.starts_with("-") {
-            return InternalPropertyKey::String(s);
+            return Self::String(s);
         }
         let Ok(i) = s.parse::<usize>() else {
-            return InternalPropertyKey::String(s);
+            return Self::String(s);
         };
 
         if i <= MAX_INDEX {
-            InternalPropertyKey::Index(i)
+            Self::Index(i)
         } else {
-            InternalPropertyKey::String(s)
+            Self::String(s)
         }
 
         //TODO: this is a hack, we should not parse strings to usize
