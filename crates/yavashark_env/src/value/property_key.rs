@@ -3,7 +3,6 @@ use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
-use std::str::FromStr;
 use yavashark_string::YSString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

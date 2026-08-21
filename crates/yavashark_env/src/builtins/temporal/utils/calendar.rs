@@ -4,6 +4,7 @@ use crate::native_obj::NativeObject;
 use crate::{Error, Realm, Res, Value};
 use temporal_rs::Calendar;
 
+#[allow(unused)]
 pub struct CalendarIdentifier(pub Calendar);
 
 impl FromValueOutput for CalendarIdentifier {
