@@ -57,7 +57,7 @@ impl Interpreter {
         false
     }
 
-    pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> Res<Value> {
+    pub fn run_in(script: &[Stmt], realm: &mut Realm, scope: &mut Scope) -> Res<Value> {
         if Self::is_strict(script) {
             scope.set_strict_mode()?;
         }
