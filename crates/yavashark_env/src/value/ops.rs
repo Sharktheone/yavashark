@@ -522,6 +522,10 @@ impl Value {
             return Ok(false);
         };
 
+        if obj.downcast::<crate::builtins::Proxy>().is_some() {
+            return Ok(false);
+        }
+
         let Self::Object(proto_obj) = rhs else {
             return Ok(false);
         };
