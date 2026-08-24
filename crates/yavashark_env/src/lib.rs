@@ -28,7 +28,6 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-// #[cfg(feature = "js")]
 pub mod import;
 pub mod inline_props;
 pub mod value;
