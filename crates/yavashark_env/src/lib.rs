@@ -44,15 +44,15 @@ pub use crate::value::{ObjectOrNull, PrimitiveValue};
 use error::Location;
 use value::BoxedObj;
 
-pub type Value = value::Value;
-pub type WeakValue = value::WeakValue;
-pub type Error = error::Error;
+pub use value::Value;
+pub use value::WeakValue;
+pub use error::Error;
+pub use value::variable::Variable;
+pub use value::Symbol;
+pub use value::ObjectProperty;
+
 pub type ObjectHandle = value::Object;
 pub type WeakObjectHandle = value::WeakObject;
-pub type Variable = value::variable::Variable;
-pub type Symbol = value::Symbol;
-
-pub type ObjectProperty = value::ObjectProperty;
 
 pub type GCd<T> = OwningGcGuard<'static, BoxedObj, T>;
 
