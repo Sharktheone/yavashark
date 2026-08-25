@@ -21,6 +21,8 @@ pub mod error;
 pub mod experiments;
 mod function_conversion;
 mod global;
+pub mod import;
+pub mod inline_props;
 mod native_obj;
 pub mod optimizer;
 pub mod realm;
@@ -28,8 +30,6 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-pub mod import;
-pub mod inline_props;
 pub mod value;
 
 mod iter;
@@ -43,13 +43,12 @@ pub use crate::value::{ObjectOrNull, PrimitiveValue};
 use error::Location;
 use value::BoxedObj;
 
+pub use error::Error;
+pub use value::ObjectProperty;
+pub use value::Symbol;
 pub use value::Value;
 pub use value::WeakValue;
-pub use error::Error;
 pub use value::variable::Variable;
-pub use value::Symbol;
-pub use value::ObjectProperty;
-
 
 pub use value::Object as ObjectHandle;
 pub use value::WeakObject as WeakObjectHandle;
