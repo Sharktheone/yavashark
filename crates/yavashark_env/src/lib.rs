@@ -50,8 +50,9 @@ pub use value::variable::Variable;
 pub use value::Symbol;
 pub use value::ObjectProperty;
 
-pub type ObjectHandle = value::Object;
-pub type WeakObjectHandle = value::WeakObject;
+
+pub use value::Object as ObjectHandle;
+pub use value::WeakObject as WeakObjectHandle;
 
 pub type GCd<T> = OwningGcGuard<'static, BoxedObj, T>;
 
