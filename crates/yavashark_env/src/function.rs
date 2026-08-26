@@ -20,9 +20,7 @@ mod class;
 mod constructor;
 pub mod function_prototype;
 
-type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
-
-pub struct NativeFunctionBuilder(NativeFunction, bool);
+pub struct NativeFunctionBuilder<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static>(NativeFunction<F>, bool);
 
 #[inline_props]
 pub struct NativeFunctionProps {
@@ -39,14 +37,14 @@ pub struct MutNativeFunction {
     pub object: MutObject,
 }
 
-pub struct NativeFunction {
-    pub f: NativeFn,
+pub struct NativeFunction<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> {
+    pub f: F,
     pub constructor: bool,
     inner: RefCell<MutNativeFunction>,
     pub props: NativeFunctionProps,
 }
 
-impl ObjectImpl for NativeFunction {
+impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl for NativeFunction<F> {
     type Inner = MutNativeFunction;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
@@ -229,10 +227,10 @@ impl ObjectImpl for NativeFunction {
     }
 }
 
-impl NativeFunction {
+impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFunction<F> {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_boxed(name: &'static str, f: NativeFn, realm: &mut Realm) -> ObjectHandle {
+    pub fn new_boxed(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f,
             constructor: false,
@@ -266,11 +264,11 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn new(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f,
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone()),
@@ -300,12 +298,12 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn with_len(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         realm: &mut Realm,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f,
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone()),
@@ -334,11 +332,11 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f: f,
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone()),
@@ -369,12 +367,12 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         proto: ObjectHandle,
         _realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f,
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
@@ -404,13 +402,13 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto_and_len(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         proto: ObjectHandle,
         len: usize,
         realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f,
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
@@ -442,12 +440,12 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: &'static str,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
         proto: ObjectHandle,
         _realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
-            f: Box::new(f),
+            f,
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
@@ -475,10 +473,10 @@ impl NativeFunction {
     }
 
     #[must_use]
-    pub fn builder() -> NativeFunctionBuilder {
+    pub fn builder(f: F) -> NativeFunctionBuilder<F> {
         NativeFunctionBuilder(
             Self {
-                f: Box::new(|_, _, _| Ok(Value::Undefined)),
+                f,
                 constructor: false,
                 inner: RefCell::new(MutNativeFunction {
                     object: MutObject::with_proto(None),
@@ -496,7 +494,7 @@ impl NativeFunction {
     }
 }
 
-impl NativeFunctionBuilder {
+impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFunctionBuilder<F> {
     #[must_use]
     pub const fn name(mut self, name: &'static str) -> Self {
         self.0.props.name = name;
@@ -504,7 +502,7 @@ impl NativeFunctionBuilder {
     }
 
     #[must_use]
-    pub fn func(mut self, f: NativeFn) -> Self {
+    pub fn func(mut self, f: F) -> Self {
         self.0.f = f;
         self
     }
@@ -512,9 +510,9 @@ impl NativeFunctionBuilder {
     #[must_use]
     pub fn boxed_func(
         mut self,
-        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        f: F,
     ) -> Self {
-        self.0.f = Box::new(f);
+        self.0.f = f;
         self
     }
 
@@ -576,7 +574,7 @@ impl NativeFunctionBuilder {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<NativeFunction>().expect("unreachable");
+            let this = handle.downcast::<NativeFunction<F>>().expect("unreachable");
 
             if self.1 {
                 let mut ctor = this.props.constructor.borrow_mut();
@@ -588,7 +586,7 @@ impl NativeFunctionBuilder {
     }
 }
 
-impl Debug for NativeFunction {
+impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> Debug for NativeFunction<F> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[Function: {}]", self.props.name)
     }
