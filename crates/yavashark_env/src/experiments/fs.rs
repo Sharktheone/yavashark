@@ -17,7 +17,7 @@ impl Fs {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
+        this.initialize(realm.intrinsics.func.clone().into())?;
 
         Ok(this.into_object())
     }
