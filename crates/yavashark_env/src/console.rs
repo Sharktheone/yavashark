@@ -50,6 +50,7 @@ pub fn get_console(realm: &mut Realm) -> ObjectHandle {
         realm,
     ); // This can only fail if we have an existing borrow to the object, which we clearly don't
 
+    #[cfg(feature = "debug_tools")]
     let _ = console.define_property(
         "printNativeStacktrace".into(),
         NativeFunction::new(
