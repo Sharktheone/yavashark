@@ -142,6 +142,19 @@ impl crate::value::ObjectImpl for StringObj {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::Index(index) if *index < self.inner.borrow().string.len())
+            || matches!(&name, InternalPropertyKey::String(name) if name == "length")
+        {
+            return Ok(None);
+        }
+        self.get_wrapped_object().delete_property(name, realm)
+    }
+
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::Index(n) = name {
             let inner = self.inner.borrow();
@@ -166,19 +179,6 @@ impl crate::value::ObjectImpl for StringObj {
             return Ok(true);
         }
         self.get_wrapped_object().contains_key(name, realm)
-    }
-
-    fn delete_property(
-        &self,
-        name: InternalPropertyKey,
-        realm: &mut Realm,
-    ) -> Res<Option<Property>> {
-        if matches!(&name, InternalPropertyKey::Index(index) if *index < self.inner.borrow().string.len())
-            || matches!(&name, InternalPropertyKey::String(name) if name == "length")
-        {
-            return Ok(None);
-        }
-        self.get_wrapped_object().delete_property(name, realm)
     }
     fn get_array_or_done(
         &self,
