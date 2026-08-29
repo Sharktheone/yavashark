@@ -1752,6 +1752,13 @@ impl Object {
         Self(Gc::new(BoxedObj::new(Box::new(obj))))
     }
 
+    pub fn new_typed<O: Obj + 'static>(obj: O) -> GCd<O> {
+        let this = Self(Gc::new(BoxedObj::new(Box::new(obj))));
+
+        this.downcast_owning()
+            .expect("this should never happen")
+    }
+
     pub fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
         let Some(to_string) = self.get_opt("toString", realm)? else {
             if let Some(to_string_tag) = self.get_opt(Symbol::TO_STRING_TAG, realm)? {
