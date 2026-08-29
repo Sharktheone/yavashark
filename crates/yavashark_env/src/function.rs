@@ -20,7 +20,10 @@ mod class;
 mod constructor;
 pub mod function_prototype;
 
-pub struct NativeFunctionBuilder<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static>(NativeFunction<F>, bool);
+pub struct NativeFunctionBuilder<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static>(
+    NativeFunction<F>,
+    bool,
+);
 
 #[inline_props]
 pub struct NativeFunctionProps {
@@ -44,7 +47,9 @@ pub struct NativeFunction<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 
     pub props: NativeFunctionProps,
 }
 
-impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl for NativeFunction<F> {
+impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
+    for NativeFunction<F>
+{
     type Inner = MutNativeFunction;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
@@ -262,11 +267,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
     }
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
-    pub fn new(
-        name: &'static str,
-        f: F,
-        realm: &mut Realm,
-    ) -> ObjectHandle {
+    pub fn new(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f,
             constructor: false,
@@ -296,12 +297,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
     }
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
-    pub fn with_len(
-        name: &'static str,
-        f: F,
-        realm: &mut Realm,
-        len: usize,
-    ) -> ObjectHandle {
+    pub fn with_len(name: &'static str, f: F, realm: &mut Realm, len: usize) -> ObjectHandle {
         let this = Self {
             f,
             constructor: false,
@@ -330,11 +326,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
     }
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
-    pub fn special(
-        name: &'static str,
-        f: F,
-        realm: &mut Realm,
-    ) -> ObjectHandle {
+    pub fn special(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f: f,
             constructor: true,
@@ -508,10 +500,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
     }
 
     #[must_use]
-    pub fn boxed_func(
-        mut self,
-        f: F,
-    ) -> Self {
+    pub fn boxed_func(mut self, f: F) -> Self {
         self.0.f = f;
         self
     }
