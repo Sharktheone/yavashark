@@ -1578,6 +1578,10 @@ impl Object {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
 
+    pub fn downcast_owning<T: 'static>(self) -> Option<GCd<T>> {
+        self.to_owning().maybe_map(BoxedObj::downcast::<T>).ok()
+    }
+
     pub fn set(
         &self,
         name: impl IntoPropertyKey,
