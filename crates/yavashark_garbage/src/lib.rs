@@ -532,6 +532,14 @@ impl<T: Collectable> Gc<T> {
             gc: self.clone(),
         }
     }
+    
+    pub fn to_owning(self) -> OwningGcGuard<'_, T> {
+        let value_ptr = unsafe { &*GcBox::value_ptr(self.inner) };
+        OwningGcGuard {
+            value_ptr,
+            gc: self,
+        }
+    }
 
     #[must_use]
     pub fn ptr_id(&self) -> usize {
