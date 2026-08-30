@@ -532,8 +532,8 @@ impl<T: Collectable> Gc<T> {
             gc: self.clone(),
         }
     }
-    
-    pub fn to_owning(self) -> OwningGcGuard<'_, T> {
+
+    pub fn to_owning<'b>(self) -> OwningGcGuard<'b, T> {
         let value_ptr = unsafe { &*GcBox::value_ptr(self.inner) };
         OwningGcGuard {
             value_ptr,
