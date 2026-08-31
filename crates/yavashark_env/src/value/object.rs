@@ -1579,7 +1579,7 @@ impl Object {
     }
 
     pub fn downcast_owning<T: 'static>(self) -> Option<GCd<T>> {
-        self.to_owning().maybe_map(BoxedObj::downcast::<T>).ok()
+        self.0.to_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
 
     pub fn set(
