@@ -234,7 +234,6 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
 
 impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFunction<F> {
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn new_boxed(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f,
@@ -252,21 +251,18 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
+            let mut ctor = handle.props.constructor.borrow_mut();
 
-            let mut ctor = this.props.constructor.borrow_mut();
-
-            *ctor = Some(handle.clone());
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
-    #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f,
@@ -283,20 +279,16 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
-
-            let mut ctor = this.props.constructor.borrow_mut();
-            *ctor = Some(handle.clone());
+            let mut ctor = handle.props.constructor.borrow_mut();
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
-    #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn with_len(name: &'static str, f: F, realm: &mut Realm, len: usize) -> ObjectHandle {
         let this = Self {
             f,
@@ -313,19 +305,16 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
-        #[allow(clippy::expect_used)]
+        let handle = ObjectHandle::new_typed(this);
+        
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
-
-            let mut ctor = this.props.constructor.borrow_mut();
-            *ctor = Some(handle.clone());
+            let mut ctor = handle.props.constructor.borrow_mut();
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
-    #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             f: f,
@@ -342,18 +331,15 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
+            let mut ctor = handle.props.constructor.borrow_mut();
 
-            let mut ctor = this.props.constructor.borrow_mut();
-
-            *ctor = Some(handle.clone());
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
     #[allow(clippy::missing_panics_doc)]
@@ -378,20 +364,16 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
-
-            let mut ctor = this.props.constructor.borrow_mut();
-            *ctor = Some(handle.clone());
+            let mut ctor = handle.props.constructor.borrow_mut();
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
-    #[allow(clippy::missing_panics_doc)]
     pub fn with_proto_and_len(
         name: &'static str,
         f: F,
@@ -414,22 +396,23 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
+
+        let gc_handle: ObjectHandle = handle.gc().into();
+        
         let _ =
-            handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+            gc_handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
-
-            let mut ctor = this.props.constructor.borrow_mut();
-            *ctor = Some(handle.clone());
+            let mut ctor = handle.props.constructor.borrow_mut();
+            *ctor = Some(gc_handle);
         }
 
-        handle
+        handle.into_gc().into()
     }
 
-    #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: &'static str,
         f: F,
@@ -451,17 +434,14 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
             },
         };
 
-        let handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new_typed(this);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<Self>().expect("unreachable");
-
-            let mut ctor = this.props.constructor.borrow_mut();
-            *ctor = Some(handle.clone());
+            let mut ctor = handle.props.constructor.borrow_mut();
+            *ctor = Some(handle.gc().into());
         }
 
-        handle
+        handle.into_gc().into()
     }
 
     #[must_use]
@@ -557,21 +537,17 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
 
     /// Builds the function handle.
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn build(self, _realm: &mut Realm) -> ObjectHandle {
-        let handle = ObjectHandle::new(self.0);
+        let handle = ObjectHandle::new_typed(self.0);
 
-        #[allow(clippy::expect_used)]
         {
-            let this = handle.downcast::<NativeFunction<F>>().expect("unreachable");
-
             if self.1 {
-                let mut ctor = this.props.constructor.borrow_mut();
-                *ctor = Some(handle.clone());
+                let mut ctor = handle.props.constructor.borrow_mut();
+                *ctor = Some(handle.gc().into());
             }
         }
 
-        handle
+        handle.into_gc().into()
     }
 }
 
