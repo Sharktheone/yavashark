@@ -1752,6 +1752,7 @@ impl Object {
         Self(Gc::new(BoxedObj::new(Box::new(obj))))
     }
 
+    #[allow(clippy::expect_used)]
     pub fn new_typed<O: Obj + 'static>(obj: O) -> GCd<O> {
         let this = Self(Gc::new(BoxedObj::new(Box::new(obj))));
 

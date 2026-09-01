@@ -342,7 +342,6 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
         handle.into_gc().into()
     }
 
-    #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: &'static str,
         f: F,
