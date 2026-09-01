@@ -490,6 +490,10 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
         self.gc.clone()
     }
 
+    pub fn into_gc(self) -> Gc<T> {
+        self.gc
+    }
+
     pub fn map_refed<U: 'a, F: FnOnce(&'a V) -> U>(self, f: F) -> OwningGcGuardRefed<T, U> {
         let val = f(self.value_ptr);
 
