@@ -7635,6 +7635,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_shonk"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_string"
 version = "0.1.0"
 dependencies = [
