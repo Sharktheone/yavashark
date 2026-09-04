@@ -17,11 +17,6 @@ use crate::realm::Realm;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{Error, InternalPropertyKey, Object, ObjectHandle, PropertyKey, Res, Value, Variable};
 
-pub struct MutValue {
-    pub name: String,
-    pub scope: Rc<RefCell<ScopeInternal>>,
-}
-
 #[derive(Debug, Clone, Copy, Default)]
 #[allow(clippy::module_name_repetitions)]
 pub struct ScopeState {
