@@ -1,0 +1,15 @@
+[package]
+name = "yavashark_alloca"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+# Skip the C toolchain entirely, even when one is installed.
+heap-alloca = []
+
+[build-dependencies]
+cc = "1"
+
+
+[lints]
+workspace = true

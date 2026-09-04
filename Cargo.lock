@@ -7463,6 +7463,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_alloca"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "yavashark_bigint"
 version = "0.1.0"
 dependencies = [
