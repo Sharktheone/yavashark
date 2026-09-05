@@ -79,7 +79,7 @@ mod stack {
     unsafe extern "C-unwind" {
         fn yavashark_with_alloca(
             size: usize,
-            callback: unsafe extern "C" fn(*mut c_void, *mut c_void),
+            callback: unsafe extern "C-unwind" fn(*mut c_void, *mut c_void),
             context: *mut c_void,
         );
     }
@@ -90,7 +90,7 @@ mod stack {
         align: usize,
     }
 
-    unsafe extern "C" fn invoke<F, R>(buffer: *mut c_void, context: *mut c_void)
+    unsafe extern "C-unwind" fn invoke<F, R>(buffer: *mut c_void, context: *mut c_void)
     where
         F: FnOnce(NonNull<()>) -> R,
     {
@@ -111,8 +111,6 @@ mod stack {
 
             let ptr = NonNull::new(ptr)
                 .expect("C alloca returned null");
-
-
 
 
             callback(ptr.cast())
