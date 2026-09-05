@@ -6,12 +6,12 @@ use std::ptr::NonNull;
 const MAX_STACK_BYTES: usize = 16 * 1024;
 
 
-enum AllocaError {
+pub enum AllocaError {
     Layout,
     TooLarge
 }
 
-fn alloca_array<T, R>(len: usize, f: impl FnOnce(&mut [MaybeUninit<T>]) -> R) -> Result<R, AllocaError> {
+pub fn alloca_array<T, R>(len: usize, f: impl FnOnce(&mut [MaybeUninit<T>]) -> R) -> Result<R, AllocaError> {
     let Ok(layout) = Layout::array::<T>(len) else {
         return Err(AllocaError::Layout)
     };
@@ -23,7 +23,7 @@ fn alloca_array<T, R>(len: usize, f: impl FnOnce(&mut [MaybeUninit<T>]) -> R) ->
 }
 
 
-fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, AllocaError> {
+pub fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, AllocaError> {
     if layout.size() == 0 {
         let ptr = std::ptr::without_provenance_mut::<()>(layout.align());
         return Ok(f(NonNull::new(ptr).ok_or(AllocaError::Layout)?));
@@ -33,6 +33,7 @@ fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, Allo
     {
 
         let size = layout.size().checked_add(layout.align() - 1).ok_or(AllocaError::TooLarge)?;
+
         if size <= MAX_STACK_BYTES {
             Ok(stack::alloca(size, layout.align(), f))
         } else {
@@ -46,7 +47,7 @@ fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, Allo
     }
 }
 
-fn heap_alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> R {
+fn heap_alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, AllocaError> {
     struct Allocation {
         ptr: NonNull<u8>,
         layout: Layout,
@@ -60,9 +61,12 @@ fn heap_alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> R {
 
     // SAFETY: alloca handles zero-sized layouts before reaching this backend.
     let ptr = unsafe { alloc::alloc(layout) };
-    let ptr = NonNull::new(ptr).unwrap_or_else(|| alloc::handle_alloc_error(layout));
+
+    let ptr = NonNull::new(ptr).ok_or(AllocaError::Layout)?;
+
     let allocation = Allocation { ptr, layout };
-    f(allocation.ptr.cast())
+
+    Ok(f(allocation.ptr.cast()))
 }
 
 #[cfg(has_c_alloca)]
