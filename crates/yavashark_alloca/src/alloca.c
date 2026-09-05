@@ -9,6 +9,7 @@
 #error Unsupported compiler for the alloca helper
 #endif
 
+__attribute__((always_inline))
 void yavashark_with_alloca(size_t size,
                           void (*callback)(void *, void *),
                           void *context) {
