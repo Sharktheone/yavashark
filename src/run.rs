@@ -11,10 +11,7 @@ use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 use std::path::PathBuf;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
 use swc_ecma_ast::Program;
-use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
@@ -194,29 +191,8 @@ fn run_code(
     native_profile: bool,
     #[allow(unused_variables)] native_profile_out: Option<&str>,
 ) {
-    let string_input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
-
-    let c = EsSyntax {
-        jsx: false,
-        fn_bind: false,
-        decorators: true,
-        decorators_before_export: true,
-        export_default_from: true,
-        import_attributes: true,
-        allow_super_outside_method: false,
-        allow_return_outside_function: false,
-        auto_accessors: true,
-        explicit_resource_management: true,
-    };
-
-    let mut p = Parser::new(Syntax::Es(c), string_input, None);
-
-    let prog = match p.parse_program() {
-        Ok(s) => s,
-        Err(e) => {
-            println!("SyntaxError: {e:?}");
-            return;
-        }
+    let Some(prog) = crate::parse::parse_program(input, &path.display().to_string()) else {
+        return;
     };
 
     if ast {

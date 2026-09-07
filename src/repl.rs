@@ -6,9 +6,6 @@ use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 use std::path::PathBuf;
 use std::time::Instant;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
-use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::{Builder, Runtime};
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
@@ -149,37 +146,8 @@ fn run_input(
         return;
     }
 
-    let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
-    let syn = Syntax::Es(EsSyntax {
-        jsx: false,
-        fn_bind: false,
-        decorators: true,
-        decorators_before_export: true,
-        export_default_from: true,
-        import_attributes: true,
-        allow_super_outside_method: false,
-        allow_return_outside_function: false,
-        auto_accessors: true,
-        explicit_resource_management: true,
-    });
-
-    let mut p = Parser::new(syn, input, None);
-
-    let script = match p.parse_script() {
-        Ok(s) => s,
-        Err(e) => {
-            // HANDLER.with(|h| {
-            //     let mut diagnostic = e.into_diagnostic(h);
-            //
-            //     diagnostic.emit();
-            //
-            //
-            // });
-
-            eprintln!("{e:?}");
-
-            return;
-        }
+    let Some(script) = crate::parse::parse_script(input, "repl.js") else {
+        return;
     };
 
     if let Err(e) = Validator::new().validate_statements(&script.body) {

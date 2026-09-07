@@ -1,4 +1,6 @@
 mod conf;
+#[cfg(not(feature = "minimal"))]
+mod parse;
 #[cfg(feature = "minimal")]
 mod minimal;
 #[cfg(feature = "vm")]

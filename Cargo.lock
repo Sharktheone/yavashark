@@ -5488,6 +5488,7 @@ dependencies = [
  "swc_atoms",
  "swc_eq_ignore_macros",
  "swc_visit",
+ "termcolor",
  "tracing",
  "unicode-width 0.2.2",
  "url",
