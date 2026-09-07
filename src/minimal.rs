@@ -54,7 +54,7 @@ pub fn main() -> ExitCode {
         match yavashark_interpreter::Interpreter::run_in(&script.body, &mut realm, &mut scope) {
             Ok(v) => v,
             Err(e) => {
-                println!("Error: {}", e.pretty_print(&mut realm));
+                println!("{}", e.pretty_print(&mut realm));
                 return ExitCode::FAILURE;
             }
         };

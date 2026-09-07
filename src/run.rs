@@ -150,7 +150,7 @@ pub fn main() -> ExitCode {
 
     if shell || input.is_none() {
         if let Err(e) = repl(config, input) {
-            eprintln!("Error: {e:?}");
+            eprintln!("{e:?}");
             return ExitCode::FAILURE;
         }
 
@@ -260,7 +260,7 @@ fn run_code(
             {
                 Ok(v) => v,
                 Err(e) => {
-                    println!("Error: {}", e.pretty_print(&mut realm));
+                    println!("{}", e.pretty_print(&mut realm));
                     return ExitCode::FAILURE;
                 }
             };
@@ -326,7 +326,7 @@ fn run_code(
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Error(err)) => {
-                println!("Error: {}", err.pretty_print(vm.get_realm()));
+                println!("{}", err.pretty_print(vm.get_realm()));
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
