@@ -6,7 +6,6 @@ use std::collections::hash_map::Entry;
 #[cfg(feature = "actual_gc")]
 use std::ops::Deref;
 use std::path::PathBuf;
-use std::rc::Rc;
 use yavashark_garbage::Gc;
 use yavashark_garbage::collectable::CellCollectable;
 #[cfg(feature = "actual_gc")]
