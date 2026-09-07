@@ -22,10 +22,9 @@ use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
 
-#[allow(clippy::unwrap_used)]
-pub fn main() {
-    let matches = clap::Command::new("yavashark")
-        .version("0.1.0")
+fn cli() -> clap::Command {
+    clap::Command::new("yavashark")
+        .version(env!("CARGO_PKG_VERSION"))
         .about("A JavaScript interpreter written in Rust")
         .after_help(
             r"Examples:
@@ -104,7 +103,11 @@ yavashark -s script.js        Run a script, then stay in the REPL",
                 .value_name("PATH")
                 .requires("native-profile"),
         )
-        .get_matches();
+}
+
+#[allow(clippy::unwrap_used)]
+pub fn main() {
+    let matches = cli().get_matches();
 
     let mut interpreter = matches.get_flag("interpreter");
     let bytecode = matches.get_flag("bytecode");
