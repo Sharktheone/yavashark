@@ -207,13 +207,13 @@ fn run_code(
     match &prog {
         Program::Script(script) => {
             if let Err(e) = validator.validate_statements(&script.body) {
-                println!("SyntaxError: {e}");
+                eprintln!("SyntaxError: {e}");
                 return ExitCode::FAILURE;
             }
         }
         Program::Module(module) => {
             if let Err(e) = validator.validate_module_items(&module.body) {
-                println!("SyntaxError: {e}");
+                eprintln!("SyntaxError: {e}");
                 return ExitCode::FAILURE;
             }
         }
@@ -246,7 +246,7 @@ fn run_code(
             ) {
                 Ok(k) => k,
                 Err(e) => {
-                    println!("Error: {e}");
+                    eprintln!("Error: {e}");
                     return ExitCode::FAILURE;
                 }
             };
@@ -260,7 +260,7 @@ fn run_code(
             {
                 Ok(v) => v,
                 Err(e) => {
-                    println!("{}", e.pretty_print(&mut realm));
+                    eprintln!("{}", e.pretty_print(&mut realm));
                     return ExitCode::FAILURE;
                 }
             };
@@ -314,31 +314,31 @@ fn run_code(
         match vm.run() {
             Ok(()) => {}
             Err(ControlFlow::Continue(_)) => {
-                println!("Error: Unexpected continue");
+                eprintln!("Error: Unexpected continue");
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Break(_)) => {
-                println!("Error: Unexpected break");
+                eprintln!("Error: Unexpected break");
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Return(_)) => {
-                println!("Error: Unexpected return");
+                eprintln!("Error: Unexpected return");
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Error(err)) => {
-                println!("{}", err.pretty_print(vm.get_realm()));
+                eprintln!("{}", err.pretty_print(vm.get_realm()));
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
-                println!("Error: Unexpected yield");
+                eprintln!("Error: Unexpected yield");
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::Await(_)) => {
-                println!("Error: Unexpected await");
+                eprintln!("Error: Unexpected await");
                 return ExitCode::FAILURE;
             }
             Err(ControlFlow::OptChainShortCircuit) => {
-                println!("Error: Unexpected optional chaining short-circuit");
+                eprintln!("Error: Unexpected optional chaining short-circuit");
                 return ExitCode::FAILURE;
             }
         }
