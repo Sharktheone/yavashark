@@ -125,54 +125,47 @@ pub fn main() {
 
     let src = matches.get_one::<String>("source");
 
-    if shell && src.is_some() {
-        println!("Cannot run src file and shell");
+    // Either a script to run or code to evaluate - `conflicts_with` rules out both at once.
+    let input = eval_code.map_or_else(
+        || {
+            src.map(|src| {
+                let content = match std::fs::read_to_string(src) {
+                    Ok(content) => content,
+                    Err(e) => {
+                        eprintln!("Error reading {src}: {e}");
+                        std::process::exit(1);
+                    }
+                };
+
+                (content, PathBuf::from(src))
+            })
+        },
+        |code| Some((code.clone(), PathBuf::from("<eval>"))),
+    );
+
+    let config = conf::Conf {
+        ast,
+        interpreter,
+        bytecode,
+        instructions,
+    };
+
+    if shell || input.is_none() {
+        if let Err(e) = repl(config, input) {
+            eprintln!("Error: {e:?}");
+            std::process::exit(1);
+        }
+
         return;
     }
 
-    if eval_code.is_some() && src.is_some() {
-        println!("Cannot use both -e and a source file");
-        return;
-    }
-
-    if eval_code.is_some() && shell {
-        println!("Cannot use both -e and shell");
-        return;
-    }
-
-    // Handle -e option
-    if let Some(code) = eval_code {
-        run_code(
-            code,
-            "<eval>".into(),
-            ast,
-            interpreter,
-            bytecode,
-            instructions,
-            js_profile_out.as_deref(),
-            native_profile,
-            native_profile_out.as_deref(),
-        );
-        return;
-    }
-
-    if let Some(src) = src {
-        let path = PathBuf::from(src);
-
-        let input = match std::fs::read_to_string(src) {
-            Ok(content) => content,
-            Err(e) => {
-                println!("Error reading file: {e}");
-                return;
-            }
-        };
-
-        if input.is_empty() {
+    if let Some((code, path)) = input {
+        if code.is_empty() {
             return;
         }
 
         run_code(
-            &input,
+            &code,
             path,
             ast,
             interpreter,
@@ -182,17 +175,6 @@ pub fn main() {
             native_profile,
             native_profile_out.as_deref(),
         );
-    }
-
-    let config = conf::Conf {
-        ast,
-        interpreter,
-        bytecode,
-        instructions,
-    };
-
-    if shell {
-        repl(config).unwrap();
     }
 }
 
