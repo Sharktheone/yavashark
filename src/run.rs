@@ -27,6 +27,13 @@ pub fn main() {
     let matches = clap::Command::new("yavashark")
         .version("0.1.0")
         .about("A JavaScript interpreter written in Rust")
+        .after_help(
+            r"Examples:
+yavashark                     Start the interactive REPL
+yavashark script.js           Run a script
+yavashark -e 'console.log(1)' Evaluate code
+yavashark -s script.js        Run a script, then stay in the REPL",
+        )
         .arg(
             clap::Arg::new("source")
                 .help("The source file to interpret")
