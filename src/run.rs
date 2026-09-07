@@ -36,83 +36,60 @@ yavashark -s script.js        Run a script, then stay in the REPL",
         )
         .arg(
             clap::Arg::new("source")
-                .help("The source file to interpret")
-                .required(false)
+                .help("The script to run (starts the REPL if omitted)")
+                .value_name("SCRIPT")
                 .index(1),
+        )
+        .arg(
+            clap::Arg::new("eval")
+                .help("Evaluate the provided JavaScript code")
+                .short('e')
+                .long("eval")
+                .value_name("CODE")
+                .conflicts_with("source"),
+        )
+        .arg(
+            clap::Arg::new("shell")
+                .help("Stay in the interactive REPL after running SCRIPT or --eval")
+                .short('s')
+                .short_alias('r')
+                .long("repl")
+                .visible_alias("shell")
+                .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("interpreter")
                 .help("Run with the tree-walk-interpreter")
                 .short('i')
-                .required(false)
-                .default_value("false")
+                .long("interpreter")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("bytecode")
                 .help("Run with the bytecode-interpreter")
                 .short('b')
-                .required(false)
-                .default_value("false")
-                .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
-            clap::Arg::new("oldbytecode")
-                .help("Run with the old bytecode-interpreter")
-                .short('B')
-                .required(false)
-                .default_value("false")
+                .long("bytecode")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("ast")
                 .help("Print the AST")
                 .short('a')
-                .required(false)
-                .default_value("false")
+                .long("ast")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("instructions")
                 .help("Print the instructions")
                 .short('I')
-                .required(false)
-                .default_value("false")
-                .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
-            clap::Arg::new("shell")
-                .help("Interactive shell (repl)")
-                .short('s')
-                .short_alias('r')
-                .alias("repl")
-                .required(false)
-                .default_value("false")
-                .action(clap::ArgAction::SetTrue),
-        )
-        .arg(
-            clap::Arg::new("shellold")
-                .help("Old interactive shell (repl)")
-                .short('S')
-                .short_alias('R')
-                .alias("replold")
-                .required(false)
-                .default_value("false")
+                .long("instructions")
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
             clap::Arg::new("profile-out")
                 .help("Write JS profiler output to this path")
                 .long("profile-out")
-                .value_name("PATH")
-                .required(false),
-        )
-        .arg(
-            clap::Arg::new("native-profile-out")
-                .help("Write native pprof output to this path")
-                .long("native-profile-out")
-                .value_name("PATH")
-                .required(false),
+                .value_name("PATH"),
         )
         .arg(
             clap::Arg::new("native-profile")
@@ -121,12 +98,11 @@ yavashark -s script.js        Run a script, then stay in the REPL",
                 .action(clap::ArgAction::SetTrue),
         )
         .arg(
-            clap::Arg::new("eval")
-                .help("Evaluate the provided JavaScript code")
-                .short('e')
-                .long("eval")
-                .value_name("CODE")
-                .required(false),
+            clap::Arg::new("native-profile-out")
+                .help("Write native pprof output to this path")
+                .long("native-profile-out")
+                .value_name("PATH")
+                .requires("native-profile"),
         )
         .get_matches();
 
