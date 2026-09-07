@@ -9,10 +9,10 @@ mod repl;
 #[cfg(not(feature = "minimal"))]
 mod run;
 
-fn main() {
+fn main() -> std::process::ExitCode {
     #[cfg(not(feature = "minimal"))]
-    run::main();
+    return run::main();
 
     #[cfg(feature = "minimal")]
-    minimal::main();
+    return minimal::main();
 }

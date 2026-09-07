@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::ExitCode;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
@@ -9,7 +10,7 @@ use yavashark_env::scope::Scope;
 use yavashark_interpreter::eval::InterpreterEval;
 
 #[allow(clippy::expect_used)]
-pub fn main() {
+pub fn main() -> ExitCode {
     let path = std::env::args().nth(1).expect("Please provide a file path");
 
     let file = std::fs::File::open(&path).expect("Failed to open file");
@@ -17,7 +18,7 @@ pub fn main() {
     let input = str::from_utf8(&mmap).expect("Failed to read file as UTF-8");
 
     if input.is_empty() {
-        return;
+        return ExitCode::SUCCESS;
     }
 
     let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
@@ -54,7 +55,7 @@ pub fn main() {
             Ok(v) => v,
             Err(e) => {
                 println!("Error: {}", e.pretty_print(&mut realm));
-                return;
+                return ExitCode::FAILURE;
             }
         };
 
@@ -65,4 +66,6 @@ pub fn main() {
             .expect("Failed to build runtime");
         rt.block_on(realm.run_event_loop());
     }
+
+    ExitCode::SUCCESS
 }

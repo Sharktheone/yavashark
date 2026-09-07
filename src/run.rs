@@ -11,6 +11,7 @@ use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 use std::path::PathBuf;
+use std::process::ExitCode;
 use swc_ecma_ast::Program;
 use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
@@ -103,7 +104,7 @@ yavashark -s script.js        Run a script, then stay in the REPL",
 }
 
 #[allow(clippy::unwrap_used)]
-pub fn main() {
+pub fn main() -> ExitCode {
     let matches = cli().get_matches();
 
     let mut interpreter = matches.get_flag("interpreter");
@@ -150,18 +151,18 @@ pub fn main() {
     if shell || input.is_none() {
         if let Err(e) = repl(config, input) {
             eprintln!("Error: {e:?}");
-            std::process::exit(1);
+            return ExitCode::FAILURE;
         }
 
-        return;
+        return ExitCode::SUCCESS;
     }
 
     if let Some((code, path)) = input {
         if code.is_empty() {
-            return;
+            return ExitCode::SUCCESS;
         }
 
-        run_code(
+        return run_code(
             &code,
             path,
             ast,
@@ -173,6 +174,8 @@ pub fn main() {
             native_profile_out.as_deref(),
         );
     }
+
+    ExitCode::SUCCESS
 }
 
 #[allow(
@@ -190,9 +193,9 @@ fn run_code(
     #[allow(unused_variables)] js_profile_out: Option<&str>,
     native_profile: bool,
     #[allow(unused_variables)] native_profile_out: Option<&str>,
-) {
+) -> ExitCode {
     let Some(prog) = crate::parse::parse_program(input, &path.display().to_string()) else {
-        return;
+        return ExitCode::FAILURE;
     };
 
     if ast {
@@ -205,13 +208,13 @@ fn run_code(
         Program::Script(script) => {
             if let Err(e) = validator.validate_statements(&script.body) {
                 println!("SyntaxError: {e}");
-                return;
+                return ExitCode::FAILURE;
             }
         }
         Program::Module(module) => {
             if let Err(e) = validator.validate_module_items(&module.body) {
                 println!("SyntaxError: {e}");
-                return;
+                return ExitCode::FAILURE;
             }
         }
     }
@@ -244,7 +247,7 @@ fn run_code(
                 Ok(k) => k,
                 Err(e) => {
                     println!("Error: {e}");
-                    return;
+                    return ExitCode::FAILURE;
                 }
             };
 
@@ -258,7 +261,7 @@ fn run_code(
                 Ok(v) => v,
                 Err(e) => {
                     println!("Error: {}", e.pretty_print(&mut realm));
-                    return;
+                    return ExitCode::FAILURE;
                 }
             };
         if !result.is_undefined() {
@@ -296,7 +299,7 @@ fn run_code(
 
         let Some(script) = prog.as_script() else {
             eprintln!("Only scripts are supported in bytecode mode currently");
-            return;
+            return ExitCode::FAILURE;
         };
 
         let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
@@ -312,31 +315,31 @@ fn run_code(
             Ok(()) => {}
             Err(ControlFlow::Continue(_)) => {
                 println!("Error: Unexpected continue");
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::Break(_)) => {
                 println!("Error: Unexpected break");
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::Return(_)) => {
                 println!("Error: Unexpected return");
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::Error(err)) => {
                 println!("Error: {}", err.pretty_print(vm.get_realm()));
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
                 println!("Error: Unexpected yield");
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::Await(_)) => {
                 println!("Error: Unexpected await");
-                return;
+                return ExitCode::FAILURE;
             }
             Err(ControlFlow::OptChainShortCircuit) => {
                 println!("Error: Unexpected optional chaining short-circuit");
-                return;
+                return ExitCode::FAILURE;
             }
         }
 
@@ -357,7 +360,7 @@ fn run_code(
     if instructions {
         let Some(script) = prog.as_script() else {
             eprintln!("Only scripts are supported in bytecode mode currently");
-            return;
+            return ExitCode::FAILURE;
         };
 
         let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
@@ -366,6 +369,8 @@ fn run_code(
             println!("{bc:#?}");
         }
     }
+
+    ExitCode::SUCCESS
 }
 
 #[cfg(feature = "pprof")]
