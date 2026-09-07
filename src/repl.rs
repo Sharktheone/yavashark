@@ -4,7 +4,7 @@ use crate::conf::Conf;
 use crate::repl::helper::ReplHelper;
 use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
-use std::path::Path;
+use std::path::PathBuf;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
@@ -15,8 +15,11 @@ use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
 
-pub fn repl(conf: Conf) -> Res {
-    let path = Path::new("repl.js");
+pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
+    let (preload, path) = match preload {
+        Some((code, path)) => (Some(code), path),
+        None => (None, PathBuf::from("repl.js")),
+    };
 
     let mut interpreter_realm = Realm::new()?;
 
@@ -25,13 +28,13 @@ pub fn repl(conf: Conf) -> Res {
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval, false)?;
-    let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
+    let mut interpreter_scope = Scope::global(&interpreter_realm, path.clone());
 
     let mut vm_realm = Realm::new()?;
     vm_realm.set_eval(InterpreterEval, false)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut vm_realm)?;
-    let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
+    let vm_scope = Scope::global(&vm_realm, path);
 
     let mut old_vm_realm = Realm::new()?;
     old_vm_realm.set_eval(InterpreterEval, false)?;
@@ -53,6 +56,19 @@ pub fn repl(conf: Conf) -> Res {
     let mut count = 1u32;
 
     let rt = Builder::new_current_thread().enable_all().build()?;
+
+    if let Some(code) = &preload {
+        run_input(
+            code,
+            conf,
+            false,
+            &mut interpreter_realm,
+            &mut interpreter_scope,
+            &mut vm_realm,
+            &vm_scope,
+            &rt,
+        );
+    }
 
     loop {
         let p = format!("{count}> ");
@@ -83,12 +99,20 @@ pub fn repl(conf: Conf) -> Res {
 
         if let Some(file) = input.strip_prefix('!') {
             let file = file.trim();
-            input = std::fs::read_to_string(file)?;
+
+            input = match std::fs::read_to_string(file) {
+                Ok(content) => content,
+                Err(e) => {
+                    eprintln!("Error reading {file}: {e}");
+                    continue;
+                }
+            };
         }
 
         run_input(
             &input,
             conf,
+            true,
             &mut interpreter_realm,
             &mut interpreter_scope,
             &mut vm_realm,
@@ -104,6 +128,7 @@ pub fn repl(conf: Conf) -> Res {
 fn run_input(
     input: &str,
     conf: Conf,
+    echo_result: bool,
     interpreter_realm: &mut Realm,
     interpreter_scope: &mut Scope,
     vm_realm: &mut Realm,
@@ -169,10 +194,12 @@ fn run_input(
             }
         };
 
-        if conf.bytecode {
-            println!("Interpreter: {}", result.pretty_print(interpreter_realm));
-        } else {
-            println!("{}", result.pretty_print(interpreter_realm));
+        if echo_result {
+            if conf.bytecode {
+                println!("Interpreter: {}", result.pretty_print(interpreter_realm));
+            } else {
+                println!("{}", result.pretty_print(interpreter_realm));
+            }
         }
 
         rt.block_on(interpreter_realm.run_event_loop());
@@ -204,7 +231,9 @@ fn run_input(
                 eprintln!("Uncaught: {e:?}");
             }
 
-            println!("Bytecode: {:?}", vm.acc());
+            if echo_result {
+                println!("Bytecode: {:?}", vm.acc());
+            }
 
             rt.block_on(vm_realm.run_event_loop());
         }
