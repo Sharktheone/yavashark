@@ -5,6 +5,7 @@ use crate::repl::helper::ReplHelper;
 use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 use std::path::PathBuf;
+use std::time::Instant;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
@@ -70,6 +71,8 @@ pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
         );
     }
 
+    let mut last_ctrl_c: Option<Instant> = None;
+
     loop {
         let p = format!("{count}> ");
 
@@ -81,7 +84,14 @@ pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
         let mut input = match readline {
             Ok(line) => line,
             Err(ReadlineError::Interrupted) => {
-                println!("Please use `Ctrl-D` to exit");
+                if let Some(last) = last_ctrl_c && last.elapsed().as_secs() < 2 {
+                        break;
+                }
+
+                println!("Please use `Ctrl+D` or press `Ctrl+C` again to exit");
+
+                last_ctrl_c = Some(Instant::now());
+
                 continue;
             }
             Err(ReadlineError::Eof) => {
