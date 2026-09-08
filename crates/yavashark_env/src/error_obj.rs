@@ -187,6 +187,7 @@ impl ErrorObj {
     const NAME: &'static str = "Error";
 
     #[constructor]
+    #[call_constructor]
     pub fn construct(message: YSString, #[realm] realm: &mut Realm) -> ValueResult {
         let obj = Self::new(Error::unknown_error(message), realm)?.into();
 
