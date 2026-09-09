@@ -1,7 +1,21 @@
 use crate::error::ErrorKind;
-use crate::print::PrettyPrint;
+use crate::error_obj::ErrorObj;
+use crate::print::{PrettyObjectOverride, PrettyPrint};
 use crate::{Error, Realm};
 use std::fmt::Write;
+
+impl PrettyObjectOverride for ErrorObj {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let inner = self.inner.try_borrow().ok()?;
+
+        Some(inner.error.pretty_print_circular(not, realm))
+    }
+}
 
 impl PrettyPrint for Error {
     fn pretty_print_key(&self, _: &mut Realm) -> String {

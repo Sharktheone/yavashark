@@ -2,6 +2,7 @@ use colored::Colorize;
 
 use crate::array::Array;
 use crate::builtins::RegExp;
+use crate::error_obj::ErrorObj;
 use crate::value::{Object, Value};
 use crate::{PrimitiveValue, PropertyKey, Realm};
 
@@ -45,6 +46,12 @@ impl PrettyPrint for Object {
     }
 
     fn pretty_print_circular(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
+        if let Some(error) = self.downcast::<ErrorObj>() {
+            if let Some(s) = PrettyObjectOverride::pretty_inline(&*error, self, not, realm) {
+                return s;
+            }
+        }
+
         if let Some(array) = self.downcast::<Array>() {
             if let Some(s) = PrettyObjectOverride::pretty_inline(&*array, self, not, realm) {
                 return s;
@@ -175,6 +182,12 @@ impl PrettyPrint for Object {
     }
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
+        if let Some(error) = self.downcast::<ErrorObj>() {
+            if let Some(s) = PrettyObjectOverride::pretty_multiline(&*error, self, not, realm) {
+                return s;
+            }
+        }
+
         // Try type-specific overrides first
         if let Some(array) = self.downcast::<crate::object::array::Array>() {
             if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
