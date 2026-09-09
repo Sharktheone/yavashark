@@ -317,15 +317,22 @@ pub struct StackFrame {
 impl Display for StackFrame {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         if self.function.is_empty() {
-            return writeln!(f, "    at {}:{}", self.loc.file(), self.loc.line());
+            return writeln!(
+                f,
+                "    at {}:{}:{}",
+                self.loc.file(),
+                self.loc.line(),
+                self.loc.column()
+            );
         }
 
         writeln!(
             f,
-            "    at {} ({}:{})",
+            "    at {} ({}:{}:{})",
             self.function,
             self.loc.file(),
-            self.loc.line()
+            self.loc.line(),
+            self.loc.column()
         )
     }
 }
