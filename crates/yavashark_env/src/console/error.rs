@@ -30,7 +30,12 @@ impl PrettyPrint for Error {
         if msg.is_empty() {
             _ = write!(buf, "{}", self.name());
         } else {
-            _ = write!(buf, "{}: {}\n{}", self.name(), msg, self.stacktrace);
+            _ = write!(buf, "{}: {}", self.name(), msg);
+        }
+
+        if !self.stacktrace.frames.is_empty() {
+            _ = write!(buf, "\n{}", self.stacktrace);
+            buf.pop();
         }
 
         buf
@@ -44,8 +49,10 @@ impl PrettyPrint for Error {
         if msg.is_empty() {
             _ = writeln!(buf, "{}", self.name());
         } else {
-            _ = writeln!(buf, "{}: {}\n{}", self.name(), msg, self.stacktrace);
+            _ = writeln!(buf, "{}: {}", self.name(), msg);
         }
+
+        _ = write!(buf, "{}", self.stacktrace);
 
         buf
     }
