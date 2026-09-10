@@ -1,3 +1,6 @@
+#![allow(warnings)]
+
+
 // Testing ground for new YS to improve perf!
 
 // We need to test:
