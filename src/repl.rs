@@ -81,8 +81,10 @@ pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
         let mut input = match readline {
             Ok(line) => line,
             Err(ReadlineError::Interrupted) => {
-                if let Some(last) = last_ctrl_c && last.elapsed().as_secs() < 2 {
-                        break;
+                if let Some(last) = last_ctrl_c
+                    && last.elapsed().as_secs() < 2
+                {
+                    break;
                 }
 
                 println!("Please use `Ctrl+D` or press `Ctrl+C` again to exit");

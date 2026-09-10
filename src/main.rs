@@ -1,10 +1,10 @@
 mod conf;
-#[cfg(not(feature = "minimal"))]
-mod parse;
 #[cfg(feature = "minimal")]
 mod minimal;
 #[cfg(feature = "vm")]
 mod optimizer;
+#[cfg(not(feature = "minimal"))]
+mod parse;
 mod repl;
 #[cfg(not(feature = "minimal"))]
 mod run;

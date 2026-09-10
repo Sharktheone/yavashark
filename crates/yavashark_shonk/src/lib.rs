@@ -55,8 +55,6 @@ struct Object<Native = ()> {
 //      - An Object might decide to give no regular ones out if it chooses to (proxy)
 //      - Lazy Properties are initialized the property is requested in the shape, then they become just regular old properties
 
-
-
 struct ObjectOps {
     set: fn(NonNull<Object>, u32, Value),
     get: fn(NonNull<Object>, u32) -> Value,

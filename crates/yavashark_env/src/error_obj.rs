@@ -197,15 +197,14 @@ impl ErrorObj {
     #[prop("toString")]
     pub fn to_js_string(&self, #[realm] realm: &mut Realm) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
-        
+
         let message = inner.error.message(realm)?;
         let name = inner.error.name();
-        
+
         if message.is_empty() {
             return Ok(name.into());
         }
 
-        
         Ok(format!("{name}: {message}").into())
     }
 

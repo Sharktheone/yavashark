@@ -306,7 +306,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
         };
 
         let handle = ObjectHandle::new_typed(this);
-        
+
         {
             let mut ctor = handle.props.constructor.borrow_mut();
             *ctor = Some(handle.gc().into());
@@ -398,10 +398,12 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
         let handle = ObjectHandle::new_typed(this);
 
         let gc_handle: ObjectHandle = handle.gc().into();
-        
-        let _ =
-            gc_handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
-        
+
+        let _ = gc_handle.define_property_attributes(
+            "name".into(),
+            Variable::config(name.into()),
+            realm,
+        );
 
         #[allow(clippy::expect_used)]
         {

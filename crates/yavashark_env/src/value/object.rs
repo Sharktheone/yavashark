@@ -1756,8 +1756,7 @@ impl Object {
     pub fn new_typed<O: Obj + 'static>(obj: O) -> GCd<O> {
         let this = Self(Gc::new(BoxedObj::new(Box::new(obj))));
 
-        this.downcast_owning()
-            .expect("this should never happen")
+        this.downcast_owning().expect("this should never happen")
     }
 
     pub fn to_string(&self, realm: &mut Realm) -> Res<YSString> {

@@ -2,18 +2,19 @@ use std::alloc::{self, Layout};
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
-
 const MAX_STACK_BYTES: usize = 16 * 1024;
-
 
 pub enum AllocaError {
     Layout,
-    TooLarge
+    TooLarge,
 }
 
-pub fn alloca_array<T, R>(len: usize, f: impl FnOnce(&mut [MaybeUninit<T>]) -> R) -> Result<R, AllocaError> {
+pub fn alloca_array<T, R>(
+    len: usize,
+    f: impl FnOnce(&mut [MaybeUninit<T>]) -> R,
+) -> Result<R, AllocaError> {
     let Ok(layout) = Layout::array::<T>(len) else {
-        return Err(AllocaError::Layout)
+        return Err(AllocaError::Layout);
     };
 
     alloca(layout, |ptr| {
@@ -21,7 +22,6 @@ pub fn alloca_array<T, R>(len: usize, f: impl FnOnce(&mut [MaybeUninit<T>]) -> R
         f(slice)
     })
 }
-
 
 pub fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, AllocaError> {
     if layout.size() == 0 {
@@ -31,18 +31,20 @@ pub fn alloca<R>(layout: Layout, f: impl FnOnce(NonNull<()>) -> R) -> Result<R, 
 
     #[cfg(has_c_alloca)]
     {
-
-        let size = layout.size().checked_add(layout.align() - 1).ok_or(AllocaError::TooLarge)?;
+        let size = layout
+            .size()
+            .checked_add(layout.align() - 1)
+            .ok_or(AllocaError::TooLarge)?;
 
         if size <= MAX_STACK_BYTES {
             Ok(stack::alloca(size, layout.align(), f))
         } else {
             Err(AllocaError::TooLarge)
         }
-
     }
 
-    #[cfg(not(has_c_alloca))] {
+    #[cfg(not(has_c_alloca))]
+    {
         crate::heap_alloca(layout, f)
     }
 }
@@ -97,21 +99,15 @@ mod stack {
         // SAFETY: The synchronous C helper forwards our live Context unchanged.
         let context = unsafe { &mut *context.cast::<Context<F, R>>() };
         context.result = MaybeUninit::new(catch_unwind(AssertUnwindSafe(|| {
-            let callback = unsafe {
-                ManuallyDrop::take(&mut context.callback)
-            };
+            let callback = unsafe { ManuallyDrop::take(&mut context.callback) };
 
             let ptr = buffer.cast::<u8>();
             let offset = ptr.align_offset(context.align);
 
-
             // SAFETY: The allocation includes align - 1 bytes of padding.
             let ptr = unsafe { ptr.add(offset) };
 
-
-            let ptr = NonNull::new(ptr)
-                .expect("C alloca returned null");
-
+            let ptr = NonNull::new(ptr).expect("C alloca returned null");
 
             callback(ptr.cast())
         })));
