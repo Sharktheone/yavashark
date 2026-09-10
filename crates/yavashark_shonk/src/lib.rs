@@ -48,6 +48,15 @@ struct Object<Native = ()> {
     native: Native,
 }
 
+// ObjectOps:
+// - We'll have two kinds Object Offsets: regular and native
+//      - The regular ones are just a offset in the properties table
+//      - The native are just for identification for the native part when matching against special properties such as `length`
+//      - An Object might decide to give no regular ones out if it chooses to (proxy)
+//      - Lazy Properties are initialized the property is requested in the shape, then they become just regular old properties
+
+
+
 struct ObjectOps {
     set: fn(NonNull<Object>, u32, Value),
     get: fn(NonNull<Object>, u32) -> Value,
