@@ -11,6 +11,8 @@
 // - How we handle escaping variables
 // - Small micro benches to compare against different engines and current Yavashark
 
+mod object;
+
 use std::collections::HashMap;
 use std::ptr::NonNull;
 
