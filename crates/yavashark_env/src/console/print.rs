@@ -40,84 +40,59 @@ pub trait PrettyPrint {
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String;
 }
 
+macro_rules! pretty_print {
+    (multiline, $obj:expr, $not:expr, $realm:expr, [$($t:ty),+ $(,)?]) => {
+        pretty_print!(@pretty_multiline, $obj, $not, $realm, [$($t),+]);
+    };
+    ($obj:expr, $not:expr, $realm:expr, [$($t:ty),+ $(,)?]) => {
+        pretty_print!(@pretty_inline, $obj, $not, $realm, [$($t),+]);
+    };
+    (@$method:ident, $obj:expr, $not:expr, $realm:expr, [$($t:ty),+]) => {
+        $(
+            if let Some(obj) = ($obj).downcast::<$t>() {
+                if let Some(s) = PrettyObjectOverride::$method(&*obj, $obj, $not, $realm) {
+                    return s;
+                }
+            }
+        )+
+    };
+}
+
 impl PrettyPrint for Object {
     fn pretty_print_key(&self, _realm: &mut Realm) -> String {
         format!("'{self}'").green().to_string()
     }
 
     fn pretty_print_circular(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
-        if let Some(error) = self.downcast::<ErrorObj>() {
-            if let Some(s) = PrettyObjectOverride::pretty_inline(&*error, self, not, realm) {
-                return s;
-            }
-        }
-
-        if let Some(array) = self.downcast::<Array>() {
-            if let Some(s) = PrettyObjectOverride::pretty_inline(&*array, self, not, realm) {
-                return s;
-            }
-        }
-        if let Some(re) = self.downcast::<RegExp>() {
-            if let Some(s) = PrettyObjectOverride::pretty_inline(&*re, self, not, realm) {
-                return s;
-            }
-        }
-
-        if let Some(date) = self.downcast::<crate::builtins::Date>() {
-            if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                return s;
-            }
-        }
+        pretty_print!(
+            self,
+            not,
+            realm,
+            [ErrorObj, Array, RegExp, crate::builtins::Date]
+        );
 
         #[cfg(feature = "temporal")]
         {
-            if let Some(date) = self.downcast::<crate::builtins::temporal::Duration>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
+            use crate::builtins::temporal::{
+                Duration, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime,
+                PlainYearMonth, ZonedDateTime,
+            };
 
-            if let Some(date) = self.downcast::<crate::builtins::temporal::Instant>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDate>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDateTime>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainMonthDay>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainTime>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainYearMonth>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::ZonedDateTime>() {
-                if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not, realm) {
-                    return s;
-                }
-            }
+            pretty_print!(
+                self,
+                not,
+                realm,
+                [
+                    Duration,
+                    Instant,
+                    PlainDate,
+                    PlainDateTime,
+                    PlainMonthDay,
+                    PlainTime,
+                    PlainYearMonth,
+                    ZonedDateTime,
+                ]
+            );
         }
 
         let id = self.id();
@@ -182,101 +157,37 @@ impl PrettyPrint for Object {
     }
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
-        if let Some(error) = self.downcast::<ErrorObj>() {
-            if let Some(s) = PrettyObjectOverride::pretty_multiline(&*error, self, not, realm) {
-                return s;
-            }
-        }
-
-        // Try type-specific overrides first
-        if let Some(array) = self.downcast::<crate::object::array::Array>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                &*array, self, not, realm,
-            ) {
-                return s;
-            }
-        }
-        if let Some(re) = self.downcast::<crate::builtins::RegExp>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                &*re, self, not, realm,
-            ) {
-                return s;
-            }
-        }
-
-        if let Some(date) = self.downcast::<crate::builtins::Date>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                &*date, self, not, realm,
-            ) {
-                return s;
-            }
-        }
+        pretty_print!(
+            multiline,
+            self,
+            not,
+            realm,
+            [ErrorObj, Array, RegExp, crate::builtins::Date]
+        );
 
         #[cfg(feature = "temporal")]
         {
-            if let Some(date) = self.downcast::<crate::builtins::temporal::Duration>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
+            use crate::builtins::temporal::{
+                Duration, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime,
+                PlainYearMonth, ZonedDateTime,
+            };
 
-            if let Some(date) = self.downcast::<crate::builtins::temporal::Instant>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDate>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDateTime>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainMonthDay>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainTime>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::PlainYearMonth>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
-
-            if let Some(date) = self.downcast::<crate::builtins::temporal::ZonedDateTime>() {
-                if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
-                    &*date, self, not, realm,
-                ) {
-                    return s;
-                }
-            }
+            pretty_print!(
+                multiline,
+                self,
+                not,
+                realm,
+                [
+                    Duration,
+                    Instant,
+                    PlainDate,
+                    PlainDateTime,
+                    PlainMonthDay,
+                    PlainTime,
+                    PlainYearMonth,
+                    ZonedDateTime,
+                ]
+            );
         }
 
         let id = self.id();
