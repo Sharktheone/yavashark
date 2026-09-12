@@ -99,17 +99,6 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
         })
     }
 
-    fn get_own_property(
-        &self,
-        name: InternalPropertyKey,
-        realm: &mut Realm,
-    ) -> Res<Option<Property>> {
-        Ok(match self.props.get_property(&name, realm)? {
-            Some(prop) => Some(prop),
-            None => self.get_wrapped_object().get_own_property(name, realm)?,
-        })
-    }
-
     fn resolve_property(
         &self,
         name: InternalPropertyKey,
@@ -121,14 +110,15 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
         })
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        Ok(self.props.contains_property(&name)?
-            || self.get_wrapped_object().contains_key(name, realm)?)
-    }
-
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        Ok(self.props.contains_property(&name)?
-            || self.get_wrapped_object().contains_own_key(name, realm)?)
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        Ok(match self.props.get_property(&name, realm)? {
+            Some(prop) => Some(prop),
+            None => self.get_wrapped_object().get_own_property(name, realm)?,
+        })
     }
 
     fn delete_property(
@@ -144,6 +134,16 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
         }
 
         self.get_wrapped_object().delete_property(name, realm)
+    }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        Ok(self.props.contains_property(&name)?
+            || self.get_wrapped_object().contains_own_key(name, realm)?)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        Ok(self.props.contains_property(&name)?
+            || self.get_wrapped_object().contains_key(name, realm)?)
     }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Property)>> {
@@ -214,10 +214,6 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
         self.constructor
     }
 
-    fn name(&self) -> String {
-        self.props.name.into()
-    }
-
     fn get_property_descriptor(
         &self,
         name: InternalPropertyKey,
@@ -229,6 +225,10 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> ObjectImpl
                 .get_wrapped_object()
                 .get_property_descriptor(name, realm)?,
         })
+    }
+
+    fn name(&self) -> String {
+        self.props.name.into()
     }
 }
 
