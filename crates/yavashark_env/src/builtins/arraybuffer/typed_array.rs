@@ -1659,7 +1659,7 @@ impl TypedArray {
     }
 
     #[get(Symbol::TO_STRING_TAG)]
-    fn to_string_tag(&self) -> &'static str {
+    pub fn to_string_tag(&self) -> &'static str {
         match self.ty {
             Type::U8C => "Uint8ClampedArray",
             Type::U8 => "Uint8Array",
