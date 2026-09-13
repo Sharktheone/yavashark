@@ -4,6 +4,7 @@ use crate::builtins::array_buf::ArrayBuffer;
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::conversion::{NonNegative, downcast_obj};
 use crate::error::Error;
+use crate::print::{PrettyObjectOverride, PrettyPrint};
 use crate::value::Obj;
 use crate::{GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use half::f16;
@@ -381,5 +382,21 @@ impl DataView {
         self.set(offset, value, le)?;
 
         Ok(Value::Undefined)
+    }
+}
+
+impl PrettyObjectOverride for DataView {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        Some(format!(
+            "DataView {{ byteLength: {}, byteOffset: {}, buffer: {} }}",
+            self.byte_length(),
+            self.byte_offset(),
+            self.buffer().pretty_print_circular(not, realm)
+        ))
     }
 }
