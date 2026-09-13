@@ -1,7 +1,9 @@
 use crate::array::Array;
+use crate::print::PrettyObjectOverride;
 use crate::utils::ValueIterator;
 use crate::value::{IntoValue, MutObj};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
+use colored::Colorize;
 use indexmap::IndexMap;
 use indexmap::map::Entry;
 use rustc_hash::FxBuildHasher;
@@ -194,4 +196,15 @@ impl WeakMap {
     //
     //     Ok(arr.into())
     // }
+}
+
+impl PrettyObjectOverride for WeakMap {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        _realm: &mut Realm,
+    ) -> Option<String> {
+        Some(format!("WeakMap {{ {} }}", "<items unknown>".cyan()))
+    }
 }
