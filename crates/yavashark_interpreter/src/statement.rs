@@ -1,5 +1,5 @@
 use swc_common::Spanned;
-use swc_ecma_ast::{Decl, Stmt};
+use swc_ecma_ast::{Decl, ForHead, Stmt, VarDeclKind, VarDeclOrExpr};
 
 use yavashark_env::{Realm, Res, RuntimeResult, Value, scope::Scope};
 
@@ -78,16 +78,7 @@ impl Interpreter {
 
     fn hoist_statements(realm: &mut Realm, script: &[Stmt], scope: &mut Scope) -> Res<()> {
         for stmt in script {
-            match stmt {
-                Stmt::Decl(decl) => {
-                    Self::hoist_decl(realm, decl, scope)?;
-                }
-                Stmt::Block(block) => {
-                    Self::hoist_globals(realm, block, scope)?;
-                }
-
-                _ => {}
-            }
+            Self::hoist_stmt_impl::<false>(realm, stmt, scope)?;
         }
 
         Ok(())
@@ -98,17 +89,86 @@ impl Interpreter {
         block: &swc_ecma_ast::BlockStmt,
         scope: &mut Scope,
     ) -> Res<()> {
-        for stmt in &block.stmts {
-            match stmt {
-                Stmt::Decl(decl) => {
-                    Self::hoist_global_decl(realm, decl, scope)?;
-                }
-                Stmt::Block(inner_block) => {
-                    Self::hoist_globals(realm, inner_block, scope)?;
-                }
+        Self::hoist_global_stmts(realm, &block.stmts, scope)
+    }
 
-                _ => {}
+    fn hoist_global_stmts(realm: &mut Realm, stmts: &[Stmt], scope: &mut Scope) -> Res {
+        for stmt in stmts {
+            Self::hoist_stmt_impl::<true>(realm, stmt, scope)?;
+        }
+
+        Ok(())
+    }
+
+    fn hoist_stmt_impl<const GLOBAL: bool>(realm: &mut Realm, stmt: &Stmt, scope: &mut Scope) -> Res {
+        match stmt {
+            Stmt::Decl(decl) => {
+                if GLOBAL {
+                    Self::hoist_global_decl(realm, decl, scope)?;
+                } else {
+                    Self::hoist_decl(realm, decl, scope)?;
+                }
             }
+            Stmt::Block(block) => {
+                Self::hoist_global_stmts(realm, &block.stmts, scope)?;
+            }
+            Stmt::If(i) => {
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &i.cons, scope)?;
+                if let Some(alt) = &i.alt {
+                    Self::hoist_stmt_impl::<GLOBAL>(realm, alt, scope)?;
+                }
+            }
+            Stmt::Switch(s) => {
+                for case in &s.cases {
+                    Self::hoist_global_stmts(realm, &case.cons, scope)?;
+                }
+            }
+            Stmt::Try(t) => {
+                Self::hoist_global_stmts(realm, &t.block.stmts, scope)?;
+                if let Some(handler) = &t.handler {
+                    Self::hoist_global_stmts(realm, &handler.body.stmts, scope)?;
+                }
+                if let Some(finalizer) = &t.finalizer {
+                    Self::hoist_global_stmts(realm, &finalizer.stmts, scope)?;
+                }
+            }
+            Stmt::While(w) => {
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope)?;
+            }
+            Stmt::DoWhile(d) => {
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &d.body, scope)?;
+            }
+            Stmt::For(f) => {
+                if let Some(VarDeclOrExpr::VarDecl(v)) = &f.init
+                    && v.kind == VarDeclKind::Var
+                {
+                    Self::hoist_var(realm, v, scope)?;
+                }
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+            }
+            Stmt::ForIn(f) => {
+                if let ForHead::VarDecl(v) = &f.left
+                    && v.kind == VarDeclKind::Var
+                {
+                    Self::hoist_var(realm, v, scope)?;
+                }
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+            }
+            Stmt::ForOf(f) => {
+                if let ForHead::VarDecl(v) = &f.left
+                    && v.kind == VarDeclKind::Var
+                {
+                    Self::hoist_var(realm, v, scope)?;
+                }
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+            }
+            Stmt::With(w) => {
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope)?;
+            }
+            Stmt::Labeled(l) => {
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &l.body, scope)?;
+            }
+            _ => {}
         }
 
         Ok(())
