@@ -1,6 +1,8 @@
+use crate::print::PrettyObjectOverride;
 use crate::utils::ValueIterator;
 use crate::value::{IntoValue, MutObj, Obj};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
+use colored::Colorize;
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
@@ -212,4 +214,15 @@ impl WeakSet {
     //
     //     Ok(arr.into())
     // }
+}
+
+impl PrettyObjectOverride for WeakSet {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        _realm: &mut Realm,
+    ) -> Option<String> {
+        Some(format!("WeakSet {{ {} }}", "<items unknown>".cyan()))
+    }
 }
