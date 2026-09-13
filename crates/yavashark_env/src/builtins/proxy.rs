@@ -1,6 +1,7 @@
 #![allow(unused)]
 use crate::array::Array;
 use crate::conversion::FromValueOutput;
+use crate::print::{PrettyObjectOverride, PrettyPrint};
 use crate::value::{
     Attributes, BoxedObj, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor,
     WeakObject,
@@ -9,6 +10,7 @@ use crate::{
     Error, InternalPropertyKey, NativeFunction, Object, ObjectHandle, ObjectOrNull, ObjectProperty,
     PrimitiveValue, PropertyKey, Realm, Res, Value, Variable, WeakObjectHandle,
 };
+use colored::Colorize;
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::ops::Deref;
@@ -608,5 +610,21 @@ impl Proxy {
             .cloned()
             .map_or(Value::Undefined, Into::into)
         // .map_or(Value::Undefined, |w| w.upgrade().map_or(Value::Undefined, Into::into))
+    }
+}
+
+impl PrettyObjectOverride for Proxy {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        if self.revoke.get() {
+            return Some("<Revoked Proxy>".cyan().to_string());
+        }
+
+        // Print the target directly, so inspecting doesn't run any traps
+        Some(self.inner.pretty_print_circular(not, realm))
     }
 }
