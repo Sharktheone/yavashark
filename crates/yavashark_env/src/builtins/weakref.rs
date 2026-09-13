@@ -1,4 +1,5 @@
 use crate::or_symbol::OrSymbol;
+use crate::print::{PrettyObjectOverride, PrettyPrint};
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, WeakObjectHandle};
 use std::cell::RefCell;
@@ -46,5 +47,19 @@ impl WeakRef {
             .try_map(|h| h.upgrade().ok_or(()))
             .map(Into::into)
             .unwrap_or(Value::Undefined)
+    }
+}
+
+impl PrettyObjectOverride for WeakRef {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        Some(format!(
+            "WeakRef {{ {} }}",
+            self.deref().pretty_print_circular(not, realm)
+        ))
     }
 }
