@@ -1,4 +1,5 @@
 use crate::array::Array;
+use crate::print::{PrettyObjectOverride, PrettyPrint, guard_circular};
 use crate::utils::ValueIterator;
 use crate::value::{IntoValue, MutObj};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
@@ -6,6 +7,7 @@ use indexmap::IndexMap;
 use indexmap::map::Entry;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
+use std::fmt::Write;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -180,4 +182,31 @@ impl Map {
     //
     //     Ok(arr.into())
     // }
+}
+
+impl PrettyObjectOverride for Map {
+    fn pretty_inline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let inner = self.inner.try_borrow().ok()?;
+
+        Some(guard_circular(obj, not, |not| {
+            let len = inner.map.len();
+            let mut s = String::with_capacity(16 + len * 32);
+            _ = write!(s, "Map({len}) {{");
+
+            for (i, (k, v)) in inner.map.iter().enumerate() {
+                s.push_str(if i == 0 { " " } else { ", " });
+                s.push_str(&k.pretty_print_circular(not, realm));
+                s.push_str(" => ");
+                s.push_str(&v.pretty_print_circular(not, realm));
+            }
+
+            s.push_str(if len == 0 { "}" } else { " }" });
+            s
+        }))
+    }
 }
