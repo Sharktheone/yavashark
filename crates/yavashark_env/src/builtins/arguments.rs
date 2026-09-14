@@ -1,5 +1,6 @@
 use crate::array::{ArrayIterator, ArrayIteratorKind, MutableArrayIterator};
 use crate::error::Error;
+use crate::print::{PrettyObjectOverride, PrettyPrint, guard_circular};
 use crate::value::{
     Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property, PropertyDescriptor,
 };
@@ -615,5 +616,31 @@ impl Arguments {
         let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
+    }
+}
+
+impl PrettyObjectOverride for Arguments {
+    fn pretty_inline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let args = self.args.try_borrow().ok()?;
+
+        Some(guard_circular(obj, not, |not| {
+            let mut s = String::with_capacity(16 + args.len() * 16);
+            s.push_str("[Arguments] [");
+
+            for (i, v) in args.iter().enumerate() {
+                if i > 0 {
+                    s.push_str(", ");
+                }
+                s.push_str(&v.pretty_print_circular(not, realm));
+            }
+
+            s.push(']');
+            s
+        }))
     }
 }
