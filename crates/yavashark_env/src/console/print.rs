@@ -116,7 +116,8 @@ impl PrettyPrint for Object {
                 }
                 PrimitiveValue::Number(n) => format!("[Number: {n}] ").bright_green().to_string(),
                 PrimitiveValue::Boolean(b) => format!("[Boolean: {b}] ").bright_green().to_string(),
-                _ => "[Primitive] ".bright_green().to_string(),
+                PrimitiveValue::BigInt(b) => format!("[BigInt: {b}n] ").bright_green().to_string(),
+                PrimitiveValue::Symbol(s) => format!("[Symbol: {s}] ").bright_green().to_string(),
             }
         } else {
             let name = self.name();
@@ -211,7 +212,8 @@ impl PrettyPrint for Object {
                 }
                 PrimitiveValue::Number(n) => format!("[Number: {n}]").bright_green().to_string(),
                 PrimitiveValue::Boolean(b) => format!("[Boolean: {b}]").bright_green().to_string(),
-                _ => "[Primitive]".bright_green().to_string(),
+                PrimitiveValue::BigInt(b) => format!("[BigInt: {b}n]").bright_green().to_string(),
+                PrimitiveValue::Symbol(s) => format!("[Symbol: {s}]").bright_green().to_string(),
             }
         } else {
             let name = self.name();
