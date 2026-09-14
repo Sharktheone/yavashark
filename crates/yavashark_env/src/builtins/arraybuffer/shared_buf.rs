@@ -1,4 +1,6 @@
 use crate::array::convert_index;
+use crate::builtins::array_buf::fmt_bytes;
+use crate::print::PrettyObjectOverride;
 use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
@@ -174,5 +176,18 @@ impl SharedArrayBuffer {
     #[get("maxByteLength")]
     fn max_byte_length(&self) -> usize {
         self.max_byte_length.unwrap_or(0)
+    }
+}
+
+impl PrettyObjectOverride for SharedArrayBuffer {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        _realm: &mut Realm,
+    ) -> Option<String> {
+        let bytes = self.get_slice().ok()?;
+
+        Some(fmt_bytes("SharedArrayBuffer", &bytes))
     }
 }
