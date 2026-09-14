@@ -41,13 +41,7 @@ pub trait PrettyPrint {
 }
 
 macro_rules! pretty_print {
-    (multiline, $obj:expr, $not:expr, $realm:expr, [$($t:ty),+ $(,)?]) => {
-        pretty_print!(@pretty_multiline, $obj, $not, $realm, [$($t),+]);
-    };
-    ($obj:expr, $not:expr, $realm:expr, [$($t:ty),+ $(,)?]) => {
-        pretty_print!(@pretty_inline, $obj, $not, $realm, [$($t),+]);
-    };
-    (@$method:ident, $obj:expr, $not:expr, $realm:expr, [$($t:ty),+]) => {
+    ($method:ident, $obj:expr, $not:expr, $realm:expr, [$($t:ty),+ $(,)?]) => {
         $(
             if let Some(obj) = ($obj).downcast::<$t>() {
                 if let Some(s) = PrettyObjectOverride::$method(&*obj, $obj, $not, $realm) {
@@ -58,17 +52,31 @@ macro_rules! pretty_print {
     };
 }
 
-impl PrettyPrint for Object {
-    fn pretty_print_key(&self, _realm: &mut Realm) -> String {
-        format!("'{self}'").green().to_string()
-    }
-
-    fn pretty_print_circular(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
+macro_rules! pretty_print_overrides {
+    ($method:ident, $obj:expr, $not:expr, $realm:expr) => {
         pretty_print!(
-            self,
-            not,
-            realm,
-            [ErrorObj, Array, RegExp, crate::builtins::Date]
+            $method,
+            $obj,
+            $not,
+            $realm,
+            [
+                crate::builtins::Proxy,
+                ErrorObj,
+                Array,
+                RegExp,
+                crate::builtins::Date,
+                crate::builtins::Map,
+                crate::builtins::Set,
+                crate::builtins::typed_array::TypedArray,
+                crate::builtins::array_buf::ArrayBuffer,
+                crate::builtins::shared_buf::SharedArrayBuffer,
+                crate::builtins::dataview::DataView,
+                crate::builtins::Promise,
+                crate::builtins::Arguments,
+                crate::builtins::WeakMap,
+                crate::builtins::WeakSet,
+                crate::builtins::WeakRef,
+            ]
         );
 
         #[cfg(feature = "temporal")]
@@ -79,9 +87,10 @@ impl PrettyPrint for Object {
             };
 
             pretty_print!(
-                self,
-                not,
-                realm,
+                $method,
+                $obj,
+                $not,
+                $realm,
                 [
                     Duration,
                     Instant,
@@ -94,6 +103,16 @@ impl PrettyPrint for Object {
                 ]
             );
         }
+    };
+}
+
+impl PrettyPrint for Object {
+    fn pretty_print_key(&self, _realm: &mut Realm) -> String {
+        format!("'{self}'").green().to_string()
+    }
+
+    fn pretty_print_circular(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
+        pretty_print_overrides!(pretty_inline, self, not, realm);
 
         let id = self.id();
 
@@ -158,38 +177,7 @@ impl PrettyPrint for Object {
     }
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
-        pretty_print!(
-            multiline,
-            self,
-            not,
-            realm,
-            [ErrorObj, Array, RegExp, crate::builtins::Date]
-        );
-
-        #[cfg(feature = "temporal")]
-        {
-            use crate::builtins::temporal::{
-                Duration, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime,
-                PlainYearMonth, ZonedDateTime,
-            };
-
-            pretty_print!(
-                multiline,
-                self,
-                not,
-                realm,
-                [
-                    Duration,
-                    Instant,
-                    PlainDate,
-                    PlainDateTime,
-                    PlainMonthDay,
-                    PlainTime,
-                    PlainYearMonth,
-                    ZonedDateTime,
-                ]
-            );
-        }
+        pretty_print_overrides!(pretty_multiline, self, not, realm);
 
         let id = self.id();
 
