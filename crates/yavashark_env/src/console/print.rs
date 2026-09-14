@@ -306,6 +306,23 @@ impl PrettyPrint for Value {
     }
 }
 
+pub fn guard_circular(
+    obj: &Object,
+    not: &mut Vec<usize>,
+    f: impl FnOnce(&mut Vec<usize>) -> String,
+) -> String {
+    let id = obj.id();
+
+    if not.contains(&id) {
+        return "[Circular *1]".bright_green().to_string();
+    }
+
+    not.push(id);
+    let s = f(not);
+    not.pop();
+    s
+}
+
 pub fn fmt_properties_to(obj: &Object, str: &mut String, not: &mut Vec<usize>, realm: &mut Realm) {
     let Ok(properties) = obj.properties(realm) else {
         return;
