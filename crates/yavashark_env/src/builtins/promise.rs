@@ -5,14 +5,17 @@ pub use into_promise::*;
 use crate::array::Array;
 use crate::conversion::downcast_obj;
 use crate::error_obj::ErrorObj;
+use crate::print::{PrettyObjectOverride, PrettyPrint, guard_circular};
 use crate::utils::ValueIterator;
 use crate::value::{BoxedObj, IntoValue, Obj};
 use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
 };
+use colored::Colorize;
 use futures::future::{join_all, select_all};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
+use std::fmt::Write;
 use tokio::sync::Notify;
 use tokio::sync::futures::Notified;
 use yavashark_garbage::OwningGcGuard;
@@ -878,5 +881,36 @@ impl RejectedHandler {
                 self.promise.reject(&val, realm)
             }
         }
+    }
+}
+
+impl PrettyObjectOverride for Promise {
+    fn pretty_inline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let inner = self.inner.try_borrow().ok()?;
+
+        Some(guard_circular(obj, not, |not| {
+            let state = self.state.get();
+
+            if state == PromiseState::Pending {
+                return format!("Promise {{ {} }}", "<pending>".cyan());
+            }
+
+            let value = inner.value.clone().unwrap_or(Value::Undefined);
+            let value = value.pretty_print_circular(not, realm);
+
+            let mut s = String::with_capacity(value.len() + 32);
+            s.push_str("Promise { ");
+            if state == PromiseState::Rejected {
+                _ = write!(s, "{} ", "<rejected>".cyan());
+            }
+            s.push_str(&value);
+            s.push_str(" }");
+            s
+        }))
     }
 }
