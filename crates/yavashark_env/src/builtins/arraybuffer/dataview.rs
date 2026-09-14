@@ -11,6 +11,7 @@ use half::f16;
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
+use std::fmt::Write;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -392,11 +393,15 @@ impl PrettyObjectOverride for DataView {
         not: &mut Vec<usize>,
         realm: &mut Realm,
     ) -> Option<String> {
-        Some(format!(
-            "DataView {{ byteLength: {}, byteOffset: {}, buffer: {} }}",
-            self.byte_length(),
-            self.byte_offset(),
-            self.buffer().pretty_print_circular(not, realm)
-        ))
+        let buffer = self.buffer().pretty_print_circular(not, realm);
+
+        let mut s = String::with_capacity(buffer.len() + 96);
+        _ = write!(
+            s,
+            "DataView {{ byteLength: {}, byteOffset: {}, buffer: {buffer} }}",
+            self.byte_length, self.byte_offset
+        );
+
+        Some(s)
     }
 }
