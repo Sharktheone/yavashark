@@ -57,9 +57,13 @@ impl PrettyObjectOverride for WeakRef {
         not: &mut Vec<usize>,
         realm: &mut Realm,
     ) -> Option<String> {
-        Some(format!(
-            "WeakRef {{ {} }}",
-            self.deref().pretty_print_circular(not, realm)
-        ))
+        let target = self.deref().pretty_print_circular(not, realm);
+
+        let mut s = String::with_capacity(target.len() + 12);
+        s.push_str("WeakRef { ");
+        s.push_str(&target);
+        s.push_str(" }");
+
+        Some(s)
     }
 }
