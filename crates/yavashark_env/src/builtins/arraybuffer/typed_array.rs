@@ -15,6 +15,7 @@ use crate::builtins::uint16array::{Uint16Array, Uint16ArrayConstructor};
 use crate::builtins::uint32array::{Uint32Array, Uint32ArrayConstructor};
 use crate::builtins::unit8array::{Uint8Array, Uint8ArrayConstructor};
 use crate::conversion::downcast_obj;
+use crate::print::{PrettyObjectOverride, PrettyPrint};
 use crate::utils::{ArrayLike, ValueIterator};
 use crate::value::{self, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor};
 use crate::{
@@ -28,6 +29,7 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
+use std::fmt::Write;
 use std::ops::{Deref, DerefMut, Range};
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
 
@@ -1757,4 +1759,44 @@ fn extend_as_bytes(bytes: &mut Vec<u8>, value: Value, ty: Type) -> Res<()> {
 
 fn bytemuck_err(err: bytemuck::PodCastError) -> Error {
     Error::new_error(err.to_string())
+}
+
+impl PrettyObjectOverride for TypedArray {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let len = self.get_length();
+
+        let mut s = String::with_capacity(24 + len * 12);
+
+        _ = write!(s, "{}({len}) [", self.to_string_tag());
+        _ = self.write_pretty_elements(&mut s, not, realm);
+
+        s.push(']');
+
+        Some(s)
+    }
+}
+
+impl TypedArray {
+    fn write_pretty_elements(
+        &self,
+        s: &mut String,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Res {
+        typed_array_run!({
+            for (i, x) in slice.iter().enumerate() {
+                if i > 0 {
+                    s.push_str(", ");
+                }
+                s.push_str(&to_value(x.0).pretty_print_circular(not, realm));
+            }
+        });
+
+        Ok(())
+    }
 }
