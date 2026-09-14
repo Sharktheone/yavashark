@@ -1,10 +1,12 @@
 use crate::array::convert_index;
 use crate::builtins::dataview::DataView;
 use crate::builtins::typed_array::TypedArray;
+use crate::print::PrettyObjectOverride;
 use crate::realm::Intrinsic;
 use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
+use std::fmt::Write;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -240,4 +242,41 @@ impl ArrayBuffer {
                 || view.instance_of(&DataView::get_global(realm)?.into(), realm)?,
         )
     }
+}
+
+impl PrettyObjectOverride for ArrayBuffer {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        _realm: &mut Realm,
+    ) -> Option<String> {
+        Some(match self.get_slice() {
+            Ok(bytes) => fmt_bytes("ArrayBuffer", &bytes),
+            Err(_) => "ArrayBuffer { (detached), byteLength: 0 }".to_string(),
+        })
+    }
+}
+
+pub fn fmt_bytes(name: &str, bytes: &[u8]) -> String {
+    const MAX_BYTES: usize = 50;
+
+    let shown = bytes.len().min(MAX_BYTES);
+
+    let mut s = String::with_capacity(name.len() + shown * 3 + 96);
+    _ = write!(s, "{name} {{ [Uint8Contents]: <");
+
+    for (i, b) in bytes[..shown].iter().enumerate() {
+        if i > 0 {
+            s.push(' ');
+        }
+        _ = write!(s, "{b:02x}");
+    }
+
+    if bytes.len() > MAX_BYTES {
+        _ = write!(s, " ... {} more bytes", bytes.len() - MAX_BYTES);
+    }
+
+    _ = write!(s, ">, byteLength: {} }}", bytes.len());
+    s
 }
