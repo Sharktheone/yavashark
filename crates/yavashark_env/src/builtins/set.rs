@@ -1,8 +1,10 @@
+use crate::print::{PrettyObjectOverride, PrettyPrint, guard_circular};
 use crate::utils::ValueIterator;
 use crate::value::{IntoValue, MutObj, Obj};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use indexmap::IndexSet;
 use std::cell::RefCell;
+use std::fmt::Write;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -224,4 +226,29 @@ impl Set {
     //
     //     Ok(arr.into())
     // }
+}
+
+impl PrettyObjectOverride for Set {
+    fn pretty_inline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
+        let inner = self.inner.try_borrow().ok()?;
+
+        Some(guard_circular(obj, not, |not| {
+            let len = inner.set.len();
+            let mut s = String::with_capacity(16 + len * 16);
+            _ = write!(s, "Set({len}) {{");
+
+            for (i, v) in inner.set.iter().enumerate() {
+                s.push_str(if i == 0 { " " } else { ", " });
+                s.push_str(&v.pretty_print_circular(not, realm));
+            }
+
+            s.push_str(if len == 0 { "}" } else { " }" });
+            s
+        }))
+    }
 }
