@@ -100,7 +100,11 @@ impl Interpreter {
         Ok(())
     }
 
-    fn hoist_stmt_impl<const GLOBAL: bool>(realm: &mut Realm, stmt: &Stmt, scope: &mut Scope) -> Res {
+    fn hoist_stmt_impl<const GLOBAL: bool>(
+        realm: &mut Realm,
+        stmt: &Stmt,
+        scope: &mut Scope,
+    ) -> Res {
         match stmt {
             Stmt::Decl(decl) => {
                 if GLOBAL {
