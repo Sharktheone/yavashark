@@ -7485,7 +7485,6 @@ dependencies = [
  "yavashark_macro",
  "yavashark_profiler",
  "yavashark_string",
- "yavashark_value",
 ]
 
 [[package]]
