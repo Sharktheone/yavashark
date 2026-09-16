@@ -9,7 +9,6 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_profiler = { path = "../yavashark_profiler", optional = true }
 colored = "3.0.0"
-paste = "1.0.15"
 rand = { version = "0.10.1"}
 num-bigint = "0.4.6"
 num-traits = "0.2.19"

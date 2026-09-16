@@ -7468,7 +7468,6 @@ dependencies = [
  "log",
  "num-bigint 0.4.8",
  "num-traits",
- "paste",
  "pin-project",
  "rand 0.10.2",
  "regress",
