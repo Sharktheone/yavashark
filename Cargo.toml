@@ -11,6 +11,10 @@ members = [
     "crates/*",
     "crates/yavashark_bytecode/generator"
 ]
+exclude = [
+    "crates/yavashark_ir", # in dev and currently broken
+    "crates/yavashark_shonk", # only for testing
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

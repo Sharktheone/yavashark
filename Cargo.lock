@@ -7522,16 +7522,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "yavashark_ir"
-version = "0.1.0"
-dependencies = [
- "bumpalo",
- "num-bigint 0.4.8",
- "regress",
- "yavashark_string",
-]
-
-[[package]]
 name = "yavashark_lexer"
 version = "0.1.0"
 dependencies = [
@@ -7564,10 +7554,6 @@ dependencies = [
  "indexmap",
  "pprof",
 ]
-
-[[package]]
-name = "yavashark_shonk"
-version = "0.1.0"
 
 [[package]]
 name = "yavashark_string"
