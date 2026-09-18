@@ -7367,7 +7367,6 @@ dependencies = [
  "console_log",
  "flate2",
  "getrandom 0.4.3",
- "half",
  "js-sys",
  "memmap2",
  "pprof",
