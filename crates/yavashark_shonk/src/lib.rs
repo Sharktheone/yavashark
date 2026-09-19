@@ -9,6 +9,8 @@
 // - Ability for async Scopes
 // - How we handle escaping variables
 // - Small micro benches to compare against different engines and current Yavashark
+//
+// Idea for the allocator: have a small bump area and we will evacuate any surving data to the eden space
 
 mod object;
 
