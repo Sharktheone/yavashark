@@ -79,7 +79,11 @@ impl Interpreter {
 
         let arrow = ObjectHandle::new(arrow);
 
-        arrow.define_property("name".into(), "".into(), realm)?;
+        arrow.define_property_attributes(
+            "name".into(),
+            yavashark_env::Variable::config("".into()),
+            realm,
+        )?;
 
         let len = stmt.params.last().map_or(0, |last| {
             if last.is_rest() {
@@ -89,7 +93,11 @@ impl Interpreter {
             }
         });
 
-        arrow.define_property("length".into(), len.into(), realm)?;
+        arrow.define_property_attributes(
+            "length".into(),
+            yavashark_env::Variable::config(len.into()),
+            realm,
+        )?;
 
         Ok(arrow.into())
     }
