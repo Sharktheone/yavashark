@@ -1,6 +1,8 @@
 extern crate proc_macro;
 
 use std::env;
+use quote::quote;
+use syn::{Expr, ExprLit, Lit};
 
 mod config;
 mod custom_props;
@@ -112,4 +114,47 @@ fn deref_type(ty: &syn::Type) -> &syn::Type {
         syn::Type::Reference(r) => deref_type(&r.elem),
         _ => ty,
     }
+}
+
+fn builtin_function_name(
+    expr: Option<&Expr>,
+    fallback: &syn::Ident,
+    prefix: &str,
+) -> proc_macro2::TokenStream {
+    let expr = expr.and_then(|expr| match expr {
+        Expr::Array(a) => a.elems.first(),
+        _ => Some(expr),
+    });
+
+    let name = match expr {
+        Some(Expr::Lit(ExprLit {
+            lit: Lit::Str(s),
+            ..
+        })) => s.value(),
+        Some(Expr::Path(path)) if path.path.segments.iter().any(|s| s.ident == "Symbol") => {
+            let ident = path.path.segments.last().unwrap().ident.to_string();
+            let mut parts = ident.split('_');
+
+            let mut description = parts.next().unwrap().to_lowercase();
+
+            for part in parts {
+                let lower = part.to_lowercase();
+                let mut chars = lower.chars();
+
+                if let Some(c) = chars.next() {
+                    description.extend(c.to_uppercase());
+                }
+
+                description.extend(chars);
+            }
+
+            format!("[Symbol.{description}]")
+        }
+        None => fallback.to_string(),
+        Some(other) => return quote! { #other },
+    };
+
+    let name = format!("{prefix}{name}");
+
+    quote! { #name }
 }
