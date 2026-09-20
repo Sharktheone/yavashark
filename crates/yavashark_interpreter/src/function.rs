@@ -18,6 +18,7 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
     Variable,
 };
+use yavashark_env::utils::coerce_object;
 #[cfg(feature = "actual_gc")]
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
@@ -170,6 +171,13 @@ impl Func for JSFunction {
 
 impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+        let this = if self.is_strict || this.is_object() {
+            this
+        } else if this.is_nullish() {
+            realm.global.clone().into()
+        } else {
+            coerce_object(this, realm)?.into()
+        };
         let arguments_args = self.needs_arguments.then(|| args.clone());
         let caller = (self.needs_arguments && !self.is_strict).then(|| this.copy());
 
