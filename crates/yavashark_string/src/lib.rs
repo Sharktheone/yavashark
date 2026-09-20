@@ -413,24 +413,32 @@ impl RopeStr {
     }
 
     fn flatten_utf16(&self) -> Rc<[u16]> {
-        let storage = unsafe { Rc::<[u16]>::new_uninit_slice(self.len()) };
+        let mut storage = Rc::<[u16]>::new_uninit_slice(self.len());
 
         let ptr = Rc::into_raw(storage).cast_mut();
-        let slice = unsafe { &mut *(ptr as *mut [u16]) };
+        let slice = unsafe { &mut *(ptr) };
         let mut offset = 0;
 
         self.for_each_elem(&mut |w| {
             match w {
                 Wtf::Utf8(s) => {
-                    unreachable!()
+                    // UTF-8 storage is ASCII-only.
+                    for byte in s.bytes() {
+                        slice[offset].write(u16::from(byte));
+
+                        offset += 1;
+                    }
                 }
                 Wtf::Utf16(s) => {
-                    slice[offset..offset + s.len()].copy_from_slice(s);
+                    slice[offset..offset + s.len()].write_copy_of_slice(s);
+
+                    offset += s.len();
                 }
             }
-
             None::<()>
         });
+
+        debug_assert_eq!(offset, slice.len());
 
         unsafe {
             (&mut *ptr).assume_init_mut();
