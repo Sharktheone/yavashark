@@ -1,5 +1,5 @@
 use swc_common::Spanned;
-use swc_ecma_ast::{Decl, ForHead, Stmt, VarDeclKind, VarDeclOrExpr};
+use swc_ecma_ast::{Decl, ForHead, Pat, Stmt, VarDecl, VarDeclKind, VarDeclOrExpr};
 
 use yavashark_env::{Realm, Res, RuntimeResult, Value, scope::Scope};
 
@@ -77,26 +77,40 @@ impl Interpreter {
     }
 
     fn hoist_statements(realm: &mut Realm, script: &[Stmt], scope: &mut Scope) -> Res<()> {
-        for stmt in script {
-            Self::hoist_stmt_impl::<false>(realm, stmt, scope)?;
-        }
+        Self::hoist_stmts::<false>(realm, script, scope, &mut Vec::new())
+    }
 
+    fn hoist_stmts<const GLOBAL: bool>(
+        realm: &mut Realm,
+        stmts: &[Stmt],
+        scope: &mut Scope,
+        lexical_names: &mut Vec<String>,
+    ) -> Res {
+        let len = lexical_names.len();
+        lexical_names.extend(stmts.iter().flat_map(lexical_bound_names));
+
+        for stmt in stmts {
+            Self::hoist_stmt_impl::<GLOBAL>(realm, stmt, scope, lexical_names)?;
+        }
+        lexical_names.truncate(len);
         Ok(())
     }
 
-    fn hoist_globals(
+    fn hoist_loop_binding(
         realm: &mut Realm,
-        block: &swc_ecma_ast::BlockStmt,
+        var: &VarDecl,
         scope: &mut Scope,
-    ) -> Res<()> {
-        Self::hoist_global_stmts(realm, &block.stmts, scope)
-    }
-
-    fn hoist_global_stmts(realm: &mut Realm, stmts: &[Stmt], scope: &mut Scope) -> Res {
-        for stmt in stmts {
-            Self::hoist_stmt_impl::<true>(realm, stmt, scope)?;
+        lexical_names: &mut Vec<String>,
+    ) -> Res {
+        if var.kind == VarDeclKind::Var {
+            Self::hoist_var(realm, var, scope)?;
+        } else {
+            lexical_names.extend(
+                var.decls
+                    .iter()
+                    .flat_map(|decl| decl::pat_idents(&decl.name)),
+            );
         }
-
         Ok(())
     }
 
@@ -104,77 +118,89 @@ impl Interpreter {
         realm: &mut Realm,
         stmt: &Stmt,
         scope: &mut Scope,
+        lexical_names: &mut Vec<String>,
     ) -> Res {
+        let len = lexical_names.len();
         match stmt {
             Stmt::Decl(decl) => {
                 if GLOBAL {
-                    Self::hoist_global_decl(realm, decl, scope)?;
+                    if !matches!(decl, Decl::Fn(f) if lexical_names.contains(&f.ident.sym.to_string()))
+                    {
+                        Self::hoist_global_decl(realm, decl, scope)?;
+                    }
                 } else {
                     Self::hoist_decl(realm, decl, scope)?;
                 }
             }
             Stmt::Block(block) => {
-                Self::hoist_global_stmts(realm, &block.stmts, scope)?;
+                Self::hoist_stmts::<true>(realm, &block.stmts, scope, lexical_names)?;
             }
             Stmt::If(i) => {
-                Self::hoist_stmt_impl::<true>(realm, &i.cons, scope)?;
+                Self::hoist_stmt_impl::<true>(realm, &i.cons, scope, lexical_names)?;
                 if let Some(alt) = &i.alt {
-                    Self::hoist_stmt_impl::<true>(realm, alt, scope)?;
+                    Self::hoist_stmt_impl::<true>(realm, alt, scope, lexical_names)?;
                 }
             }
             Stmt::Switch(s) => {
+                lexical_names.extend(
+                    s.cases
+                        .iter()
+                        .flat_map(|case| &case.cons)
+                        .flat_map(lexical_bound_names),
+                );
                 for case in &s.cases {
-                    Self::hoist_global_stmts(realm, &case.cons, scope)?;
+                    Self::hoist_stmts::<true>(realm, &case.cons, scope, lexical_names)?;
                 }
             }
             Stmt::Try(t) => {
-                Self::hoist_global_stmts(realm, &t.block.stmts, scope)?;
+                Self::hoist_stmts::<true>(realm, &t.block.stmts, scope, lexical_names)?;
                 if let Some(handler) = &t.handler {
-                    Self::hoist_global_stmts(realm, &handler.body.stmts, scope)?;
+                    if let Some(param) = &handler.param
+                        && !matches!(param, Pat::Ident(_))
+                    {
+                        lexical_names.extend(decl::pat_idents(param));
+                    }
+                    Self::hoist_stmts::<true>(realm, &handler.body.stmts, scope, lexical_names)?;
                 }
+                lexical_names.truncate(len);
                 if let Some(finalizer) = &t.finalizer {
-                    Self::hoist_global_stmts(realm, &finalizer.stmts, scope)?;
+                    Self::hoist_stmts::<true>(realm, &finalizer.stmts, scope, lexical_names)?;
                 }
             }
             Stmt::While(w) => {
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope, lexical_names)?;
             }
             Stmt::DoWhile(d) => {
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &d.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &d.body, scope, lexical_names)?;
             }
             Stmt::For(f) => {
-                if let Some(VarDeclOrExpr::VarDecl(v)) = &f.init
-                    && v.kind == VarDeclKind::Var
-                {
-                    Self::hoist_var(realm, v, scope)?;
+                if let Some(VarDeclOrExpr::VarDecl(v)) = &f.init {
+                    Self::hoist_loop_binding(realm, v, scope, lexical_names)?;
                 }
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope, lexical_names)?;
             }
             Stmt::ForIn(f) => {
-                if let ForHead::VarDecl(v) = &f.left
-                    && v.kind == VarDeclKind::Var
-                {
-                    Self::hoist_var(realm, v, scope)?;
+                if let ForHead::VarDecl(v) = &f.left {
+                    Self::hoist_loop_binding(realm, v, scope, lexical_names)?;
                 }
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope, lexical_names)?;
             }
             Stmt::ForOf(f) => {
-                if let ForHead::VarDecl(v) = &f.left
-                    && v.kind == VarDeclKind::Var
-                {
-                    Self::hoist_var(realm, v, scope)?;
+                if let ForHead::VarDecl(v) = &f.left {
+                    Self::hoist_loop_binding(realm, v, scope, lexical_names)?;
                 }
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &f.body, scope, lexical_names)?;
             }
             Stmt::With(w) => {
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &w.body, scope, lexical_names)?;
             }
             Stmt::Labeled(l) => {
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &l.body, scope)?;
+                Self::hoist_stmt_impl::<GLOBAL>(realm, &l.body, scope, lexical_names)?;
             }
             _ => {}
         }
 
+        lexical_names.truncate(len);
         Ok(())
     }
 }
@@ -187,5 +213,17 @@ impl IsHoistable for Stmt {
     fn skip_statements(&self) -> bool {
         matches!(self, Self::Decl(Decl::Fn(_)) | Self::Empty(_))
             || matches!(self, Self::Block(block) if block.stmts.is_empty())
+    }
+}
+
+fn lexical_bound_names(stmt: &Stmt) -> Vec<String> {
+    match stmt {
+        Stmt::Decl(Decl::Var(v)) if v.kind != VarDeclKind::Var => v
+            .decls
+            .iter()
+            .flat_map(|decl| decl::pat_idents(&decl.name))
+            .collect(),
+        Stmt::Decl(Decl::Class(c)) => vec![c.ident.sym.to_string()],
+        _ => Vec::new(),
     }
 }

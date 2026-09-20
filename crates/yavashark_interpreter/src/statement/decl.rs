@@ -80,7 +80,7 @@ impl Interpreter {
     }
 }
 
-fn pat_idents(pat: &Pat) -> Vec<String> {
+pub fn pat_idents(pat: &Pat) -> Vec<String> {
     match pat {
         Pat::Ident(ident) => vec![ident.id.sym.to_string()],
         Pat::Array(array) => array
