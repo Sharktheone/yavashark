@@ -37,9 +37,7 @@ impl Interpreter {
 
     pub fn hoist_global_decl(realm: &mut Realm, stmt: &Decl, scope: &mut Scope) -> Res {
         match stmt {
-            Decl::Fn(f) => {
-                scope.declare_global_var(f.ident.sym.to_string(), Value::Undefined, realm)
-            }
+            Decl::Fn(f) => scope.hoist_global_var(f.ident.sym.to_string(), realm),
             Decl::Var(v) if v.kind == VarDeclKind::Var => Self::hoist_var(realm, v, scope),
             _ => Ok(()),
         }
