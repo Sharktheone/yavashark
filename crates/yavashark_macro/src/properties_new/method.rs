@@ -75,16 +75,12 @@ impl Method {
             TokenStream::new()
         };
 
-        let js_name = self
-            .js_name
-            .clone()
-            .as_ref()
-            .and_then(|js| match js {
-                Expr::Array(a) => a.elems.first(),
-                _ => Some(js),
-            })
-            .map(|js| quote! { #js })
-            .unwrap_or_else(|| quote! { stringify!(#name_ident) });
+        let prefix = match self.ty {
+            Type::Get => "get ",
+            Type::Set => "set ",
+            Type::Normal => "",
+        };
+        let js_name = crate::builtin_function_name(self.js_name.as_ref(), name_ident, prefix);
 
         let (length, _) = self.calculate_length();
 

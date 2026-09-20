@@ -685,11 +685,12 @@ impl Method {
             TokenStream::new()
         };
 
-        let name = self
-            .js_name
-            .first()
-            .map(|js_name| quote! {#js_name})
-            .unwrap_or_else(|| quote! {stringify!(#name)});
+        let prefix = match self.ty {
+            Type::Get => "get ",
+            Type::Set => "set ",
+            Type::Normal => "",
+        };
+        let name = crate::builtin_function_name(self.js_name.first(), name, prefix);
 
         let optionals = self
             .args
