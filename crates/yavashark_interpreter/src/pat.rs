@@ -265,7 +265,7 @@ pub fn set_value_name(name: &str, value: &Value, realm: &mut Realm) -> Res {
         if let Some(arrow) = obj.downcast::<ArrowFunction>() {
             arrow.define_property_attributes(
                 "name".into(),
-                YSString::from_ref(name).into(),
+                yavashark_env::Variable::config(YSString::from_ref(name).into()),
                 realm,
             )?;
         }
