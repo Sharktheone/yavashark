@@ -81,8 +81,16 @@ impl ByteCodeInterpreter {
         if func.is_generator && !func.is_async {
             let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params)?;
 
-            g.define_property_attributes("length".into(), len.into(), realm)?;
-            g.define_property_attributes("name".into(), name.into(), realm)?;
+            g.define_property_attributes(
+                "length".into(),
+                yavashark_env::Variable::config(len.into()),
+                realm,
+            )?;
+            g.define_property_attributes(
+                "name".into(),
+                yavashark_env::Variable::config(name.into()),
+                realm,
+            )?;
 
             return Ok(g.into_object());
         }
@@ -91,8 +99,16 @@ impl ByteCodeInterpreter {
             let g =
                 AsyncGeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params)?;
 
-            g.define_property_attributes("length".into(), len.into(), realm)?;
-            g.define_property_attributes("name".into(), name.into(), realm)?;
+            g.define_property_attributes(
+                "length".into(),
+                yavashark_env::Variable::config(len.into()),
+                realm,
+            )?;
+            g.define_property_attributes(
+                "name".into(),
+                yavashark_env::Variable::config(name.into()),
+                realm,
+            )?;
 
             return Ok(g.into_object());
         }
@@ -100,16 +116,32 @@ impl ByteCodeInterpreter {
         if func.is_async {
             let f = AsyncBytecodeFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
-            f.define_property_attributes("length".into(), len.into(), realm)?;
-            f.define_property_attributes("name".into(), name.into(), realm)?;
+            f.define_property_attributes(
+                "length".into(),
+                yavashark_env::Variable::config(len.into()),
+                realm,
+            )?;
+            f.define_property_attributes(
+                "name".into(),
+                yavashark_env::Variable::config(name.into()),
+                realm,
+            )?;
 
             return Ok(f.into_object());
         }
 
         let f = BytecodeFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
-        f.define_property_attributes("length".into(), len.into(), realm)?;
-        f.define_property_attributes("name".into(), name.into(), realm)?;
+        f.define_property_attributes(
+            "length".into(),
+            yavashark_env::Variable::config(len.into()),
+            realm,
+        )?;
+        f.define_property_attributes(
+            "name".into(),
+            yavashark_env::Variable::config(name.into()),
+            realm,
+        )?;
 
         Ok(f.into_object())
     }
