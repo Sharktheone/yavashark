@@ -117,9 +117,9 @@ impl Interpreter {
                 Self::hoist_global_stmts(realm, &block.stmts, scope)?;
             }
             Stmt::If(i) => {
-                Self::hoist_stmt_impl::<GLOBAL>(realm, &i.cons, scope)?;
+                Self::hoist_stmt_impl::<true>(realm, &i.cons, scope)?;
                 if let Some(alt) = &i.alt {
-                    Self::hoist_stmt_impl::<GLOBAL>(realm, alt, scope)?;
+                    Self::hoist_stmt_impl::<true>(realm, alt, scope)?;
                 }
             }
             Stmt::Switch(s) => {
