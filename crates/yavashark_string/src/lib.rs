@@ -453,19 +453,42 @@ impl RopeStr {
 impl ToString for RopeStr {
     fn to_string(&self) -> String {
         let mut result = String::with_capacity(self.len());
+        // Retain a high surrogate across leaf boundaries without flattening.
+        let mut pending_high = None;
 
         self.for_each_elem(&mut |w| {
             match w {
-                Wtf::Utf8(s) => result.push_str(s),
+                Wtf::Utf8(s) => {
+                    if !s.is_empty() {
+                        if pending_high.take().is_some() {
+                            result.push('\u{FFFD}');
+                        }
+                        result.push_str(s);
+                    }
+                }
                 Wtf::Utf16(s) => {
                     for &unit in s {
-                        result.push(std::char::from_u32(u32::from(unit)).unwrap_or('\u{FFFD}'));
+                        if let Some(high) = pending_high.take() {
+                            if is_low_surrogate(unit) {
+                                result.push(decode_surrogate_pair(high, unit));
+                                continue;
+                            }
+                            result.push('\u{FFFD}');
+                        }
+                        if is_high_surrogate(unit) {
+                            pending_high = Some(unit);
+                        } else {
+                            result.push(char::from_u32(u32::from(unit)).unwrap_or('\u{FFFD}'));
+                        }
                     }
                 }
             }
-
             None::<()>
         });
+
+        if pending_high.is_some() {
+            result.push('\u{FFFD}');
+        }
 
         result
     }
@@ -1812,6 +1835,22 @@ mod tests {
         let c = a + b;
         assert_eq!(c.len(), 11);
         assert_eq!(c.as_str_lossy(), "hello world");
+    }
+
+    #[test]
+    fn rope_utf16_boundaries_and_mixed_leaves() {
+        let rope = RopeStr::from_elems(
+            YSString::from_utf16(&[0x61, 0xD83D]),
+            YSString::from_utf16(&[0xDE00, 0x62, 0xD800]),
+        );
+        assert_eq!(rope.to_string(), "a😀b\u{FFFD}");
+        assert_eq!(
+            &*rope.flatten_utf16(),
+            &[0x61, 0xD83D, 0xDE00, 0x62, 0xD800]
+        );
+        let mixed = RopeStr::from_elems(YSString::from("ascii"), rope.as_ysstring());
+        assert_eq!(mixed.to_string(), "asciia😀b\u{FFFD}");
+        assert_eq!(mixed.to_utf16_vec().as_slice(), &*mixed.flatten_utf16());
     }
 
     #[test]
