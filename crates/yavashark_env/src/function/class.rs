@@ -400,7 +400,7 @@ impl Class {
 
         inner.define_property_attributes(
             "name".into(),
-            Variable::write_config(name.clone().into()),
+            Variable::config(name.clone().into()),
             realm,
         )?;
 
@@ -420,7 +420,7 @@ impl Class {
 
         inner.define_property_attributes(
             "name".into(),
-            Variable::write_config(name.clone().into()),
+            Variable::config(name.clone().into()),
             realm,
         )?;
 
