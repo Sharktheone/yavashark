@@ -41,7 +41,7 @@ impl Uint8ClampedArray {
         byte_length: Option<usize>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let ty = TypedArray::new(realm, buf, byte_offset, byte_length, Type::U8)?;
+        let ty = TypedArray::new(realm, buf, byte_offset, byte_length, Type::U8C)?;
 
         Ok(Self::new(realm, ty)?.into_object())
     }
