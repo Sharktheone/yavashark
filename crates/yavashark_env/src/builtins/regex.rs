@@ -827,8 +827,9 @@ impl RegExp {
     }
 
     #[get("sticky")]
-    pub const fn sticky(&self) -> bool {
-        self.flags.sticky
+    #[nonstatic]
+    pub fn sticky(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.sticky)
     }
 
     #[get("flags")]
