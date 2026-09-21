@@ -815,8 +815,9 @@ impl RegExp {
     }
 
     #[get("unicode")]
-    pub const fn unicode(&self) -> bool {
-        self.flags.unicode
+    #[nonstatic]
+    pub fn unicode(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.unicode)
     }
 
     #[get("unicodeSets")]
