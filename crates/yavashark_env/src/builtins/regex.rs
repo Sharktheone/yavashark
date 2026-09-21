@@ -833,8 +833,25 @@ impl RegExp {
     }
 
     #[get("flags")]
-    pub fn flag_string(&self) -> YSString {
-        self.original_flags.clone()
+    #[nonstatic]
+    pub fn flag_string(#[this] this: Value, #[realm] realm: &mut Realm) -> Res<YSString> {
+        let object = this.as_object()?;
+        let mut flags = String::with_capacity(8);
+        for (name, flag) in [
+            ("hasIndices", 'd'),
+            ("global", 'g'),
+            ("ignoreCase", 'i'),
+            ("multiline", 'm'),
+            ("dotAll", 's'),
+            ("unicode", 'u'),
+            ("unicodeSets", 'v'),
+            ("sticky", 'y'),
+        ] {
+            if object.get(name, realm)?.is_truthy() {
+                flags.push(flag);
+            }
+        }
+        Ok(flags.into())
     }
 
     #[get("source")]
