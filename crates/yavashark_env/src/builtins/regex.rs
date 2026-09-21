@@ -775,8 +775,9 @@ impl RegExp {
     }
 
     #[get("global")]
-    pub const fn global(&self) -> bool {
-        self.flags.global
+    #[nonstatic]
+    pub fn global(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.global)
     }
 
     #[get("lastIndex")]
@@ -1413,4 +1414,35 @@ fn regexp_flag(this: &Value, realm: &mut Realm, flag: impl FnOnce(&RegExp) -> bo
         return Ok(Value::Undefined);
     }
     Err(Error::ty("RegExp getter requires a RegExp receiver"))
+}
+
+fn set_regexp_index(this: &Value, value: Value, realm: &mut Realm) -> Res<()> {
+    match this
+        .as_object()?
+        .define_property("lastIndex".into(), value, realm)?
+    {
+        DefinePropertyResult::Handled => Ok(()),
+        DefinePropertyResult::ReadOnly => Err(Error::ty("lastIndex is not writable")),
+        DefinePropertyResult::Setter(setter, value) => {
+            setter.call(vec![value], this.clone(), realm)?;
+            Ok(())
+        }
+    }
+}
+
+fn regexp_exec_generic(this: &Value, string: YSString, realm: &mut Realm) -> ValueResult {
+    let object = this.as_object()?;
+    let exec = object.get("exec", realm)?;
+    if exec.is_callable() {
+        let result = exec.call(realm, vec![string.into()], this.clone())?;
+        if !result.is_null() && !result.is_object() {
+            return Err(Error::ty("RegExp exec must return an object or null"));
+        }
+        Ok(result)
+    } else {
+        let regex = object
+            .downcast::<RegExp>()
+            .ok_or_else(|| Error::ty("RegExp receiver required"))?;
+        regex.exec(this, string, realm)
+    }
 }
