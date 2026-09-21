@@ -401,29 +401,28 @@ impl RegExp {
     }
 
     #[prop(Symbol::SEARCH)]
+    #[nonstatic]
     pub fn symbol_search(
-        &self,
-        #[this] this: &Value,
-        input: YSString,
+        #[this] this: Value,
+        input: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let previous_last_index = self.last_index.get();
-
-        self.set_last_index_value(this, 0, realm)?;
-        let exec_result = self.regexp_exec(this, input, realm)?;
-        self.set_last_index_value(this, previous_last_index, realm)?;
-
-        if exec_result.is_null() {
-            return Ok(Value::Number(-1.0));
+        let object = this.as_object()?;
+        let input = input.to_string(realm)?;
+        let previous = object.get("lastIndex", realm)?;
+        if !previous.same_value(&Value::Number(0.0)) {
+            set_regexp_index(&this, 0.into(), realm)?;
         }
-
-        let Value::Object(result_obj) = exec_result else {
-            return Err(Error::ty("RegExp exec must return an object"));
-        };
-
-        let index_value = result_obj.get("index", realm)?;
-        let index = index_value.to_number(realm)?;
-        Ok(Value::Number(index))
+        let result = regexp_exec_generic(&this, input, realm)?;
+        let current = object.get("lastIndex", realm)?;
+        if !current.same_value(&previous) {
+            set_regexp_index(&this, previous, realm)?;
+        }
+        if result.is_null() {
+            Ok((-1).into())
+        } else {
+            result.as_object()?.get("index", realm)
+        }
     }
 
     #[prop(Symbol::MATCH_ALL)]
