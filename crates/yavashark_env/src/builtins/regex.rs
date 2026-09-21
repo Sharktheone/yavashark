@@ -803,8 +803,9 @@ impl RegExp {
     }
 
     #[get("multiline")]
-    pub const fn multiline(&self) -> bool {
-        self.flags.multiline
+    #[nonstatic]
+    pub fn multiline(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.multiline)
     }
 
     #[get("dotAll")]
