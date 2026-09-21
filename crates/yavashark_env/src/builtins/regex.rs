@@ -809,8 +809,9 @@ impl RegExp {
     }
 
     #[get("dotAll")]
-    pub const fn dot_all(&self) -> bool {
-        self.flags.dot_all
+    #[nonstatic]
+    pub fn dot_all(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.dot_all)
     }
 
     #[get("unicode")]
