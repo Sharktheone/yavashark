@@ -791,8 +791,9 @@ impl RegExp {
     }
 
     #[get("hasIndices")]
-    pub const fn has_indices(&self) -> bool {
-        self.flags.has_indices
+    #[nonstatic]
+    pub fn has_indices(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.has_indices)
     }
 
     #[get("ignoreCase")]
