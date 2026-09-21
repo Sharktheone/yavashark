@@ -797,8 +797,9 @@ impl RegExp {
     }
 
     #[get("ignoreCase")]
-    pub const fn ignore_case(&self) -> bool {
-        self.flags.icase
+    #[nonstatic]
+    pub fn ignore_case(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        regexp_flag(&this, realm, |r| r.flags.icase)
     }
 
     #[get("multiline")]
