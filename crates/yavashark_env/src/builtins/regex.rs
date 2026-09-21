@@ -1403,3 +1403,14 @@ impl Intrinsic for RegExpStringIterator {
             .clone())
     }
 }
+
+fn regexp_flag(this: &Value, realm: &mut Realm, flag: impl FnOnce(&RegExp) -> bool) -> ValueResult {
+    let object = this.as_object()?;
+    if let Some(regex) = object.downcast::<RegExp>() {
+        return Ok(flag(&regex).into());
+    }
+    if object == &RegExp::get_intrinsic(realm)? {
+        return Ok(Value::Undefined);
+    }
+    Err(Error::ty("RegExp getter requires a RegExp receiver"))
+}
