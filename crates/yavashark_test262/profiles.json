@@ -59,6 +59,22 @@
       "build_compiler": "llvm",
       "workers": 512,
       "timeout": "60s"
+    },
+    "quick": {
+      "test_root": "../../test262/test/",
+      "selection": "quick",
+      "coverage": 100,
+      "timeout": "5s",
+      "noskip": true
+    },
+    "bench": {
+      "test_root": "../../test262/test/",
+      "bench": true,
+      "noskip": true,
+      "bench_samples": 1024,
+      "bench_repeats": 2,
+      "probe_timeout": "2s",
+      "timeout": "5s"
     }
   }
 }
