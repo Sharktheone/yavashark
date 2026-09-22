@@ -28,6 +28,8 @@ const ROOT_DIRS: &[&str] = &[
 ];
 
 fn main() {
+    maybe_disable_core_dumps();
+
     #[cfg(feature = "timings")]
     let now = std::time::Instant::now();
     run();
@@ -211,4 +213,27 @@ fn write_native_profile(
     }
 
     eprintln!("wrote native profile to {}", out.display());
+}
+
+
+fn maybe_disable_core_dumps() {
+    #[cfg(target_os = "linux")]
+    if std::env::var_os("YAVASHARK_TEST262_RUNNER").is_some()
+        && std::env::var_os("YAVASHARK_TEST262_CORE_DUMPS").as_deref()
+        != Some(std::ffi::OsStr::new("1"))
+    {
+        disable_core_dumps();
+    }
+}
+
+fn disable_core_dumps() {
+    let _ = unsafe {
+        libc::prctl(
+            libc::PR_SET_DUMPABLE,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+            0 as libc::c_ulong,
+        )
+    };
 }
