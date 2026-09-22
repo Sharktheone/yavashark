@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: test262-data-updates
+  cancel-in-progress: false
+
 jobs:
   update-results:
     if: github.repository == 'Sharktheone/yavashark'
