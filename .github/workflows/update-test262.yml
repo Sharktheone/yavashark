@@ -50,7 +50,7 @@ jobs:
       - name: Run Test262 Runner
         working-directory: crates/yavashark_test262
         run: |
-          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --workers 256 --noskip
+          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --cpus 4 --calibration-key github-linux-4 --noskip
 
       - name: Get commit info
         id: commit_info
