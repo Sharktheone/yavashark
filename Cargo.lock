@@ -7587,6 +7587,7 @@ version = "0.1.0"
 dependencies = [
  "bitflags 2.13.2",
  "flate2",
+ "libc",
  "oxc",
  "oxc_semantic",
  "pprof",
