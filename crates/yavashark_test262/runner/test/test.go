@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
+	"yavashark_test262_runner/cpus"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/status"
 	"yavashark_test262_runner/timing"
@@ -27,19 +27,45 @@ func SetTimeout(timeout time.Duration) {
 	TestTimeout = timeout
 }
 
+type Options struct {
+	Risky   bool
+	Engine  string
+	CPUs    []int
+	Timeout time.Duration
+	Timings bool
+}
+
 func RunTest(path string, timings bool) results.Result {
+	return Run(path, Options{Timeout: TestTimeout, Timings: timings})
+}
+
+func Run(path string, options Options) (result results.Result) {
 	startTime := time.Now()
-
-	ctx, cancel := context.WithTimeout(context.Background(), TestTimeout)
+	engine := options.Engine
+	if engine == "" {
+		engine = ENGINE_LOCATION
+	}
+	timeout := options.Timeout
+	if timeout <= 0 {
+		timeout = DEFAULT_TIMEOUT
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-
-	cmd := exec.CommandContext(ctx, ENGINE_LOCATION, path)
+	executable, args := cpus.LaunchArgs(engine, path, options.Risky)
+	cmd := exec.CommandContext(ctx, executable, args...)
+	cmd.Env = append(os.Environ(), "YAVASHARK_TEST262_RUNNER=1")
+	defer func() {
+		if cmd.ProcessState != nil {
+			result.CPUTime = cmd.ProcessState.UserTime() + cmd.ProcessState.SystemTime()
+			result.MemoryKB = peakMemory(cmd.ProcessState)
+		}
+	}()
 
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b
 
-	err := cmd.Start()
+	err := cpus.Start(cmd, options.CPUs)
 	if err != nil {
 		return results.Result{
 			Status:   status.RUNNER_ERROR,
@@ -50,31 +76,8 @@ func RunTest(path string, timings bool) results.Result {
 		}
 	}
 
-	var peakMemoryKB uint64
-	done := make(chan bool)
-
-	go func() {
-		ticker := time.NewTicker(10 * time.Millisecond)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-done:
-				return
-			case <-ticker.C:
-				if cmd.Process != nil {
-					memKB := getProcessMemoryKB(cmd.Process.Pid)
-					if memKB > peakMemoryKB {
-						peakMemoryKB = memKB
-					}
-				}
-			}
-		}
-	}()
-
 	waitErr := cmd.Wait()
-
-	close(done)
+	var peakMemoryKB uint64
 
 	duration := time.Since(startTime)
 
@@ -90,7 +93,7 @@ func RunTest(path string, timings bool) results.Result {
 		}
 	}
 
-	if timings {
+	if options.Timings {
 		timing.ParseDurations(out)
 	}
 
@@ -191,26 +194,4 @@ func RunTest(path string, timings bool) results.Result {
 		MemoryKB: peakMemoryKB,
 		Duration: duration,
 	}
-}
-
-func getProcessMemoryKB(pid int) uint64 {
-	statusFile := fmt.Sprintf("/proc/%d/status", pid)
-	data, err := os.ReadFile(statusFile)
-	if err != nil {
-		return 0
-	}
-
-	lines := strings.Split(string(data), "\n")
-	for _, line := range lines {
-		if strings.HasPrefix(line, "VmRSS:") {
-			fields := strings.Fields(line)
-			if len(fields) >= 2 {
-				memKB, err := strconv.ParseUint(fields[1], 10, 64)
-				if err == nil {
-					return memKB
-				}
-			}
-		}
-	}
-	return 0
 }

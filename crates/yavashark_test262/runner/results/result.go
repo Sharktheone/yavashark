@@ -14,6 +14,7 @@ const (
 )
 
 type Result struct {
+	CPUTime  time.Duration `json:"cpu_time,omitempty"`
 	Status   status.Status `json:"status"`
 	Msg      string        `json:"msg"`
 	Path     string        `json:"path"`

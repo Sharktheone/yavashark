@@ -1,198 +1,161 @@
 package scheduler
 
 import (
+	_ "embed"
 	"encoding/json"
-	"log"
-	"os"
+	"hash/fnv"
+	"math"
 	"sort"
-	"time"
+	"strings"
+	"yavashark_test262_runner/calibration"
+	"yavashark_test262_runner/results"
+	"yavashark_test262_runner/status"
 )
 
-type TestJob struct {
-	Path          string
-	EstimatedTime time.Duration
-	Priority      int
+//go:embed costs.json
+var seedJSON []byte
+var seeds map[string]string
+
+func init() {
+	if err := json.Unmarshal(seedJSON, &seeds); err != nil {
+		panic(err)
+	}
 }
 
-type StoredResult struct {
-	Status   string        `json:"status"`
-	Msg      string        `json:"msg"`
-	Path     string        `json:"path"`
-	MemoryKB uint64        `json:"memory_kb"`
-	Duration time.Duration `json:"duration"`
+type Job struct {
+	Path     string
+	Tier     calibration.Tier
+	Cost     float64
+	TimedOut bool
+}
+type Plan struct {
+	Fast, Medium, Slow, Risky []Job
+	Discovered                int `json:"discovered"`
+	QuickEligible             int `json:"quick_eligible"`
+	Excluded                  int `json:"excluded"`
+	Unknown                   int `json:"unknown"`
 }
 
-const (
-	// Priority levels
-	PRIORITY_FAST      = 0 // Tests < 100ms based on history
-	PRIORITY_MEDIUM    = 1 // Tests 100ms - 1s
-	PRIORITY_SLOW      = 2 // Tests 1s - 5s
-	PRIORITY_SLOW_RISK = 3 // Tests > 5s or timeout/crash
-)
-
-// ScheduleTests sorts tests intelligently using historical timing data
-func ScheduleTests(testPaths []string, timings map[string]time.Duration) []TestJob {
-	jobs := make([]TestJob, len(testPaths))
-
-	for i, path := range testPaths {
-		estimatedTime := timings[path]
-		priority := calculatePriorityFromTiming(estimatedTime)
-
-		jobs[i] = TestJob{
-			Path:          path,
-			EstimatedTime: estimatedTime,
-			Priority:      priority,
+func Classify(path string, e *calibration.Environment, h map[string]results.Result) Job {
+	key := calibration.Key(path)
+	j := Job{Path: path, Tier: calibration.Unknown}
+	// A known timeout in either source must never enter quick selection.
+	if r, ok := h[key]; ok && r.Status == status.TIMEOUT {
+		j.Tier = calibration.Risky
+		j.TimedOut = true
+		return j
+	}
+	// Measurements for this hardware supersede the conservative checked-in seed.
+	if m := e.Tests[key]; m != nil {
+		if m.LastStatus == status.TIMEOUT {
+			j.Tier = calibration.Risky
+			j.TimedOut = true
+			return j
+		}
+		if m.LastStatus == status.CRASH {
+			j.Tier = calibration.Risky
+			return j
+		}
+		if m.Samples > 0 && m.CPU > 0 {
+			j.Cost = m.CPU
+			j.Tier = calibration.CostTier(m.CPU)
+			return j
 		}
 	}
-
-	sort.Slice(jobs, func(i, j int) bool {
-		if jobs[i].Priority != jobs[j].Priority {
-			return jobs[i].Priority < jobs[j].Priority
+	if r, ok := h[key]; ok {
+		if r.Status == status.TIMEOUT {
+			j.Tier = calibration.Risky
+			j.TimedOut = true
+			return j
 		}
-		if jobs[i].EstimatedTime != jobs[j].EstimatedTime {
-			return jobs[i].EstimatedTime < jobs[j].EstimatedTime
+		if r.Status == status.CRASH {
+			j.Tier = calibration.Risky
+			return j
 		}
-		return jobs[i].Path < jobs[j].Path
-	})
-
-	return jobs
-}
-
-func calculatePriorityFromTiming(duration time.Duration) int {
-	if duration == 0 {
-		return PRIORITY_MEDIUM
-	}
-
-	if duration > 5*time.Second {
-		return PRIORITY_SLOW_RISK
-	} else if duration > 1*time.Second {
-		return PRIORITY_SLOW
-	} else if duration > 100*time.Millisecond {
-		return PRIORITY_MEDIUM
-	}
-	return PRIORITY_FAST
-}
-
-func LoadTestTimings(resultsPath string) map[string]time.Duration {
-	timings := make(map[string]time.Duration)
-
-	contents, err := os.ReadFile(resultsPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			log.Printf("No previous results found at %s, using default priorities", resultsPath)
-			return timings
+		if r.CPUTime > 0 {
+			j.Cost = float64(r.CPUTime)
+			j.Tier = calibration.CostTier(j.Cost)
+			return j
 		}
-		log.Printf("Failed to read results file %s: %v", resultsPath, err)
-		return timings
 	}
-
-	var results []StoredResult
-	err = json.Unmarshal(contents, &results)
-	if err != nil {
-		log.Printf("Failed to parse results JSON: %v", err)
-		return timings
+	// These tests construct essentially all Unicode code points even from tiny sources.
+	if strings.HasPrefix(key, "built-ins/RegExp/property-escapes/generated/") {
+		j.Tier = calibration.Slow
+		return j
 	}
-
-	for _, result := range results {
-		path := result.Path
-
-		if result.Status == "TIMEOUT" {
-			timings[path] = 30 * time.Second
-		} else if result.Status == "CRASH" {
-			timings[path] = 20 * time.Second
-		} else if result.Duration > 0 {
-			timings[path] = result.Duration
+	if tier, ok := seeds[key]; ok {
+		if tier == "timeout" {
+			j.Tier = calibration.Risky
+			j.TimedOut = true
 		} else {
-			timings[path] = 500 * time.Millisecond
+			j.Tier = calibration.Tier(tier)
 		}
+		return j
 	}
-
-	log.Printf("Loaded timing data for %d tests from %s", len(timings), resultsPath)
-	return timings
+	// Known completed tests with no measured CPU cost are normal, not assigned fake times.
+	if r, ok := h[key]; ok && r.Status != status.SKIP && r.Status != status.RUNNER_ERROR {
+		j.Tier = calibration.Fast
+	}
+	return j
 }
-
-func EstimateTimingFromFileSize(path string) time.Duration {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		return 500 * time.Millisecond
-	}
-
-	sizeKB := fileInfo.Size() / 1024
-
-	if sizeKB > 100 {
-		return 10 * time.Second
-	} else if sizeKB > 50 {
-		return 5 * time.Second
-	} else if sizeKB > 20 {
-		return 1 * time.Second
-	} else if sizeKB > 5 {
-		return 200 * time.Millisecond
-	}
-	return 50 * time.Millisecond
+func hash(path string) uint64 {
+	h := fnv.New64a()
+	h.Write([]byte(calibration.Key(path)))
+	return h.Sum64()
 }
-
-func FilterTimingsForTests(timings map[string]time.Duration, testPaths []string) map[string]time.Duration {
-	testSet := make(map[string]struct{}, len(testPaths))
-	for _, path := range testPaths {
-		testSet[path] = struct{}{}
-	}
-
-	filtered := make(map[string]time.Duration, len(testPaths))
-	for path, duration := range timings {
-		if _, exists := testSet[path]; exists {
-			filtered[path] = duration
+func Make(paths []string, e *calibration.Environment, h map[string]results.Result, selection string, coverage float64) Plan {
+	p := Plan{Discovered: len(paths)}
+	var eligible, others []Job
+	for _, path := range paths {
+		j := Classify(path, e, h)
+		if j.Tier == calibration.Unknown {
+			p.Unknown++
+		}
+		if j.Tier == calibration.Fast || j.Tier == calibration.Medium || j.Tier == calibration.Unknown {
+			eligible = append(eligible, j)
+		} else {
+			others = append(others, j)
 		}
 	}
-	return filtered
-}
-
-func EnrichTimingsWithFallback(timings map[string]time.Duration, testPaths []string) {
-	for _, path := range testPaths {
-		if _, exists := timings[path]; !exists {
-			timings[path] = EstimateTimingFromFileSize(path)
+	p.QuickEligible = len(eligible)
+	// Stable, nested sampling across test families. Coverage applies only to this range.
+	sort.Slice(eligible, func(i, j int) bool {
+		a, b := hash(eligible[i].Path), hash(eligible[j].Path)
+		if a == b {
+			return eligible[i].Path < eligible[j].Path
+		}
+		return a < b
+	})
+	if selection == "quick" {
+		n := int(math.Ceil(float64(len(eligible)) * coverage / 100))
+		eligible = eligible[:n]
+	} else {
+		eligible = append(eligible, others...)
+	}
+	for _, j := range eligible {
+		switch j.Tier {
+		case calibration.Fast:
+			p.Fast = append(p.Fast, j)
+		case calibration.Slow:
+			p.Slow = append(p.Slow, j)
+		case calibration.Risky:
+			p.Risky = append(p.Risky, j)
+		default:
+			p.Medium = append(p.Medium, j)
 		}
 	}
-}
-
-func GetStatisticsForTests(timings map[string]time.Duration, testPaths []string) (min, max, avg time.Duration, fastCount, mediumCount, slowCount, riskCount int) {
-	if len(testPaths) == 0 {
-		return
+	p.Excluded = p.Discovered - len(eligible)
+	// Longest measured jobs first within a phase reduces its completion tail.
+	for _, jobs := range [][]Job{p.Fast, p.Medium, p.Slow, p.Risky} {
+		sort.SliceStable(jobs, func(i, j int) bool {
+			if jobs[i].TimedOut != jobs[j].TimedOut {
+				return jobs[i].TimedOut
+			} // launch hang timers early
+			if jobs[i].Cost != jobs[j].Cost {
+				return jobs[i].Cost > jobs[j].Cost
+			}
+			return hash(jobs[i].Path) < hash(jobs[j].Path)
+		})
 	}
-
-	var total time.Duration
-	count := 0
-
-	for _, path := range testPaths {
-		duration, exists := timings[path]
-		if !exists {
-			duration = 500 * time.Millisecond
-		}
-
-		count++
-		total += duration
-
-		priority := calculatePriorityFromTiming(duration)
-		switch priority {
-		case PRIORITY_FAST:
-			fastCount++
-		case PRIORITY_MEDIUM:
-			mediumCount++
-		case PRIORITY_SLOW:
-			slowCount++
-		case PRIORITY_SLOW_RISK:
-			riskCount++
-		}
-
-		if min == 0 || duration < min {
-			min = duration
-		}
-		if duration > max {
-			max = duration
-		}
-	}
-
-	if count > 0 {
-		avg = total / time.Duration(count)
-	}
-	return
+	return p
 }

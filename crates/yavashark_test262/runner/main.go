@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"path/filepath"
+	"time"
 	"yavashark_test262_runner/build"
+	"yavashark_test262_runner/calibration"
 	"yavashark_test262_runner/ci"
 	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
@@ -13,11 +15,22 @@ import (
 
 const (
 	DEFAULT_TEST_ROOT = "test262/test"
-	DEFAULT_WORKERS   = 1024
 )
 
 func main() {
 	config := LoadConfig()
+	type preparedResult struct {
+		data *run.Prepared
+		err  error
+	}
+	var loading chan preparedResult
+	if config.Rebuild && !config.CI {
+		loading = make(chan preparedResult, 1)
+		go func() {
+			p, err := run.Prepare([]string{config.testPath()}, config.runConfig())
+			loading <- preparedResult{p, err}
+		}()
+	}
 
 	if config.Rebuild {
 		buildConfig := build.Config{
@@ -30,6 +43,29 @@ func main() {
 		}
 	}
 
+	if loading != nil {
+		p := <-loading
+		if p.err != nil {
+			log.Fatal(p.err)
+		}
+		config.prepared = p.data
+	}
+	if config.Rebuild && config.Engine == "" && config.BuildMode == build.BuildModeDebug {
+		config.Engine = "../../target/debug/yavashark_test262"
+	}
+
+	if config.Bench {
+		root := filepath.Join(config.TestRootDir, config.TestDir)
+		if config.FilterPath != "" {
+			root = filepath.Join(config.TestRootDir, NormalizeFilterPath(config.FilterPath, config.TestRootDir))
+		}
+		timeout, _ := time.ParseDuration(config.ProbeTimeout)
+		if err := run.Benchmark([]string{root}, run.BenchConfig{RunConfig: config.runConfig(), Samples: config.BenchSamples, Repeats: config.BenchRepeats, ProbeTimeout: timeout, Output: config.BenchOutput}); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	if config.FilterPath != "" {
 		runFilteredTests(config)
 		return
@@ -37,17 +73,14 @@ func main() {
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	runConfig := run.RunConfig{
-		Workers:     config.Workers,
-		Skips:       config.Skips,
-		Timings:     config.Timings,
-		Timeout:     config.Timeout,
-		Interactive: config.Interactive,
-	}
+	runConfig := config.runConfig()
 
 	testResults, summary := run.TestsInDir(testRoot, runConfig)
+	if testResults.RunnerError > 0 {
+		log.Fatal("runner errors; refusing to replace conformance results")
+	}
 
-	if config.Diff && !config.CI {
+	if config.Diff && !config.CI && config.Selection != "quick" {
 		printDiff(testResults, config.DiffFilter)
 	}
 
@@ -64,7 +97,15 @@ func main() {
 		_ = testResults.ComparePrev()
 	}
 
-	if config.TestDir == "" {
+	if config.Selection == "quick" || config.Output != "" {
+		path := config.Output
+		if path == "" {
+			path = "results-quick.json"
+		}
+		if err := calibration.Save(path, testResults.TestResults); err != nil {
+			log.Fatal(err)
+		}
+	} else if config.TestDir == "" {
 		testResults.Write()
 	}
 
@@ -80,16 +121,24 @@ func runFilteredTests(config *Config) {
 
 	log.Printf("Running filtered tests in: %s", testRoot)
 
-	runConfig := run.RunConfig{
-		Workers:     config.Workers,
-		Skips:       config.Skips,
-		Timings:     config.Timings,
-		Timeout:     config.Timeout,
-		Interactive: config.Interactive,
-	}
+	runConfig := config.runConfig()
 
 	filteredResults, filteredSummary := run.TestsInDir(testRoot, runConfig)
+	if filteredResults.RunnerError > 0 {
+		log.Fatal("runner errors; refusing to replace conformance results")
+	}
 
+	if config.Selection == "quick" || config.Output != "" {
+		progress.PrintSummary(filteredSummary)
+		path := config.Output
+		if path == "" {
+			path = "results-quick.json"
+		}
+		if err := calibration.Save(path, filteredResults.TestResults); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	prevResults, err := results.LoadResults()
 	if err != nil {
 		log.Printf("Warning: Could not load previous results: %v", err)
@@ -170,4 +219,15 @@ func printDiff(testResults *results.TestResults, diffFilter string) {
 
 		diff.PrintGroupedFilter(filter)
 	}
+}
+
+func (config *Config) runConfig() run.RunConfig {
+	return run.RunConfig{Prepared: config.prepared, Workers: config.Workers, RiskyWorkers: config.RiskyWorkers, RiskyCPUs: config.RiskyCPUs, CPUCount: config.CPUCount, Selection: config.Selection, Coverage: config.Coverage, CalibrationPath: config.CalibrationPath, CalibrationKey: config.CalibrationKey, HistoryPath: config.HistoryPath, Engine: config.Engine, ReportPath: config.ReportPath, Skips: config.Skips, Timings: config.Timings, Timeout: config.Timeout, Interactive: config.Interactive}
+}
+
+func (config *Config) testPath() string {
+	if config.FilterPath != "" {
+		return filepath.Join(config.TestRootDir, NormalizeFilterPath(config.FilterPath, config.TestRootDir))
+	}
+	return filepath.Join(config.TestRootDir, config.TestDir)
 }

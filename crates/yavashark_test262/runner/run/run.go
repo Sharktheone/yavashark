@@ -1,332 +1,217 @@
 package run
 
 import (
-	"fmt"
+	"bytes"
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
-	"sync"
 	"time"
+	"yavashark_test262_runner/calibration"
 	"yavashark_test262_runner/progress"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/scheduler"
 	"yavashark_test262_runner/status"
-	"yavashark_test262_runner/test"
-	"yavashark_test262_runner/worker"
 )
 
-var SKIP = []string{
-	"intl402",
-	"staging",
-}
+var SKIP = []string{"intl402", "staging"}
 
 type RunConfig struct {
-	Workers     int
-	Skips       bool
-	Timings     bool
-	Timeout     time.Duration
-	Interactive bool
-	FailedOnly  bool // Only run tests that are currently failing
+	Prepared        *Prepared
+	Workers         int
+	RiskyWorkers    int
+	RiskyCPUs       int
+	CPUCount        int
+	Selection       string
+	Coverage        float64
+	CalibrationPath string
+	CalibrationKey  string
+	HistoryPath     string
+	Engine          string
+	ReportPath      string
+	Skips           bool
+	Timings         bool
+	Timeout         time.Duration
+	Interactive     bool
+	FailedOnly      bool
 }
 
-func TestsInDir(testRoot string, config RunConfig) (*results.TestResults, progress.Summary) {
-	// Set the timeout for tests
-	test.SetTimeout(config.Timeout)
-
-	jobs := make(chan string, config.Workers*8)
-
-	resultsChan := make(chan results.Result, config.Workers*8)
-
-	wg := &sync.WaitGroup{}
-
-	wg.Add(config.Workers)
-
-	num := countTests(testRoot)
-
-	// Load previous results for delta calculation
-	prevResults, _ := results.LoadResults()
-	var prevResultsMap map[string]status.Status
-	if prevResults != nil {
-		prevResultsMap = make(map[string]status.Status)
-		for _, r := range prevResults {
-			prevResultsMap[r.Path] = r.Status
-		}
-	}
-
-	progressTracker := progress.NewProgressTracker(num, config.Interactive, prevResultsMap)
-
-	for i := range config.Workers {
-		go worker.Worker(i, jobs, resultsChan, wg, config.Timings)
-	}
-
-	testResults := results.New(num)
-
-	// WaitGroup for result processing
-	resultsDone := make(chan struct{})
-
-	// Goroutine to process results and update progress
-	go func() {
-		for res := range resultsChan {
-			testResults.Add(res)
-			progressTracker.Add(res.Status, res.Path)
-		}
-		close(resultsDone)
-	}()
-
-	var testPaths []string
-	var skippedPaths []string
-
-	_ = filepath.Walk(testRoot, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, "_FIXTURE") {
-			return nil
-		}
-
-		p, err := filepath.Rel(testRoot, path)
-		if err != nil {
-			log.Printf("Failed to get relative path for %s: %v", path, err)
-			return nil
-		}
-
-		shouldSkip := false
-		if config.Skips {
-			for _, skip := range SKIP {
-				if strings.HasPrefix(p, skip) {
-					skippedPaths = append(skippedPaths, path)
-					shouldSkip = true
-					break
-				}
-			}
-		}
-
-		if !shouldSkip {
-			testPaths = append(testPaths, path)
-		}
-
-		return nil
-	})
-
-	timingData := scheduler.LoadTestTimings("results.json")
-
-	scheduler.EnrichTimingsWithFallback(timingData, testPaths)
-
-	// Get statistics only for tests we're actually running
-	min, max, avg, fastCount, mediumCount, slowCount, riskCount := scheduler.GetStatisticsForTests(timingData, testPaths)
-	log.Printf("Timing statistics - Min: %v, Max: %v, Avg: %v", min, max, avg)
-	log.Printf("Test distribution - Fast: %d, Medium: %d, Slow: %d, Risky: %d",
-		fastCount, mediumCount, slowCount, riskCount)
-
-	scheduledJobs := scheduler.ScheduleTests(testPaths, timingData)
-
-	now := time.Now()
-
-	go func() {
-		for _, job := range scheduledJobs {
-			jobs <- job.Path
-		}
-
-		for _, path := range skippedPaths {
-			resultsChan <- results.Result{
-				Status:   status.SKIP,
-				Msg:      "skip",
-				Path:     path,
-				MemoryKB: 0,
-				Duration: 0,
-			}
-		}
-
-		close(jobs)
-	}()
-
-	wg.Wait()
-	close(resultsChan)
-
-	<-resultsDone
-
-	summary := progressTracker.Finish()
-
-	fmt.Printf("\n")
-
-	log.Printf("Finished running %d tests in %s", num, time.Since(now).String())
-
-	return testResults, summary
-}
-
-// TestSpecificPaths runs a specific list of test paths (files or directories)
-// Returns the test results and a list of paths that were skipped due to errors
-func TestSpecificPaths(paths []string, config RunConfig) (*results.TestResults, progress.Summary, []string) {
-	// Set the timeout for tests
-	test.SetTimeout(config.Timeout)
-
-	// Load previous results for failedOnly filtering and delta calculation
-	prevResults, _ := results.LoadResults()
-	var prevResultsMap map[string]status.Status
-	if prevResults != nil {
-		prevResultsMap = make(map[string]status.Status)
-		for _, r := range prevResults {
-			prevResultsMap[r.Path] = r.Status
-		}
-	}
-
-	// Expand paths - if a path is a directory, walk it to find all tests
-	var testPaths []string
-	var skippedPaths []string
-	var errorPaths []string
-
-	for _, p := range paths {
-		info, err := os.Stat(p)
-		if err != nil {
-			errorPaths = append(errorPaths, p)
-			continue
-		}
-
-		if info.IsDir() {
-			// Walk the directory to find all test files
-			_ = filepath.Walk(p, func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return nil
-				}
-				if info.IsDir() {
-					return nil
-				}
-				if strings.Contains(path, "_FIXTURE") {
-					return nil
-				}
-
-				// Check for skip directories if enabled
-				if config.Skips {
-					for _, skip := range SKIP {
-						if strings.Contains(path, "/"+skip+"/") || strings.HasPrefix(path, skip) {
-							skippedPaths = append(skippedPaths, path)
-							return nil
-						}
-					}
-				}
-
-				// If failedOnly, skip tests that are currently passing
-				if config.FailedOnly && prevResultsMap != nil {
-					if prevStatus, ok := prevResultsMap[path]; ok && prevStatus == status.PASS {
-						return nil // skip passing tests
-					}
-				}
-
-				testPaths = append(testPaths, path)
+// Discover is shared by regular execution and calibration. Overlapping paths
+// are deduplicated; fixture/non-JS files never become jobs.
+func Discover(paths []string, skip bool) (tests, skipped, errors []string) {
+	seen := map[string]bool{}
+	for _, root := range paths {
+		err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				errors = append(errors, path)
 				return nil
-			})
-		} else {
-			// Single file
-			if strings.Contains(p, "_FIXTURE") {
-				continue
 			}
-			// If failedOnly, skip tests that are currently passing
-			if config.FailedOnly && prevResultsMap != nil {
-				if prevStatus, ok := prevResultsMap[p]; ok && prevStatus == status.PASS {
-					continue // skip passing tests
+			if d.IsDir() {
+				return nil
+			}
+			if strings.Contains(path, "_FIXTURE") || !isTestFile(path) {
+				return nil
+			}
+			abs, err := filepath.Abs(path)
+			if err != nil {
+				return err
+			}
+			if seen[abs] {
+				return nil
+			}
+			seen[abs] = true
+			k := calibration.Key(path)
+			if skip {
+				for _, prefix := range SKIP {
+					if strings.HasPrefix(k, prefix+"/") {
+						skipped = append(skipped, path)
+						return nil
+					}
 				}
 			}
-			testPaths = append(testPaths, p)
+			tests = append(tests, path)
+			return nil
+		})
+		if err != nil {
+			errors = append(errors, root)
 		}
 	}
-
-	if len(testPaths) == 0 && len(skippedPaths) == 0 {
-		// No tests to run
-		return results.New(0), progress.Summary{}, errorPaths
+	sort.Strings(tests)
+	sort.Strings(skipped)
+	return
+}
+func TestsInDir(root string, config RunConfig) (*results.TestResults, progress.Summary) {
+	tr, s, errors := TestSpecificPaths([]string{root}, config)
+	for _, p := range errors {
+		log.Printf("Could not read test path: %s", p)
 	}
-
-	jobs := make(chan string, config.Workers*8)
-	resultsChan := make(chan results.Result, config.Workers*8)
-	wg := &sync.WaitGroup{}
-	wg.Add(config.Workers)
-
-	num := uint32(len(testPaths) + len(skippedPaths))
-
-	progressTracker := progress.NewProgressTracker(num, config.Interactive, prevResultsMap)
-
-	for i := range config.Workers {
-		go worker.Worker(i, jobs, resultsChan, wg, config.Timings)
+	return tr, s
+}
+func TestSpecificPaths(paths []string, config RunConfig) (*results.TestResults, progress.Summary, []string) {
+	tr, s, errs, err := runPaths(paths, config)
+	if err != nil {
+		log.Printf("Runner error: %v", err)
+		tr = results.New(1)
+		tr.Add(results.Result{Status: status.RUNNER_ERROR, Msg: err.Error()})
+		s = progress.Summary{RunnerError: 1, Total: 1}
+		errs = append(errs, err.Error())
 	}
+	return tr, s, errs
+}
+func runPaths(paths []string, config RunConfig) (*results.TestResults, progress.Summary, []string, error) {
+	inputs, err := preparedInputs(paths, config)
+	if err != nil {
+		return nil, progress.Summary{}, nil, err
+	}
+	tests, skipped := append([]string(nil), inputs.tests...), inputs.skipped
+	var errors []string
+	config.Prepared = inputs
+	store, env, opts, err := resolve(config)
+	if err != nil {
+		return nil, progress.Summary{}, errors, err
+	}
+	history := inputs.history
 
-	testResults := results.New(num)
-	resultsDone := make(chan struct{})
-
-	go func() {
-		for res := range resultsChan {
-			testResults.Add(res)
-			progressTracker.Add(res.Status, res.Path)
+	prev := map[string]status.Status{}
+	for _, p := range tests {
+		if r, ok := history[calibration.Key(p)]; ok {
+			prev[p] = r.Status
 		}
-		close(resultsDone)
-	}()
-
-	// Load timing data for scheduling
-	timingData := scheduler.LoadTestTimings("results.json")
-	scheduler.EnrichTimingsWithFallback(timingData, testPaths)
-	scheduledJobs := scheduler.ScheduleTests(testPaths, timingData)
-
-	now := time.Now()
-
-	go func() {
-		for _, job := range scheduledJobs {
-			jobs <- job.Path
-		}
-
-		// Add skipped paths as SKIP results
-		for _, path := range skippedPaths {
-			resultsChan <- results.Result{
-				Status:   status.SKIP,
-				Msg:      "skip",
-				Path:     path,
-				MemoryKB: 0,
-				Duration: 0,
+	}
+	if config.FailedOnly {
+		filtered := tests[:0]
+		for _, p := range tests {
+			if s, ok := prev[p]; !ok || s != status.PASS {
+				filtered = append(filtered, p)
 			}
 		}
-
-		close(jobs)
-	}()
-
-	wg.Wait()
-	close(resultsChan)
-	<-resultsDone
-
-	summary := progressTracker.Finish()
-
-	log.Printf("Finished running %d tests in %s", len(testPaths), time.Since(now).String())
-
-	return testResults, summary, errorPaths
+		tests = filtered
+	}
+	selection := config.Selection
+	if selection == "" {
+		selection = "full"
+	}
+	coverage := config.Coverage
+	if coverage == 0 {
+		coverage = 100
+	}
+	plan := scheduler.Make(tests, env, history, selection, coverage)
+	if config.RiskyWorkers == 0 && env.Settings == nil {
+		hangs := 0
+		for _, j := range plan.Risky {
+			if j.TimedOut {
+				hangs++
+			}
+		}
+		opts.Settings.RiskyWorkers = max(opts.Settings.RiskyWorkers, min(hangs, 128))
+	}
+	n := len(tests) - plan.Excluded + len(skipped)
+	log.Printf("Selection %s: %d/%d runnable tests; quick range %d, excluded %d, unknown costs %d", selection, len(tests)-plan.Excluded, len(tests), plan.QuickEligible, plan.Excluded, plan.Unknown)
+	log.Printf("Queues: fast=%d medium=%d slow=%d risky=%d; settings=%+v", len(plan.Fast), len(plan.Medium), len(plan.Slow), len(plan.Risky), opts.Settings)
+	tracker := progress.NewProgressTracker(uint32(n), config.Interactive, prev)
+	tr := results.New(uint32(n))
+	emit := func(r results.Result) { tr.Add(r); tracker.Add(r.Status, r.Path) }
+	stats := Execute(plan, opts, emit)
+	for _, p := range skipped {
+		emit(results.Result{Path: p, Status: status.SKIP, Msg: "excluded test directory"})
+	}
+	summary := tracker.Finish()
+	env.Observe(tr.TestResults)
+	file := config.CalibrationPath
+	if file == "" {
+		file = "runner-calibration.json"
+	}
+	if err = calibration.Save(file, store); err != nil {
+		return tr, summary, errors, err
+	}
+	if config.ReportPath != "" {
+		// Timing artifacts do not need the engine's potentially large diagnostics;
+		// those remain in the ordinary conformance results.
+		type measurement struct {
+			Path     string        `json:"path"`
+			Status   status.Status `json:"status"`
+			CPUTime  time.Duration `json:"cpu_time"`
+			Duration time.Duration `json:"duration"`
+			MemoryKB uint64        `json:"memory_kb"`
+		}
+		measurements := make([]measurement, len(tr.TestResults))
+		for i, r := range tr.TestResults {
+			measurements[i] = measurement{r.Path, r.Status, r.CPUTime, r.Duration, r.MemoryKB}
+		}
+		report := struct {
+			Selection     string         `json:"selection"`
+			Coverage      float64        `json:"coverage"`
+			Discovered    int            `json:"discovered"`
+			QuickEligible int            `json:"quick_eligible"`
+			Excluded      int            `json:"excluded"`
+			Unknown       int            `json:"unknown"`
+			Stats         ExecutionStats `json:"execution"`
+			Results       []measurement  `json:"results"`
+		}{selection, coverage, len(tests), plan.QuickEligible, plan.Excluded, plan.Unknown, stats, measurements}
+		if err = calibration.Save(config.ReportPath, report); err != nil {
+			return tr, summary, errors, err
+		}
+	}
+	log.Printf("Finished %d tests in %s (not selected: %d); CPU masks normal=%v risky=%v", tr.Total, stats.Duration, plan.Excluded, stats.NormalCPUs, stats.RiskyCPUs)
+	return tr, summary, errors, nil
 }
 
-func countTests(path string) uint32 {
-	var num uint32 = 0
-
-	_ = filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-
-		if info == nil {
-			log.Printf("Failed to get file info for %s", path)
-			return nil
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if strings.Contains(path, "_FIXTURE") {
-			return nil
-		}
-
-		num++
-
-		return nil
-	})
-
-	return num
+// Some upstream tests have extensionless names. Recognize their Test262 header
+// without accidentally scheduling result JSON or other repository artifacts.
+func isTestFile(path string) bool {
+	if strings.HasSuffix(path, ".js") {
+		return true
+	}
+	if filepath.Ext(path) != "" {
+		return false
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+	var header [4096]byte
+	n, _ := f.Read(header[:])
+	return bytes.Contains(header[:n], []byte("/*---"))
 }
