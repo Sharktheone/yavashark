@@ -49,4 +49,14 @@ jobs:
       - name: Run Test262 Runner
         working-directory: crates/yavashark_test262
         run: |
-          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --workers 256
+          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --cpus 4 --calibration-key github-linux-4
+
+      - name: Upload runner timing and calibration files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-measurements
+          path: |
+            data/runner-timings.json
+            data/runner-calibration.json
+          if-no-files-found: warn
