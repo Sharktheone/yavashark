@@ -543,6 +543,10 @@ impl MutObject {
 
             let idx = self.array.remove(i);
 
+            if idx.1 + 1 == self.values.len() {
+                return self.values.pop().map(|v| v.property());
+            }
+
             return self
                 .values
                 .get_mut(idx.1)
