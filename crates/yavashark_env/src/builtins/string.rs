@@ -435,6 +435,17 @@ impl StringObj {
             .map(u16::from)
             .map(YSString::from_code_unit)
     }
+
+    fn string_index(index: f64, len: usize) -> usize {
+        let index = if index.is_nan() { 0.0 } else { index.trunc() };
+
+        if index < 0.0 {
+            usize::MAX
+        } else {
+            index as usize
+        }
+    }
+
 }
 
 #[properties_new(
