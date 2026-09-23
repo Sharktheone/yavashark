@@ -424,6 +424,7 @@ impl Iterator {
 
         // 2. If IsCallable(procedure) is false, throw a TypeError exception.
         if !procedure.is_callable() {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::ty("procedure is not callable"));
         }
         let procedure = procedure.to_object()?;
