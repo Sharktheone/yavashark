@@ -533,12 +533,12 @@ impl StringObj {
 
     #[prop("concat")]
     pub fn concat(
-        #[this] mut string: String,
+        #[this] mut string: YSString,
         args: &[Value],
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         for arg in args {
-            string.push_str(&arg.to_string(realm)?.as_str_lossy());
+            string.push_str(arg.to_string(realm)?);
         }
 
         Ok(string.into())
