@@ -486,17 +486,32 @@ impl StringObj {
     }
 
     #[prop("charAt")]
-    pub fn char_at(#[this] str: &Stringable, index: isize) -> Value {
-        Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
+    pub fn char_at(#[this] this: YSString, index: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        let index = index.to_number(realm)?;
+
+        let index = Self::string_index(index, this.len());
+
+        Ok(this
+            .code_unit_at(index)
+            .map(YSString::from_code_unit)
+            .unwrap_or_default()
+            .into())
     }
 
     #[prop("charCodeAt")]
-    #[must_use]
-    pub fn char_code_at(#[this] str: &Stringable, index: isize) -> Value {
-        Self::get_single_str(str, index)
-            .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
-            .unwrap_or_default()
-            .into()
+    pub fn char_code_at(
+        #[this] this: YSString,
+        index: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let index = index.to_number(realm)?;
+
+        let index = Self::string_index(index, this.len());
+
+        Ok(this
+            .code_unit_at(index)
+            .map_or(f64::NAN, f64::from)
+            .into())
     }
 
     #[prop("codePointAt")]
