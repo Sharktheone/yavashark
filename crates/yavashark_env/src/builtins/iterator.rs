@@ -494,6 +494,7 @@ impl Iterator {
 
         // 2. If IsCallable(reducer) is false, throw a TypeError exception.
         if !reducer.is_callable() {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::ty("reducer is not callable"));
         }
         let reducer = reducer.to_object()?;
