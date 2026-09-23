@@ -238,14 +238,16 @@ impl Iterator {
         let num_limit = limit.to_number(realm)?;
 
         // 4. If numLimit is NaN, throw a RangeError exception.
-        if num_limit.is_nan() {
-            return Err(Error::range("limit must not be NaN"));
+        if num_limit.is_nan() || (num_limit.is_finite() && num_limit > 9007199254740991.0) {
+            let _ = close_iterator_object(&o, realm);
+            return Err(Error::range("invalid iterator limit"));
         }
 
         // 5. Let integerLimit be ! ToIntegerOrInfinity(numLimit).
         // 6. If integerLimit < 0, throw a RangeError exception.
         let integer_limit = to_integer_or_infinity(num_limit);
         if integer_limit < 0.0 {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::range("limit must not be negative"));
         }
 
@@ -1922,4 +1924,128 @@ fn close_iterator_object(object: &ObjectHandle, realm: &mut Realm) -> Res<()> {
         next_method: Value::Undefined,
     }
     .close(realm)
+}
+
+fn buffered_iterator(
+    this: Value,
+    size: Value,
+    sliding: bool,
+    undersized: Value,
+    realm: &mut Realm,
+) -> Res<ObjectHandle> {
+    let object = this.to_object()?;
+    let size = match size {
+        Value::Number(n) if n.is_finite() && n.fract() == 0.0 => n,
+        _ => {
+            let _ = close_iterator_object(&object, realm);
+            return Err(Error::ty("size must be an integral Number"));
+        }
+    };
+    if !(1.0..=4294967295.0).contains(&size) {
+        let _ = close_iterator_object(&object, realm);
+        return Err(Error::range("size is out of range"));
+    }
+    let allow_partial = if undersized.is_undefined() || undersized.same_value(&Value::from("only-full")) {
+        false
+    } else if undersized.same_value(&Value::from("allow-partial")) {
+        true
+    } else {
+        let _ = close_iterator_object(&object, realm);
+        return Err(Error::ty("invalid undersized mode"));
+    };
+    let iterated = IteratorRecord::new(object, realm)?;
+    Ok(IteratorHelperObject::new(
+        BufferedIteratorHelper {
+            iterated,
+            size: size as usize,
+            sliding,
+            allow_partial,
+            buffer: std::cell::RefCell::new(std::collections::VecDeque::new()),
+            alive: std::cell::Cell::new(true),
+            executing: std::cell::Cell::new(false),
+        },
+        realm,
+    )?
+    .into_object())
+}
+
+#[derive(Debug)]
+struct BufferedIteratorHelper {
+    iterated: IteratorRecord,
+    size: usize,
+    sliding: bool,
+    allow_partial: bool,
+    buffer: std::cell::RefCell<std::collections::VecDeque<Value>>,
+    alive: std::cell::Cell<bool>,
+    executing: std::cell::Cell<bool>,
+}
+
+impl_iterator_helper_intrinsic!(BufferedIteratorHelper);
+
+impl IteratorHelperImpl for BufferedIteratorHelper {
+    fn next_impl(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        if self.executing.replace(true) {
+            return Err(Error::ty("Iterator helper is already running"));
+        }
+        let result = (|| {
+            if !self.alive.get() {
+                return create_iter_result_object(Value::Undefined, true, realm);
+            }
+            if self.sliding && self.buffer.borrow().len() == self.size {
+                match self.iterated.step(realm) {
+                    Ok(Some(value)) => {
+                        let mut buffer = self.buffer.borrow_mut();
+                        buffer.pop_front();
+                        buffer.push_back(value);
+                    }
+                    Ok(None) => {
+                        self.alive.set(false);
+                        self.buffer.borrow_mut().clear();
+                        return create_iter_result_object(Value::Undefined, true, realm);
+                    }
+                    Err(e) => { self.alive.set(false); self.buffer.borrow_mut().clear(); return Err(e); }
+                }
+            }
+            while self.buffer.borrow().len() < self.size {
+                match self.iterated.step(realm) {
+                    Ok(Some(value)) => self.buffer.borrow_mut().push_back(value),
+                    Ok(None) => {
+                        self.alive.set(false);
+                        break;
+                    }
+                    Err(e) => {
+                        self.alive.set(false);
+                        self.buffer.borrow_mut().clear();
+                        return Err(e);
+                    }
+                }
+            }
+            let mut buffer = self.buffer.borrow_mut();
+            if buffer.is_empty() || (self.sliding && !self.allow_partial && buffer.len() < self.size) {
+                buffer.clear();
+                return create_iter_result_object(Value::Undefined, true, realm);
+            }
+            let values = if self.sliding {
+                buffer.iter().cloned().collect()
+            } else {
+                buffer.drain(..).collect()
+            };
+            drop(buffer);
+            let array = crate::array::Array::with_elements(realm, values)?.into_value();
+            create_iter_result_object(array, false, realm)
+        })();
+        self.executing.set(false);
+        result
+    }
+
+    fn return_impl(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        if self.executing.get() {
+            return Err(Error::ty("Iterator helper is already running"));
+        }
+        self.buffer.borrow_mut().clear();
+        if self.alive.replace(false) {
+            self.iterated.close(realm)?;
+        }
+        create_iter_result_object(Value::Undefined, true, realm)
+    }
 }
