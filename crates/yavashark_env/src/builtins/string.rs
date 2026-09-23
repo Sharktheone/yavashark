@@ -515,12 +515,20 @@ impl StringObj {
     }
 
     #[prop("codePointAt")]
-    #[must_use]
-    pub fn code_point_at(#[this] str: &Stringable, index: isize) -> Value {
-        Self::get_single_str(str, index)
-            .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
-            .unwrap_or_default()
-            .into()
+    pub fn code_point_at(
+        #[this] this: YSString,
+        index: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let index = index.to_number(realm)?;
+
+        let index = Self::string_index(index, this.len());
+
+        Ok(match this.code_point_at(index) {
+            Some(CodePoint::Unicode(ch)) => (ch as u32).into(),
+            Some(CodePoint::UnpairedSurrogate(unit)) => u32::from(unit).into(),
+            None => Value::Undefined,
+        })
     }
 
     #[prop("concat")]
