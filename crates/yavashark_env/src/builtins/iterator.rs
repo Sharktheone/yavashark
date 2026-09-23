@@ -470,6 +470,7 @@ impl Iterator {
 
         // 2. If IsCallable(mapper) is false, throw a TypeError exception.
         if !mapper.is_callable() {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::ty("mapper is not a function"));
         }
         let mapper = mapper.to_object()?;
