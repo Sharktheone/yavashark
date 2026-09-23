@@ -266,6 +266,7 @@ impl Iterator {
 
         // 2. If IsCallable(predicate) is false, throw a TypeError exception.
         if !predicate.is_callable() {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::ty("predicate is not callable"));
         }
         let predicate = predicate.to_object()?;
@@ -303,7 +304,7 @@ impl Iterator {
 
             // e. If ToBoolean(result) is false, return ? IteratorClose(iterated, NormalCompletion(false)).
             if !result.is_truthy() {
-                let _ = iterated.close(realm);
+                iterated.close(realm)?;
                 return Ok(false);
             }
 
