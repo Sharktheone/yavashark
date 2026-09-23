@@ -486,7 +486,7 @@ impl StringObj {
     }
 
     #[prop("charAt")]
-    pub fn char_at(#[this] this: YSString, index: Value, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn char_at(#[this] this: YSString, index: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let index = index.to_number(realm)?;
 
         let index = Self::string_index(index, this.len());
@@ -501,7 +501,7 @@ impl StringObj {
     #[prop("charCodeAt")]
     pub fn char_code_at(
         #[this] this: YSString,
-        index: Value,
+        index: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let index = index.to_number(realm)?;
@@ -517,7 +517,7 @@ impl StringObj {
     #[prop("codePointAt")]
     pub fn code_point_at(
         #[this] this: YSString,
-        index: Value,
+        index: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let index = index.to_number(realm)?;
