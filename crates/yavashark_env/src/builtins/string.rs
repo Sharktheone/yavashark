@@ -436,7 +436,7 @@ impl StringObj {
             .map(YSString::from_code_unit)
     }
 
-    fn string_index(index: f64, len: usize) -> usize {
+    fn string_index(index: f64) -> usize {
         let index = if index.is_nan() { 0.0 } else { index.trunc() };
 
         if index < 0.0 {
@@ -489,7 +489,7 @@ impl StringObj {
     pub fn char_at(#[this] this: YSString, index: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let index = index.to_number(realm)?;
 
-        let index = Self::string_index(index, this.len());
+        let index = Self::string_index(index);
 
         Ok(this
             .code_unit_at(index)
@@ -506,7 +506,7 @@ impl StringObj {
     ) -> ValueResult {
         let index = index.to_number(realm)?;
 
-        let index = Self::string_index(index, this.len());
+        let index = Self::string_index(index);
 
         Ok(this
             .code_unit_at(index)
@@ -522,7 +522,7 @@ impl StringObj {
     ) -> ValueResult {
         let index = index.to_number(realm)?;
 
-        let index = Self::string_index(index, this.len());
+        let index = Self::string_index(index);
 
         Ok(match this.code_point_at(index) {
             Some(CodePoint::Unicode(ch)) => (ch as u32).into(),
