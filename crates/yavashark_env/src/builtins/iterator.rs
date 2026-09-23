@@ -235,7 +235,13 @@ impl Iterator {
         let o = this.to_object()?;
 
         // 3. Let numLimit be ? ToNumber(limit).
-        let num_limit = limit.to_number(realm)?;
+        let num_limit = match limit.to_number(realm) {
+            Ok(n) => n,
+            Err(e) => {
+                let _ = close_iterator_object(&o, realm);
+                return Err(e);
+            }
+        };
 
         // 4. If numLimit is NaN, throw a RangeError exception.
         if num_limit.is_nan() || (num_limit.is_finite() && num_limit > 9007199254740991.0) {
@@ -611,17 +617,25 @@ impl Iterator {
         let o = this.to_object()?;
 
         // 3. Let numLimit be ? ToNumber(limit).
-        let num_limit = limit.to_number(realm)?;
+        let num_limit = match limit.to_number(realm) {
+            Ok(n) => n,
+            Err(e) => {
+                let _ = close_iterator_object(&o, realm);
+                return Err(e);
+            }
+        };
 
         // 4. If numLimit is NaN, throw a RangeError exception.
-        if num_limit.is_nan() {
-            return Err(Error::range("limit must not be NaN"));
+        if num_limit.is_nan() || (num_limit.is_finite() && num_limit > 9007199254740991.0) {
+            let _ = close_iterator_object(&o, realm);
+            return Err(Error::range("invalid iterator limit"));
         }
 
         // 5. Let integerLimit be ! ToIntegerOrInfinity(numLimit).
         // 6. If integerLimit < 0, throw a RangeError exception.
         let integer_limit = to_integer_or_infinity(num_limit);
         if integer_limit < 0.0 {
+            let _ = close_iterator_object(&o, realm);
             return Err(Error::range("limit must not be negative"));
         }
 
