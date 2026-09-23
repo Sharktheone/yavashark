@@ -1915,3 +1915,11 @@ impl IteratorHelperImpl for ZipKeyedIteratorHelper {
         create_iter_result_object(Value::Undefined, true, realm)
     }
 }
+
+fn close_iterator_object(object: &ObjectHandle, realm: &mut Realm) -> Res<()> {
+    IteratorRecord {
+        iterator: object.clone(),
+        next_method: Value::Undefined,
+    }
+    .close(realm)
+}
