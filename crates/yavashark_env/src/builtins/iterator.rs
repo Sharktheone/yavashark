@@ -683,6 +683,46 @@ impl Iterator {
         }
         Ok(false)
     }
+
+    #[nonstatic]
+    #[length(1)]
+    fn join(
+        #[this] this: Value,
+        separator: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<yavashark_string::YSString> {
+        let object = this.to_object()?;
+        let separator = match separator {
+            None | Some(Value::Undefined) => ",".into(),
+            Some(value) => match value.to_string(realm) {
+                Ok(s) => s,
+                Err(e) => {
+                    let _ = close_iterator_object(&object, realm);
+                    return Err(e);
+                }
+            },
+        };
+        let iterated = IteratorRecord::new(object, realm)?;
+        let mut result = yavashark_string::YSString::new();
+        let mut first = true;
+        while let Some(value) = iterated.step(realm)? {
+            if !first {
+                result += separator.clone();
+            }
+            first = false;
+            if !value.is_nullish() {
+                match value.to_string(realm) {
+                    Ok(s) => result += s,
+                    Err(e) => {
+                        let _ = iterated.close(realm);
+                        return Err(e);
+                    }
+                }
+            }
+        }
+        Ok(result)
+    }
+
     /// 27.1.2.13 Iterator.prototype.toArray ( )
     #[nonstatic]
     #[prop("toArray")]
