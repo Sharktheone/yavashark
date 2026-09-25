@@ -646,6 +646,43 @@ impl Iterator {
         TakeIteratorHelper::create(iterated, integer_limit as u64, realm)
     }
 
+    #[nonstatic]
+    #[length(1)]
+    fn includes(
+        #[this] this: Value,
+        search: Value,
+        skipped: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
+        let object = this.to_object()?;
+        let skipped = skipped.unwrap_or(Value::Undefined);
+        let count = if skipped.is_undefined() {
+            0.0
+        } else {
+            match skipped {
+                Value::Number(n) if !n.is_nan() && (n.is_infinite() || n.fract() == 0.0) => n,
+                _ => {
+                    let _ = close_iterator_object(&object, realm);
+                    return Err(Error::ty("skippedElements must be an integral Number"));
+                }
+            }
+        };
+        if count < 0.0 || (count.is_finite() && count > 9007199254740991.0) {
+            let _ = close_iterator_object(&object, realm);
+            return Err(Error::range("skippedElements is out of range"));
+        }
+        let iterated = IteratorRecord::new(object, realm)?;
+        let mut skipped = 0.0;
+        while let Some(value) = iterated.step(realm)? {
+            if skipped < count {
+                skipped += 1.0;
+            } else if value.same_value_zero(&search) {
+                iterated.close(realm)?;
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
     /// 27.1.2.13 Iterator.prototype.toArray ( )
     #[nonstatic]
     #[prop("toArray")]
