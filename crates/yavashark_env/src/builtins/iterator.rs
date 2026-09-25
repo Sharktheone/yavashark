@@ -728,6 +728,11 @@ impl Iterator {
         buffered_iterator(this, size, false, Value::Undefined, realm)
     }
 
+    #[nonstatic]
+    fn windows(#[this] this: Value, size: Value, undersized: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        buffered_iterator(this, size, true, undersized.unwrap_or(Value::Undefined), realm)
+    }
+
     /// 27.1.2.13 Iterator.prototype.toArray ( )
     #[nonstatic]
     #[prop("toArray")]
