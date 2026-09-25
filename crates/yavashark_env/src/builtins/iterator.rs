@@ -723,6 +723,11 @@ impl Iterator {
         Ok(result)
     }
 
+    #[nonstatic]
+    fn chunks(#[this] this: Value, size: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        buffered_iterator(this, size, false, Value::Undefined, realm)
+    }
+
     /// 27.1.2.13 Iterator.prototype.toArray ( )
     #[nonstatic]
     #[prop("toArray")]
