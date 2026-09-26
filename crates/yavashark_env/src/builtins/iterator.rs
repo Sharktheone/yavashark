@@ -1265,7 +1265,7 @@ impl IteratorHelperImpl for TakeIteratorHelper {
         let remaining = self.remaining.get();
         if remaining == 0 {
             self.alive.set(false);
-            let _ = self.iterated.close(realm);
+            self.iterated.close(realm)?;
             return create_iter_result_object(Value::Undefined, true, realm);
         }
 
