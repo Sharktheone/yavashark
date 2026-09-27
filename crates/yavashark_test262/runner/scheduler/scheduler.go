@@ -39,12 +39,6 @@ type Plan struct {
 func Classify(path string, e *calibration.Environment, h map[string]results.Result) Job {
 	key := calibration.Key(path)
 	j := Job{Path: path, Tier: calibration.Unknown}
-	// A known timeout in either source must never enter quick selection.
-	if r, ok := h[key]; ok && r.Status == status.TIMEOUT {
-		j.Tier = calibration.Risky
-		j.TimedOut = true
-		return j
-	}
 	// Measurements for this hardware supersede the conservative checked-in seed.
 	if m := e.Tests[key]; m != nil {
 		if m.LastStatus == status.TIMEOUT {
@@ -62,12 +56,14 @@ func Classify(path string, e *calibration.Environment, h map[string]results.Resu
 			return j
 		}
 	}
+	// An explicit measurement on this machine is fresher than a compact prior
+	// CI status. Without a usable measurement, known timeouts remain risky.
+	if r, ok := h[key]; ok && r.Status == status.TIMEOUT {
+		j.Tier = calibration.Risky
+		j.TimedOut = true
+		return j
+	}
 	if r, ok := h[key]; ok {
-		if r.Status == status.TIMEOUT {
-			j.Tier = calibration.Risky
-			j.TimedOut = true
-			return j
-		}
 		if r.Status == status.CRASH {
 			j.Tier = calibration.Risky
 			return j
