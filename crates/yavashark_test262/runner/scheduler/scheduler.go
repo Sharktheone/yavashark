@@ -1,11 +1,9 @@
 package scheduler
 
 import (
-	"embed"
+	_ "embed"
 	"encoding/json"
-	"errors"
 	"hash/fnv"
-	"io/fs"
 	"math"
 	"sort"
 	"strings"
@@ -14,20 +12,11 @@ import (
 	"yavashark_test262_runner/status"
 )
 
-// The empty default keeps this pattern valid when the optional costs.json is absent.
-//
-//go:embed costs*.json
-var seedFiles embed.FS
+//go:embed costs.json
+var seedJSON []byte
 var seeds map[string]string
 
 func init() {
-	seedJSON, err := seedFiles.ReadFile("costs.json")
-	if errors.Is(err, fs.ErrNotExist) {
-		seedJSON, err = seedFiles.ReadFile("costs.default.json")
-	}
-	if err != nil {
-		panic(err)
-	}
 	if err := json.Unmarshal(seedJSON, &seeds); err != nil {
 		panic(err)
 	}
