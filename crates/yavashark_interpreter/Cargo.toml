@@ -18,6 +18,8 @@ yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter", o
 yavashark_vm = { path = "../yavashark_vm", optional = true }
 yavashark_swc_validator = { path = "../yavashark_swc_validator" }
 log = "0.4.21"
+
+[dev-dependencies]
 env_logger = "0.11.3"
 
 
