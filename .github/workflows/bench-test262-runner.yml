@@ -1,0 +1,73 @@
+name: Benchmark Test262 Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      samples:
+        description: Fast-phase sample size (medium capped at 128, slow/risky at 24)
+        default: '1024'
+        required: true
+      repeats:
+        description: Repetitions per worker configuration
+        default: '2'
+        required: true
+
+concurrency:
+  group: test262-data-updates
+  cancel-in-progress: false
+
+jobs:
+  benchmark:
+    if: github.repository == 'Sharktheone/yavashark'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      - uses: actions/checkout@v7
+        with:
+          repository: tc39/test262
+          path: test262
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.26'
+      - name: Build runner
+        working-directory: crates/yavashark_test262/runner
+        run: go build
+      - name: Build engine
+        run: cargo build --release -p yavashark_test262
+      - uses: actions/checkout@v6
+        with:
+          repository: Sharktheone/yavashark-data
+          token: ${{ secrets.YAVASHARK_DATA_PAT }}
+          path: data
+          persist-credentials: true
+      - name: Calibrate scheduler on four CPUs
+        working-directory: crates/yavashark_test262
+        env:
+          BENCH_SAMPLES: ${{ inputs.samples }}
+          BENCH_REPEATS: ${{ inputs.repeats }}
+        run: |
+          ./runner/yavashark_test262_runner -p bench --cpus 4 --timeout 30s \
+            --repo ../../data --calibration-key github-linux-4 \
+            --bench-samples "$BENCH_SAMPLES" --bench-repeats "$BENCH_REPEATS" \
+            --bench-output ../../data/runner-bench.json
+      - name: Upload benchmark measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-benchmark
+          path: |
+            data/runner-bench.json
+            data/runner-calibration.json
+      - name: Save calibration to data repository
+        working-directory: data
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add runner-bench.json runner-calibration.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Test262 runner calibration"
+            git push
+          fi
