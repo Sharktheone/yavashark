@@ -1,0 +1,87 @@
+name: Full Test262 Calibration
+
+on:
+  workflow_dispatch:
+    inputs:
+      timeout:
+        description: Per-test timeout for the full calibration run
+        default: '60s'
+        required: true
+      workers:
+        description: Concurrent normal test processes
+        default: '4'
+        required: true
+      risky_workers:
+        description: Concurrent risky test processes
+        default: '8'
+        required: true
+
+concurrency:
+  group: test262-data-updates
+  cancel-in-progress: false
+
+jobs:
+  calibrate:
+    if: github.repository == 'Sharktheone/yavashark'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      - uses: actions/checkout@v7
+        with:
+          repository: tc39/test262
+          path: test262
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-go@v7
+        with:
+          go-version: '1.26'
+      - name: Build runner
+        working-directory: crates/yavashark_test262/runner
+        run: go build
+      - name: Build engine
+        run: cargo build --release -p yavashark_test262
+      - uses: actions/checkout@v6
+        with:
+          repository: Sharktheone/yavashark-data
+          token: ${{ secrets.YAVASHARK_DATA_PAT }}
+          path: data
+          persist-credentials: true
+      - name: Run full suite and collect calibration
+        working-directory: crates/yavashark_test262
+        env:
+          TEST_TIMEOUT: ${{ inputs.timeout }}
+          NORMAL_WORKERS: ${{ inputs.workers }}
+          RISKY_WORKERS: ${{ inputs.risky_workers }}
+        run: |
+          ./runner/yavashark_test262_runner \
+            --test_root ../../test262/test \
+            --cpus 4 --workers "$NORMAL_WORKERS" \
+            --risky-cpus 1 --risky-workers "$RISKY_WORKERS" \
+            --timeout "$TEST_TIMEOUT" \
+            --repo ../../data \
+            --calibration ../../data/runner-calibration.json \
+            --calibration-key github-linux-4 \
+            --history /tmp/no-prior-test-history.json \
+            --output ../../data/runner-calibration-results.json \
+            --report ../../data/runner-calibration-report.json
+      - name: Upload calibration measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-test262-calibration
+          path: |
+            data/runner-calibration-results.json
+            data/runner-calibration-report.json
+            data/runner-calibration.json
+          if-no-files-found: warn
+      - name: Save calibration to data repository
+        working-directory: data
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add runner-calibration.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update full Test262 calibration"
+            git push
+          fi
