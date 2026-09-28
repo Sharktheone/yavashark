@@ -258,6 +258,7 @@ fn run_code(
 
             realm.set_profile_writer(p);
         }
+        #[cfg(feature = "vm")]
         yavashark_vm::init(&mut realm).unwrap();
 
         let result =
