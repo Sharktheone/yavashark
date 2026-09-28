@@ -1,6 +1,6 @@
 use crate::{Compiler, Res};
 use swc_ecma_ast::YieldExpr;
-use yavashark_bytecode::data::{OutputData, Undefined};
+use yavashark_bytecode::data::{Acc, OutputData, Undefined};
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
@@ -19,6 +19,9 @@ impl Compiler {
             self.instructions.push(Instruction::yield_no_value());
         }
 
+        if let Some(out) = out {
+            self.instructions.push(Instruction::move_(Acc, out));
+        }
         Ok(())
     }
 }
