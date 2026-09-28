@@ -190,6 +190,7 @@ pub struct GlobalProperties {
     #[cfg(feature = "annex_b")]
     escape: Partial<ObjectHandle, Escape>,
 
+    #[cfg(feature = "annex_b")]
     unescape: Partial<ObjectHandle, Unescape>,
 
     #[prop("encodeURI")]
