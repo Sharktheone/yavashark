@@ -14,8 +14,8 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_env = { path = "../yavashark_env", features = ["tests"] }
 yavashark_value = { path = "../yavashark_value" }
 yavashark_string = { path = "../yavashark_string" }
-yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter", optional = true }
-yavashark_vm = { path = "../yavashark_vm", optional = true }
+yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter", default-features = false, optional = true }
+yavashark_vm = { path = "../yavashark_vm", default-features = false, optional = true }
 yavashark_swc_validator = { path = "../yavashark_swc_validator" }
 log = "0.4.21"
 

@@ -14,7 +14,9 @@ use yavashark_env::{
     Class, ClassInstance, Error, Object, PropertyKey, Realm, Res, Value, ValueResult,
 };
 use yavashark_string::YSString;
+#[cfg(feature = "vm")]
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
+#[cfg(feature = "vm")]
 use yavashark_vm::generator::GeneratorFunction;
 
 impl Interpreter {
@@ -274,10 +276,12 @@ pub fn set_value_name(name: &str, value: &Value, realm: &mut Realm) -> Res {
             class.update_name(name, realm)?;
         }
 
+        #[cfg(feature = "vm")]
         if let Some(generator) = obj.downcast::<GeneratorFunction>() {
             generator.update_name(name, realm)?;
         }
 
+        #[cfg(feature = "vm")]
         if let Some(generator) = obj.downcast::<AsyncGeneratorFunction>() {
             generator.update_name(name, realm)?;
         }

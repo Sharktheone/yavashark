@@ -111,6 +111,11 @@ pub fn main() -> ExitCode {
     let bytecode = matches.get_flag("bytecode");
     let ast = matches.get_flag("ast");
     let instructions = matches.get_flag("instructions");
+    #[cfg(not(feature = "vm"))]
+    if bytecode || instructions {
+        eprintln!("Bytecode support is disabled. Rebuild with --features simple_bytecode.");
+        return ExitCode::FAILURE;
+    }
     let shell = matches.get_flag("shell");
     let eval_code = matches.get_one::<String>("eval");
     let js_profile_out = matches.get_one::<String>("profile-out").cloned();
