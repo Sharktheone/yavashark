@@ -21,10 +21,10 @@ exclude = [
 [dependencies]
 swc_common = { version = "26.0.0", features = ["tty-emitter"] }
 swc_ecma_parser = "45.0.0"
-yavashark_interpreter = { path = "crates/yavashark_interpreter" }
+yavashark_interpreter = { path = "crates/yavashark_interpreter", default-features = false }
 yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
-yavashark_vm = { path = "crates/yavashark_vm", optional = true }
-yavashark_env = { path = "crates/yavashark_env" }
+yavashark_vm = { path = "crates/yavashark_vm", default-features = false, optional = true }
+yavashark_env = { path = "crates/yavashark_env", default-features = false }
 yavashark_profiler = { path = "crates/yavashark_profiler", optional = true }
 yavashark_swc_validator = { path = "crates/yavashark_swc_validator" }
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
@@ -49,14 +49,14 @@ flate2 = { version = "1.1.5", optional = true }
 pprof = { version = "0.15.0", features = ["prost-codec"], optional = true }
 rustyline = { version = "15.0.0", features = ["derive"] }
 rustyline-derive = "0.11.0"
-tokio = { version = "1.47.1", features = ["full"] }
-yavashark_env = { path = "crates/yavashark_env" }
+tokio = { version = "1.47.1", default-features = false, features = ["rt"] }
+yavashark_env = { path = "crates/yavashark_env", default-features = false }
 
 [lib]
 crate-type = ["cdylib"]
 
 [features]
-default = ["simple_bytecode", "temporal", "icu"]
+default = ["simple_bytecode", "temporal", "icu", "annex_b"]
 minimal = []
 memmap = []
 pprof = ["dep:pprof", "dep:flate2"]
@@ -69,6 +69,9 @@ obj_trace = ["yavashark_env/obj_trace", "actual_gc"]
 actual_gc = ["yavashark_env/actual_gc", "yavashark_interpreter/actual_gc", "yavashark_vm?/actual_gc"]
 temporal = ["yavashark_env/temporal"]
 icu = ["yavashark_env/icu"]
+# Alias for the JavaScript Intl API; keep `icu` for existing callers.
+intl = ["icu"]
+annex_b = ["yavashark_env/annex_b"]
 
 
 [profile.release]
@@ -78,6 +81,12 @@ codegen-units = 1
 debug = false
 strip = true
 panic = "abort"
+
+# Opt in when executable size matters more than peak execution speed.
+[profile.release-small]
+inherits = "release"
+opt-level = "z"
+lto = "thin"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["--enable-bulk-memory", "--enable-nontrapping-float-to-int"]

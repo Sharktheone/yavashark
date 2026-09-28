@@ -11,7 +11,7 @@ swc_ecma_ast = "29.0.0"
 swc_common = "26.0.0"
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_garbage = { path = "../yavashark_garbage" }
-yavashark_env = { path = "../yavashark_env", features = ["tests"] }
+yavashark_env = { path = "../yavashark_env", default-features = false }
 yavashark_value = { path = "../yavashark_value" }
 yavashark_string = { path = "../yavashark_string" }
 yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter", default-features = false, optional = true }
@@ -20,11 +20,15 @@ yavashark_swc_validator = { path = "../yavashark_swc_validator" }
 log = "0.4.21"
 
 [dev-dependencies]
+yavashark_env = { path = "../yavashark_env", default-features = false, features = ["tests"] }
 env_logger = "0.11.3"
 
 
 [features]
-default = []
+default = ["temporal", "icu", "annex_b"]
+temporal = ["yavashark_env/temporal"]
+icu = ["yavashark_env/icu"]
+annex_b = ["yavashark_env/annex_b"]
 profiler = ["yavashark_env/profiler", "yavashark_vm?/profiler"]
 actual_gc = ["yavashark_env/actual_gc", "yavashark_garbage/actual_gc", "yavashark_vm?/actual_gc"]
 vm = ["dep:yavashark_vm", "dep:yavashark_bytecode_interpreter"]

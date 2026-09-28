@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-yavashark_env = { path = "../yavashark_env" }
+yavashark_env = { path = "../yavashark_env", default-features = false }
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_value = { path = "../yavashark_value" }
 yavashark_string = { path = "../yavashark_string" }
@@ -16,7 +16,10 @@ swc_ecma_ast = "29.0.0"
 
 
 [features]
-default = []
+default = ["temporal", "icu", "annex_b"]
+temporal = ["yavashark_env/temporal"]
+icu = ["yavashark_env/icu"]
+annex_b = ["yavashark_env/annex_b"]
 profiler = ["yavashark_env/profiler"]
 actual_gc = ["yavashark_env/actual_gc", "yavashark_garbage/actual_gc"]
 simple_bytecode = ["yavashark_bytecode/simple_bytecode"]
