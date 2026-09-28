@@ -1,7 +1,7 @@
 use crate::VM;
 use crate::data::{Data, OutputData};
 use yavashark_bytecode::JmpAddr;
-use yavashark_bytecode::data::{ControlIdx, Label, VarName};
+use yavashark_bytecode::data::{Acc, ControlIdx, Label, VarName};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
 use yavashark_env::value::{IntoValue, ObjectOrNull};
@@ -196,16 +196,19 @@ pub fn this(output: impl OutputData, vm: &mut impl VM) -> Res {
 pub fn yield_(data: impl Data, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
 
+    vm.set_continue_storage(Acc);
     Err(ControlFlow::Yield(result))
 }
 
 pub fn yield_star(data: impl Data, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
 
+    vm.set_continue_storage(Acc);
     Err(ControlFlow::YieldStar(result.to_object()?))
 }
 
-pub const fn yield_no_value(_: &impl VM) -> ControlResult {
+pub fn yield_no_value(vm: &mut impl VM) -> ControlResult {
+    vm.set_continue_storage(Acc);
     Err(ControlFlow::Yield(Value::Undefined))
 }
 
