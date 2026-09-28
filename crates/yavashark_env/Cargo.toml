@@ -24,7 +24,7 @@ half = { version = "2.7.1", features = ["bytemuck", "num-traits"]}
 bytemuck = { version = "1.21.0", features = ["extern_crate_alloc"] }
 hex = "0.4.3"
 log = "0.4.25"
-futures = "0.3.31"
+futures-util = { version = "0.3.31", default-features = false, features = ["std"] }
 pin-project = "1.1.10"
 rustc-hash = "2.1.1"
 temporal_rs = { version = "0.2.6", features = ["sys", "tzdb", "compiled_data"], optional = true }

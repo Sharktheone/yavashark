@@ -12,7 +12,7 @@ use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
 };
 use colored::Colorize;
-use futures::future::{join_all, select_all};
+use futures_util::future::{join_all, select_all};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::fmt::Write;
