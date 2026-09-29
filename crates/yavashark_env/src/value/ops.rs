@@ -191,6 +191,33 @@ impl Value {
         })
     }
 
+    pub fn to_big_int_64(&self, realm: &mut Realm) -> Result<i64, Error> {
+        // 1. Let prim be ? ToPrimitive(argument, number).
+        let prim = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+        // 2. Based on the type of prim:
+        Ok(match prim {
+            // Number -> NumberToBigInt(prim) - throws RangeError for non-integers
+            Self::Number(n) => number_to_big_int_64(n)?,
+            Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
+            Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
+            Self::Boolean(b) => i64::from(b),
+            // String -> StringToBigInt(prim) - throws SyntaxError for invalid strings
+            Self::String(s) => {
+                if let Some(s) = s.as_str() {
+                    parse_big_int_64(s)?
+                } else {
+                    return Err(Error::ty("Cannot convert non-UTF8 string to BigInt"));
+                }
+            }
+            Self::BigInt(b) => b
+                .to_i64()
+                .ok_or_else(|| Error::range("BigInt value is out of range for i64"))?,
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
+            Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
+        })
+    }
+
     /// ToBigInt abstract operation - throws TypeError for Number values.
     /// This is different from `to_big_int` which is used by the BigInt constructor
     /// and converts integral numbers using NumberToBigInt.
@@ -213,6 +240,35 @@ impl Value {
             Self::Number(_) => return Err(Error::ty("Cannot convert Number to BigInt")),
             Self::String(s) => parse_big_int(&s.as_str_lossy())
                 .map_err(|_| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))?,
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
+            Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
+        })
+    }
+
+    /// ToBigInt abstract operation - throws TypeError for Number values.
+    /// This is different from `to_big_int` which is used by the BigInt constructor
+    /// and converts integral numbers using NumberToBigInt.
+    pub fn to_big_int_strict_64(&self, realm: &mut Realm) -> Result<i64, Error> {
+        // 1. Let prim be ? ToPrimitive(argument, number).
+        let prim = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+        // 2. Return the value that prim corresponds to in the ToBigInt table.
+        Ok(match prim {
+            Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
+            Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
+            Self::Boolean(b) => i64::from(b),
+            Self::BigInt(b) => b
+                .to_i64()
+                .ok_or_else(|| Error::range("BigInt value is out of range for i64"))?,
+            Self::Number(_) => return Err(Error::ty("Cannot convert Number to BigInt")),
+            Self::String(s) => {
+                if let Some(s) = s.as_str() {
+                    parse_big_int_64(s)
+                        .map_err(|_| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))?
+                } else {
+                    return Err(Error::ty("Cannot convert non-UTF8 string to BigInt"));
+                }
+            }
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
             Self::Object(_) => return Err(Error::new("ToPrimitive should have converted object")),
         })
@@ -250,6 +306,25 @@ pub fn number_to_big_int(n: f64) -> Result<BigInt, Error> {
 
     // 2. Return ℤ(ℝ(number)).
     BigInt::from_f64(n).ok_or_else(|| Error::range("Cannot convert number to BigInt"))
+}
+
+/// NumberToBigInt ( number ) - per ECMAScript spec
+/// Throws RangeError if the number is not a safe integer (NaN, Infinity, or has fractional part)
+pub fn number_to_big_int_64(n: f64) -> Result<i64, Error> {
+    // 1. If IsIntegralNumber(number) is false, throw a RangeError exception.
+    // IsIntegralNumber returns false for NaN, Infinity, -Infinity, and non-integers
+    if n.is_nan() {
+        return Err(Error::range("Cannot convert NaN to BigInt"));
+    }
+    if n.is_infinite() {
+        return Err(Error::range("Cannot convert Infinity to BigInt"));
+    }
+    if n.fract() != 0.0 {
+        return Err(Error::range("Cannot convert non-integer to BigInt"));
+    }
+
+    // 2. Return ℤ(ℝ(number)).
+    i64::from_f64(n).ok_or_else(|| Error::range("Cannot convert number to BigInt"))
 }
 
 /// StringToBigInt - per ECMAScript spec
@@ -299,8 +374,58 @@ fn string_to_big_int(s: &str) -> Option<BigInt> {
     BigInt::from_str(s).ok()
 }
 
+fn string_to_big_int_64(s: &str) -> Option<i64> {
+    let s = s.trim();
+
+    if s.is_empty() {
+        return Some(0);
+    }
+
+    // Check for negative hex/octal/binary which is not allowed
+    if s.starts_with("-0x")
+        || s.starts_with("-0X")
+        || s.starts_with("-0b")
+        || s.starts_with("-0B")
+        || s.starts_with("-0o")
+        || s.starts_with("-0O")
+    {
+        return None;
+    }
+
+    if s.starts_with("0x") || s.starts_with("0X") {
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return i64::from_str_radix(digits, 16).ok();
+    }
+
+    if s.starts_with("0b") || s.starts_with("0B") {
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return i64::from_str_radix(digits, 2).ok();
+    }
+
+    if s.starts_with("0o") || s.starts_with("0O") {
+        let digits = &s[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return i64::from_str_radix(digits, 8).ok();
+    }
+
+    i64::from_str(s).ok()
+}
+
 fn parse_big_int(s: &str) -> Result<BigInt, Error> {
     string_to_big_int(s).ok_or_else(|| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))
+}
+
+fn parse_big_int_64(s: &str) -> Result<i64, Error> {
+    string_to_big_int_64(s)
+        .ok_or_else(|| Error::syn_error(format!("Cannot convert '{s}' to BigInt")))
 }
 
 impl PartialOrd for Value {
