@@ -44,7 +44,7 @@ fn parse(input: &str) -> Res<Vec<Stmt>> {
         .map_err(|e| yavashark_env::Error::syn_error(format!("{e:?}")))?;
 
     if let Err(e) = Validator::new().validate_statements(&script.body) {
-        return Err(yavashark_env::Error::syn_error(e));
+        return Err(yavashark_env::Error::syn_error(e.to_string()));
     }
 
     Ok(script.body)

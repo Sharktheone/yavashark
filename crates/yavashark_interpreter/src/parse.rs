@@ -43,7 +43,7 @@ pub fn parse_module(input: &str) -> Res<Module> {
     }
 
     if let Err(e) = Validator::new().validate_module_items(&m.body) {
-        return Err(Error::syn_error(e));
+        return Err(Error::syn_error(e.to_string()));
     }
 
     Ok(m)

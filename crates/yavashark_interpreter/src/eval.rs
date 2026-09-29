@@ -48,7 +48,7 @@ impl Eval for InterpreterEval {
         }
 
         if let Err(e) = validator.validate_statements(&script.body) {
-            return Err(Error::syn_error(e));
+            return Err(Error::syn_error(e.to_string()));
         }
 
         Interpreter::run_in(&script.body, realm, scope)

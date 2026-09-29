@@ -21,7 +21,7 @@ pprof = { version = "0.15.0", features = ["prost-codec"], optional = true }
 flate2 = { version = "1.0", optional = true }
 
 swc_common = "26.0.0"
-swc_ecma_parser = { version = "45.0.0", features = ["verify"] }
+swc_ecma_parser = "45.0.0"
 swc_ecma_ast = "29.0.0"
 yaml-rust2 = "0.10.0"
 bitflags = "2.6.0"

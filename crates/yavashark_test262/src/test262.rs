@@ -139,7 +139,7 @@ impl Test262 {
         }
 
         if let Err(e) = Validator::new().validate_statements(&script.body) {
-            return Err(Error::syn_error(e));
+            return Err(Error::syn_error(e.to_string()));
         }
 
         let mut inner = self.inner.try_borrow_mut()?;
