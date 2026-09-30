@@ -654,7 +654,7 @@ impl TypedArray {
 
         let mut items = Vec::new();
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         while let Some(item) = iter.next(realm)? {
             let item = if let Some(map_fn) = &map_fn {
@@ -869,7 +869,7 @@ impl TypedArray {
 
         let mut results: Vec<u8> = Vec::new();
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -899,7 +899,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -930,7 +930,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -961,7 +961,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -992,7 +992,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -1023,7 +1023,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -1193,7 +1193,7 @@ impl TypedArray {
 
         let mut results: Vec<u8> = Vec::new();
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
@@ -1378,7 +1378,7 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+        let this_arg = this_arg.unwrap_or(Value::Undefined);
 
         typed_array_run!({
             let owned = slice.to_vec();
