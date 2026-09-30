@@ -849,6 +849,16 @@ impl Scope {
         })
     }
 
+    pub fn declare_function_name(&mut self, name: String, value: Value) -> Res {
+        let mut scope = self.scope.borrow_mut()?;
+        let ObjectOrVariables::Variables(variables) = &mut scope.variables else {
+            return Err(Error::new("Function name requires a declarative scope"));
+        };
+
+        variables.insert(name, VariableOrRef::FunctionName(value));
+        Ok(())
+    }
+
     pub fn declare_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
         self.scope.borrow_mut()?.declare_var(name, value, realm)
     }
