@@ -74,12 +74,6 @@ impl Interpreter {
                             elems.push(res);
                         }
 
-                        if elems.is_empty() && scope.is_strict_mode()? {
-                            return Err(Error::reference(
-                                "Cannot destructure empty array in strict mode",
-                            ));
-                        }
-
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
                         let assert_last = true;
                     } else {
@@ -87,12 +81,6 @@ impl Interpreter {
                             value
                         } else {
                             is_finished = true;
-                            if scope.is_strict_mode()? {
-                                return Err(Error::reference(
-                                    "Cannot destructure empty array in strict mode",
-                                ));
-                            }
-
                             Value::Undefined
                         };
 
@@ -132,12 +120,6 @@ impl Interpreter {
                             let mut value = if let Some(value) = value {
                                 value
                             } else {
-                                if scope.is_strict_mode()? {
-                                    return Err(Error::reference_error(format!(
-                                        "Property {key:?} does not exist on object",
-                                    )));
-                                }
-
                                 Value::Undefined
                             };
 
