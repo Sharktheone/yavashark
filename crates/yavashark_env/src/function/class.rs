@@ -3,7 +3,7 @@ use crate::realm::Realm;
 use crate::value::BoxedObj;
 use crate::value::{
     Attributes, ConstructorFn, DefinePropertyResult, InstanceFieldInitializer, IntoValue, Obj,
-    Property, Variable,
+    Property, PropertyDescriptor, Variable,
 };
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
@@ -577,6 +577,14 @@ pub struct ClassInstance {
 }
 
 impl Obj for ClassInstance {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
+        self.inner.try_borrow()?.property_descriptor(name, realm)
+    }
+
     fn define_property(
         &self,
         name: InternalPropertyKey,
