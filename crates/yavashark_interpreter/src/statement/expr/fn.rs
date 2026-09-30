@@ -26,7 +26,7 @@ impl Interpreter {
 
             #[cfg(feature = "vm")]
             if let Some(ident) = &stmt.ident {
-                fn_scope.declare_var(ident.sym.to_string(), function.clone().into(), realm);
+                fn_scope.declare_function_name(ident.sym.to_string(), function.clone().into())?;
             }
 
             #[cfg(feature = "vm")]
@@ -42,7 +42,7 @@ impl Interpreter {
         )?;
 
         if let Some(ident) = &stmt.ident {
-            fn_scope.declare_var(ident.sym.to_string(), function.clone().into(), realm);
+            fn_scope.declare_function_name(ident.sym.to_string(), function.clone().into())?;
         }
 
         Ok(function.into())
