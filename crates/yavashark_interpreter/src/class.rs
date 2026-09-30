@@ -37,6 +37,9 @@ impl InstanceFieldInitializer for ExprFieldInitializer {
     fn initialize(&self, this: Value, realm: &mut Realm) -> Result<(), Error> {
         let value = if let Some(expr) = &self.value_expr {
             let mut scope = self.scope.child_object(this.copy().to_object()?)?;
+            scope.set_strict_mode()?;
+            scope.set_new_target_allowed(true)?;
+            scope.set_target(Value::Undefined)?;
             Interpreter::run_expr(realm, expr, self.span, &mut scope)?
         } else {
             Value::Undefined
