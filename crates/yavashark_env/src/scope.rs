@@ -25,6 +25,7 @@ pub struct ScopeState {
 #[allow(unused)]
 impl ScopeState {
     const NONE: u8 = 0b0;
+    const NEW_TARGET: u8 = 0b1;
     const FUNCTION: u8 = 0b10;
     const ITERATION: u8 = 0b100;
     const BREAKABLE: u8 = 0b1000;
@@ -73,6 +74,7 @@ impl ScopeState {
     }
 
     pub const fn set_function(&mut self) {
+        self.state |= Self::NEW_TARGET;
         self.state |= Self::FUNCTION;
         self.state |= Self::RETURNABLE;
     }
@@ -665,6 +667,10 @@ impl ScopeInternal {
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(name) {
                     if !var.is_writable(realm) {
+                        if !strict && matches!(var, VariableOrRef::FunctionName(_)) {
+                            return Ok(true);
+                        }
+
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
@@ -945,6 +951,20 @@ impl Scope {
 
     pub fn set_target(&mut self, target: Value) -> Res {
         self.scope.borrow_mut()?.new_target = target;
+        Ok(())
+    }
+
+    pub fn allows_new_target(&self) -> Res<bool> {
+        Ok(self.scope.borrow()?.state.state & ScopeState::NEW_TARGET != 0)
+    }
+
+    pub fn set_new_target_allowed(&mut self, allowed: bool) -> Res {
+        let mut scope = self.scope.borrow_mut()?;
+        if allowed {
+            scope.state.state |= ScopeState::NEW_TARGET;
+        } else {
+            scope.state.state &= !ScopeState::NEW_TARGET;
+        }
         Ok(())
     }
 
