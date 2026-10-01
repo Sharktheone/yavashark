@@ -25,6 +25,7 @@ impl Func for ArrowFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;
+        scope.set_new_target_allowed(self.scope.allows_new_target()?)?;
         scope.state_set_returnable()?;
 
         let mut args_iter = args.into_iter();
@@ -41,6 +42,7 @@ impl Func for ArrowFunction {
 
         let scope = &mut scope.child()?;
         scope.state_set_function()?;
+        scope.set_new_target_allowed(self.scope.allows_new_target()?)?;
         scope.state_set_returnable()?;
 
         let res = match &*self.expr.body {
