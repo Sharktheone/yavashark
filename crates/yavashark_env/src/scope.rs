@@ -282,7 +282,7 @@ impl ObjectOrVariables {
     fn insert_opt(&mut self, name: String, variable: Variable, realm: &mut Realm) -> Res {
         match self {
             Self::Object(o) => {
-                if !o.contains_key(name.clone().into(), realm)? {
+                if !o.contains_own_key(name.clone().into(), realm)? {
                     o.define_property_attributes(name.into(), variable, realm)?;
                 }
             }
@@ -308,7 +308,7 @@ impl ObjectOrVariables {
     fn get_value(&self, name: &str, realm: &mut Realm) -> Option<Value> {
         match self {
             Self::Object(o) => o
-                .get_own_property_no_get_set(
+                .resolve_property_no_get_set(
                     InternalPropertyKey::String(YSString::from_ref(name)),
                     realm,
                 )
@@ -562,7 +562,14 @@ impl ScopeInternal {
     }
 
     pub fn has_value(&self, name: &str, realm: &mut Realm) -> Res<bool> {
-        if self.variables.contains_key(name, realm) {
+        let found = match &self.variables {
+            ObjectOrVariables::Object(object) => {
+                object.contains_key(InternalPropertyKey::String(YSString::from_ref(name)), realm)?
+            }
+            ObjectOrVariables::Variables(variables) => variables.contains_key(name),
+        };
+
+        if found {
             Ok(true)
         } else {
             match &self.parent {
