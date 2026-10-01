@@ -49,6 +49,7 @@ impl ValidationError<'_> {
 pub struct Validator<'a> {
     scratch: Bump,
     strict: bool,
+    allow_new_target: bool,
     lifetime: PhantomData<&'a ()>,
 }
 
@@ -60,6 +61,11 @@ impl<'a> Validator<'a> {
 
     pub const fn enable_script_strict_mode(&mut self) {
         self.strict = true;
+    }
+
+    /// Direct eval inherits whether its caller has a new.target binding.
+    pub const fn enable_new_target(&mut self) {
+        self.allow_new_target = true;
     }
 
     // Avoid retaining an unusually large program's scratch high-water mark.
@@ -74,7 +80,11 @@ impl<'a> Validator<'a> {
     pub fn validate_statements(&mut self, ast: &'a [Stmt]) -> Result<'a> {
         self.reset_scratch();
 
-        check::Checker::new(&self.scratch, self.strict, false).validate_script(ast)
+        let mut checker = check::Checker::new(&self.scratch, self.strict, false);
+        if self.allow_new_target {
+            checker.allow_new_target();
+        }
+        checker.validate_script(ast)
     }
 
     pub fn validate_module_items(&mut self, ast: &'a [ModuleItem]) -> Result<'a> {

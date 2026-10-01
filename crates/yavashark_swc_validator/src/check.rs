@@ -93,6 +93,10 @@ impl<'a, 'b> Checker<'a, 'b> {
         }
     }
 
+    pub(crate) fn allow_new_target(&mut self) {
+        self.ctx.new_target = true;
+    }
+
     fn push_scope(&mut self, kind: ScopeKind) {
         self.scopes.push(Scope {
             kind,
