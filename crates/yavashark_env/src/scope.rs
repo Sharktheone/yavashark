@@ -182,6 +182,7 @@ pub struct VariableReference {
 #[derive(Debug)]
 pub enum VariableOrRef {
     Variable(Variable),
+    FunctionName(Value),
     Ref(VariableReference),
 }
 
@@ -212,6 +213,7 @@ impl VariableOrRef {
     pub fn get(&self, realm: &mut Realm) -> Variable {
         match self {
             Self::Variable(v) => v.clone(),
+            Self::FunctionName(value) => Variable::new_read_only(value.copy()),
             Self::Ref(r) => r.get(realm),
         }
     }
@@ -219,6 +221,7 @@ impl VariableOrRef {
     pub fn update(&mut self, value: Value, realm: &mut Realm) -> Res {
         match self {
             Self::Variable(v) => v.value = value,
+            Self::FunctionName(_) => {}
             Self::Ref(r) => return r.update(value, realm),
         }
 
@@ -229,6 +232,7 @@ impl VariableOrRef {
     fn copy_value(&self, realm: &mut Realm) -> Value {
         match self {
             Self::Variable(v) => v.value.copy(),
+            Self::FunctionName(value) => value.copy(),
             Self::Ref(r) => r.get(realm).value,
         }
     }
@@ -237,6 +241,7 @@ impl VariableOrRef {
     fn is_writable(&self, realm: &mut Realm) -> bool {
         match self {
             Self::Variable(v) => v.properties.is_writable(),
+            Self::FunctionName(_) => false,
             Self::Ref(r) => r.get(realm).properties.is_writable(),
         }
     }
@@ -369,6 +374,11 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
                     match v {
                         VariableOrRef::Variable(var) => {
                             if let Some(obj) = var.value.gc_untyped_ref() {
+                                refs.push(obj);
+                            }
+                        }
+                        VariableOrRef::FunctionName(value) => {
+                            if let Some(obj) = value.gc_untyped_ref() {
                                 refs.push(obj);
                             }
                         }
@@ -707,6 +717,12 @@ impl ScopeInternal {
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
                     if !var.is_writable(realm) {
+                        if !self.state.is_strict_mode()
+                            && matches!(var, VariableOrRef::FunctionName(_))
+                        {
+                            return Ok(());
+                        }
+
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
