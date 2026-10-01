@@ -33,6 +33,7 @@ pub struct NativeFunctionProps {
     #[readonly]
     #[no_enumerable]
     pub name: &'static str,
+    #[no_enumerable]
     pub constructor: Option<ObjectHandle>,
 }
 
