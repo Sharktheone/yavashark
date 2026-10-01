@@ -660,13 +660,23 @@ impl ScopeInternal {
     }
 
     pub fn update(&mut self, name: &str, value: Value, realm: &mut Realm) -> Res<bool> {
+        self.update_with_strict(name, value, realm, self.state.is_strict_mode())
+    }
+
+    fn update_with_strict(
+        &mut self,
+        name: &str,
+        value: Value,
+        realm: &mut Realm,
+        strict: bool,
+    ) -> Res<bool> {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name = InternalPropertyKey::String(YSString::from_ref(name));
                 if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
-                        if self.state.is_strict_mode() {
+                        if strict {
                             return Err(Error::ty("Assignment to constant variable"));
                         }
 
@@ -698,7 +708,9 @@ impl ScopeInternal {
         }
 
         if let Some(p) = &self.parent {
-            return p.borrow_mut()?.update(name, value, realm);
+            return p
+                .borrow_mut()?
+                .update_with_strict(name, value, realm, strict);
         }
 
         Ok(false)
@@ -740,7 +752,12 @@ impl ScopeInternal {
         }
 
         if let Some(p) = &self.parent {
-            if p.borrow_mut()?.update(&name, value.copy(), realm)? {
+            if p.borrow_mut()?.update_with_strict(
+                &name,
+                value.copy(),
+                realm,
+                self.state.is_strict_mode(),
+            )? {
                 return Ok(());
             }
         }
