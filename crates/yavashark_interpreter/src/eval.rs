@@ -38,19 +38,30 @@ impl Eval for InterpreterEval {
             }
         };
 
-        // let scope = &mut scope.child()?;
-        // scope.state_set_function();
-
         let mut validator = Validator::new();
 
         if scope.is_strict_mode()? {
             validator.enable_script_strict_mode();
         }
 
+        let allow_new_target = scope.allows_new_target()?;
+
+        if allow_new_target {
+            validator.enable_new_target();
+        }
+
         if let Err(e) = validator.validate_statements(&script.body) {
             return Err(Error::syn_error(e.to_string()));
         }
 
-        Interpreter::run_in(&script.body, realm, scope)
+        let mut eval_scope = scope.child()?;
+
+        if scope.is_strict_mode()? || Interpreter::is_strict(&script.body) {
+            eval_scope.set_strict_mode()?;
+            eval_scope.state_set_function()?;
+            eval_scope.set_new_target_allowed(allow_new_target)?;
+        }
+
+        Interpreter::run_in(&script.body, realm, &mut eval_scope)
     }
 }
