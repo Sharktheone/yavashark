@@ -250,6 +250,16 @@ impl<'a> Checker<'a, '_> {
             ));
         }
 
+        if matches!(stmt, Stmt::Decl(Decl::Fn(function))
+            if !self.ctx.strict && !function.function.is_async && !function.function.is_generator)
+        {
+            self.push_scope(ScopeKind::Block);
+            self.validate_statement(stmt)?;
+            self.scopes.pop();
+
+            return Ok(());
+        }
+
         self.validate_single_statement(stmt, true)
     }
 
