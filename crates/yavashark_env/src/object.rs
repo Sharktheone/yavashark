@@ -909,9 +909,13 @@ impl MutObj for MutObject {
         value: ObjectHandle,
         _realm: &mut Realm,
     ) -> Res {
-        if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, ObjectProperty::getter(value.into()));
-            return Ok(());
+        if matches!(name, InternalPropertyKey::Index(_)) {
+            return self.define_getter_attributes(
+                name,
+                value,
+                Attributes::from_values(false, true, true),
+                _realm,
+            );
         }
 
         let key = name.into();
@@ -952,9 +956,13 @@ impl MutObj for MutObject {
         value: ObjectHandle,
         _realm: &mut Realm,
     ) -> Res {
-        if let InternalPropertyKey::Index(n) = name {
-            self.insert_array(n, ObjectProperty::setter(value.into()));
-            return Ok(());
+        if matches!(name, InternalPropertyKey::Index(_)) {
+            return self.define_setter_attributes(
+                name,
+                value,
+                Attributes::from_values(false, true, true),
+                _realm,
+            );
         }
 
         let key = name.into();
