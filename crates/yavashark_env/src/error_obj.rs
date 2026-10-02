@@ -1,7 +1,7 @@
 use crate::error::ErrorKind;
 use crate::realm::Realm;
-use crate::value::CustomName;
-use crate::{Error, MutObject, ObjectHandle, Res, Value, ValueResult};
+use crate::value::{CustomName, MutObj};
+use crate::{Error, MutObject, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 use yavashark_string::{ToYSString, YSString};
@@ -17,61 +17,7 @@ pub struct ErrorObj {
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(error: Error, realm: &mut Realm) -> Res<ObjectHandle> {
-        let proto = match &error.kind {
-            ErrorKind::Type(_) => realm.intrinsics.clone_public().ty_error.get(realm)?.clone(),
-            ErrorKind::Reference(_) => realm
-                .intrinsics
-                .clone_public()
-                .reference_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::Range(_) => realm
-                .intrinsics
-                .clone_public()
-                .range_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::Syntax(_) => realm
-                .intrinsics
-                .clone_public()
-                .syn_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::Eval(_) => realm
-                .intrinsics
-                .clone_public()
-                .eval_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::URI(_) => realm
-                .intrinsics
-                .clone_public()
-                .uri_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::Aggregate(_) => realm
-                .intrinsics
-                .clone_public()
-                .aggregate_error
-                .get(realm)?
-                .clone(),
-            ErrorKind::Suppressed(_) => realm
-                .intrinsics
-                .clone_public()
-                .suppressed_error
-                .get(realm)?
-                .clone(),
-            _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
-        };
-
-        let this = Self {
-            inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(proto),
-                error,
-            }),
-        };
-
-        Ok(ObjectHandle::new(this))
+        Ok(ObjectHandle::new(Self::raw(error, realm)?))
     }
 
     pub fn error_to_value(err: Error, realm: &mut Realm) -> ValueResult {
@@ -82,19 +28,15 @@ impl ErrorObj {
     }
 
     pub fn new_from(message: YSString, realm: &mut Realm) -> Res<ObjectHandle> {
-        let this = Self {
-            inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(
-                    realm.intrinsics.clone_public().error.get(realm)?.clone(),
-                ),
-                error: Error::unknown_error(message),
-            }),
-        };
-
-        Ok(ObjectHandle::new(this))
+        Self::new(Error::unknown_error(message), realm)
     }
 
     pub fn raw(error: Error, realm: &mut Realm) -> Res<Self> {
+        let message = error.message(realm)?;
+        Self::with_message(error, Some(message), realm)
+    }
+
+    pub fn with_message(error: Error, message: Option<YSString>, realm: &mut Realm) -> Res<Self> {
         let proto = match &error.kind {
             ErrorKind::Type(_) => realm.intrinsics.clone_public().ty_error.get(realm)?.clone(),
             ErrorKind::Reference(_) => realm
@@ -142,23 +84,22 @@ impl ErrorObj {
             _ => realm.intrinsics.clone_public().error.get(realm)?.clone(),
         };
 
+        let mut object = MutObject::with_proto(proto);
+        if let Some(message) = message {
+            object.define_property_attributes(
+                "message".into(),
+                Variable::write_config(message.into()),
+                realm,
+            )?;
+        }
+
         Ok(Self {
-            inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(proto),
-                error,
-            }),
+            inner: RefCell::new(MutableErrorObj { object, error }),
         })
     }
 
     pub fn raw_from(message: YSString, realm: &mut Realm) -> Res<Self> {
-        Ok(Self {
-            inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(
-                    realm.intrinsics.clone_public().error.get(realm)?.clone(),
-                ),
-                error: Error::unknown_error(message),
-            }),
-        })
+        Self::raw(Error::unknown_error(message), realm)
     }
 
     pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
@@ -188,8 +129,9 @@ impl ErrorObj {
 
     #[constructor]
     #[call_constructor]
-    pub fn construct(message: YSString, #[realm] realm: &mut Realm) -> ValueResult {
-        let obj = Self::new(Error::unknown_error(message), realm)?.into();
+    pub fn construct(message: Option<YSString>, #[realm] realm: &mut Realm) -> ValueResult {
+        let error = Error::unknown_error(message.clone().unwrap_or_default());
+        let obj = ObjectHandle::new(Self::with_message(error, message, realm)?).into();
 
         Ok(obj)
     }
@@ -208,11 +150,6 @@ impl ErrorObj {
         Ok(format!("{name}: {message}").into())
     }
 
-    #[get("message")]
-    pub fn get_message(&self, #[realm] realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow()?;
-        Ok(inner.error.message(realm)?.into())
-    }
     #[prop("message")]
     #[configurable]
     #[writable]
