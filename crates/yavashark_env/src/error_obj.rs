@@ -213,6 +213,10 @@ impl ErrorObj {
         let inner = self.inner.try_borrow()?;
         Ok(inner.error.message(realm)?.into())
     }
+    #[prop("message")]
+    #[configurable]
+    #[writable]
+    const MESSAGE: &'static str = "";
 
     #[prop("isError")]
     pub fn is_error(that: Value) -> bool {
