@@ -133,8 +133,10 @@ impl GeneratorFunction {
 impl Func for GeneratorFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent_this(&self.scope, this)?;
-        scope.state_set_returnable()?;
-        scope.set_strict_mode()?;
+        scope.state_set_function()?;
+        if self.code.strict {
+            scope.set_strict_mode()?;
+        }
 
         self.params.execute(&args, scope.clone(), realm)?;
 
