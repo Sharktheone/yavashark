@@ -486,7 +486,11 @@ impl StringObj {
     }
 
     #[prop("charAt")]
-    pub fn char_at(#[this] this: YSString, index: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn char_at(#[this] this: Value, index: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+        if this.is_nullish() {
+            return Err(Error::ty("String method called on null or undefined"));
+        }
+        let this = <YSString as crate::conversion::FromValueOutput>::from_value_out(this, realm)?;
         let index = index.to_number(realm)?;
 
         let index = Self::string_index(index);
