@@ -46,6 +46,7 @@ impl ByteCodeInterpreter {
             let ds = DataSection::new(code.variables, Vec::new(), code.literals, code.control);
 
             compiled = Some(Rc::new(BytecodeFunctionCode {
+                strict: BytecodeFunctionCode::has_strict_directive(&body.stmts),
                 instructions: code.instructions,
                 ds,
             }));

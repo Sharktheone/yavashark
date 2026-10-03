@@ -33,6 +33,12 @@ impl Compiler {
         let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
         let code = BytecodeFunctionCode {
+            strict: match &*expr.body {
+                ArrowFunctionBody::FunctionBody(body) => {
+                    BytecodeFunctionCode::has_strict_directive(&body.stmts)
+                }
+                ArrowFunctionBody::Expr(_) => false,
+            },
             instructions: this.instructions,
             ds,
         };

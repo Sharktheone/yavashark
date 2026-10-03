@@ -56,8 +56,32 @@ pub struct ArrayLiteralBlueprint {
 
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct BytecodeFunctionCode {
+    pub strict: bool,
     pub instructions: Vec<instructions::Instruction>,
     pub ds: DataSection,
+}
+
+impl BytecodeFunctionCode {
+    pub fn has_strict_directive(statements: &[swc_ecma_ast::Stmt]) -> bool {
+        for statement in statements {
+            let swc_ecma_ast::Stmt::Expr(expression) = statement else {
+                break;
+            };
+            let swc_ecma_ast::Expr::Lit(swc_ecma_ast::Lit::Str(string)) = &*expression.expr else {
+                break;
+            };
+
+            if string
+                .raw
+                .as_ref()
+                .is_some_and(|raw| raw == "\"use strict\"" || raw == "'use strict'")
+            {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]

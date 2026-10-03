@@ -46,6 +46,7 @@ impl Compiler {
         let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
         Ok(BytecodeFunctionCode {
+            strict: BytecodeFunctionCode::has_strict_directive(&b.stmts),
             instructions: this.instructions,
             ds,
         })
@@ -59,6 +60,7 @@ impl Compiler {
         let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
         Ok(BytecodeFunctionCode {
+            strict: BytecodeFunctionCode::has_strict_directive(&body.stmts),
             instructions: this.instructions,
             ds,
         })

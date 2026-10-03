@@ -10,15 +10,54 @@ use yavashark_env::utils::{coerce_object, coerce_object_strict};
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::value::{DefinePropertyResult, Obj, Property};
+use yavashark_env::value::{DefinePropertyResult, Obj, Property, PropertyDescriptor};
 use yavashark_env::{
-    Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult,
-    Value,
+    Class, ClassInstance, Error, InternalPropertyKey, ObjectHandle, ObjectOrNull, PrivateMember,
+    Realm, Res, RuntimeResult, Value,
 };
 use yavashark_string::YSString;
 
 impl Interpreter {
     pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
+        if matches!(
+            stmt.op,
+            AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign
+        ) {
+            if let AssignTarget::Simple(SimpleAssignTarget::Member(member)) = &stmt.left {
+                if !matches!(member.prop, MemberProp::PrivateName(_)) {
+                    let object = Self::run_expr(realm, &member.obj, member.span, scope)?;
+                    let object = coerce_object_strict(object, realm)?;
+                    let key = match &member.prop {
+                        MemberProp::Ident(ident) => {
+                            InternalPropertyKey::String(YSString::from_ref(&ident.sym))
+                        }
+                        MemberProp::Computed(computed) => {
+                            Self::run_expr(realm, &computed.expr, computed.span, scope)?
+                                .into_internal_property_key(realm)?
+                        }
+                        MemberProp::PrivateName(_) => unreachable!(),
+                    };
+                    let left = object
+                        .resolve_property(key.clone(), realm)?
+                        .unwrap_or(Value::Undefined);
+
+                    if Self::assignment_short_circuits(stmt.op, &left) {
+                        return Ok(left);
+                    }
+
+                    let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
+                    Self::assign_property(
+                        realm,
+                        &object,
+                        key,
+                        value.copy(),
+                        scope.is_strict_mode()?,
+                    )?;
+                    return Ok(value);
+                }
+            }
+        }
+
         let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         if stmt.op == AssignOp::Assign {
@@ -121,17 +160,65 @@ impl Interpreter {
             }
         };
 
-        match obj.define_property(key, value, realm)? {
-            DefinePropertyResult::Handled => {}
-            DefinePropertyResult::ReadOnly => {
-                if scope.is_strict_mode()? {
-                    return Err(Error::ty("Cannot assign to read only property"));
+        Self::assign_property(realm, &obj, key, value, scope.is_strict_mode()?)
+    }
+
+    fn assignment_short_circuits(op: AssignOp, left: &Value) -> bool {
+        match op {
+            AssignOp::OrAssign => left.is_truthy(),
+            AssignOp::AndAssign => !left.is_truthy(),
+            AssignOp::NullishAssign => !left.is_nullish(),
+            _ => false,
+        }
+    }
+
+    fn assign_property(
+        realm: &mut Realm,
+        object: &ObjectHandle,
+        key: InternalPropertyKey,
+        value: Value,
+        strict: bool,
+    ) -> Res {
+        if !object.contains_own_key(key.clone(), realm)? {
+            let mut prototype = object.prototype(realm)?;
+
+            while let ObjectOrNull::Object(parent) = prototype {
+                if let Some(descriptor) = parent.property_descriptor(key.clone(), realm)? {
+                    match descriptor {
+                        PropertyDescriptor::Accessor {
+                            set: Some(setter), ..
+                        } => {
+                            setter.call(vec![value], object.clone().into(), realm)?;
+                            return Ok(());
+                        }
+                        PropertyDescriptor::Accessor { set: None, .. }
+                        | PropertyDescriptor::Data {
+                            writable: false, ..
+                        } => {
+                            return if strict {
+                                Err(Error::ty("Cannot assign to read only property"))
+                            } else {
+                                Ok(())
+                            };
+                        }
+                        PropertyDescriptor::Data { writable: true, .. } => break,
+                    }
                 }
-            }
-            DefinePropertyResult::Setter(setter, value) => {
-                setter.call(vec![value], obj.clone().into(), realm)?;
+
+                prototype = parent.prototype(realm)?;
             }
         }
+
+        match object.define_property(key, value, realm)? {
+            DefinePropertyResult::ReadOnly if strict => {
+                return Err(Error::ty("Cannot assign to read only property"));
+            }
+            DefinePropertyResult::Setter(setter, value) => {
+                setter.call(vec![value], object.clone().into(), realm)?;
+            }
+            _ => {}
+        }
+
         Ok(())
     }
 
@@ -417,13 +504,6 @@ impl Interpreter {
                         }
                     }
                 } else {
-                    if scope.is_strict_mode()? {
-                        return Err(Error::ty_error(format!(
-                            "Property {name:?} does not exist on object",
-                        ))
-                        .into());
-                    }
-
                     (Value::Undefined, true)
                 });
 
@@ -439,7 +519,15 @@ impl Interpreter {
 
             let value = Self::run_assign_op(op, left, right, realm)?;
 
-            obj.define_property(name, value.copy(), realm);
+            match obj.define_property(name, value.copy(), realm)? {
+                DefinePropertyResult::ReadOnly if scope.is_strict_mode()? => {
+                    return Err(Error::ty("Cannot assign to read only property").into());
+                }
+                DefinePropertyResult::Setter(setter, assigned) => {
+                    setter.call(vec![assigned], obj.clone().into(), realm)?;
+                }
+                _ => {}
+            }
             Ok(value)
         } else {
             Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
