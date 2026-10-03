@@ -17,6 +17,7 @@ impl Compiler {
 
         let mut properties = Vec::with_capacity(expr.elems.len());
         let mut dealloc = Vec::new();
+        let mut spread = Vec::new();
 
         for elem in &expr.elems {
             match elem {
@@ -24,7 +25,18 @@ impl Compiler {
                     let storage = self.alloc_reg_or_stack();
                     dealloc.push(storage);
 
-                    self.compile_expr_data_certain(&expr.expr, storage);
+                    self.compile_expr_data_certain(&expr.expr, storage)?;
+
+                    if expr.spread.is_some() {
+                        // Consume the iterator before evaluating the next element.
+                        let iterator = self.alloc_reg_or_stack();
+                        self.instructions
+                            .push(Instruction::push_iter(storage, iterator));
+                        self.instructions
+                            .push(Instruction::iter_collect(iterator, storage));
+                        self.dealloc(iterator);
+                        spread.push(properties.len());
+                    }
 
                     properties.push(Some(storage.into()));
                 }
@@ -33,7 +45,10 @@ impl Compiler {
                 }
             }
         }
-        let ob = self.alloc_const(ConstValue::Array(ArrayLiteralBlueprint { properties }));
+        let ob = self.alloc_const(ConstValue::Array(ArrayLiteralBlueprint {
+            properties,
+            spread,
+        }));
 
         let m = MoveOptimization::new(ob, vec![Instruction::move_(ob, out)]);
 

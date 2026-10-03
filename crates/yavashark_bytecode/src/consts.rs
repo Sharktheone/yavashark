@@ -52,6 +52,7 @@ pub struct ObjectLiteralBlueprint {
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteralBlueprint {
     pub properties: Vec<Option<DataTypeValue>>,
+    pub spread: Vec<usize>,
 }
 
 #[derive(Debug, PartialEq, Clone, Default)]
