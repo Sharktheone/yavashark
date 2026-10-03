@@ -154,7 +154,7 @@ impl Interpreter {
                     pat,
                     scope,
                     &mut iter::once(value.clone()),
-                    &mut |scope, name, value, realm| scope.declare_var(name, value, realm),
+                    &mut Self::assign_binding,
                 )?;
             }
         }
