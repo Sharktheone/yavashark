@@ -221,6 +221,19 @@ impl Interpreter {
         Ok(())
     }
 
+    pub(crate) fn assign_binding(
+        scope: &mut Scope,
+        name: String,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res {
+        if scope.is_strict_mode()? && !scope.has_value(&name, realm)? {
+            return Err(Error::reference_error(format!("{name} is not defined")));
+        }
+
+        scope.update_or_define(name, value, realm)
+    }
+
     fn assign_pat(
         realm: &mut Realm,
         pat: &AssignTargetPat,
@@ -236,7 +249,7 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(value),
-                    &mut |scope, name, value, realm| scope.update_or_define(name, value, realm),
+                    &mut Self::assign_binding,
                 )?;
             }
             AssignTargetPat::Object(expr) => {
@@ -247,7 +260,7 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(value),
-                    &mut |scope, name, value, realm| scope.update_or_define(name, value, realm),
+                    &mut Self::assign_binding,
                 )?;
             }
             AssignTargetPat::Invalid(_) => {
