@@ -516,10 +516,7 @@ impl StringObj {
 
         let index = Self::string_index(index);
 
-        Ok(this
-            .code_unit_at(index)
-            .map_or(f64::NAN, f64::from)
-            .into())
+        Ok(this.code_unit_at(index).map_or(f64::NAN, f64::from).into())
     }
 
     #[prop("codePointAt")]
