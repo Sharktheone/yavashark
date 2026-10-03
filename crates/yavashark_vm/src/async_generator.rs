@@ -208,14 +208,14 @@ impl AsyncGenerator {
 #[props(intrinsic_name = async_generator)]
 impl AsyncGenerator {
     #[nonstatic]
-    pub fn next(this: Value, realm: &mut Realm) -> ValueResult {
+    pub fn next(this: Value, value: Option<Value>, realm: &mut Realm) -> ValueResult {
         let this = downcast_obj::<Self>(this)?;
 
         let mut state_ref = this.state.try_borrow_mut()?;
         let state = state_ref.take();
         drop(state_ref);
 
-        Ok(AsyncGeneratorTask::new(realm, state, this)?.into())
+        Ok(AsyncGeneratorTask::new(realm, state, this, value.unwrap_or(Value::Undefined))?.into())
     }
 
     #[prop("return")]
@@ -252,7 +252,7 @@ impl AsyncGenerator {
 
         let ResumableVM { state, .. } = vm;
 
-        AsyncGeneratorTask::new(realm, Some(state), this)
+        AsyncGeneratorTask::new(realm, Some(state), this, Value::Undefined)
     }
 
     #[prop(Symbol::ITERATOR)]

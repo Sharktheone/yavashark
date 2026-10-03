@@ -14,6 +14,7 @@ use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 
 pub struct AsyncGeneratorTask {
     state: Option<VmState>,
+    resume_value: Option<Value>,
     await_promise:
         Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>, bool)>>,
     promise: OwningGcGuard<'static, BoxedObj, Promise>,
@@ -29,6 +30,7 @@ impl AsyncGeneratorTask {
         realm: &mut Realm,
         state: Option<VmState>,
         generator: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
+        resume_value: Value,
     ) -> Res<ObjectHandle> {
         let promise_obj = Promise::new(realm)?.into_object();
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
@@ -45,6 +47,7 @@ impl AsyncGeneratorTask {
 
         let this = Self {
             state,
+            resume_value: Some(resume_value),
             await_promise: None,
             promise,
             generator,
@@ -107,7 +110,11 @@ impl AsyncTask for AsyncGeneratorTask {
 
 impl AsyncGeneratorTask {
     fn poll_next(&mut self, realm: &mut Realm) -> Poll<Res> {
-        if let Some(state) = self.state.take() {
+        if let Some(mut state) = self.state.take() {
+            if let Some(value) = self.resume_value.take() {
+                state.continue_async(value, realm)?;
+            }
+
             let vm = ResumableVM::from_state(state, realm);
             match vm.poll_next() {
                 AsyncGeneratorPoll::Await(state, promise) => {
