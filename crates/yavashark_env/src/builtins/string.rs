@@ -524,10 +524,14 @@ impl StringObj {
 
     #[prop("codePointAt")]
     pub fn code_point_at(
-        #[this] this: YSString,
+        #[this] this: Value,
         index: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
+        if this.is_nullish() {
+            return Err(Error::ty("String method called on null or undefined"));
+        }
+        let this = <YSString as crate::conversion::FromValueOutput>::from_value_out(this, realm)?;
         let index = index.to_number(realm)?;
 
         let index = Self::string_index(index);
