@@ -260,6 +260,17 @@ impl<'a> Checker<'a, '_> {
             return Ok(());
         }
 
+        if matches!(stmt, Stmt::Decl(Decl::Fn(function))
+            if !self.ctx.strict && !function.function.is_async && !function.function.is_generator)
+        {
+            // Annex B treats an if-arm function as though it were in a block.
+            self.push_scope(ScopeKind::Block);
+            self.validate_statement(stmt)?;
+            self.scopes.pop();
+
+            return Ok(());
+        }
+
         self.validate_single_statement(stmt, true)
     }
 
