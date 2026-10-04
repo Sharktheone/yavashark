@@ -144,17 +144,28 @@ impl Compiler {
     pub fn compile_assign_expr(&mut self, expr: &Expr, value: impl Data) -> Res {
         match expr {
             Expr::Member(m) => {
+                let saved_value = self.alloc_reg_or_stack();
+                self.instructions
+                    .push(Instruction::move_(value, saved_value));
+                let object = self.alloc_reg_or_stack();
+                self.compile_expr_data_certain(&m.obj, object)?;
+
                 let key = self.compile_member_prop(&m.prop)?;
-                let obj = self.compile_expr_data_acc(&m.obj)?;
 
                 match key {
                     MemberKey::Public(member) => {
-                        self.instructions
-                            .push(Instruction::store_member(obj, member, value));
+                        self.instructions.push(Instruction::store_member(
+                            object,
+                            member,
+                            saved_value,
+                        ));
                     }
                     MemberKey::Private(member) => {
-                        self.instructions
-                            .push(Instruction::store_private_member(obj, member, value));
+                        self.instructions.push(Instruction::store_private_member(
+                            object,
+                            member,
+                            saved_value,
+                        ));
                     }
                 }
             }
