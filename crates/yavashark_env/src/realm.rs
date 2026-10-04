@@ -14,6 +14,7 @@ pub use initialize::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
+use std::rc::Rc;
 #[cfg(feature = "profiler")]
 use std::time::Instant;
 
@@ -26,6 +27,7 @@ pub struct Realm {
     pub global: ObjectHandle,              // [[GlobalObject]]
     pub env: Environment,                  // [[GlobalEnv]]
     pub queue: AsyncTaskQueue,
+    eval_impl: Option<Rc<dyn Eval>>,
     #[cfg(feature = "profiler")]
     pub profile: Profile,
     #[cfg(feature = "profiler")]
@@ -50,6 +52,7 @@ impl Realm {
                 modules: HashMap::new(),
             },
             queue: AsyncTaskQueue::new(),
+            eval_impl: None,
             #[cfg(feature = "profiler")]
             profile: Profile::new(),
             #[cfg(feature = "profiler")]
@@ -61,7 +64,11 @@ impl Realm {
         Ok(realm)
     }
 
-    pub fn set_eval(&mut self, eval: impl Eval + 'static, strict: bool) -> Res {
+    pub fn set_eval(&mut self, eval: impl Eval + 'static) -> Res {
+        let eval = Rc::new(eval) as Rc<dyn Eval>;
+
+        self.eval_impl = Some(Rc::clone(&eval));
+
         let eval_func = NativeFunction::with_len(
             "eval",
             move |args, _, realm| {
@@ -73,14 +80,7 @@ impl Realm {
                     return Ok(code.copy());
                 };
 
-                let mut scope = Scope::global(realm, PathBuf::from("eval")); //TODO: the scope should be the caller's scope
-
-                //TODO: this is a hack
-                if strict {
-                    scope = scope.child()?;
-                    scope.set_strict_mode()?;
-                    scope.state_set_function()?;
-                }
+                let mut scope = Scope::global(realm, PathBuf::from("eval"));
 
                 eval.eval(&code.as_str_lossy(), realm, &mut scope)
             },
@@ -97,6 +97,15 @@ impl Realm {
         )?;
 
         Ok(())
+    }
+
+    pub fn eval_in_scope(&mut self, source: &str, scope: &mut Scope) -> ValueResult {
+        let eval = self
+            .eval_impl
+            .clone()
+            .ok_or(crate::Error::new("eval is not installed"))?;
+
+        eval.eval(source, self, scope)
     }
 
     pub async fn run_event_loop(&mut self) {
@@ -147,6 +156,7 @@ impl Default for Realm {
                 modules: HashMap::new(),
             },
             queue: AsyncTaskQueue::new(),
+            eval_impl: None,
             #[cfg(feature = "profiler")]
             profile: Profile::new(),
             #[cfg(feature = "profiler")]
