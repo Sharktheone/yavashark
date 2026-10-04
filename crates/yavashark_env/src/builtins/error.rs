@@ -4,7 +4,7 @@ use crate::value::Obj;
 use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Value, Variable};
 
 macro_rules! error {
-    ($name:ident, $create:ident, $get:ident) => {
+    ($name:ident, $create:ident, $get:ident, $message_index:expr) => {
         pub fn $get(realm: &mut Realm) -> Res<ObjectHandle> {
             let error = realm.intrinsics.clone_public().error.get(realm)?.clone();
 
@@ -31,18 +31,25 @@ macro_rules! error {
             let constr = NativeConstructor::special_with_proto(
                 stringify!($name).into(),
                 |args, realm| {
-                    let msg =
-                        args.first()
-                            .map_or(Result::<String, Error>::Ok(String::new()), |x| {
-                                if x.is_symbol() {
-                                    return Err(Error::ty(
-                                        "Cannot convert a Symbol value to a string",
-                                    ));
-                                }
-                                Ok(x.to_string(realm)?.to_string())
-                            })?;
+                    let message = args
+                        .get($message_index)
+                        .filter(|value| !value.is_undefined())
+                        .map(|value| {
+                            if value.is_symbol() {
+                                return Err(Error::ty("Cannot convert a Symbol value to a string"));
+                            }
 
-                    let obj = ErrorObj::raw(Error::$create(msg), realm)?;
+                            value.to_string(realm)
+                        })
+                        .transpose()?;
+
+                    let error = Error::$create(
+                        message
+                            .as_ref()
+                            .map(ToString::to_string)
+                            .unwrap_or_default(),
+                    );
+                    let obj = ErrorObj::with_message(error, message, realm)?;
 
                     Ok(obj.into_object())
                 },
@@ -96,11 +103,11 @@ macro_rules! error {
     };
 }
 
-error!(TypeError, ty_error, get_type_error);
-error!(ReferenceError, reference_error, get_reference_error);
-error!(RangeError, range_error, get_range_error);
-error!(SyntaxError, syn_error, get_syntax_error);
-error!(EvalError, eval_error, get_eval_error);
-error!(URIError, uri_error, get_uri_error);
-error!(AggregateError, aggregate_error, get_aggregate_error);
-error!(SuppressedError, suppressed_error, get_supressed_error);
+error!(TypeError, ty_error, get_type_error, 0);
+error!(ReferenceError, reference_error, get_reference_error, 0);
+error!(RangeError, range_error, get_range_error, 0);
+error!(SyntaxError, syn_error, get_syntax_error, 0);
+error!(EvalError, eval_error, get_eval_error, 0);
+error!(URIError, uri_error, get_uri_error, 0);
+error!(AggregateError, aggregate_error, get_aggregate_error, 1);
+error!(SuppressedError, suppressed_error, get_supressed_error, 2);
