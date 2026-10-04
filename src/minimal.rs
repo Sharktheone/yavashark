@@ -44,7 +44,7 @@ pub fn main() -> ExitCode {
 
     let mut scope = Scope::global(&realm, PathBuf::from(path));
     realm
-        .set_eval(InterpreterEval, false)
+        .set_eval(InterpreterEval)
         .expect("Failed to set eval");
 
     // #[cfg(feature = "vm")]

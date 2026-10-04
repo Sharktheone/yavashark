@@ -243,7 +243,7 @@ fn run_code(
     if interpreter {
         let mut realm = Realm::new().unwrap();
         let mut scope = Scope::global(&realm, path.clone());
-        realm.set_eval(InterpreterEval, false).unwrap();
+        realm.set_eval(InterpreterEval).unwrap();
         #[cfg(feature = "profiler")]
         if let Some(profile_out) = js_profile_out {
             let p = match yavashark_profiler::FileProfileWriter::from_path(
