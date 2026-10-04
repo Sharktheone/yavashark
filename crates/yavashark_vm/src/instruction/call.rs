@@ -5,25 +5,50 @@ use yavashark_env::utils::ValueIterator;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 
 pub fn call(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
-    let func = func.get(vm)?;
-
-    let args = vm.get_call_args();
-    let this = vm.get_this()?;
-
-    let ret = func.call(vm.get_realm(), args, this)?;
+    let ret = call_value(func, vm)?;
 
     output.set(ret, vm)
 }
 
 pub fn call_no_output(func: impl Data, vm: &mut impl VM) -> Res {
-    let func = func.get(vm)?;
-
-    let args = vm.get_call_args();
-    let this = vm.get_this()?;
-
-    func.call(vm.get_realm(), args, this)?;
+    call_value(func, vm)?;
 
     Ok(())
+}
+
+fn call_value(reference: impl Data, vm: &mut impl VM) -> yavashark_env::ValueResult {
+    let direct_eval = matches!(
+        reference.data_type(),
+        yavashark_bytecode::data::DataType::Var(name) if vm.var_name(name.0) == Some("eval")
+    );
+
+    let function = reference.get(vm)?;
+    let args = vm.get_call_args();
+
+    if direct_eval {
+        let is_eval = matches!(
+            &function,
+            Value::Object(function) if vm.get_realm_ref().intrinsics.eval.as_ref() == Some(function)
+        );
+
+        if is_eval {
+            let Some(value) = args.first() else {
+                return Ok(Value::Undefined);
+            };
+
+            let Value::String(source) = value else {
+                return Ok(value.copy());
+            };
+
+            let mut scope = vm.get_scope().clone();
+
+            return vm
+                .get_realm()
+                .eval_in_scope(&source.as_str_lossy(), &mut scope);
+        }
+    }
+
+    function.call(vm.get_realm(), args, Value::Undefined)
 }
 
 pub fn call_member(
