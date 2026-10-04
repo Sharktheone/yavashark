@@ -73,11 +73,25 @@ impl ConstIntoValue for ConstValue {
 
 impl ConstIntoValue for ArrayLiteralBlueprint {
     fn into_value(self, vm: &mut impl VM) -> ValueResult {
-        let props = self
-            .properties
-            .into_iter()
-            .map(|v| v.map(|v| v.into_value(vm)).transpose())
-            .collect::<Result<Vec<_>, _>>()?;
+        let mut props = Vec::with_capacity(self.properties.len());
+
+        let mut spread = self.spread.into_iter().peekable();
+
+        for (index, value) in self.properties.into_iter().enumerate() {
+            let value = value.map(|value| value.into_value(vm)).transpose()?;
+
+            if spread.peek() == Some(&index) {
+                spread.next();
+
+                let value = value.ok_or(yavashark_env::Error::new("Missing spread snapshot"))?;
+
+                let mut array = yavashark_env::utils::ArrayLike::new(value, vm.get_realm())?;
+
+                props.extend(array.take_vec(vm.get_realm())?.into_iter().map(Some));
+            } else {
+                props.push(value);
+            }
+        }
 
         Ok(Array::with_elements_sparse(vm.get_realm(), props)?.into_value())
     }
