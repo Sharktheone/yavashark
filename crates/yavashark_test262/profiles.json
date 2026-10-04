@@ -3,8 +3,17 @@
     "fast": {
       "test_root": "../../test262/test/",
       "noskip": true,
-      "workers": 1024,
-      "timeout": "5s"
+      "timeout": "5s",
+      "selection": "quick"
+    },
+    "rf": {
+      "test_root": "../../test262/test/",
+      "noskip": true,
+      "timeout": "5s",
+      "selection": "quick",
+      "rebuild": true,
+      "build_mode": "release",
+      "build_compiler": "llvm"
     },
     "interactive": {
       "test_root": "../../test262/test/",

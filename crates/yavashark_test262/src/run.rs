@@ -1,6 +1,6 @@
 use crate::harness::setup_global;
 use crate::metadata::{Flags, Metadata, NegativePhase};
-use crate::utils::parse_file;
+use crate::utils::{ParsedTest, parse_file};
 use std::path::{Path, PathBuf};
 use std::process;
 use swc_ecma_ast::Program;
@@ -18,29 +18,56 @@ pub fn run_file(
 ) -> Result<String, String> {
     #[cfg(feature = "timings")]
     let parse = std::time::Instant::now();
-    let (stmt, metadata) = parse_file(&file);
+    let test = ParsedTest::from_file(&file);
     #[cfg(feature = "timings")]
     unsafe {
         crate::PARSE_DURATION = parse.elapsed();
     }
 
-    for feature in &metadata.features {
+    if test.programs.iter().all(Option::is_none) {
+        return Ok(String::new());
+    }
+
+    for feature in &test.metadata.features {
         if SKIP_FEATURES.contains(&feature.as_str()) {
             println!("SKIP");
             process::exit(0);
         }
     }
 
+    let mut result = String::new();
+
+    for (program, variant) in test.programs.into_iter().flatten() {
+        result = run_variant(
+            file.clone(),
+            program,
+            test.metadata.clone(),
+            #[cfg(feature = "profiler")]
+            profile_out,
+        )
+        .map_err(|error| format!("{variant:?}: {error}"))?;
+    }
+
+    Ok(result)
+}
+
+fn run_variant(
+    file: PathBuf,
+    stmt: Program,
+    metadata: Metadata,
+    #[cfg(feature = "profiler")] profile_out: Option<&Path>,
+) -> Result<String, String> {
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
-    let strict = metadata.flags.contains(Flags::ONLY_STRICT);
+    // Harness files are separate sloppy scripts; the test AST carries its
+    // strict directive or module goal.
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
-    let (mut realm, mut scope, harness_dir) = setup_global(
+    let (mut realm, _, harness_dir) = setup_global(
         file.clone(),
         raw,
         async_,
-        strict,
+        false,
         #[cfg(feature = "profiler")]
         profile_out,
     )
@@ -50,6 +77,9 @@ pub fn run_file(
         crate::SETUP_DURATION = setup.elapsed();
     }
 
+    // Do not mutate the lexical context captured by harness functions when
+    // the test enters strict mode.
+    let mut scope = Scope::global(&realm, file.clone());
     let result = match run_file_in(file, &mut realm, &mut scope, stmt, metadata, &harness_dir) {
         Ok(v) => Ok(v),
         Err(e) => Err(e.pretty_print(&mut realm)),
@@ -74,10 +104,10 @@ pub fn run_file_in(
     for inc in metadata.includes {
         let path = harness.join("harness").join(inc);
 
-        scope.set_path(path.clone())?;
         let (stmt, metadata) = parse_file(&path);
+        let mut include_scope = Scope::global(realm, path.clone());
 
-        run_file_in(path, realm, scope, stmt, metadata, harness)?;
+        run_file_in(path, realm, &mut include_scope, stmt, metadata, harness)?;
     }
 
     scope.set_path(file)?;

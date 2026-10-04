@@ -1,14 +1,9 @@
-use crate::metadata::NegativePhase;
-use crate::utils::parse_metadata;
 use std::path::PathBuf;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
-use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::Error;
 
 pub fn test_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(not(feature = "oxc"))]
-    test_parse_swc(file.clone());
+    test_parse_swc(file);
 
     #[cfg(feature = "oxc")]
     test_parse_oxc(file);
@@ -17,51 +12,7 @@ pub fn test_file(file: PathBuf) -> Result<String, Error> {
 }
 
 pub fn test_parse_swc(file: PathBuf) {
-    let input = std::fs::read_to_string(&file).unwrap();
-
-    let metadata = parse_metadata(&input);
-
-    let end = BytePos(input.len() as u32);
-
-    let input = StringInput::new(&input, BytePos(0), end);
-
-    let c = EsSyntax {
-        jsx: false,
-        fn_bind: false,
-        decorators: true,
-        decorators_before_export: true,
-        export_default_from: true,
-        import_attributes: true,
-        allow_super_outside_method: false,
-        allow_return_outside_function: false,
-        auto_accessors: true,
-        explicit_resource_management: true,
-    };
-
-    let mut p = Parser::new(Syntax::Es(c), input, None);
-
-    let _s = match p.parse_program() {
-        Ok(s) => {
-            if let Some(neg) = &metadata.negative {
-                if neg.phase == NegativePhase::Parse {
-                    println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
-                    panic!()
-                }
-            }
-
-            s
-        }
-        Err(e) => {
-            if let Some(neg) = &metadata.negative {
-                if neg.phase == NegativePhase::Parse {
-                    return;
-                }
-            }
-
-            println!("PARSE_ERROR:\n{e:?}");
-            panic!()
-        }
-    };
+    crate::utils::ParsedTest::from_file(&file);
 }
 
 #[cfg(feature = "oxc")]
