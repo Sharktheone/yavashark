@@ -99,7 +99,7 @@ pub fn setup_global(
         }
     }
 
-    r.set_eval(InterpreterEval, strict)?;
+    r.set_eval(InterpreterEval)?;
     yavashark_vm::init(&mut r)?;
 
     Ok((r, s, harness_dir.to_path_buf()))
