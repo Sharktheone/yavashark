@@ -168,6 +168,10 @@ impl Compiler {
                         ));
                     }
                 }
+
+                self.dealloc(key.data_type());
+                self.dealloc(object);
+                self.dealloc(saved_value);
             }
             Expr::SuperProp(super_prop) => {
                 todo!()
