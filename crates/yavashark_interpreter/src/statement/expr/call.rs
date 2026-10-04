@@ -9,12 +9,37 @@ use yavashark_env::scope::Scope;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::value::Obj;
 use yavashark_env::{ClassInstance, ControlFlow, Error, Realm, Value, ValueResult};
+use yavashark_env::realm::Eval;
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
         match &stmt.callee {
             Callee::Expr(callee_expr) => {
                 let (callee, this) = Self::run_call_expr(realm, callee_expr, stmt.span, scope)?;
+
+                //TODO: I don't like this for the eval case, but this is the best it gets for now. This just needs to be a bytecode instruction in the future
+                let mut reference = &**callee_expr;
+                while let Expr::Paren(paren) = reference {
+                    reference = &paren.expr;
+                }
+
+                if matches!(reference, Expr::Ident(ident) if ident.sym == *"eval")
+                    && matches!(&callee, Value::Object(function)
+                        if realm.intrinsics.eval.as_ref() == Some(function))
+                {
+                    // This could be done more efficient in the future, but okay for now
+                    let args = Self::run_call_arguments(realm, &stmt.args, stmt.span, scope)?;
+
+                    let Some(value) = args.first() else {
+                        return Ok(Value::Undefined);
+                    };
+
+                    let Value::String(source) = value else {
+                        return Ok(value.copy());
+                    };
+
+                    return crate::eval::InterpreterEval.eval(&source.as_str_lossy(), realm, scope);
+                }
 
                 let this = match this {
                     Some(this) => this,
@@ -100,6 +125,26 @@ impl Interpreter {
         span: Span,
         scope: &mut Scope,
     ) -> ValueResult {
+        let values = Self::run_call_arguments(realm, args, span, scope)?;
+
+        if let Value::Object(f) = callee {
+            f.call(values, this, realm) //In strict mode, this is undefined
+                .map_err(|mut e| {
+                    e.attach_function_stack(f.name(), get_location(span, scope));
+
+                    e
+                })
+        } else {
+            Err(Error::ty_error(format!("{callee} is not a function")))
+        }
+    }
+
+    fn run_call_arguments(
+        realm: &mut Realm,
+        args: &[ExprOrSpread],
+        span: Span,
+        scope: &mut Scope,
+    ) -> Result<Vec<Value>, yavashark_env::Error> {
         let mut values = Vec::with_capacity(args.len());
 
         for arg in args {
@@ -116,16 +161,7 @@ impl Interpreter {
             }
         }
 
-        if let Value::Object(f) = callee {
-            f.call(values, this, realm) //In strict mode, this is undefined
-                .map_err(|mut e| {
-                    e.attach_function_stack(f.name(), get_location(span, scope));
-
-                    e
-                })
-        } else {
-            Err(Error::ty_error(format!("{callee} is not a function")))
-        }
+        Ok(values)
     }
 
     #[allow(clippy::cognitive_complexity)]
@@ -150,7 +186,10 @@ impl Interpreter {
 
                     return Ok((val, Some(par)));
                 }
-                Expr::SuperProp(stmt) => Self::run_super_prop(realm, stmt, scope)?,
+                Expr::SuperProp(stmt) => {
+                    let value = Self::run_super_prop(realm, stmt, scope)?;
+                    return Ok((value, Some(scope.this()?)));
+                }
                 Expr::Cond(stmt) => Self::run_cond(realm, stmt, scope)?,
                 Expr::Call(stmt) => Self::run_call(realm, stmt, scope)?,
                 Expr::New(stmt) => Self::run_new(realm, stmt, scope)?,
@@ -164,7 +203,7 @@ impl Interpreter {
                 Expr::Yield(stmt) => Self::run_yield(realm, stmt, scope)?,
                 Expr::MetaProp(stmt) => Self::run_meta_prop(realm, stmt, scope)?,
                 Expr::Await(stmt) => Self::run_await(realm, stmt, scope)?,
-                Expr::Paren(stmt) => Self::run_paren(realm, stmt, scope)?,
+                Expr::Paren(stmt) => return Self::run_call_expr(realm, &stmt.expr, span, scope),
                 Expr::PrivateName(stmt) => Self::run_private_name(realm, stmt, scope)?,
                 Expr::OptChain(stmt) => Self::run_opt_chain(realm, stmt, scope)?,
                 Expr::Invalid(stmt) => {
