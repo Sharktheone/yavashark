@@ -3438,6 +3438,9 @@ impl Intrinsic for ArrayIterator {
             realm,
         )?;
 
+        let next = proto.get("next", realm)?;
+        proto.define_property_attributes("next".into(), Variable::write_config(next), realm)?;
+
         //TODO: this is a hack, we need to update everything to the new #[props] macro
         let val = Variable::config("Array Iterator".into());
         proto.set(Symbol::TO_STRING_TAG, val, realm)?;
