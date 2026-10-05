@@ -445,7 +445,6 @@ impl StringObj {
             index as usize
         }
     }
-
 }
 
 #[properties_new(

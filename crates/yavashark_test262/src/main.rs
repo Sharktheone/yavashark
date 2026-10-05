@@ -215,12 +215,11 @@ fn write_native_profile(
     eprintln!("wrote native profile to {}", out.display());
 }
 
-
 fn maybe_disable_core_dumps() {
     #[cfg(target_os = "linux")]
     if std::env::var_os("YAVASHARK_TEST262_RUNNER").is_some()
         && std::env::var_os("YAVASHARK_TEST262_CORE_DUMPS").as_deref()
-        != Some(std::ffi::OsStr::new("1"))
+            != Some(std::ffi::OsStr::new("1"))
     {
         disable_core_dumps();
     }

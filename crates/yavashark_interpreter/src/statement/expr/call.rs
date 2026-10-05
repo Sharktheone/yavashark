@@ -5,11 +5,11 @@ use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 use crate::Interpreter;
 use crate::location::get_location;
 use yavashark_env::import::DynamicImport;
+use yavashark_env::realm::Eval;
 use yavashark_env::scope::Scope;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::value::Obj;
 use yavashark_env::{ClassInstance, ControlFlow, Error, Realm, Value, ValueResult};
-use yavashark_env::realm::Eval;
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {

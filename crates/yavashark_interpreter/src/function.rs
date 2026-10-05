@@ -9,6 +9,7 @@ use yavashark_env::builtins::Arguments;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
+use yavashark_env::utils::coerce_object;
 #[cfg(feature = "actual_gc")]
 use yavashark_env::value::BoxedObj;
 use yavashark_env::value::{
@@ -18,7 +19,6 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
     Variable,
 };
-use yavashark_env::utils::coerce_object;
 #[cfg(feature = "actual_gc")]
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;

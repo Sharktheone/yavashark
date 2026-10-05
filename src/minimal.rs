@@ -43,9 +43,7 @@ pub fn main() -> ExitCode {
     let mut realm = Realm::new().expect("Failed to create realm");
 
     let mut scope = Scope::global(&realm, PathBuf::from(path));
-    realm
-        .set_eval(InterpreterEval)
-        .expect("Failed to set eval");
+    realm.set_eval(InterpreterEval).expect("Failed to set eval");
 
     // #[cfg(feature = "vm")]
     // yavashark_vm::init(&mut realm).expect("Failed to init VM");

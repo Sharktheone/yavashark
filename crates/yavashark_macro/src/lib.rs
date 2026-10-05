@@ -1,7 +1,7 @@
 extern crate proc_macro;
 
-use std::env;
 use quote::quote;
+use std::env;
 use syn::{Expr, ExprLit, Lit};
 
 mod config;
@@ -128,8 +128,7 @@ fn builtin_function_name(
 
     let name = match expr {
         Some(Expr::Lit(ExprLit {
-            lit: Lit::Str(s),
-            ..
+            lit: Lit::Str(s), ..
         })) => s.value(),
         Some(Expr::Path(path)) if path.path.segments.iter().any(|s| s.ident == "Symbol") => {
             let ident = path.path.segments.last().unwrap().ident.to_string();

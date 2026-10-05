@@ -729,8 +729,19 @@ impl Iterator {
     }
 
     #[nonstatic]
-    fn windows(#[this] this: Value, size: Value, undersized: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        buffered_iterator(this, size, true, undersized.unwrap_or(Value::Undefined), realm)
+    fn windows(
+        #[this] this: Value,
+        size: Value,
+        undersized: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        buffered_iterator(
+            this,
+            size,
+            true,
+            undersized.unwrap_or(Value::Undefined),
+            realm,
+        )
     }
 
     /// 27.1.2.13 Iterator.prototype.toArray ( )
@@ -2054,14 +2065,15 @@ fn buffered_iterator(
         let _ = close_iterator_object(&object, realm);
         return Err(Error::range("size is out of range"));
     }
-    let allow_partial = if undersized.is_undefined() || undersized.same_value(&Value::from("only-full")) {
-        false
-    } else if undersized.same_value(&Value::from("allow-partial")) {
-        true
-    } else {
-        let _ = close_iterator_object(&object, realm);
-        return Err(Error::ty("invalid undersized mode"));
-    };
+    let allow_partial =
+        if undersized.is_undefined() || undersized.same_value(&Value::from("only-full")) {
+            false
+        } else if undersized.same_value(&Value::from("allow-partial")) {
+            true
+        } else {
+            let _ = close_iterator_object(&object, realm);
+            return Err(Error::ty("invalid undersized mode"));
+        };
     let iterated = IteratorRecord::new(object, realm)?;
     Ok(IteratorHelperObject::new(
         BufferedIteratorHelper {
@@ -2112,7 +2124,11 @@ impl IteratorHelperImpl for BufferedIteratorHelper {
                         self.buffer.borrow_mut().clear();
                         return create_iter_result_object(Value::Undefined, true, realm);
                     }
-                    Err(e) => { self.alive.set(false); self.buffer.borrow_mut().clear(); return Err(e); }
+                    Err(e) => {
+                        self.alive.set(false);
+                        self.buffer.borrow_mut().clear();
+                        return Err(e);
+                    }
                 }
             }
             while self.buffer.borrow().len() < self.size {
@@ -2130,7 +2146,9 @@ impl IteratorHelperImpl for BufferedIteratorHelper {
                 }
             }
             let mut buffer = self.buffer.borrow_mut();
-            if buffer.is_empty() || (self.sliding && !self.allow_partial && buffer.len() < self.size) {
+            if buffer.is_empty()
+                || (self.sliding && !self.allow_partial && buffer.len() < self.size)
+            {
                 buffer.clear();
                 return create_iter_result_object(Value::Undefined, true, realm);
             }
