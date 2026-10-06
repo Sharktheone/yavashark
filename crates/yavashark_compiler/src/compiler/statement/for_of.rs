@@ -1,3 +1,5 @@
+#![allow(clippy::similar_names)]
+
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use swc_ecma_ast::{ForHead, ForOfStmt, VarDeclKind};
