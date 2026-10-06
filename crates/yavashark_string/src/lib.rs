@@ -1584,7 +1584,7 @@ impl YSString {
 // =============================================================================
 
 /// Check if a UTF-16 slice is well-formed (no unpaired surrogates).
-fn is_utf16_well_formed(units: &[u16]) -> bool {
+const fn is_utf16_well_formed(units: &[u16]) -> bool {
     let mut i = 0;
     while i < units.len() {
         let unit = units[i];
