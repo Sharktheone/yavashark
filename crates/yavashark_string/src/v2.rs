@@ -212,6 +212,15 @@ pub enum Type {
     Wtf16,
 }
 
+impl Type {
+    const fn width(self) -> u8 {
+        match self {
+            Self::Ascii => 1,
+            Self::Wtf16 => 2,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StringRef<'a> {
     Ascii(&'a str),

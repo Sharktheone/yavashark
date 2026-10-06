@@ -127,7 +127,7 @@ impl HeapString {
 
     const fn get_base_ptr(&self) -> NonNull<()> {
         // SAFETY: ptr is always valid and properly aligned, and ptr_offset is always <= u32::MAX
-        unsafe { self.ptr.sub(self.ptr_offset as usize) }
+        unsafe { self.ptr.byte_sub(self.ptr_offset as usize * self.ty.width() as usize) }
     }
 
     const fn storage_len(&self) -> usize {
