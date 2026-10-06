@@ -71,7 +71,7 @@ impl GCAllocator {
     pub fn alloc<T>(&mut self, value: T) -> Gc<T> {
         let boxed = Box::new(value);
 
-        let ptr = unsafe { NonNull::new_unchecked(Box::into_raw(boxed)) };
+        let ptr = Box::into_non_null(boxed);
 
         self.gcs.push(GCDef {
             ptr: ptr.cast(),
