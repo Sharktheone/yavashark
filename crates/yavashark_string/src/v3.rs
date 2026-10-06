@@ -102,7 +102,7 @@ impl AsciiString {
         Self::new_with_extra(str, 0)
     }
 
-    unsafe fn get_data_ptr(slf: NonNull<Self>) -> &'static mut [u8] {
+    unsafe fn get_data_ptr<'a>(slf: NonNull<Self>) -> &'a mut [u8] {
         unsafe {
             let ptr = slf.offset(1).cast::<u8>();
 
@@ -110,7 +110,7 @@ impl AsciiString {
         }
     }
 
-    unsafe fn get_data_ptr_ref(slf: NonNull<Self>) -> &'static [u8] {
+    unsafe fn get_data_ptr_ref<'a>(slf: NonNull<Self>) -> &'a [u8] {
         unsafe {
             let ptr = slf.offset(1).cast::<u8>();
 
@@ -210,7 +210,7 @@ impl Wtf16String {
         Self::new_with_extra(str, 0)
     }
 
-    unsafe fn get_data_ptr(slf: NonNull<Self>) -> &'static mut [u16] {
+    unsafe fn get_data_ptr<'a>(slf: NonNull<Self>) -> &'a mut [u16] {
         unsafe {
             let ptr = slf.offset(1).cast::<u16>();
 
@@ -218,7 +218,7 @@ impl Wtf16String {
         }
     }
 
-    unsafe fn get_data_ptr_ref(slf: NonNull<Self>) -> &'static [u16] {
+    unsafe fn get_data_ptr_ref<'a>(slf: NonNull<Self>) -> &'a [u16] {
         unsafe {
             let ptr = slf.offset(1).cast::<u16>();
 
