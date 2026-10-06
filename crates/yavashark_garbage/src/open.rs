@@ -1,4 +1,6 @@
+#![allow(warnings)]
 #![allow(unused)]
+
 use std::ptr::NonNull;
 use std::rc::Rc;
 
