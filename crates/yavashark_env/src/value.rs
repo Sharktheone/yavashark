@@ -971,7 +971,7 @@ impl Iterator for CtxIter<'_> {
             Err(e) => return Some(Err(e)),
         };
 
-        let done = next.get_property(&Value::string("done"), self.realm);
+        let done = next.get_property("done", self.realm);
 
         let done = match done {
             Ok(done) => done.is_truthy(),
@@ -982,7 +982,7 @@ impl Iterator for CtxIter<'_> {
             return None;
         }
 
-        Some(next.get_property(&Value::string("value"), self.realm))
+        Some(next.get_property("value", self.realm))
     }
 }
 
@@ -1036,13 +1036,13 @@ impl Value {
 impl Object {
     pub fn iter_next(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
         let next = self.call_method("next", realm, Vec::new())?;
-        let done = next.get_property_opt(&Value::string("done"), realm)?;
+        let done = next.get_property_opt("done", realm)?;
 
         if done.is_some_and(|x| x.is_truthy()) {
             return Ok(None);
         }
 
-        next.get_property_opt(&Value::string("value"), realm)
+        next.get_property_opt("value", realm)
             .map(|opt| Some(opt.unwrap_or(Value::Undefined)))
     }
 
@@ -1053,17 +1053,17 @@ impl Object {
     }
 
     pub fn iter_res(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
-        let done = self.resolve_property(&Value::string("done"), realm)?;
+        let done = self.resolve_property("done", realm)?;
 
         if done.is_some_and(|x| x.is_truthy()) {
             return Ok(None);
         }
-        self.resolve_property(&Value::string("value"), realm)
+        self.resolve_property("value", realm)
             .map(|x| Some(x.unwrap_or(Value::Undefined)))
     }
 
     pub fn iter_done(&self, realm: &mut Realm) -> Result<bool, Error> {
-        let done = self.resolve_property(&Value::string("done"), realm)?;
+        let done = self.resolve_property("done", realm)?;
 
         Ok(done.is_some_and(|x| x.is_truthy()))
     }
@@ -1076,7 +1076,7 @@ impl Object {
 
     pub fn iter_next_is_finished(&self, realm: &mut Realm) -> Result<bool, Error> {
         let next = self.call_method("next", realm, Vec::new())?;
-        let done = next.get_property_opt(&Value::string("done"), realm)?;
+        let done = next.get_property_opt("done", realm)?;
 
         Ok(done.is_some_and(|done| done.is_truthy()))
     }
