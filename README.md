@@ -15,3 +15,12 @@ Yavashark currently passes ~81% of the entire test262 suite including intl, temp
 
 Contributions to Yavashark are welcome! Whether it's reporting bugs, suggesting features, or contributing code, we
 appreciate all forms of help in making Yavashark better.
+
+## Compiling
+
+Compile the engine via Cargo. Run
+
+```shell
+cargo build --release # for a binary in target/release/yavashark
+cargo run --release # for running the engine directly
+```
