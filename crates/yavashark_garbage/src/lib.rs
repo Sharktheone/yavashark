@@ -693,7 +693,7 @@ impl<T: Collectable> Gc<T> {
         };
 
         let gc_box = Box::new(gc_box);
-        let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
+        let gc_box = Box::into_non_null(gc_box); //Unsafe, since we know that Box::into_raw will not return null
 
         Self { inner: gc_box }
     }

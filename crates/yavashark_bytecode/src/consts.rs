@@ -63,6 +63,7 @@ pub struct BytecodeFunctionCode {
 }
 
 impl BytecodeFunctionCode {
+    #[must_use]
     pub fn has_strict_directive(statements: &[swc_ecma_ast::Stmt]) -> bool {
         for statement in statements {
             let swc_ecma_ast::Stmt::Expr(expression) = statement else {

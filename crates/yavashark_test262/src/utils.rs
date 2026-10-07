@@ -224,9 +224,7 @@ fn parse_metadata_comments(input: &str) -> Metadata {
 }
 
 fn process_comments(map: SingleThreadedCommentsMap) -> Vec<Yaml> {
-    map.borrow()
-        .iter()
-        .flat_map(|(_, x)| x)
+    map.borrow().values().flatten()
         .filter(|comment| {
             if comment.kind != CommentKind::Block {
                 return false;

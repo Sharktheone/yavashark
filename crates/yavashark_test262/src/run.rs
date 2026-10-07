@@ -118,8 +118,8 @@ pub fn run_file_in(
             Err(_) => format!("{:?}", v),
         });
 
-    if let Some(negative) = metadata.negative {
-        if negative.phase == NegativePhase::Runtime {
+    if let Some(negative) = metadata.negative
+        && negative.phase == NegativePhase::Runtime {
             let e = match res {
                 Ok(v) => {
                     return Err(Error::new_error(format!("Expected error but got {:?}", v)));
@@ -146,7 +146,6 @@ pub fn run_file_in(
                 res = Ok("".to_string());
             }
         }
-    }
 
     if res.is_ok() && realm.has_pending_jobs() {
         tokio::runtime::Builder::new_current_thread()

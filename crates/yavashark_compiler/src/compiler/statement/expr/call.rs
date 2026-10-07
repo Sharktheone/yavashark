@@ -67,17 +67,16 @@ impl Compiler {
 
         if args_have_call {
             todo!()
-        } else {
-            for arg in args {
-                let out = self.compile_expr_data_acc(&arg.expr)?;
-
-                if arg.spread.is_some() {
-                    self.instructions.push(Instruction::spread_call(out));
-                } else {
-                    self.instructions.push(Instruction::push_call(out));
-                }
-            }
         }
+        for arg in args {
+            let out = self.compile_expr_data_acc(&arg.expr)?;
+
+            if arg.spread.is_some() {
+                self.instructions.push(Instruction::spread_call(out));
+            } else {
+                self.instructions.push(Instruction::push_call(out));
+            }
+        };
 
         Ok(())
     }

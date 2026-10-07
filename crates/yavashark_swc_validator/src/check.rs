@@ -93,7 +93,7 @@ impl<'a, 'b> Checker<'a, 'b> {
         }
     }
 
-    pub(crate) fn allow_new_target(&mut self) {
+    pub(crate) const fn allow_new_target(&mut self) {
         self.ctx.new_target = true;
     }
 

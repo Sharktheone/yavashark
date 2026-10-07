@@ -22,9 +22,9 @@ impl Interpreter {
         if matches!(
             stmt.op,
             AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign
-        ) {
-            if let AssignTarget::Simple(SimpleAssignTarget::Member(member)) = &stmt.left {
-                if !matches!(member.prop, MemberProp::PrivateName(_)) {
+        )
+            && let AssignTarget::Simple(SimpleAssignTarget::Member(member)) = &stmt.left
+                && !matches!(member.prop, MemberProp::PrivateName(_)) {
                     let object = Self::run_expr(realm, &member.obj, member.span, scope)?;
                     let object = coerce_object_strict(object, realm)?;
                     let key = match &member.prop {
@@ -55,8 +55,6 @@ impl Interpreter {
                     )?;
                     return Ok(value);
                 }
-            }
-        }
 
         let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
