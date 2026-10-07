@@ -188,7 +188,7 @@ impl Math {
         // 4. If n is 1𝔽, return +∞𝔽.
         // 5. If n is -1𝔽, return -∞𝔽.
         // 6. Return an implementation-approximated Number value representing the inverse hyperbolic tangent of ℝ(n).
-        n.atanh()
+        0.5 * ((1.0 + n) / (1.0 - n)).ln()
     }
 
     /// # 21.3.2.8 Math.atan2 ( y, x )
