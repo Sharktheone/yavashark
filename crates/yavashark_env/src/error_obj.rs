@@ -163,4 +163,11 @@ impl ErrorObj {
 
         this.downcast::<Self>().is_some()
     }
+
+    #[get("stack")]
+    pub fn get_stack(&self) -> Res<String> {
+        let inner = self.inner.try_borrow()?;
+
+        Ok(inner.error.stack().to_string())
+    }
 }
