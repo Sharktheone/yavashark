@@ -7377,6 +7377,7 @@ dependencies = [
  "icu",
  "icu_calendar",
  "indexmap",
+ "libm",
  "log",
  "num-bigint 0.4.8",
  "num-traits",
