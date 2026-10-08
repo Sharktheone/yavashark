@@ -6,7 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.12
 	github.com/google/uuid v1.6.0
 	github.com/modelcontextprotocol/go-sdk v1.4.1
-	golang.org/x/net v0.52.0
+	golang.org/x/net v0.56.0
 )
 
 require (
