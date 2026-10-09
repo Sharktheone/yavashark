@@ -4,7 +4,7 @@ use crate::array::Array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
 use crate::realm::{Intrinsic, Realm};
-use crate::utils::coerce_object;
+use crate::utils::{coerce_object, coerce_object_strict};
 use crate::value::Property;
 use crate::value::property_key::IntoPropertyKey;
 use crate::{Error, Object, ObjectHandle, ObjectOrNull, Symbol, Value, ValueResult};
@@ -205,5 +205,5 @@ fn intrinsic_is<T: Intrinsic + 'static>(obj: &ObjectHandle, realm: &mut Realm) -
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    Ok(this)
+    Ok(coerce_object_strict(this, realm)?.into())
 }
