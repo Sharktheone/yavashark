@@ -1698,11 +1698,6 @@ impl<T: Into<Self>> AddAssign<T> for YSString {
     }
 }
 
-// =============================================================================
-// ToYSString trait
-// =============================================================================
-
-/// Trait for converting types to `YSString`.
 pub trait ToYSString {
     fn to_ys_string(&self) -> YSString;
 }
