@@ -201,7 +201,7 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 }
 
 fn intrinsic_is<T: Intrinsic + 'static>(obj: &ObjectHandle, realm: &mut Realm) -> bool {
-    obj.downcast::<T>().is_some() || T::get_intrinsic(realm).map(|p| p == *obj).unwrap_or(false)
+    obj.downcast::<T>().is_some() || T::get_intrinsic(realm).is_ok_and(|p| p == *obj)
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
