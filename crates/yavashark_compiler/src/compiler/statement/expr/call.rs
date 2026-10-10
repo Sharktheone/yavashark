@@ -76,7 +76,7 @@ impl Compiler {
             } else {
                 self.instructions.push(Instruction::push_call(out));
             }
-        };
+        }
 
         Ok(())
     }

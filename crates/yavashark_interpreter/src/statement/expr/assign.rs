@@ -22,39 +22,33 @@ impl Interpreter {
         if matches!(
             stmt.op,
             AssignOp::OrAssign | AssignOp::AndAssign | AssignOp::NullishAssign
-        )
-            && let AssignTarget::Simple(SimpleAssignTarget::Member(member)) = &stmt.left
-                && !matches!(member.prop, MemberProp::PrivateName(_)) {
-                    let object = Self::run_expr(realm, &member.obj, member.span, scope)?;
-                    let object = coerce_object_strict(object, realm)?;
-                    let key = match &member.prop {
-                        MemberProp::Ident(ident) => {
-                            InternalPropertyKey::String(YSString::from_ref(&ident.sym))
-                        }
-                        MemberProp::Computed(computed) => {
-                            Self::run_expr(realm, &computed.expr, computed.span, scope)?
-                                .into_internal_property_key(realm)?
-                        }
-                        MemberProp::PrivateName(_) => unreachable!(),
-                    };
-                    let left = object
-                        .resolve_property(key.clone(), realm)?
-                        .unwrap_or(Value::Undefined);
-
-                    if Self::assignment_short_circuits(stmt.op, &left) {
-                        return Ok(left);
-                    }
-
-                    let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                    Self::assign_property(
-                        realm,
-                        &object,
-                        key,
-                        value.copy(),
-                        scope.is_strict_mode()?,
-                    )?;
-                    return Ok(value);
+        ) && let AssignTarget::Simple(SimpleAssignTarget::Member(member)) = &stmt.left
+            && !matches!(member.prop, MemberProp::PrivateName(_))
+        {
+            let object = Self::run_expr(realm, &member.obj, member.span, scope)?;
+            let object = coerce_object_strict(object, realm)?;
+            let key = match &member.prop {
+                MemberProp::Ident(ident) => {
+                    InternalPropertyKey::String(YSString::from_ref(&ident.sym))
                 }
+                MemberProp::Computed(computed) => {
+                    Self::run_expr(realm, &computed.expr, computed.span, scope)?
+                        .into_internal_property_key(realm)?
+                }
+                MemberProp::PrivateName(_) => unreachable!(),
+            };
+            let left = object
+                .resolve_property(key.clone(), realm)?
+                .unwrap_or(Value::Undefined);
+
+            if Self::assignment_short_circuits(stmt.op, &left) {
+                return Ok(left);
+            }
+
+            let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
+            Self::assign_property(realm, &object, key, value.copy(), scope.is_strict_mode()?)?;
+            return Ok(value);
+        }
 
         let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
