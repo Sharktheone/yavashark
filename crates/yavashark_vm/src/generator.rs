@@ -92,7 +92,7 @@ impl GeneratorFunction {
     }
 }
 
-#[props(intrinsic_name = generator_function)]
+#[props(intrinsic_name = generator_function, to_string_tag = "GeneratorFunction")]
 impl GeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
