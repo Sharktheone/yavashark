@@ -737,8 +737,8 @@ fn is_concat_spreadable(obj: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
     }
 
     // 4. Return ? IsArray(O).
-    // Check if it's an Array instance
-    let is_array = obj.downcast::<Array>().is_some();
+    is_array(obj, realm)
+}
 
 pub fn is_array(obj: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
     if let Some(proxy) = obj.downcast::<Proxy>() {
