@@ -7,15 +7,14 @@ use crate::realm::{Intrinsic, Realm};
 use crate::utils::{ArrayLike, ProtoDefault, ValueIterator, coerce_object_strict};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{
-    Attributes, BoxedObj, Constructor, CustomName, DefinePropertyDescriptor, DefinePropertyResult,
-    Func, IntoValue, MutObj, Obj, ObjectImpl, ObjectOrNull, Property, PropertyDescriptor,
+    Attributes, Constructor, CustomName, DefinePropertyDescriptor, DefinePropertyResult, Func,
+    IntoValue, MutObj, Obj, ObjectImpl, ObjectOrNull, Property, PropertyDescriptor,
 };
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, Symbol};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
-use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
 
@@ -741,7 +740,17 @@ fn is_concat_spreadable(obj: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
     // Check if it's an Array instance
     let is_array = obj.downcast::<Array>().is_some();
 
-    Ok(is_array)
+pub fn is_array(obj: &ObjectHandle, realm: &mut Realm) -> Res<bool> {
+    if let Some(proxy) = obj.downcast::<Proxy>() {
+        if proxy.revoke.get() {
+            return Err(Error::ty("Cannot perform 'isArray' on a revoked proxy"));
+        }
+
+        return is_array(&proxy.inner, realm);
+    }
+
+    Ok(obj.downcast::<Array>().is_some()
+        || obj == realm.intrinsics.clone_public().array.get(realm)?)
 }
 
 #[must_use]
@@ -3224,26 +3233,10 @@ impl ArrayConstructor {
 
     #[prop("isArray")]
     fn is_array(test: Value, #[realm] realm: &mut Realm) -> Res<bool> {
-        let is_proto = if let Value::Object(o) = &test {
-            o == realm.intrinsics.clone_public().array.get(realm)?
-        } else {
-            return Ok(false);
-        };
-
-        if is_proto {
-            return Ok(true);
+        match test {
+            Value::Object(obj) => is_array(&obj, realm),
+            _ => Ok(false),
         }
-
-        if let Some(proxy) = test.downcast::<Proxy>()? {
-            if proxy.revoke.get() {
-                return Err(Error::ty("Cannot perform 'isArray' on a revoked proxy"));
-            }
-        }
-
-        let this: Res<OwningGcGuard<BoxedObj, Array>, _> =
-            crate::value::FromValue::from_value(test);
-
-        Ok(this.is_ok())
     }
 
     fn of(#[realm] realm: &mut Realm, args: Vec<Value>, #[this] this: Value) -> Res<ObjectHandle> {
