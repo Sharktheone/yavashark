@@ -96,7 +96,7 @@ impl AsyncGeneratorFunction {
     }
 }
 
-#[props(intrinsic_name = async_generator_function)]
+#[props(intrinsic_name = async_generator_function, to_string_tag = "AsyncGeneratorFunction")]
 impl AsyncGeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
@@ -205,7 +205,7 @@ impl AsyncGenerator {
     }
 }
 
-#[props(intrinsic_name = async_generator)]
+#[props(intrinsic_name = async_generator, to_string_tag = "AsyncGenerator")]
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, value: Option<Value>, realm: &mut Realm) -> ValueResult {
