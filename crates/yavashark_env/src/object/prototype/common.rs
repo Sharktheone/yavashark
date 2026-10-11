@@ -1,6 +1,6 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use crate::array::Array;
+use crate::array::is_array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
 use crate::realm::{Intrinsic, Realm};
@@ -169,14 +169,12 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 
     let this = coerce_object(this, realm)?;
 
-    let mut owned_tag = YSString::new();
-
-    let tag = if this.is_callable() || this.is_constructable() {
-        "Function"
-    } else if intrinsic_is::<Array>(&this, realm) {
+    let builtin_tag = if is_array(&this, realm)? {
         "Array"
     } else if intrinsic_is::<Arguments>(&this, realm) {
         "Arguments"
+    } else if this.is_callable() || this.is_constructable() {
+        "Function"
     } else if intrinsic_is::<ErrorObj>(&this, realm) {
         "Error"
     } else if intrinsic_is::<BooleanObj>(&this, realm) {
@@ -189,15 +187,15 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
         "Date"
     } else if intrinsic_is::<RegExp>(&this, realm) {
         "RegExp"
-    } else if let Some(to_string_tag) = this.get_opt(Symbol::TO_STRING_TAG, realm)? {
-        owned_tag = to_string_tag.to_string(realm)?;
-
-        &*owned_tag.as_str_lossy()
     } else {
         "Object"
     };
 
-    Ok(format!("[object {tag}]").into())
+    if let Value::String(tag) = this.get(Symbol::TO_STRING_TAG, realm)? {
+        return Ok(format!("[object {tag}]").into());
+    }
+
+    Ok(format!("[object {builtin_tag}]").into())
 }
 
 fn intrinsic_is<T: Intrinsic + 'static>(obj: &ObjectHandle, realm: &mut Realm) -> bool {
