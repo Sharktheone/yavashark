@@ -155,7 +155,7 @@ mod bits {
     }
 
     pub const fn box_int32(val: i32) -> u64 {
-        (val as u64) | INT32_TAG
+        (val as u32 as u64) | INT32_TAG
     }
 
     pub const fn box_bool(val: bool) -> u64 {
