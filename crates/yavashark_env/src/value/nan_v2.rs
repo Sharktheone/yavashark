@@ -79,7 +79,7 @@ mod bits {
     }
 
     pub const fn is_imm(val: u64) -> bool {
-        val == IMM_TAG
+        tag(val) == IMM_TAG
     }
 
     pub const fn is_bool(val: u64) -> bool {
