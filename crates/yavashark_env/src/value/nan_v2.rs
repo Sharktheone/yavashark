@@ -22,7 +22,7 @@ use std::ptr::NonNull;
 /// Unused     1111 1111 1111 1011 0000 0000 0000 0000 0000 .. 0000
 ///
 /// String     1111 1111 1111 1100 PPPP PPPP PPPP PPPP PPPP .. PPPP
-/// BigInt     1111 1111 1111 1110 PPPP PPPP PPPP PPPP PPPP .. PPPP
+/// BigInt     1111 1111 1111 1101 PPPP PPPP PPPP PPPP PPPP .. PPPP
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct ValueInner {
