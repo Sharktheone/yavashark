@@ -82,6 +82,11 @@ mod bits {
         tag(val) == IMM_TAG
     }
 
+    pub const DOUBLE_SHIFTED_LIMIT: u64 = 0xFFF2_0000_0000_0000;
+
+    pub const fn is_f64_fast(val: u64) -> bool {
+        (val << 1) < DOUBLE_SHIFTED_LIMIT
+    }
     pub const fn is_bool(val: u64) -> bool {
         val == TRUE || val == FALSE
     }
