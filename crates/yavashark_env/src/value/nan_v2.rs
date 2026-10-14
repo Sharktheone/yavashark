@@ -87,6 +87,14 @@ mod bits {
     pub const fn is_f64_fast(val: u64) -> bool {
         (val << 1) < DOUBLE_SHIFTED_LIMIT
     }
+
+    pub const fn is_number(val: u64) -> bool {
+        is_f64_fast(val) || is_int32(val)
+    }
+
+    pub const fn is_nan(val: u64) -> bool {
+        is_f64_fast(val) && (val << 1) > 0xFFE0_0000_0000_0000
+    }
     pub const fn is_bool(val: u64) -> bool {
         val == TRUE || val == FALSE
     }
