@@ -92,6 +92,10 @@ mod bits {
         is_f64_fast(val) || is_int32(val)
     }
 
+    pub const fn both_int32(a: u64, b: u64) -> bool {
+        ((a ^ INT32_TAG) | (b ^ INT32_TAG)) >> 32 == 0
+    }
+
     pub const fn is_nan(val: u64) -> bool {
         is_f64_fast(val) && (val << 1) > 0xFFE0_0000_0000_0000
     }
