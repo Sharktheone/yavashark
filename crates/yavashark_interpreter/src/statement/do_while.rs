@@ -22,7 +22,7 @@ impl Interpreter {
                     ControlFlow::Break(None) => {
                         break;
                     }
-                    ControlFlow::Continue(l) if last_loop.as_ref() == l.as_ref() => {
+                    ControlFlow::Continue(l) if l.is_none() || last_loop.as_ref() == l.as_ref() => {
                         let condition = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
 
                         if condition.is_falsey() {
