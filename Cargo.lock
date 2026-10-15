@@ -7468,6 +7468,7 @@ dependencies = [
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser 45.1.3",
+ "swc_ecma_transforms_react",
  "swc_ecma_transforms_typescript",
  "tokio",
  "wasm-bindgen",

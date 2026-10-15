@@ -22,7 +22,7 @@ impl Http {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
@@ -96,7 +96,7 @@ impl HttpResponseWriter {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this)
     }

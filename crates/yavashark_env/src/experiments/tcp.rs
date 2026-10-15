@@ -16,7 +16,7 @@ impl Tcp {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
+        this.initialize(realm)?;
 
         Ok(this.into_object())
     }
