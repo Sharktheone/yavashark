@@ -10,6 +10,7 @@ use swc_ecma_parser::lexer::Lexer;
 use swc_ecma_parser::{EsSyntax, PResult, Parser, StringInput, Syntax, TsSyntax};
 use swc_ecma_transforms_typescript::{Config, TsxConfig};
 
+#[allow(unused)]
 const SYNTAX_ES: Syntax = Syntax::Es(EsSyntax {
     jsx: false,
     fn_bind: false,
@@ -92,7 +93,7 @@ pub fn parse_program(code: &str, name: &str) -> Option<Program> {
 fn strip_ts(prog: &mut Program, cm: Rc<SourceMap>) {
     GLOBALS.set(&Globals::default(), || {
         swc_ecma_transforms_typescript::tsx(
-            cm,
+            Rc::clone(&cm),
             Config::default(),
             TsxConfig::default(),
             NoopComments,
@@ -102,6 +103,17 @@ fn strip_ts(prog: &mut Program, cm: Rc<SourceMap>) {
 
         swc_ecma_transforms_typescript::strip(Mark::new(), Mark::new())
             .process(prog);
+
+        swc_ecma_transforms_react::jsx(
+            cm,
+            None::<NoopComments>,
+            swc_ecma_transforms_react::Options {
+                runtime: Some(swc_ecma_transforms_react::Runtime::Classic),
+                ..Default::default()
+            },
+            Mark::new(),
+            Mark::new(),
+        )
+        .process(prog);
     });
 }
-
