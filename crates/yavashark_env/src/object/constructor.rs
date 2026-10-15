@@ -214,6 +214,9 @@ impl ObjectConstructor {
         let mut props = Vec::with_capacity(keys.len());
 
         for key in keys {
+            if key.is_symbol() {
+                continue;
+            }
             let value = obj.resolve_property_no_get_set(key.clone(), realm)?;
             let Some(value) = value else {
                 continue;
