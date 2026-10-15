@@ -90,7 +90,7 @@ impl Interpreter {
                 Err(ControlFlow::Break(None)) => {
                     break;
                 }
-                Err(ControlFlow::Continue(l)) if label.as_ref() == l.as_ref() => {}
+                Err(ControlFlow::Continue(l)) if l.is_none() || label.as_ref() == l.as_ref() => {}
                 Err(e) => return Err(e),
             }
         }
