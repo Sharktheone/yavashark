@@ -29,7 +29,7 @@ impl Interpreter {
                     ControlFlow::Break(None) => {
                         break Ok(Value::Undefined);
                     }
-                    ControlFlow::Continue(l) if *l == label => {}
+                    ControlFlow::Continue(l) if l.is_none() || *l == label => {}
                     _ => return Err(e),
                 },
             }
