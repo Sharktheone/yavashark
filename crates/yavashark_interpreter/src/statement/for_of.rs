@@ -7,8 +7,8 @@ impl Interpreter {
     pub fn run_for_of(realm: &mut Realm, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
-        let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;
+        let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_loop()?;
 
         let iter = obj.iter_no_realm(realm)?;
@@ -28,7 +28,7 @@ impl Interpreter {
                 Err(ControlFlow::Break(None)) => {
                     break;
                 }
-                Err(ControlFlow::Continue(l)) if label.as_ref() == l.as_ref() => {}
+                Err(ControlFlow::Continue(l)) if l.is_none() || label.as_ref() == l.as_ref() => {}
                 Err(e) => return Err(e),
             }
         }

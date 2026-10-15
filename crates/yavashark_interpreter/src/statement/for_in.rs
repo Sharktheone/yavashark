@@ -64,9 +64,9 @@ impl Interpreter {
             prototype = proto.prototype(realm)?;
         }
 
+        let label = scope.last_label()?;
         for key in keys {
             let scope = &mut Scope::with_parent(scope)?;
-            let label = scope.last_label()?;
             scope.state_set_loop()?;
 
             let Some(prop) = obj.resolve_property(key.clone().into(), realm)? else {
