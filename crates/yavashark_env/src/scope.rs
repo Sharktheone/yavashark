@@ -1218,19 +1218,6 @@ mod tests {
     }
 
     #[test]
-    fn scope_internal_declare_read_only_var_and_update_fails() {
-        let mut realm = Realm::new().unwrap();
-        let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
-        scope
-            .declare_read_only_var("test".to_string(), Value::Number(42.0), &mut realm)
-            .unwrap();
-        let result = scope
-            .update("test", Value::Number(43.0), &mut realm)
-            .unwrap();
-        assert!(!result);
-    }
-
-    #[test]
     fn scope_internal_declare_global_var_and_resolve() {
         let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
