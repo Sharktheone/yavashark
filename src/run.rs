@@ -128,6 +128,8 @@ pub fn main() -> ExitCode {
 
     let src = matches.get_one::<String>("source");
 
+    let mut print_res = false;
+
     // Either a script to run or code to evaluate - `conflicts_with` rules out both at once.
     let input = eval_code.map_or_else(
         || {
@@ -143,7 +145,10 @@ pub fn main() -> ExitCode {
                 (content, PathBuf::from(src))
             })
         },
-        |code| Some((code.clone(), PathBuf::from("<eval>"))),
+        |code| {
+            print_res = true;
+            Some((code.clone(), PathBuf::from("<eval>")))
+        },
     );
 
     let config = conf::Conf {
@@ -172,6 +177,7 @@ pub fn main() -> ExitCode {
             path,
             ast,
             interpreter,
+            print_res,
             bytecode,
             instructions,
             js_profile_out.as_deref(),
@@ -193,6 +199,7 @@ fn run_code(
     path: PathBuf,
     ast: bool,
     interpreter: bool,
+    print_res: bool,
     #[allow(unused_variables)] bytecode: bool,
     #[allow(unused_variables)] instructions: bool,
     #[allow(unused_variables)] js_profile_out: Option<&str>,
@@ -270,11 +277,11 @@ fn run_code(
                     return ExitCode::FAILURE;
                 }
             };
-        if !result.is_undefined() {
+        if !result.is_undefined() && print_res {
             if bytecode && interpreter {
-                println!("Interpreter: {result:?}");
+                println!("Interpreter: {}", result.pretty_print(&mut realm));
             } else {
-                println!("{result:?}");
+                println!("{}", result.pretty_print(&mut realm));
             }
         }
 
@@ -353,7 +360,7 @@ fn run_code(
 
         let ret = vm.acc();
 
-        if !ret.is_undefined() {
+        if !ret.is_undefined() && print_res {
             if bytecode && interpreter {
                 println!("Bytecode: {ret:?}");
             } else {
