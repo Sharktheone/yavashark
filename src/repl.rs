@@ -12,6 +12,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
+use crate::run::cli;
 
 pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
     let (preload, path) = match preload {
@@ -116,6 +117,18 @@ pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
                     continue;
                 }
             };
+        }
+
+        match &*input {
+            ".help" => {
+                if let Err(e) = cli().print_help() {
+                    eprintln!("Error writing help: {e:?}");
+                }
+
+                continue;
+            }
+            ".exit" => return Ok(()),
+            _ => {}
         }
 
         run_input(
