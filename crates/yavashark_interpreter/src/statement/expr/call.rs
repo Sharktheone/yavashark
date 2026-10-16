@@ -206,7 +206,7 @@ impl Interpreter {
                 Expr::Await(stmt) => Self::run_await(realm, stmt, scope)?,
                 Expr::Paren(stmt) => return Self::run_call_expr(realm, &stmt.expr, span, scope),
                 Expr::PrivateName(stmt) => Self::run_private_name(realm, stmt, scope)?,
-                Expr::OptChain(stmt) => return Self::run_opt_chain_reference(realm, stmt, scope),
+                Expr::OptChain(stmt) => Self::run_opt_chain(realm, stmt, scope)?,
                 Expr::Invalid(stmt) => {
                     return Err(ControlFlow::error(format!(
                         "{:?}: Invalid expression.",
