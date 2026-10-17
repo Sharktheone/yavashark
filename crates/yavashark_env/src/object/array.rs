@@ -122,6 +122,36 @@ impl ObjectImpl for Array {
         Ok(DefinePropertyResult::Handled)
     }
 
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(Some(Property::Value(
+                self.length.get().into(),
+                Attributes::from_values(self.length_writable.get(), false, false),
+            )));
+        }
+
+        self.get_wrapped_object().resolve_property(name, realm)
+    }
+
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(Some(Property::Value(
+                self.length.get().into(),
+                Attributes::from_values(self.length_writable.get(), false, false),
+            )));
+        }
+
+        self.get_wrapped_object().get_own_property(name, realm)
+    }
+
     fn define_getter_attributes(
         &self,
         name: InternalPropertyKey,
@@ -178,51 +208,6 @@ impl ObjectImpl for Array {
         Ok(())
     }
 
-    fn resolve_property(
-        &self,
-        name: InternalPropertyKey,
-        realm: &mut Realm,
-    ) -> Res<Option<Property>> {
-        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(
-                self.length.get().into(),
-                Attributes::from_values(self.length_writable.get(), false, false),
-            )));
-        }
-
-        self.get_wrapped_object().resolve_property(name, realm)
-    }
-
-    fn get_own_property(
-        &self,
-        name: InternalPropertyKey,
-        realm: &mut Realm,
-    ) -> Res<Option<Property>> {
-        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(
-                self.length.get().into(),
-                Attributes::from_values(self.length_writable.get(), false, false),
-            )));
-        }
-
-        self.get_wrapped_object().get_own_property(name, realm)
-    }
-
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(true);
-        }
-
-        self.get_wrapped_object().contains_key(name, realm)
-    }
-
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(true);
-        }
-        self.get_wrapped_object().contains_own_key(name, realm)
-    }
-
     fn delete_property(
         &self,
         name: InternalPropertyKey,
@@ -232,6 +217,21 @@ impl ObjectImpl for Array {
             return Ok(None);
         }
         self.get_wrapped_object().delete_property(name, realm)
+    }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(true);
+        }
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(true);
+        }
+
+        self.get_wrapped_object().contains_key(name, realm)
     }
 
     fn get_property_descriptor(
@@ -3108,27 +3108,31 @@ impl PrettyObjectOverride for Array {
         let mut s = String::new();
         s.push('[');
 
-        let mut empty = 0u32;
+        let mut last_index = 0usize;
 
-        for (i, (_, idx)) in inner.array.iter().enumerate() {
-            if let Some(v) = inner.values.get(*idx) {
+        for (i, (idx, slot)) in inner.array.iter().enumerate() {
+
+            if let Some(v) = inner.values.get(*slot) {
                 if i > 0 {
                     s.push_str(", ");
                 }
 
-                if empty != 0 {
-                    let _ = write!(s, "<{empty} empty items>");
-                    empty = 0;
+                if last_index != *idx {
+                    let _ = write!(s, "<{} empty items>, ", *idx - last_index);
                 }
 
                 s.push_str(&v.value.pretty_print_circular(not, realm));
-            } else {
-                empty += 1;
+                last_index = *idx + 1;
             }
         }
 
-        if empty != 0 {
-            let _ = write!(s, "<{empty} empty items> ");
+
+        if last_index != self.length.get() {
+            if s.is_empty() {
+                let _ = write!(s, "<{} empty items> ", self.length.get() - last_index);
+            } else {
+                let _ = write!(s, " <{} empty items> ", self.length.get() - last_index);
+            }
         }
 
         s.push(']');
