@@ -9,7 +9,7 @@ NaN-Boxing value type, the new object model and finally the standalone GC projec
 
 ## ECMA-262 Compliance
 
-Yavashark currently passes ~81% of the entire test262 suite including intl, temporal, annexB and stating. 
+Yavashark currently passes ~81% of the entire test262 suite including intl, temporal, annexB and staging. 
 
 ## Contributing
 
