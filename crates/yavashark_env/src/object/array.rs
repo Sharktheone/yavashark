@@ -16,7 +16,6 @@ use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::fmt::Write;
 use std::ops::{Deref, DerefMut};
-use colored::Colorize;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
 
