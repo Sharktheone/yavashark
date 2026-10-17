@@ -265,7 +265,7 @@ impl PrettyPrint for Value {
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => format!("\"{s}\"").green().to_string(),
+            Self::String(s) => s.to_string(),
             Self::Object(o) => o.pretty_print_circular(not, realm),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
             Self::BigInt(b) => {
@@ -283,7 +283,7 @@ impl PrettyPrint for Value {
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => format!("\"{s}\"").green().to_string(),
+            Self::String(s) => s.to_string(),
             Self::Object(o) => o.pretty_print_circular_nl(not, realm),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
             Self::BigInt(b) => {
@@ -339,7 +339,7 @@ pub fn fmt_properties_to(obj: &Object, str: &mut String, not: &mut Vec<usize>, r
 impl PrettyPrint for PropertyKey {
     fn pretty_print_key(&self, _realm: &mut Realm) -> String {
         match self {
-            Self::String(s) => format!("\"{s}\"").green().to_string(),
+            Self::String(s) => s.to_string(),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
     }
