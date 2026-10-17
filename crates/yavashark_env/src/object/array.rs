@@ -14,7 +14,9 @@ use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, Symbol};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
+use std::fmt::Write;
 use std::ops::{Deref, DerefMut};
+use colored::Colorize;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
 
@@ -3106,14 +3108,30 @@ impl PrettyObjectOverride for Array {
         };
         let mut s = String::new();
         s.push('[');
+
+        let mut empty = 0u32;
+
         for (i, (_, idx)) in inner.array.iter().enumerate() {
             if let Some(v) = inner.values.get(*idx) {
                 if i > 0 {
                     s.push_str(", ");
                 }
+
+                if empty != 0 {
+                    let _ = write!(s, "<{empty} empty items>");
+                    empty = 0;
+                }
+
                 s.push_str(&v.value.pretty_print_circular(not, realm));
+            } else {
+                empty += 1;
             }
         }
+
+        if empty != 0 {
+            let _ = write!(s, "<{empty} empty items> ");
+        }
+
         s.push(']');
         Some(s)
     }
