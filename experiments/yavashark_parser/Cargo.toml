@@ -7,5 +7,5 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-yavashark_lexer = { path = "../yavashark_lexer" }
+yavashark_lexer = { path = "../../docs/yavashark_lexer" }
 slotmap = "1.0.7"
