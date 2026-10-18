@@ -2674,10 +2674,8 @@ impl Array {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // 1. If comparator is not undefined and IsCallable(comparator) is false, throw a TypeError exception.
-        if let Some(ref f) = func {
-            if !f.is_callable() {
+        if let Some(ref f) = func && !f.is_callable() {
                 return Err(Error::ty("comparator is not a function"));
-            }
         }
 
         // 2. Let O be ? ToObject(this value).
