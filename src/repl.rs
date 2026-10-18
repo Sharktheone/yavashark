@@ -2,6 +2,7 @@ mod helper;
 
 use crate::conf::Conf;
 use crate::repl::helper::ReplHelper;
+use crate::run::cli;
 use rustyline::error::ReadlineError;
 use rustyline::{CompletionType, Config, EditMode, Editor};
 use std::path::PathBuf;
@@ -12,7 +13,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_swc_validator::Validator;
-use crate::run::cli;
 
 pub fn repl(conf: Conf, preload: Option<(String, PathBuf)>) -> Res {
     let (preload, path) = match preload {

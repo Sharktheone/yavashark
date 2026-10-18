@@ -1,10 +1,10 @@
 use crate::Interpreter;
 use swc_common::Spanned;
 use swc_ecma_ast::AwaitExpr;
-use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
 use yavashark_env::builtins::{Promise, PromiseState};
 use yavashark_env::error_obj::ErrorObj;
+use yavashark_env::scope::Scope;
+use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_await(realm: &mut Realm, stmt: &AwaitExpr, scope: &mut Scope) -> RuntimeResult {
@@ -21,7 +21,7 @@ impl Interpreter {
                     PromiseState::Fulfilled => Ok(value),
                     PromiseState::Rejected => Err(ControlFlow::Error(Error::throw(value))),
                     PromiseState::Pending => Err(ControlFlow::Error(Error::new(
-                        "TODO: await not yet implemented in interpreter, use bytecode!"
+                        "TODO: await not yet implemented in interpreter, use bytecode!",
                     ))),
                 };
             }

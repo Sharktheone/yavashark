@@ -1,10 +1,10 @@
 use std::mem;
-use swc_ecma_ast::Pass;
 use std::rc::Rc;
+use swc_common::comments::NoopComments;
 use swc_common::errors::{ColorConfig, Handler};
 use swc_common::sync::Lrc;
-use swc_common::{FileName, Globals, Mark, SourceFile, SourceMap, GLOBALS};
-use swc_common::comments::NoopComments;
+use swc_common::{FileName, GLOBALS, Globals, Mark, SourceFile, SourceMap};
+use swc_ecma_ast::Pass;
 use swc_ecma_ast::{Program, Script};
 use swc_ecma_parser::lexer::Lexer;
 use swc_ecma_parser::{EsSyntax, PResult, Parser, StringInput, Syntax, TsSyntax};
@@ -56,7 +56,6 @@ pub fn parse_script(code: &str, name: &str) -> Option<Script> {
 
     let mut res = emit(Rc::clone(&cm), &mut p, res);
 
-
     if let Some(script) = res.as_mut() {
         let s = mem::take(script);
 
@@ -85,10 +84,8 @@ pub fn parse_program(code: &str, name: &str) -> Option<Program> {
         strip_ts(p, cm);
     }
 
-
     res
 }
-
 
 fn strip_ts(prog: &mut Program, cm: Rc<SourceMap>) {
     GLOBALS.set(&Globals::default(), || {
@@ -98,11 +95,11 @@ fn strip_ts(prog: &mut Program, cm: Rc<SourceMap>) {
             TsxConfig::default(),
             NoopComments,
             Mark::new(),
-            Mark::new()
-        ).process(prog);
+            Mark::new(),
+        )
+        .process(prog);
 
-        swc_ecma_transforms_typescript::strip(Mark::new(), Mark::new())
-            .process(prog);
+        swc_ecma_transforms_typescript::strip(Mark::new(), Mark::new()).process(prog);
 
         swc_ecma_transforms_react::jsx(
             cm,

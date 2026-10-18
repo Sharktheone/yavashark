@@ -2674,8 +2674,10 @@ impl Array {
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         // 1. If comparator is not undefined and IsCallable(comparator) is false, throw a TypeError exception.
-        if let Some(ref f) = func && !f.is_callable() {
-                return Err(Error::ty("comparator is not a function"));
+        if let Some(ref f) = func
+            && !f.is_callable()
+        {
+            return Err(Error::ty("comparator is not a function"));
         }
 
         // 2. Let O be ? ToObject(this value).
@@ -3109,7 +3111,6 @@ impl PrettyObjectOverride for Array {
         let mut last_index = 0usize;
 
         for (i, (idx, slot)) in inner.array.iter().enumerate() {
-
             if let Some(v) = inner.values.get(*slot) {
                 if i > 0 {
                     s.push_str(", ");
@@ -3123,7 +3124,6 @@ impl PrettyObjectOverride for Array {
                 last_index = *idx + 1;
             }
         }
-
 
         if last_index != self.length.get() {
             if s.is_empty() {

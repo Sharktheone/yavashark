@@ -105,7 +105,6 @@ yavashark -s script.js        Run a script, then stay in the REPL",
 
 #[allow(clippy::unwrap_used)]
 pub fn main() -> ExitCode {
-
     let matches = cli().get_matches();
 
     let mut interpreter = matches.get_flag("interpreter");
