@@ -2362,6 +2362,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "gmp-mpfr-sys"
+version = "1.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7db155b537cb791b133341f99f68371d86ee7fa4c79aacfbc376d72d23c70531"
+dependencies = [
+ "libc",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "gpu-alloc"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7473,6 +7483,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_alloca"
+version = "0.1.0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
+name = "yavashark_bigint"
+version = "0.1.0"
+dependencies = [
+ "gmp-mpfr-sys",
+]
+
+[[package]]
 name = "yavashark_bytecode"
 version = "0.1.0"
 dependencies = [
@@ -7593,6 +7617,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_ir"
+version = "0.1.0"
+dependencies = [
+ "bumpalo",
+ "num-bigint 0.4.8",
+ "regress",
+ "yavashark_string",
+]
+
+[[package]]
+name = "yavashark_lexer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
+
+[[package]]
 name = "yavashark_macro"
 version = "0.1.0"
 dependencies = [
@@ -7600,6 +7641,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "yavashark_parser"
+version = "0.1.0"
+dependencies = [
+ "slotmap",
+ "yavashark_lexer",
 ]
 
 [[package]]
@@ -7612,10 +7661,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_shonk"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_string"
 version = "0.1.0"
 dependencies = [
  "thin-vec",
+]
+
+[[package]]
+name = "yavashark_swc"
+version = "0.1.0"
+dependencies = [
+ "rand 0.10.2",
+ "swc_common",
+ "swc_ecma_parser 45.1.3",
 ]
 
 [[package]]
@@ -7655,6 +7717,20 @@ dependencies = [
  "yavashark_string",
  "yavashark_swc_validator",
  "yavashark_vm",
+]
+
+[[package]]
+name = "yavashark_value"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "equivalent",
+ "half",
+ "num-bigint 0.4.8",
+ "num-traits",
+ "rand 0.10.2",
+ "yavashark_garbage",
+ "yavashark_string",
 ]
 
 [[package]]
