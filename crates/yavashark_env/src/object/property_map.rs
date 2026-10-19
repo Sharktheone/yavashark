@@ -23,6 +23,13 @@ pub struct PropertyMap<T: ?Sized> {
     data: OpaqueData<T>,
 }
 
+//TODO: I need to just write down my new thoughts here real quick:
+// 1. MapState will be moved to the Shape, there is no reason to have it in the PropertyMap. The initial reason was cache-locality, but the property load will be unchecked anyways
+// 2. The PropertyMap / InlineObject / New Object won't have a pointer to the shape at all! It will be handled by the gc. The gc will just put type-level metadata in the same allocation as shape.
+//    So a Gc type can specify (or provide `()`) for per type metadata (we'll get that for almost free). APIs for further exchanging the alloc will exist!
+// 3. The GC will need a "move" API. Regular rust types either specify none or can optimize for the move (e.g a resized, flattened allocation)
+
+
 #[repr(C, align(8))]
 #[derive(Default)]
 pub struct OpaqueData<T: ?Sized> {
