@@ -1,5 +1,7 @@
 #![allow(warnings)]
 
+mod lib;
+
 // Testing ground for new YS to improve perf!
 
 // We need to test:
