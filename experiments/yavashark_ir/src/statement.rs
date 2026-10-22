@@ -4,27 +4,27 @@ use bumpalo::collections::Vec;
 use yavashark_string::YSString;
 
 pub enum Statement<'alloc> {
-    Block(Box<'alloc, Block<'alloc>>),
-    Expression(Box<'alloc, Expression<'alloc>>),
+    Block(&'alloc Block<'alloc>),
+    Expression(&'alloc Expression<'alloc>),
 
-    Break(Box<'alloc, Break>),
-    Continue(Box<'alloc, Continue>),
-    Return(Box<'alloc, Return<'alloc>>),
-    Throw(Box<'alloc, Throw<'alloc>>),
+    Break(&'alloc Break),
+    Continue(&'alloc Continue),
+    Return(&'alloc Return<'alloc>),
+    Throw(&'alloc Throw<'alloc>),
 
-    Try(Box<'alloc, Try<'alloc>>),
+    Try(&'alloc Try<'alloc>),
 
-    If(Box<'alloc, If<'alloc>>),
-    Switch(Box<'alloc, Switch<'alloc>>),
+    If(&'alloc If<'alloc>),
+    Switch(&'alloc Switch<'alloc>),
 
-    Labelled(Box<'alloc, Labelled<'alloc>>),
-    While(Box<'alloc, While<'alloc>>),
-    DoWhile(Box<'alloc, DoWhile<'alloc>>),
-    For(Box<'alloc, For<'alloc>>),
-    ForIn(Box<'alloc, ForIn<'alloc>>),
-    ForOf(Box<'alloc, ForOf<'alloc>>),
+    Labelled(&'alloc Labelled<'alloc>),
+    While(&'alloc While<'alloc>),
+    DoWhile(&'alloc DoWhile<'alloc>),
+    For(&'alloc For<'alloc>),
+    ForIn(&'alloc ForIn<'alloc>),
+    ForOf(&'alloc ForOf<'alloc>),
 
-    With(Box<'alloc, With<'alloc>>),
+    With(&'alloc With<'alloc>),
 
     Debugger(Debugger),
 }
