@@ -29,7 +29,6 @@ pub struct PropertyMap<T: ?Sized> {
 //    So a Gc type can specify (or provide `()`) for per type metadata (we'll get that for almost free). APIs for further exchanging the alloc will exist!
 // 3. The GC will need a "move" API. Regular rust types either specify none or can optimize for the move (e.g a resized, flattened allocation)
 
-
 #[repr(C, align(8))]
 #[derive(Default)]
 pub struct OpaqueData<T: ?Sized> {

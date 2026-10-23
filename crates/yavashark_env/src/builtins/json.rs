@@ -156,7 +156,6 @@ impl JSON {
     #[configurable]
     const TO_STRING_TAG: &'static str = "JSON";
 
-
     #[length(2)]
     fn parse(str: &Value, #[realm] realm: &mut Realm) -> Res<Value> {
         let str = str.to_primitive(Hint::String, realm)?;
