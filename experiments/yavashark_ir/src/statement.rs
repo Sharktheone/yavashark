@@ -159,3 +159,19 @@ pub enum Pattern<'alloc> {
 struct VarDecl<'alloc> {
     a: &'alloc (),
 }
+
+
+struct FuncId(u32);
+
+
+struct Class<'alloc> {
+    a: &'alloc (),
+}
+
+struct Import<'alloc> {
+    a: &'alloc (),
+}
+
+struct Export<'alloc> {
+    a: &'alloc (),
+}
