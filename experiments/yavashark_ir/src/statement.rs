@@ -55,14 +55,6 @@ pub struct Block<'alloc> {
     statements: Vec<'alloc, Statement<'alloc>>,
 }
 
-pub struct Break {
-    label: Option<YSString>,
-}
-
-pub struct Continue {
-    label: Option<YSString>,
-}
-
 pub struct Return<'alloc> {
     value: Option<Expression<'alloc>>,
 }
