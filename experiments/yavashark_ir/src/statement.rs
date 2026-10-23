@@ -1,6 +1,7 @@
 use crate::expr::Expression;
 use bumpalo::collections::Vec;
 use yavashark_string::YSString;
+use crate::atom::Atom;
 
 pub enum Statement<'alloc> {
     /// Expressions
@@ -19,6 +20,8 @@ pub enum Statement<'alloc> {
     Continue(&'alloc Continue),
     Return(&'alloc Return<'alloc>),
     Throw(&'alloc Throw<'alloc>),
+    Break(Atom),
+    Continue(Atom),
 
     /// Try
 
