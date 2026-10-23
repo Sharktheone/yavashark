@@ -1,21 +1,35 @@
 use crate::expr::Expression;
-use bumpalo::boxed::Box;
 use bumpalo::collections::Vec;
 use yavashark_string::YSString;
 
 pub enum Statement<'alloc> {
-    Block(&'alloc Block<'alloc>),
+    /// Expressions
     Expression(&'alloc Expression<'alloc>),
+
+    /// Block
+    Block(&'alloc Block<'alloc>),
+
+    Var(&'alloc VarDecl<'alloc>),
+    Function(FuncId),
+    Class(&'alloc Class<'alloc>),
+
+    /// Control Flow
 
     Break(&'alloc Break),
     Continue(&'alloc Continue),
     Return(&'alloc Return<'alloc>),
     Throw(&'alloc Throw<'alloc>),
 
+    /// Try
+
     Try(&'alloc Try<'alloc>),
+
+    /// Branching
 
     If(&'alloc If<'alloc>),
     Switch(&'alloc Switch<'alloc>),
+
+    /// Loops
 
     Labelled(&'alloc Labelled<'alloc>),
     While(&'alloc While<'alloc>),
@@ -26,7 +40,14 @@ pub enum Statement<'alloc> {
 
     With(&'alloc With<'alloc>),
 
+    /// Modules
+
+    Import(&'alloc Import<'alloc>),
+    Export(&'alloc Export<'alloc>),
+
+    /// Debugger
     Debugger(Debugger),
+    Empty,
 }
 
 pub struct Block<'alloc> {
