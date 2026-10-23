@@ -1,7 +1,5 @@
-use bumpalo::boxed::Box;
-use num_bigint::BigInt;
 use regress::Regex;
-use yavashark_string::YSString;
+use crate::atom::Atom;
 
 pub enum Expression<'alloc> {
     Bool(bool),
@@ -9,11 +7,11 @@ pub enum Expression<'alloc> {
     Undefined,
     Float(f64),
     Int32(i32),
-    String(YSString),
-    BigInt(&'alloc BigInt),
+    String(Atom),
+    BigInt(Atom),
     RegExp(&'alloc Regex),
     Template(&'alloc TemplateLiteral<'alloc>),
-    Ident(YSString),
+    Ident(Atom),
     MetaProp(&'alloc MetaProp),
     Super(&'alloc SuperProp),
     ArrayLit(&'alloc ArrayLiteral<'alloc>),
