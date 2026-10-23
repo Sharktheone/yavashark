@@ -16,12 +16,10 @@ pub enum Statement<'alloc> {
 
     /// Control Flow
 
-    Break(&'alloc Break),
-    Continue(&'alloc Continue),
-    Return(&'alloc Return<'alloc>),
-    Throw(&'alloc Throw<'alloc>),
     Break(Atom),
     Continue(Atom),
+    Return(&'alloc Expression<'alloc>),
+    Throw(&'alloc Expression<'alloc>),
 
     /// Try
 
