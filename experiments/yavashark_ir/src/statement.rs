@@ -1,5 +1,4 @@
 use crate::expr::Expr;
-use yavashark_string::YSString;
 use crate::atom::Atom;
 
 #[derive(Debug, Clone, Copy)]
@@ -66,7 +65,7 @@ pub struct Try<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Catch<'a> {
-    param: Option<Pattern<'a>>,
+    param: Option<Pat<'a>>,
     block: Block<'a>,
 }
 
@@ -131,7 +130,7 @@ pub struct ForIn<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum ForInLeft<'a> {
     VarDecl(VarDecl<'a>),
-    Pattern(Pattern<'a>),
+    Pattern(Pat<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -144,7 +143,7 @@ pub struct ForOf<'a> {
 #[derive(Debug, Clone, Copy)]
 pub enum ForOfLeft<'a> {
     VarDecl(VarDecl<'a>),
-    Pattern(Pattern<'a>),
+    Pattern(Pat<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -155,7 +154,10 @@ pub struct With<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Debugger;
-pub enum Pattern<'a> {
+
+
+#[derive(Debug, Clone, Copy)]
+pub enum Pat<'a> {
     A(&'a ()),
 }
 
