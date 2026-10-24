@@ -2,48 +2,48 @@ use crate::expr::Expression;
 use yavashark_string::YSString;
 use crate::atom::Atom;
 
-pub enum Statement<'alloc> {
+pub enum Statement<'a> {
     /// Expressions
-    Expression(Expression<'alloc>),
+    Expression(Expression<'a>),
 
     /// Block
-    Block(&'alloc Block<'alloc>),
+    Block(&'a Block<'a>),
 
-    Var(&'alloc VarDecl<'alloc>),
+    Var(&'a VarDecl<'a>),
     Function(FuncId),
-    Class(&'alloc Class<'alloc>),
+    Class(&'a Class<'a>),
 
     /// Control Flow
 
     Break(Atom),
     Continue(Atom),
-    Return(&'alloc Expression<'alloc>),
-    Throw(&'alloc Expression<'alloc>),
+    Return(&'a Expression<'a>),
+    Throw(&'a Expression<'a>),
 
     /// Try
 
-    Try(&'alloc Try<'alloc>),
+    Try(&'a Try<'a>),
 
     /// Branching
 
-    If(&'alloc If<'alloc>),
-    Switch(&'alloc Switch<'alloc>),
+    If(&'a If<'a>),
+    Switch(&'a Switch<'a>),
 
     /// Loops
 
-    Labelled(&'alloc Labelled<'alloc>),
-    While(&'alloc While<'alloc>),
-    DoWhile(&'alloc DoWhile<'alloc>),
-    For(&'alloc For<'alloc>),
-    ForIn(&'alloc ForIn<'alloc>),
-    ForOf(&'alloc ForOf<'alloc>),
+    Labelled(&'a Labelled<'a>),
+    While(&'a While<'a>),
+    DoWhile(&'a DoWhile<'a>),
+    For(&'a For<'a>),
+    ForIn(&'a ForIn<'a>),
+    ForOf(&'a ForOf<'a>),
 
-    With(&'alloc With<'alloc>),
+    With(&'a With<'a>),
 
     /// Modules
 
-    Import(&'alloc Import<'alloc>),
-    Export(&'alloc Export<'alloc>),
+    Import(&'a Import<'a>),
+    Export(&'a Export<'a>),
 
     /// Debugger
     Debugger(Debugger),
