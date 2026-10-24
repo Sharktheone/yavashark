@@ -4,7 +4,7 @@ use crate::atom::Atom;
 
 pub enum Statement<'alloc> {
     /// Expressions
-    Expression(&'alloc Expression<'alloc>),
+    Expression(Expression<'alloc>),
 
     /// Block
     Block(&'alloc Block<'alloc>),
@@ -48,6 +48,11 @@ pub enum Statement<'alloc> {
     /// Debugger
     Debugger(Debugger),
     Empty,
+}
+
+#[test]
+fn foo() {
+    dbg!(size_of::<Statement>());
 }
 
 pub struct Block<'alloc> {
