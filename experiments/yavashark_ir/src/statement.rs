@@ -1,5 +1,4 @@
 use crate::expr::Expression;
-use bumpalo::collections::Vec;
 use yavashark_string::YSString;
 use crate::atom::Atom;
 
@@ -52,7 +51,7 @@ pub enum Statement<'alloc> {
 }
 
 pub struct Block<'alloc> {
-    statements: Vec<'alloc, Statement<'alloc>>,
+    statements: &'alloc [Statement<'alloc>],
 }
 
 pub struct Return<'alloc> {
@@ -82,12 +81,12 @@ pub struct If<'alloc> {
 
 pub struct Switch<'alloc> {
     discriminant: Expression<'alloc>,
-    cases: Vec<'alloc, SwitchCase<'alloc>>,
+    cases: &'alloc [SwitchCase<'alloc>],
 }
 
 pub struct SwitchCase<'alloc> {
     test: Option<Expression<'alloc>>,
-    consequent: Vec<'alloc, Statement<'alloc>>,
+    consequent: &'alloc [Statement<'alloc>],
 }
 
 pub struct Labelled<'alloc> {
