@@ -2,6 +2,7 @@ use crate::expr::Expr;
 use yavashark_string::YSString;
 use crate::atom::Atom;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Stmt<'a> {
     /// Expressions
     Expr(Expr<'a>),
@@ -50,58 +51,63 @@ pub enum Stmt<'a> {
     Empty,
 }
 
-#[test]
-fn foo() {
-    dbg!(size_of::<Stmt>());
-}
-
+#[derive(Debug, Clone, Copy)]
 pub struct Block<'a> {
-    statements: &'a [Stmt<'a>],
+    pub stmts: &'a [Stmt<'a>],
 }
 
 
+#[derive(Debug, Clone, Copy)]
 pub struct Try<'a> {
     block: Block<'a>,
     catch: Option<Catch<'a>>,
     finally: Option<Block<'a>>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Catch<'a> {
     param: Option<Pattern<'a>>,
     block: Block<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct If<'a> {
     test: Expr<'a>,
     consequent: Stmt<'a>,
     alternate: Option<Stmt<'a>>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Switch<'a> {
     discriminant: Expr<'a>,
     cases: &'a [SwitchCase<'a>],
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct SwitchCase<'a> {
     test: Option<Expr<'a>>,
     consequent: &'a [Stmt<'a>],
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Labelled<'a> {
-    label: YSString,
+    label: Atom,
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct While<'a> {
     test: Expr<'a>,
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct DoWhile<'a> {
     body: Stmt<'a>,
     test: Expr<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct For<'a> {
     init: Option<ForInit<'a>>,
     test: Option<Expr<'a>>,
@@ -109,38 +115,45 @@ pub struct For<'a> {
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ForInit<'a> {
     VarDecl(VarDecl<'a>),
     Expression(Expr<'a>),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ForIn<'a> {
     left: ForInLeft<'a>,
     right: Expr<'a>,
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ForInLeft<'a> {
     VarDecl(VarDecl<'a>),
     Pattern(Pattern<'a>),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct ForOf<'a> {
     left: ForOfLeft<'a>,
     right: Expr<'a>,
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum ForOfLeft<'a> {
     VarDecl(VarDecl<'a>),
     Pattern(Pattern<'a>),
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct With<'a> {
     object: Expr<'a>,
     body: Stmt<'a>,
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Debugger;
 pub enum Pattern<'a> {
     A(&'a ()),
@@ -151,6 +164,7 @@ struct VarDecl<'a> {
 }
 
 
+#[derive(Debug, Clone, Copy)]
 struct FuncId(u32);
 
 
@@ -158,10 +172,12 @@ struct Class<'a> {
     a: &'a (),
 }
 
+#[derive(Debug, Clone, Copy)]
 struct Import<'a> {
     a: &'a (),
 }
 
+#[derive(Debug, Clone, Copy)]
 struct Export<'a> {
     a: &'a (),
 }

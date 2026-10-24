@@ -1,6 +1,7 @@
 use regress::Regex;
 use crate::atom::Atom;
 
+#[derive(Debug, Clone, Copy)]
 pub enum Expr<'a> {
     Bool(bool),
     Null,
