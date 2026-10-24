@@ -1,4 +1,4 @@
-use crate::statement::Statement;
+use crate::statement::Stmt;
 use yavashark_string::YSString;
 
 mod atom;
@@ -9,17 +9,17 @@ mod statement;
 pub struct YavasharkIr<'alloc> {
     functions: &'alloc [Function<'alloc>],
 
-    root: Statement<'alloc>,
+    root: Stmt<'alloc>,
 }
 
 pub struct Function<'alloc> {
     name: YSString,
     parameters: &'alloc [YSString],
-    body: Statement<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub struct YavasharkBlock<'alloc> {
-    statements: &'alloc [Statement<'alloc>],
+    statements: &'alloc [Stmt<'alloc>],
 }
 
 trait IRTranslator {

@@ -1,10 +1,10 @@
-use crate::expr::Expression;
+use crate::expr::Expr;
 use yavashark_string::YSString;
 use crate::atom::Atom;
 
-pub enum Statement<'a> {
+pub enum Stmt<'a> {
     /// Expressions
-    Expression(Expression<'a>),
+    Expr(Expr<'a>),
 
     /// Block
     Block(&'a Block<'a>),
@@ -17,8 +17,8 @@ pub enum Statement<'a> {
 
     Break(Atom),
     Continue(Atom),
-    Return(&'a Expression<'a>),
-    Throw(&'a Expression<'a>),
+    Return(Option<&'a Expr<'a>>),
+    Throw(&'a Expr<'a>),
 
     /// Try
 
@@ -52,19 +52,19 @@ pub enum Statement<'a> {
 
 #[test]
 fn foo() {
-    dbg!(size_of::<Statement>());
+    dbg!(size_of::<Stmt>());
 }
 
 pub struct Block<'alloc> {
-    statements: &'alloc [Statement<'alloc>],
+    statements: &'alloc [Stmt<'alloc>],
 }
 
 pub struct Return<'alloc> {
-    value: Option<Expression<'alloc>>,
+    value: Option<Expr<'alloc>>,
 }
 
 pub struct Throw<'alloc> {
-    value: Expression<'alloc>,
+    value: Expr<'alloc>,
 }
 
 pub struct Try<'alloc> {
@@ -79,52 +79,52 @@ pub struct Catch<'alloc> {
 }
 
 pub struct If<'alloc> {
-    test: Expression<'alloc>,
-    consequent: Statement<'alloc>,
-    alternate: Option<Statement<'alloc>>,
+    test: Expr<'alloc>,
+    consequent: Stmt<'alloc>,
+    alternate: Option<Stmt<'alloc>>,
 }
 
 pub struct Switch<'alloc> {
-    discriminant: Expression<'alloc>,
+    discriminant: Expr<'alloc>,
     cases: &'alloc [SwitchCase<'alloc>],
 }
 
 pub struct SwitchCase<'alloc> {
-    test: Option<Expression<'alloc>>,
-    consequent: &'alloc [Statement<'alloc>],
+    test: Option<Expr<'alloc>>,
+    consequent: &'alloc [Stmt<'alloc>],
 }
 
 pub struct Labelled<'alloc> {
     label: YSString,
-    body: Statement<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub struct While<'alloc> {
-    test: Expression<'alloc>,
-    body: Statement<'alloc>,
+    test: Expr<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub struct DoWhile<'alloc> {
-    body: Statement<'alloc>,
-    test: Expression<'alloc>,
+    body: Stmt<'alloc>,
+    test: Expr<'alloc>,
 }
 
 pub struct For<'alloc> {
     init: Option<ForInit<'alloc>>,
-    test: Option<Expression<'alloc>>,
-    update: Option<Expression<'alloc>>,
-    body: Statement<'alloc>,
+    test: Option<Expr<'alloc>>,
+    update: Option<Expr<'alloc>>,
+    body: Stmt<'alloc>,
 }
 
 pub enum ForInit<'alloc> {
     VarDecl(VarDecl<'alloc>),
-    Expression(Expression<'alloc>),
+    Expression(Expr<'alloc>),
 }
 
 pub struct ForIn<'alloc> {
     left: ForInLeft<'alloc>,
-    right: Expression<'alloc>,
-    body: Statement<'alloc>,
+    right: Expr<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub enum ForInLeft<'alloc> {
@@ -134,8 +134,8 @@ pub enum ForInLeft<'alloc> {
 
 pub struct ForOf<'alloc> {
     left: ForOfLeft<'alloc>,
-    right: Expression<'alloc>,
-    body: Statement<'alloc>,
+    right: Expr<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub enum ForOfLeft<'alloc> {
@@ -144,8 +144,8 @@ pub enum ForOfLeft<'alloc> {
 }
 
 pub struct With<'alloc> {
-    object: Expression<'alloc>,
-    body: Statement<'alloc>,
+    object: Expr<'alloc>,
+    body: Stmt<'alloc>,
 }
 
 pub struct Debugger;

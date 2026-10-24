@@ -1,7 +1,7 @@
 use regress::Regex;
 use crate::atom::Atom;
 
-pub enum Expression<'alloc> {
+pub enum Expr<'alloc> {
     Bool(bool),
     Null,
     Undefined,
