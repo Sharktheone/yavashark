@@ -55,120 +55,113 @@ fn foo() {
     dbg!(size_of::<Stmt>());
 }
 
-pub struct Block<'alloc> {
-    statements: &'alloc [Stmt<'alloc>],
+pub struct Block<'a> {
+    statements: &'a [Stmt<'a>],
 }
 
-pub struct Return<'alloc> {
-    value: Option<Expr<'alloc>>,
+
+pub struct Try<'a> {
+    block: Block<'a>,
+    catch: Option<Catch<'a>>,
+    finally: Option<Block<'a>>,
 }
 
-pub struct Throw<'alloc> {
-    value: Expr<'alloc>,
+pub struct Catch<'a> {
+    param: Option<Pattern<'a>>,
+    block: Block<'a>,
 }
 
-pub struct Try<'alloc> {
-    block: Block<'alloc>,
-    catch: Option<Catch<'alloc>>,
-    finally: Option<Block<'alloc>>,
+pub struct If<'a> {
+    test: Expr<'a>,
+    consequent: Stmt<'a>,
+    alternate: Option<Stmt<'a>>,
 }
 
-pub struct Catch<'alloc> {
-    param: Option<Pattern<'alloc>>,
-    block: Block<'alloc>,
+pub struct Switch<'a> {
+    discriminant: Expr<'a>,
+    cases: &'a [SwitchCase<'a>],
 }
 
-pub struct If<'alloc> {
-    test: Expr<'alloc>,
-    consequent: Stmt<'alloc>,
-    alternate: Option<Stmt<'alloc>>,
+pub struct SwitchCase<'a> {
+    test: Option<Expr<'a>>,
+    consequent: &'a [Stmt<'a>],
 }
 
-pub struct Switch<'alloc> {
-    discriminant: Expr<'alloc>,
-    cases: &'alloc [SwitchCase<'alloc>],
-}
-
-pub struct SwitchCase<'alloc> {
-    test: Option<Expr<'alloc>>,
-    consequent: &'alloc [Stmt<'alloc>],
-}
-
-pub struct Labelled<'alloc> {
+pub struct Labelled<'a> {
     label: YSString,
-    body: Stmt<'alloc>,
+    body: Stmt<'a>,
 }
 
-pub struct While<'alloc> {
-    test: Expr<'alloc>,
-    body: Stmt<'alloc>,
+pub struct While<'a> {
+    test: Expr<'a>,
+    body: Stmt<'a>,
 }
 
-pub struct DoWhile<'alloc> {
-    body: Stmt<'alloc>,
-    test: Expr<'alloc>,
+pub struct DoWhile<'a> {
+    body: Stmt<'a>,
+    test: Expr<'a>,
 }
 
-pub struct For<'alloc> {
-    init: Option<ForInit<'alloc>>,
-    test: Option<Expr<'alloc>>,
-    update: Option<Expr<'alloc>>,
-    body: Stmt<'alloc>,
+pub struct For<'a> {
+    init: Option<ForInit<'a>>,
+    test: Option<Expr<'a>>,
+    update: Option<Expr<'a>>,
+    body: Stmt<'a>,
 }
 
-pub enum ForInit<'alloc> {
-    VarDecl(VarDecl<'alloc>),
-    Expression(Expr<'alloc>),
+pub enum ForInit<'a> {
+    VarDecl(VarDecl<'a>),
+    Expression(Expr<'a>),
 }
 
-pub struct ForIn<'alloc> {
-    left: ForInLeft<'alloc>,
-    right: Expr<'alloc>,
-    body: Stmt<'alloc>,
+pub struct ForIn<'a> {
+    left: ForInLeft<'a>,
+    right: Expr<'a>,
+    body: Stmt<'a>,
 }
 
-pub enum ForInLeft<'alloc> {
-    VarDecl(VarDecl<'alloc>),
-    Pattern(Pattern<'alloc>),
+pub enum ForInLeft<'a> {
+    VarDecl(VarDecl<'a>),
+    Pattern(Pattern<'a>),
 }
 
-pub struct ForOf<'alloc> {
-    left: ForOfLeft<'alloc>,
-    right: Expr<'alloc>,
-    body: Stmt<'alloc>,
+pub struct ForOf<'a> {
+    left: ForOfLeft<'a>,
+    right: Expr<'a>,
+    body: Stmt<'a>,
 }
 
-pub enum ForOfLeft<'alloc> {
-    VarDecl(VarDecl<'alloc>),
-    Pattern(Pattern<'alloc>),
+pub enum ForOfLeft<'a> {
+    VarDecl(VarDecl<'a>),
+    Pattern(Pattern<'a>),
 }
 
-pub struct With<'alloc> {
-    object: Expr<'alloc>,
-    body: Stmt<'alloc>,
+pub struct With<'a> {
+    object: Expr<'a>,
+    body: Stmt<'a>,
 }
 
 pub struct Debugger;
-pub enum Pattern<'alloc> {
-    A(&'alloc ()),
+pub enum Pattern<'a> {
+    A(&'a ()),
 }
 
-struct VarDecl<'alloc> {
-    a: &'alloc (),
+struct VarDecl<'a> {
+    a: &'a (),
 }
 
 
 struct FuncId(u32);
 
 
-struct Class<'alloc> {
-    a: &'alloc (),
+struct Class<'a> {
+    a: &'a (),
 }
 
-struct Import<'alloc> {
-    a: &'alloc (),
+struct Import<'a> {
+    a: &'a (),
 }
 
-struct Export<'alloc> {
-    a: &'alloc (),
+struct Export<'a> {
+    a: &'a (),
 }
