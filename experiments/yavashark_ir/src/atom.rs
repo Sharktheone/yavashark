@@ -15,6 +15,24 @@ impl Atom {
         Self::inline_units(s.bytes().map(u16::from), s.len())
     }
 
+    pub fn inline_bytes(bytes: &[u8]) -> Option<Self> {
+        let len = bytes.len();
+
+        if len > INLINE_CAPACITY {
+            return None;
+        }
+
+        let mut data = [0; INLINE_CAPACITY];
+
+        //TODO(perf): this can be optimized by two overlapping 32bit loads plus a slow path instead of the heavy variable width load here!
+        data[..len].copy_from_slice(bytes);
+
+        Some(Self {
+            len: len as u8,
+            data,
+        })
+    }
+
     fn inline_units(units: impl Iterator<Item = u16>, len: usize) -> Option<Self> {
         if len > INLINE_CAPACITY {
             return None;
