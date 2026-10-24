@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bumpalo = { version = "3.20.2", features = ["collections", "boxed"] }
+bumpalo = { version = "3.20.2" }
 yavashark_string = { path = "../../crates/yavashark_string" }
 num-bigint = "0.4.6"
 regress = "0.12.0"
