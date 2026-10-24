@@ -57,6 +57,28 @@ pub struct Block<'a> {
 
 
 #[derive(Debug, Clone, Copy)]
+pub struct VarDecl<'a> {
+    pub kind: VarKind,
+    pub decls: &'a [Declarator<'a>],
+}
+
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum VarKind {
+    Var,
+    Let,
+    Const,
+    Using,
+    AwaitUsing,
+}
+
+
+#[derive(Debug, Clone, Copy)]
+pub struct Declarator<'a> {
+    pub target: Pat<'a>,
+    pub init: Option<Expr<'a>>,
+}
+#[derive(Debug, Clone, Copy)]
 pub struct Try<'a> {
     block: Block<'a>,
     catch: Option<Catch<'a>>,
