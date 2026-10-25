@@ -50,6 +50,12 @@ pub enum Stmt<'a> {
     Empty,
 }
 
+const _: () = {
+    assert!(size_of::<Stmt<'static>>() == 16, "Stmt must be 16 bytes");
+    assert!(size_of::<Stmt<'static>>() == size_of::<Option<Stmt<'static>>>());
+
+};
+
 #[derive(Debug, Clone, Copy)]
 pub struct Block<'a> {
     pub stmts: &'a [Stmt<'a>],
