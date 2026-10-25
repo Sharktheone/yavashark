@@ -40,3 +40,8 @@ trait IRTranslator {
 pub struct Ident {
     pub name: Atom,
 }
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct ScopeId(u32);
+
