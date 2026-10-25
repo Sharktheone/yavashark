@@ -34,10 +34,10 @@ pub enum Stmt<'a> {
 
     Labelled(&'a Labelled<'a>),
     While(&'a While<'a>),
-    DoWhile(&'a DoWhile<'a>),
+    DoWhile(&'a While<'a>),
     For(&'a For<'a>),
-    ForIn(&'a ForIn<'a>),
-    ForOf(&'a ForOf<'a>),
+    ForIn(&'a ForEach<'a>),
+    ForOf(&'a ForEach<'a>),
 
     With(&'a With<'a>),
 
@@ -110,12 +110,12 @@ pub struct If<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Switch<'a> {
     pub discriminant: Expr<'a>,
-    pub cases: &'a [SwitchCase<'a>],
+    pub cases: &'a [Case<'a>],
     pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct SwitchCase<'a> {
+pub struct Case<'a> {
     pub test: Option<Expr<'a>>,
     pub consequent: &'a [Stmt<'a>],
 }
@@ -133,12 +133,6 @@ pub struct While<'a> {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct DoWhile<'a> {
-    pub body: Stmt<'a>,
-    pub test: Expr<'a>,
-}
-
-#[derive(Debug, Clone, Copy)]
 pub struct For<'a> {
     pub init: Option<ForInit<'a>>,
     pub test: Option<Expr<'a>>,
@@ -149,35 +143,23 @@ pub struct For<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum ForInit<'a> {
-    VarDecl(VarDecl<'a>),
+    VarDecl(&'a VarDecl<'a>),
     Expression(Expr<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct ForIn<'a> {
-    pub left: ForInLeft<'a>,
+pub struct ForEach<'a> {
+    pub left: ForHead<'a>,
     pub right: Expr<'a>,
     pub body: Stmt<'a>,
+    pub is_await: bool,
     pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum ForInLeft<'a> {
-    VarDecl(VarDecl<'a>),
-    Pattern(Pat<'a>),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ForOf<'a> {
-    pub left: ForOfLeft<'a>,
-    pub right: Expr<'a>,
-    pub body: Stmt<'a>,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum ForOfLeft<'a> {
-    VarDecl(VarDecl<'a>),
-    Pattern(Pat<'a>),
+pub enum ForHead<'a> {
+    Var(&'a VarDecl<'a>),
+    Pat(Pat<'a>),
 }
 
 #[derive(Debug, Clone, Copy)]
