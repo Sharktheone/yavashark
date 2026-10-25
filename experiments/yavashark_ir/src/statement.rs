@@ -80,60 +80,60 @@ pub struct Declarator<'a> {
 }
 #[derive(Debug, Clone, Copy)]
 pub struct Try<'a> {
-    block: Block<'a>,
-    catch: Option<Catch<'a>>,
-    finally: Option<Block<'a>>,
+    pub block: Block<'a>,
+    pub catch: Option<Catch<'a>>,
+    pub finally: Option<Block<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Catch<'a> {
-    param: Option<Pat<'a>>,
-    block: Block<'a>,
+    pub param: Option<Pat<'a>>,
+    pub block: Block<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct If<'a> {
-    test: Expr<'a>,
-    consequent: Stmt<'a>,
-    alternate: Option<Stmt<'a>>,
+    pub test: Expr<'a>,
+    pub consequent: Stmt<'a>,
+    pub alternate: Option<Stmt<'a>>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Switch<'a> {
-    discriminant: Expr<'a>,
-    cases: &'a [SwitchCase<'a>],
+    pub discriminant: Expr<'a>,
+    pub cases: &'a [SwitchCase<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct SwitchCase<'a> {
-    test: Option<Expr<'a>>,
-    consequent: &'a [Stmt<'a>],
+    pub test: Option<Expr<'a>>,
+    pub consequent: &'a [Stmt<'a>],
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Labelled<'a> {
-    label: Atom,
-    body: Stmt<'a>,
+    pub label: Atom,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct While<'a> {
-    test: Expr<'a>,
-    body: Stmt<'a>,
+    pub test: Expr<'a>,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct DoWhile<'a> {
-    body: Stmt<'a>,
-    test: Expr<'a>,
+    pub body: Stmt<'a>,
+    pub test: Expr<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct For<'a> {
-    init: Option<ForInit<'a>>,
-    test: Option<Expr<'a>>,
-    update: Option<Expr<'a>>,
-    body: Stmt<'a>,
+    pub init: Option<ForInit<'a>>,
+    pub test: Option<Expr<'a>>,
+    pub update: Option<Expr<'a>>,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -144,9 +144,9 @@ pub enum ForInit<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ForIn<'a> {
-    left: ForInLeft<'a>,
-    right: Expr<'a>,
-    body: Stmt<'a>,
+    pub left: ForInLeft<'a>,
+    pub right: Expr<'a>,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -157,9 +157,9 @@ pub enum ForInLeft<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ForOf<'a> {
-    left: ForOfLeft<'a>,
-    right: Expr<'a>,
-    body: Stmt<'a>,
+    pub left: ForOfLeft<'a>,
+    pub right: Expr<'a>,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -170,8 +170,8 @@ pub enum ForOfLeft<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct With<'a> {
-    object: Expr<'a>,
-    body: Stmt<'a>,
+    pub object: Expr<'a>,
+    pub body: Stmt<'a>,
 }
 
 #[derive(Debug, Clone, Copy)]
