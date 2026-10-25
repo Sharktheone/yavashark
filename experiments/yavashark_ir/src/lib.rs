@@ -1,5 +1,6 @@
 use crate::statement::Stmt;
 use yavashark_string::YSString;
+use crate::atom::Atom;
 
 mod atom;
 mod expr;
@@ -24,4 +25,10 @@ pub struct YavasharkBlock<'alloc> {
 
 trait IRTranslator {
     fn translate(&self, input: &str) -> YavasharkIr;
+}
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Ident {
+    pub name: Atom,
 }
