@@ -1,12 +1,42 @@
 use std::fmt::{Debug, Formatter};
 
 const INLINE_CAPACITY: usize = 7;
-const INTERNED: u8 = u8::MAX;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Atom {
-    len: u8,
+    len: Len,
     data: [u8; INLINE_CAPACITY],
+}
+
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[repr(u8)]
+pub enum Len {
+    Empty = 0,
+    L1 = 1,
+    L2 = 2,
+    L3 = 3,
+    L4 = 4,
+    L5 = 5,
+    L6 = 6,
+    L7 = 7,
+    Interned = 255,
+}
+
+impl Len {
+    const fn new(len: usize) -> Option<Self> {
+        match len {
+            0 => Some(Self::Empty),
+            1 => Some(Self::L1),
+            2 => Some(Self::L2),
+            3 => Some(Self::L3),
+            4 => Some(Self::L4),
+            5 => Some(Self::L5),
+            6 => Some(Self::L6),
+            7 => Some(Self::L7),
+            _ => None,
+        }
+    }
 }
 
 impl Atom {
@@ -18,9 +48,7 @@ impl Atom {
     pub fn inline_bytes(bytes: &[u8]) -> Option<Self> {
         let len = bytes.len();
 
-        if len > INLINE_CAPACITY {
-            return None;
-        }
+        let l = Len::new(len)?;
 
         let mut data = [0; INLINE_CAPACITY];
 
@@ -28,15 +56,13 @@ impl Atom {
         data[..len].copy_from_slice(bytes);
 
         Some(Self {
-            len: len as u8,
+            len: l,
             data,
         })
     }
 
     fn inline_units(units: impl Iterator<Item = u16>, len: usize) -> Option<Self> {
-        if len > INLINE_CAPACITY {
-            return None;
-        }
+        let l = Len::new(len)?;
 
         let mut data = [0; INLINE_CAPACITY];
 
@@ -50,7 +76,7 @@ impl Atom {
         }
 
         Some(Self {
-            len: len as u8,
+            len: l,
             data,
         })
     }
@@ -59,7 +85,7 @@ impl Atom {
         let [a, b, c, d] = index.to_le_bytes();
 
         Self {
-            len: INTERNED,
+            len: Len::Interned,
             data: [a, b, c, d, 0, 0, 0],
         }
     }
@@ -71,8 +97,8 @@ impl Atom {
         std::str::from_utf8(bytes).ok()
     }
 
-    const fn index(self) -> Option<usize> {
-        if self.len != INTERNED {
+    fn index(self) -> Option<usize> {
+        if self.len != Len::Interned {
             return None;
         }
 
