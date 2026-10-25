@@ -195,7 +195,7 @@ struct VarDecl<'a> {
 
 
 #[derive(Debug, Clone, Copy)]
-struct FuncId(u32);
+pub struct FuncId(u32);
 
 
 struct Class<'a> {
@@ -204,10 +204,10 @@ struct Class<'a> {
 
 #[derive(Debug, Clone, Copy)]
 struct Import<'a> {
-    a: &'a (),
+    pub a: &'a (),
 }
 
 #[derive(Debug, Clone, Copy)]
 struct Export<'a> {
-    a: &'a (),
+    pub a: &'a (),
 }

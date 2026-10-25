@@ -5,6 +5,14 @@ use crate::atom::Atom;
 mod atom;
 mod expr;
 mod statement;
+mod span;
+
+pub use atom::*;
+pub use expr::*;
+pub use statement::*;
+pub use span::*;
+
+
 
 /// This IR will be used for many optimizations in the YS interpreter and compiler.
 pub struct YavasharkIr<'alloc> {
