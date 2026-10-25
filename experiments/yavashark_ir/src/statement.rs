@@ -184,15 +184,6 @@ pub struct With<'a> {
 pub struct Debugger;
 
 
-#[derive(Debug, Clone, Copy)]
-pub enum Pat<'a> {
-    A(&'a ()),
-}
-
-struct VarDecl<'a> {
-    a: &'a (),
-}
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct FuncId(u32);
@@ -210,4 +201,48 @@ struct Import<'a> {
 #[derive(Debug, Clone, Copy)]
 struct Export<'a> {
     pub a: &'a (),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum PropKey<'a> {
+    /// Identifier and string keys, bigint keys are converted to their decimal string.
+    Name(Atom),
+    Number(f64), //TODO: we might be able to also put this into `Name`
+    Computed(Expr<'a>),
+    Private(Ident),
+}
+
+
+#[derive(Debug, Clone, Copy)]
+pub enum Pat<'a> {
+    Ident(Ident),
+    /// Member expressions and other targets only valid in assignments.
+    Expr(Expr<'a>),
+    Array(&'a ArrayPat<'a>),
+    Object(&'a ObjectPat<'a>),
+    Default(&'a DefaultPat<'a>),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ArrayPat<'a> {
+    pub elems: &'a [Option<Pat<'a>>],
+    pub rest: Option<Pat<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct ObjectPat<'a> {
+    pub props: &'a [PatProp<'a>],
+    pub rest: Option<Pat<'a>>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PatProp<'a> {
+    pub key: PropKey<'a>,
+    pub value: Pat<'a>,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DefaultPat<'a> {
+    pub target: Pat<'a>,
+    pub value: Expr<'a>,
 }
