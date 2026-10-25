@@ -40,3 +40,8 @@ pub enum Expr<'a> {
     ComputedMember(&'a ComputedMemberExpression<'a>),
     PrivateField(&'a PrivateFieldExpression<'a>),
 }
+
+const _: () = {
+    assert!(size_of::<Expr<'static>>() == 16, "Expr must be 16 bytes");
+    assert!(size_of::<Expr<'static>>() == size_of::<Option<Expr<'static>>>());
+};
