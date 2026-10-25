@@ -1,5 +1,6 @@
 use crate::expr::Expr;
 use crate::atom::Atom;
+use crate::{Ident, ScopeId, Span};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Stmt<'a> {
@@ -59,6 +60,7 @@ const _: () = {
 #[derive(Debug, Clone, Copy)]
 pub struct Block<'a> {
     pub stmts: &'a [Stmt<'a>],
+    pub scope: ScopeId,
 }
 
 
@@ -95,6 +97,7 @@ pub struct Try<'a> {
 pub struct Catch<'a> {
     pub param: Option<Pat<'a>>,
     pub block: Block<'a>,
+    pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -108,6 +111,7 @@ pub struct If<'a> {
 pub struct Switch<'a> {
     pub discriminant: Expr<'a>,
     pub cases: &'a [SwitchCase<'a>],
+    pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -140,6 +144,7 @@ pub struct For<'a> {
     pub test: Option<Expr<'a>>,
     pub update: Option<Expr<'a>>,
     pub body: Stmt<'a>,
+    pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -153,6 +158,7 @@ pub struct ForIn<'a> {
     pub left: ForInLeft<'a>,
     pub right: Expr<'a>,
     pub body: Stmt<'a>,
+    pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -178,6 +184,7 @@ pub enum ForOfLeft<'a> {
 pub struct With<'a> {
     pub object: Expr<'a>,
     pub body: Stmt<'a>,
+    pub scope: ScopeId,
 }
 
 #[derive(Debug, Clone, Copy)]
