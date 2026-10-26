@@ -222,9 +222,33 @@ pub struct ImportSpecifier {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Export<'a> {
-    pub a: &'a (),
+pub enum Export<'a> {
+    /// `export var / let / const / function / class`
+    Decl(Stmt<'a>),
+    /// `export default function / class`, these are hoisted like declarations.
+    DefaultDecl(Stmt<'a>),
+    DefaultExpr(Expr<'a>),
+    Named {
+        specifiers: &'a [ExportSpecifier],
+        source: Option<Atom>,
+        attributes: &'a [(Atom, Atom)],
+    },
+    /// `export * from` and `export * as name from`
+    All {
+        exported: Option<Atom>,
+        source: Atom,
+        attributes: &'a [(Atom, Atom)],
+    },
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct ExportSpecifier {
+    /// A local binding, or the imported name when re-exporting from another module.
+    pub local: Ident,
+    pub exported: Atom,
+}
+
+
 
 #[derive(Debug, Clone, Copy)]
 pub enum PropKey<'a> {
