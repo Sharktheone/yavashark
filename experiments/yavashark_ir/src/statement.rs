@@ -1,6 +1,6 @@
 use crate::expr::Expr;
 use crate::atom::Atom;
-use crate::{Ident, MethodKind, ScopeId, Span};
+use crate::{FuncId, Ident, MethodKind, ScopeId, Span};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Stmt<'a> {
@@ -199,11 +199,6 @@ pub struct With<'a> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Debugger;
-
-
-
-#[derive(Debug, Clone, Copy)]
-pub struct FuncId(u32);
 
 
 
