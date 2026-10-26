@@ -43,7 +43,7 @@ pub enum Stmt<'a> {
 
     /// Modules
 
-    Import(&'a Import<'a>),
+    Import(&'a ImportDecl<'a>),
     Export(&'a Export<'a>),
 
     /// Debugger
@@ -208,12 +208,21 @@ pub struct FuncId(u32);
 
 
 #[derive(Debug, Clone, Copy)]
-struct Import<'a> {
-    pub a: &'a (),
+pub struct ImportDecl<'a> {
+    pub specifiers: &'a [ImportSpecifier],
+    pub source: Atom,
+    pub attributes: &'a [(Atom, Atom)],
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Export<'a> {
+pub struct ImportSpecifier {
+    /// `None` for `* as local`, default imports are `Some("default")`.
+    pub imported: Option<Atom>,
+    pub local: Ident,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Export<'a> {
     pub a: &'a (),
 }
 
