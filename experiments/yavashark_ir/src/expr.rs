@@ -1,5 +1,6 @@
 use regress::Regex;
 use crate::atom::Atom;
+use crate::FuncId;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Expr<'a> {
@@ -16,7 +17,6 @@ pub enum Expr<'a> {
     MetaProp(&'a MetaProp),
     Super(&'a SuperProp),
     Array(&'a Array<'a>),
-    ArrowFunction(&'a Arrow<'a>),
     Assignment(&'a Assignment<'a>),
     Await(&'a Await<'a>),
     Binary(&'a Binary<'a>),
@@ -24,7 +24,7 @@ pub enum Expr<'a> {
     Chain(&'a Chain<'a>),
     Class(&'a Class<'a>),
     Conditional(&'a Conditional<'a>),
-    Function(&'a Function<'a>),
+    Function(FuncId),
     Import(&'a Import<'a>),
     Logical(&'a Logical<'a>),
     New(&'a New<'a>),
