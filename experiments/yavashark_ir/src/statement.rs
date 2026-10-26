@@ -1,6 +1,6 @@
 use crate::expr::Expr;
 use crate::atom::Atom;
-use crate::{Ident, ScopeId, Span};
+use crate::{Ident, MethodKind, ScopeId, Span};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Stmt<'a> {
@@ -86,6 +86,34 @@ pub struct Declarator<'a> {
     pub target: Pat<'a>,
     pub init: Option<Expr<'a>>,
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct Class<'a> {
+    pub name: Option<Ident>,
+    pub super_class: Option<Expr<'a>>,
+    pub constructor: Option<FuncId>,
+    pub members: &'a [ClassMember<'a>],
+    /// Holds the inner class name binding.
+    pub scope: ScopeId,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum ClassMember<'a> {
+    Method {
+        key: PropKey<'a>,
+        func: FuncId,
+        kind: MethodKind,
+        is_static: bool,
+    },
+    Field {
+        key: PropKey<'a>,
+        value: Option<FuncId>,
+        is_static: bool,
+    },
+    StaticBlock(FuncId),
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct Try<'a> {
     pub block: Block<'a>,
@@ -178,9 +206,6 @@ pub struct Debugger;
 pub struct FuncId(u32);
 
 
-struct Class<'a> {
-    a: &'a (),
-}
 
 #[derive(Debug, Clone, Copy)]
 struct Import<'a> {
