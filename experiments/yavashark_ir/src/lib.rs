@@ -45,3 +45,9 @@ pub struct Ident {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScopeId(u32);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum MethodKind {
+    Method,
+    Getter,
+    Setter
+}
