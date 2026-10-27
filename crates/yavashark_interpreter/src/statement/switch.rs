@@ -29,7 +29,7 @@ impl Interpreter {
             }
 
             match Self::run_statements(realm, &case.cons, scope) {
-                Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
+                Err(ControlFlow::Break(None)) => return Ok(ret.unwrap_or(Value::Undefined)),
                 Err(e) => return Err(e),
                 Ok(v) => {
                     if v.is_nullish() {
@@ -46,7 +46,7 @@ impl Interpreter {
         {
             for case in stmt.cases.iter().skip(default_index) {
                 match Self::run_statements(realm, &case.cons, scope) {
-                    Err(ControlFlow::Break(_)) => return Ok(ret.unwrap_or(Value::Undefined)),
+                    Err(ControlFlow::Break(None)) => return Ok(ret.unwrap_or(Value::Undefined)),
                     Err(e) => return Err(e),
                     Ok(v) => {
                         if v.is_nullish() {
