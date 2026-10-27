@@ -82,7 +82,7 @@ fn main() {
     engine.realm()
         .global
         .clone()
-        .define_property("counter".into(), counter.into(), engine.realm())
+        .set("counter", counter, engine.realm())
         .expect("failed to define counter");
 
     engine.run(SCRIPT, "examples/extend.rs").expect("failed to run script");
