@@ -7,6 +7,7 @@
 
 A new JavaScript engine, currently in development, written in Rust. 🦈
 
+<br clear="right">
 
 ## Project Status
 
