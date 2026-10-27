@@ -1,13 +1,8 @@
 use std::cell::{Cell, RefCell};
-use std::path::PathBuf;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
-use swc_ecma_parser::{Parser, Syntax};
+use yavashark::Engine;
 use yavashark_env::realm::Intrinsic;
-use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{MutObject, ObjectHandle, Realm, Res};
-use yavashark_interpreter::Interpreter;
 use yavashark_macro::{object, props};
 
 #[object]
@@ -79,21 +74,16 @@ console.log("counter:", counter.getLabel(), "after reset:", counter.value());
 "#;
 
 fn main() {
-    let input = StringInput::new(SCRIPT, BytePos(0), BytePos(SCRIPT.len() as u32));
-    let script = Parser::new(Syntax::Es(Default::default()), input, None)
-        .parse_script()
-        .expect("failed to parse script");
+    let mut engine = Engine::new();
 
-    let mut realm = Realm::new().expect("failed to create realm");
+    let counter = Counter::create(engine.realm()).expect("failed to create counter");
 
-    let counter = Counter::create(&mut realm).expect("failed to create counter");
-    realm
+
+    engine.realm()
         .global
         .clone()
-        .define_property("counter".into(), counter.into(), &mut realm)
+        .define_property("counter".into(), counter.into(), engine.realm())
         .expect("failed to define counter");
 
-    let mut scope = Scope::global(&realm, PathBuf::from("extend.js"));
-
-    Interpreter::run_in(&script.body, &mut realm, &mut scope).expect("script threw an error");
+    engine.run(SCRIPT, "examples/extend.rs").expect("failed to run script");
 }
