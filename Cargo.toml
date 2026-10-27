@@ -56,7 +56,7 @@ yavashark_garbage = { path = "crates/yavashark_garbage" }
 yavashark_macro = { path = "crates/yavashark_macro" }
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [features]
 default = ["simple_bytecode", "temporal", "icu", "annex_b"]
