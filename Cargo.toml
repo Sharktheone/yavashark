@@ -51,6 +51,10 @@ rustyline-derive = "0.11.0"
 tokio = { version = "1.47.1", default-features = false, features = ["rt"] }
 yavashark_env = { path = "crates/yavashark_env", default-features = false }
 
+[dev-dependencies]
+yavashark_garbage = { path = "crates/yavashark_garbage" }
+yavashark_macro = { path = "crates/yavashark_macro" }
+
 [lib]
 crate-type = ["cdylib"]
 
