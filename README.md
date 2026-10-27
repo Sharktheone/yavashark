@@ -1,6 +1,12 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logo-dark.svg">
+  <img src=".github/assets/logo-light.svg" alt="Yavashark, a pink shark" width="160" align="right">
+</picture>
+
 # Yavashark
 
-A new JavaScript engine, currently in development, written in Rust. 
+A new JavaScript engine, currently in development, written in Rust. 🦈
+
 
 ## Project Status
 
