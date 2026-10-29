@@ -1,4 +1,5 @@
 mod helper;
+mod highlight;
 
 use crate::conf::Conf;
 use crate::repl::helper::ReplHelper;

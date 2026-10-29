@@ -1,6 +1,7 @@
 use crate::conf::Conf;
+use crate::repl::highlight::highlight;
 use rustyline::completion::{Completer, FilenameCompleter, Pair};
-use rustyline::highlight::{CmdKind, Highlighter, MatchingBracketHighlighter};
+use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::hint::HistoryHinter;
 use rustyline::validate::MatchingBracketValidator;
 use rustyline::{Context, Helper};
@@ -62,7 +63,6 @@ impl Completer for ScopeCompleter {
 pub struct ReplHelper {
     #[rustyline(Completer)]
     pub completer: ScopeCompleter,
-    pub highlighter: MatchingBracketHighlighter,
     #[rustyline(Validator)]
     pub validator: MatchingBracketValidator,
     #[rustyline(Hinter)]
@@ -86,7 +86,6 @@ impl ReplHelper {
 
         Self {
             completer,
-            highlighter: MatchingBracketHighlighter::new(),
             validator: MatchingBracketValidator::new(),
             hinter: HistoryHinter {},
             colored_prompt: String::new(),
@@ -96,7 +95,7 @@ impl ReplHelper {
 
 impl Highlighter for ReplHelper {
     fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
-        self.highlighter.highlight(line, pos)
+        Cow::Owned(highlight(line, pos))
     }
 
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
@@ -115,7 +114,7 @@ impl Highlighter for ReplHelper {
         Cow::Owned("\x1b[1m".to_owned() + hint + "\x1b[m")
     }
 
-    fn highlight_char(&self, line: &str, pos: usize, kind: CmdKind) -> bool {
-        self.highlighter.highlight_char(line, pos, kind)
+    fn highlight_char(&self, _line: &str, _pos: usize, _kind: CmdKind) -> bool {
+        true
     }
 }
