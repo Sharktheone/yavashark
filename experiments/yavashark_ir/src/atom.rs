@@ -8,7 +8,6 @@ pub struct Atom {
     data: [u8; INLINE_CAPACITY],
 }
 
-
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 #[repr(u8)]
 pub enum Len {
@@ -55,10 +54,7 @@ impl Atom {
         //TODO(perf): this can be optimized by two overlapping 32bit loads plus a slow path instead of the heavy variable width load here!
         data[..len].copy_from_slice(bytes);
 
-        Some(Self {
-            len: l,
-            data,
-        })
+        Some(Self { len: l, data })
     }
 
     fn inline_units(units: impl Iterator<Item = u16>, len: usize) -> Option<Self> {
@@ -75,10 +71,7 @@ impl Atom {
             *byte = unit as u8;
         }
 
-        Some(Self {
-            len: l,
-            data,
-        })
+        Some(Self { len: l, data })
     }
 
     const fn interned(index: u32) -> Self {

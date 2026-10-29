@@ -78,12 +78,14 @@ fn main() {
 
     let counter = Counter::create(engine.realm()).expect("failed to create counter");
 
-
-    engine.realm()
+    engine
+        .realm()
         .global
         .clone()
         .set("counter", counter, engine.realm())
         .expect("failed to define counter");
 
-    engine.run(SCRIPT, "examples/extend.rs").expect("failed to run script");
+    engine
+        .run(SCRIPT, "examples/extend.rs")
+        .expect("failed to run script");
 }

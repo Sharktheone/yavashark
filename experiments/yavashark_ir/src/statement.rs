@@ -1,5 +1,5 @@
-use crate::expr::Expr;
 use crate::atom::Atom;
+use crate::expr::Expr;
 use crate::{FuncId, Ident, MethodKind, ScopeId, Span};
 
 #[derive(Debug, Clone, Copy)]
@@ -15,23 +15,19 @@ pub enum Stmt<'a> {
     Class(&'a Class<'a>),
 
     /// Control Flow
-
     Break(Atom),
     Continue(Atom),
     Return(Option<&'a Expr<'a>>),
     Throw(&'a Expr<'a>),
 
     /// Try
-
     Try(&'a Try<'a>),
 
     /// Branching
-
     If(&'a If<'a>),
     Switch(&'a Switch<'a>),
 
     /// Loops
-
     Labelled(&'a Labelled<'a>),
     While(&'a While<'a>),
     DoWhile(&'a While<'a>),
@@ -42,7 +38,6 @@ pub enum Stmt<'a> {
     With(&'a With<'a>),
 
     /// Modules
-
     Import(&'a ImportDecl<'a>),
     Export(&'a Export<'a>),
 
@@ -54,7 +49,6 @@ pub enum Stmt<'a> {
 const _: () = {
     assert!(size_of::<Stmt<'static>>() == 16, "Stmt must be 16 bytes");
     assert!(size_of::<Stmt<'static>>() == size_of::<Option<Stmt<'static>>>());
-
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -63,13 +57,11 @@ pub struct Block<'a> {
     pub scope: ScopeId,
 }
 
-
 #[derive(Debug, Clone, Copy)]
 pub struct VarDecl<'a> {
     pub kind: VarKind,
     pub decls: &'a [Declarator<'a>],
 }
-
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum VarKind {
@@ -79,7 +71,6 @@ pub enum VarKind {
     Using,
     AwaitUsing,
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct Declarator<'a> {
@@ -200,8 +191,6 @@ pub struct With<'a> {
 #[derive(Debug, Clone, Copy)]
 pub struct Debugger;
 
-
-
 #[derive(Debug, Clone, Copy)]
 pub struct ImportDecl<'a> {
     pub specifiers: &'a [ImportSpecifier],
@@ -243,8 +232,6 @@ pub struct ExportSpecifier {
     pub exported: Atom,
 }
 
-
-
 #[derive(Debug, Clone, Copy)]
 pub enum PropKey<'a> {
     /// Identifier and string keys, bigint keys are converted to their decimal string.
@@ -253,7 +240,6 @@ pub enum PropKey<'a> {
     Computed(Expr<'a>),
     Private(Ident),
 }
-
 
 #[derive(Debug, Clone, Copy)]
 pub enum Pat<'a> {

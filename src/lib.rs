@@ -2,13 +2,13 @@ mod direct_exec;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
 
+pub use direct_exec::*;
 use std::path::PathBuf;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_parser::{Parser, Syntax};
-pub use direct_exec::*;
-use yavashark_env::{Error, Realm, ValueResult};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Error, Realm, ValueResult};
 use yavashark_interpreter::Interpreter;
 
 pub struct Engine {
@@ -35,7 +35,6 @@ impl Engine {
         let script = Parser::new(Syntax::Es(Default::default()), input, None)
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
-
 
         let result = Interpreter::run_in(&script.body, &mut self.realm, scope);
         result

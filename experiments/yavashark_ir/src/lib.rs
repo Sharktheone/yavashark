@@ -1,18 +1,16 @@
+use crate::atom::Atom;
 use crate::statement::Stmt;
 use yavashark_string::YSString;
-use crate::atom::Atom;
 
 mod atom;
 mod expr;
-mod statement;
 mod span;
+mod statement;
 
 pub use atom::*;
 pub use expr::*;
-pub use statement::*;
 pub use span::*;
-
-
+pub use statement::*;
 
 /// This IR will be used for many optimizations in the YS interpreter and compiler.
 pub struct YavasharkIr<'alloc> {
@@ -35,12 +33,10 @@ trait IRTranslator {
     fn translate(&self, input: &str) -> YavasharkIr;
 }
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Ident {
     pub name: Atom,
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScopeId(pub u32);
@@ -52,5 +48,5 @@ pub struct FuncId(pub u32);
 pub enum MethodKind {
     Method,
     Getter,
-    Setter
+    Setter,
 }

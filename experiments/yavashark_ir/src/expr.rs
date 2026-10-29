@@ -1,6 +1,6 @@
-use regress::Regex;
-use crate::atom::Atom;
 use crate::FuncId;
+use crate::atom::Atom;
+use regress::Regex;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Expr<'a> {

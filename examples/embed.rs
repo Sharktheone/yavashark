@@ -13,7 +13,14 @@ console.log("fib(20) =", fib(20));
 fn main() {
     let mut engine = Engine::new();
 
-    let result = engine.run(SCRIPT, "examples/embed.rs").expect("failed to run script");
+    let result = engine
+        .run(SCRIPT, "examples/embed.rs")
+        .expect("failed to run script");
 
-    println!("result: {}", result.to_string(engine.realm()).expect("failed to stringify"));
+    println!(
+        "result: {}",
+        result
+            .to_string(engine.realm())
+            .expect("failed to stringify")
+    );
 }

@@ -15,10 +15,12 @@ impl Span {
 pub struct Spanned<'a, T>(Span, &'a T);
 
 const _: () = {
-    assert!(size_of::<Spanned<'static, ()>>() == 12, "Spanned must be 12 bytes");
+    assert!(
+        size_of::<Spanned<'static, ()>>() == 12,
+        "Spanned must be 12 bytes"
+    );
     assert!(size_of::<Spanned<'static, ()>>() == size_of::<Option<Spanned<'static, ()>>>());
 };
-
 
 impl<'a, T> Spanned<'a, T> {
     const fn new(span: Span, value: &'a T) -> Self {
