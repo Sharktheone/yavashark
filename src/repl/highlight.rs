@@ -353,16 +353,16 @@ fn matching_brackets(src: &str, tokens: &[Token], cursor: usize) -> Option<(usiz
     let (open, close, forward) = bracket_pair(&src[tokens[current].range.clone()])?;
 
 
-    let tmp1;
-    let tmp2;
+    let mut tmp1;
+    let mut tmp2;
 
-    let candidates: &dyn Iterator<Item = usize> = if forward {
+    let candidates: &mut dyn Iterator<Item = usize> = if forward {
         tmp1 = current + 1..tokens.len();
 
-        &tmp1
+        &mut tmp1
     } else {
         tmp2 = (0..current).rev();
-        &tmp2
+        &mut tmp2
     };
 
     let mut depth = 0usize;
