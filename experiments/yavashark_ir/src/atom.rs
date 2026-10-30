@@ -57,6 +57,13 @@ impl Atom {
         Some(Self { len: l, data })
     }
 
+    pub fn inline_bigint(value: u64) -> Option<Self> {
+        let bytes = value.to_le_bytes();
+        let len = bytes.iter().rposition(|&b| b != 0).map_or(0, |pos| pos + 1);
+
+        Self::inline_bytes(&bytes[..len])
+    }
+
     fn inline_units(units: impl Iterator<Item = u16>, len: usize) -> Option<Self> {
         let l = Len::new(len)?;
 
