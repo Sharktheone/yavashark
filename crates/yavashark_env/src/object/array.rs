@@ -3235,7 +3235,7 @@ impl ArrayConstructor {
     pub fn new(_: &Object, proto: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableArrayConstructor {
-                object: MutObject::with_proto(proto.clone()),
+                object: MutObject::with_proto(proto),
             }),
         };
 
