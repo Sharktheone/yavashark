@@ -3168,7 +3168,7 @@ pub struct ArrayConstructor {}
 
 impl CustomName for ArrayConstructor {
     fn custom_name(&self) -> String {
-        "Function".to_owned()
+        "Array".to_owned()
     }
 }
 
