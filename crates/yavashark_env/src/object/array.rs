@@ -3250,6 +3250,9 @@ impl ArrayConstructor {
     #[prop("length")]
     const LENGTH: usize = 1;
 
+    #[prop("name")]
+    const NAME: &'static str = "Array";
+
     #[prop("isArray")]
     fn is_array(test: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         match test {
