@@ -36,7 +36,6 @@ mod iter;
 pub mod or_symbol;
 pub mod partial_init;
 
-use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
 pub use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 pub use crate::value::{ObjectOrNull, PrimitiveValue};
@@ -103,23 +102,6 @@ impl ControlFlow {
 
     #[must_use]
     pub fn throw(val: Value) -> Self {
-        if let Value::Object(obj) = &val {
-            {
-                if let Some(err) = obj.downcast::<ErrorObj>() {
-                    let inner = match err.inner.try_borrow() {
-                        Ok(inner) => inner,
-                        Err(e) => {
-                            return Self::Error(e.into());
-                        }
-                    };
-
-                    let e = &inner.error;
-
-                    return Self::Error(e.clone());
-                }
-            }
-        }
-
         Self::Error(Error::throw(val))
     }
 
