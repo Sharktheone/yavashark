@@ -1,6 +1,5 @@
 use crate::inline_props::InlineObject;
 use crate::object::constructor::ObjectConstructor;
-use crate::object::prototype::common::get_own_property_descriptor;
 use crate::partial_init::{Initializer, Partial};
 use crate::realm::Realm;
 use crate::value::ObjectOrNull;
@@ -32,9 +31,6 @@ pub struct Prototype {
 
     #[prop("hasOwnProperty")]
     has_own_property: Partial<ObjectHandle, HasOwnProperty>,
-
-    #[prop("getOwnPropertyDescriptor")]
-    get_own_property_descriptor: Partial<ObjectHandle, GetOwnPropertyDescriptor>,
 
     #[prop("isPrototypeOf")]
     is_prototype_of: Partial<ObjectHandle, IsPrototypeOf>,
@@ -70,12 +66,6 @@ proto!(DefineSetter, define_setter, "__defineSetter__", 2);
 proto!(LookupGetter, lookup_getter, "__lookupGetter__", 1);
 proto!(LookupSetter, lookup_setter, "__lookupSetter__", 1);
 proto!(HasOwnProperty, has_own_property, "hasOwnProperty", 1);
-proto!(
-    GetOwnPropertyDescriptor,
-    get_own_property_descriptor,
-    "getOwnPropertyDescriptor",
-    1
-);
 proto!(IsPrototypeOf, is_prototype_of, "isPrototypeOf", 1);
 proto!(
     PropertyIsEnumerable,
