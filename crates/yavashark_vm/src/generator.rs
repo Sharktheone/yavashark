@@ -114,11 +114,11 @@ impl GeneratorFunction {
             buf.push_str(&arg.to_string(realm)?.as_str_lossy());
         }
 
-        buf.push_str(") { ");
+        buf.push_str("\n) {\n");
 
         buf.push_str(&code.to_string(realm)?.as_str_lossy());
 
-        buf.push_str(" }");
+        buf.push_str("\n}");
 
         buf.push_str("anonymous");
 
