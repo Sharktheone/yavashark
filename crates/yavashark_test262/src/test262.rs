@@ -82,6 +82,11 @@ impl Test262 {
 
         let global = new_realm.global.clone();
 
+        //TODO: This is stupid, we need to store the realm ptr in a function soon ish!
+        for key in global.keys(&mut new_realm)? {
+            global.get(key, &mut new_realm)?;
+        }
+
         let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
 
         global.define_property("$262".into(), this.copy(), realm)?;
