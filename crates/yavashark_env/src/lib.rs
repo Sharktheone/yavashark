@@ -101,7 +101,7 @@ impl ControlFlow {
     }
 
     #[must_use]
-    pub fn throw(val: Value) -> Self {
+    pub const fn throw(val: Value) -> Self {
         Self::Error(Error::throw(val))
     }
 
