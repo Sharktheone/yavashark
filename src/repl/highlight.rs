@@ -352,7 +352,6 @@ fn matching_brackets(src: &str, tokens: &[Token], cursor: usize) -> Option<(usiz
 
     let (open, close, forward) = bracket_pair(&src[tokens[current].range.clone()])?;
 
-
     let mut tmp1;
     let mut tmp2;
 
