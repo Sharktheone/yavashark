@@ -276,15 +276,15 @@ impl Hash for Value {
 
 impl From<ObjectHandle> for ObjectOrNull {
     fn from(o: ObjectHandle) -> Self {
-        ObjectOrNull::Object(o)
+        Self::Object(o)
     }
 }
 
 impl From<Option<ObjectHandle>> for ObjectOrNull {
     fn from(o: Option<ObjectHandle>) -> Self {
         match o {
-            Some(o) => ObjectOrNull::Object(o),
-            None => ObjectOrNull::Null,
+            Some(o) => Self::Object(o),
+            None => Self::Null,
         }
     }
 }
@@ -294,8 +294,8 @@ impl TryFrom<Value> for ObjectOrNull {
 
     fn try_from(value: Value) -> Result<Self, Self::Error> {
         match value {
-            Value::Object(o) => Ok(ObjectOrNull::Object(o)),
-            Value::Null => Ok(ObjectOrNull::Null),
+            Value::Object(o) => Ok(Self::Object(o)),
+            Value::Null => Ok(Self::Null),
             _ => Err(Error::ty("expected object or null")),
         }
     }
