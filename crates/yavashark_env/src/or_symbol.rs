@@ -10,27 +10,27 @@ pub enum OrSymbol<T = Value> {
 
 impl<T> OrSymbol<T> {
     pub const fn is_symbol(&self) -> bool {
-        matches!(self, OrSymbol::Symbol(_))
+        matches!(self, Self::Symbol(_))
     }
 
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> OrSymbol<U> {
         match self {
-            OrSymbol::Value(v) => OrSymbol::Value(f(v)),
-            OrSymbol::Symbol(s) => OrSymbol::Symbol(s),
+            Self::Value(v) => OrSymbol::Value(f(v)),
+            Self::Symbol(s) => OrSymbol::Symbol(s),
         }
     }
 
     pub fn try_map<U, E, F: FnOnce(T) -> Result<U, E>>(self, f: F) -> Result<OrSymbol<U>, E> {
         match self {
-            OrSymbol::Value(v) => Ok(OrSymbol::Value(f(v)?)),
-            OrSymbol::Symbol(s) => Ok(OrSymbol::Symbol(s)),
+            Self::Value(v) => Ok(OrSymbol::Value(f(v)?)),
+            Self::Symbol(s) => Ok(OrSymbol::Symbol(s)),
         }
     }
 
     pub fn as_ref(&self) -> OrSymbol<&T> {
         match self {
-            OrSymbol::Value(v) => OrSymbol::Value(v),
-            OrSymbol::Symbol(s) => OrSymbol::Symbol(s.clone()),
+            Self::Value(v) => OrSymbol::Value(v),
+            Self::Symbol(s) => OrSymbol::Symbol(s.clone()),
         }
     }
 }
@@ -38,8 +38,8 @@ impl<T> OrSymbol<T> {
 impl<T: IntoValue> IntoValue for OrSymbol<T> {
     fn into_value(self) -> Value {
         match self {
-            OrSymbol::Value(v) => v.into_value(),
-            OrSymbol::Symbol(s) => Value::Symbol(s),
+            Self::Value(v) => v.into_value(),
+            Self::Symbol(s) => Value::Symbol(s),
         }
     }
 }
@@ -47,8 +47,8 @@ impl<T: IntoValue> IntoValue for OrSymbol<T> {
 impl<T: Into<Value>> Into<Value> for OrSymbol<T> {
     fn into(self) -> Value {
         match self {
-            OrSymbol::Value(v) => v.into(),
-            OrSymbol::Symbol(s) => Value::Symbol(s),
+            Self::Value(v) => v.into(),
+            Self::Symbol(s) => Value::Symbol(s),
         }
     }
 }
