@@ -153,13 +153,13 @@ impl Equivalent<WeakValue> for Value {
 impl Equivalent<PrimitiveValue> for Value {
     fn equivalent(&self, other: &PrimitiveValue) -> bool {
         match (self, other) {
-            (Value::Null, PrimitiveValue::Null) => true,
-            (Value::Undefined, PrimitiveValue::Undefined) => true,
-            (Value::Number(a), PrimitiveValue::Number(b)) => a.to_bits() == b.to_bits(),
-            (Value::String(a), PrimitiveValue::String(b)) => a == b,
-            (Value::Boolean(a), PrimitiveValue::Boolean(b)) => a == b,
-            (Value::Symbol(a), PrimitiveValue::Symbol(b)) => a == b,
-            (Value::BigInt(a), PrimitiveValue::BigInt(b)) => a == b,
+            (Self::Null, PrimitiveValue::Null) => true,
+            (Self::Undefined, PrimitiveValue::Undefined) => true,
+            (Self::Number(a), PrimitiveValue::Number(b)) => a.to_bits() == b.to_bits(),
+            (Self::String(a), PrimitiveValue::String(b)) => a == b,
+            (Self::Boolean(a), PrimitiveValue::Boolean(b)) => a == b,
+            (Self::Symbol(a), PrimitiveValue::Symbol(b)) => a == b,
+            (Self::BigInt(a), PrimitiveValue::BigInt(b)) => a == b,
             _ => false,
         }
     }
@@ -195,8 +195,8 @@ impl Equivalent<WeakValue> for PrimitiveValue {
 impl Equivalent<ObjectOrNull> for Value {
     fn equivalent(&self, other: &ObjectOrNull) -> bool {
         match (self, other) {
-            (Value::Null, ObjectOrNull::Null) => true,
-            (Value::Object(a), ObjectOrNull::Object(b)) => a.equivalent(b),
+            (Self::Null, ObjectOrNull::Null) => true,
+            (Self::Object(a), ObjectOrNull::Object(b)) => a.equivalent(b),
             _ => false,
         }
     }
