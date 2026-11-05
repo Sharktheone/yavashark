@@ -13,7 +13,6 @@ pub mod object;
 pub mod profiler;
 pub mod scope;
 
-pub mod args;
 pub mod builtins;
 pub mod conversion;
 pub mod error;
