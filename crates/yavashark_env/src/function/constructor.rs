@@ -166,8 +166,8 @@ impl NativeConstructor {
         Self::special_with_proto(
             name,
             f,
-            realm.intrinsics.func.clone().into(),
-            realm.intrinsics.func.clone().into(),
+            realm.intrinsics.func.clone(),
+            realm.intrinsics.func.clone(),
         )
     }
 
