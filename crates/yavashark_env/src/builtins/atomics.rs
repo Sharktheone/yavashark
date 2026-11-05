@@ -1,5 +1,6 @@
 use crate::{Object, ObjectHandle, Realm, Res, Symbol, Value};
 use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 
 #[object]
 #[derive(Debug)]
@@ -60,7 +61,7 @@ impl Atomics {
 
     pub fn sub(ta: &ObjectHandle, index: usize, value: i32) {}
 
-    pub fn wait(ta: &ObjectHandle, index: usize, value: i32, timeout: Option<u32>) -> String {
+    pub fn wait(ta: &ObjectHandle, index: usize, value: i32, timeout: Option<u32>) -> YSString {
         "ok".into()
     }
 
