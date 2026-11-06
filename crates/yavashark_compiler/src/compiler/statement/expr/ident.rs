@@ -5,6 +5,7 @@ use yavashark_bytecode::data::{OutputData, VarName};
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
+    #[allow(clippy::single_option_map)]
     pub fn compile_ident(
         &mut self,
         ident: &Ident,
