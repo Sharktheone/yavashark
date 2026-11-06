@@ -452,11 +452,12 @@ impl NumberObj {
             if num.is_nan() {
                 return Ok("NaN".into());
             }
+
             return Ok(if num.is_sign_positive() {
-                "Infinity".into()
+                "Infinity"
             } else {
-                "-Infinity".into()
-            });
+                "-Infinity"
+            }.into());
         }
 
         if num.abs() >= 1e21 {
@@ -486,11 +487,12 @@ impl NumberObj {
             if num.is_nan() {
                 return Ok("NaN".into());
             }
+
             return Ok(if num.is_sign_positive() {
-                "Infinity".into()
+                "Infinity"
             } else {
-                "-Infinity".into()
-            });
+                "-Infinity"
+            }.into());
         }
 
         if p < 1.0 || p > 100.0 || !p.is_finite() {

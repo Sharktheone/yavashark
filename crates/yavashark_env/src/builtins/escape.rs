@@ -450,7 +450,7 @@ fn validate_utf8_sequence(bytes: &[u8]) -> Res<()> {
     }
 
     // Check for code points beyond 0x10FFFF
-    if code_point > 0x10FFFF {
+    if code_point > 0x0010_FFFF {
         return Err(Error::uri_error("Invalid UTF-8: code point too large"));
     }
 

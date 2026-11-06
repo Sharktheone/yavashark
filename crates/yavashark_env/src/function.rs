@@ -318,7 +318,7 @@ impl<F: Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static> NativeFuncti
 
     pub fn special(name: &'static str, f: F, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
-            f: f,
+            f,
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone()),
