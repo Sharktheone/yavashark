@@ -34,10 +34,6 @@ impl Constructor for NativeConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         crate::profiler::profile_call(realm, || self.name.clone(), |realm| (self.f)(args, realm))
     }
-
-    // fn construct_proto(&self) -> Res<ObjectProperty> {
-    //     Ok(self.proto.clone().into())
-    // }
 }
 
 impl Func for NativeConstructor {
