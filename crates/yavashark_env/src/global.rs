@@ -351,8 +351,8 @@ pub fn new_global_obj(proto: ObjectHandle) -> Res<ObjectHandle> {
     Ok(handle)
 }
 
-#[allow(unused)]
-#[inline(always)]
+#[allow(unused, clippy::missing_const_for_fn, clippy::needless_pass_by_ref_mut)]
+#[inline]
 pub fn init_global_obj(realm: &mut Realm) -> Res<()> {
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(&realm.global.clone(), realm)?;
