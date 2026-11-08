@@ -55,7 +55,7 @@ impl<T: Into<Value>> Into<Value> for OrSymbol<T> {
 
 impl<T> From<T> for OrSymbol<T> {
     fn from(value: T) -> Self {
-        OrSymbol::Value(value)
+        Self::Value(value)
     }
 }
 
