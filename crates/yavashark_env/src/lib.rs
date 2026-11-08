@@ -92,7 +92,7 @@ impl ControlFlow {
         Self::Error(Error::ty_error(e))
     }
 
-    pub fn get_error(self) -> std::result::Result<Error, Self> {
+    pub fn get_error(self) -> Result<Error, Self> {
         match self {
             Self::Error(e) => Ok(e),
             e => Err(e),
