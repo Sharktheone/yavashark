@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload runner timing and calibration files
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: runner-measurements
           path: |
