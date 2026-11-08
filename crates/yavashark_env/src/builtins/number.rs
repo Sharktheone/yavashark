@@ -457,7 +457,8 @@ impl NumberObj {
                 "Infinity"
             } else {
                 "-Infinity"
-            }.into());
+            }
+            .into());
         }
 
         if num.abs() >= 1e21 {
@@ -492,7 +493,8 @@ impl NumberObj {
                 "Infinity"
             } else {
                 "-Infinity"
-            }.into());
+            }
+            .into());
         }
 
         if p < 1.0 || p > 100.0 || !p.is_finite() {
