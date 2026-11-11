@@ -114,7 +114,7 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str(&inner.string.as_str_lossy(), index)
+            let chr = Self::get_single_str_ys(&inner.string, index)
                 .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
