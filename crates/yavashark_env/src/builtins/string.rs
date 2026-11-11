@@ -436,6 +436,20 @@ impl StringObj {
             .map(YSString::from_code_unit)
     }
 
+    pub fn get_single_str_ys(str: &YSString, index: isize) -> Option<YSString> {
+        let len = str.len() as isize;
+
+        let start = if index < 0 {
+            (len + index) as usize
+        } else {
+            index as usize
+        };
+
+        str
+            .code_unit_at(start)
+            .map(YSString::from_code_unit)
+    }
+
     fn string_index(index: f64) -> usize {
         let index = if index.is_nan() { 0.0 } else { index.trunc() };
 
