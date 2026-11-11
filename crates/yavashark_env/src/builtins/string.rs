@@ -461,6 +461,7 @@ impl StringObj {
     }
 }
 
+//TODO: there needs to be some YSStringable so all of these won't convert from wtf-16 to utf8
 #[properties_new(
     intrinsic_name(string),
     default_null(string),
