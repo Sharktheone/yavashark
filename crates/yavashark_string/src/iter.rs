@@ -23,6 +23,14 @@ impl Iterator for CodeUnits<'_> {
     }
 
     #[inline]
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        match self {
+            Self::Utf8(iter) => iter.nth(n).map(u16::from),
+            Self::Utf16(iter) => iter.nth(n),
+        }
+    }
+
+    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self {
             Self::Utf8(iter) => iter.size_hint(),
@@ -47,6 +55,14 @@ impl DoubleEndedIterator for CodeUnits<'_> {
         match self {
             Self::Utf8(iter) => iter.next_back().map(u16::from),
             Self::Utf16(iter) => iter.next_back(),
+        }
+    }
+
+    #[inline]
+    fn nth_back(&mut self, n: usize) -> Option<Self::Item> {
+        match self {
+            Self::Utf8(iter) => iter.nth_back(n).map(u16::from),
+            Self::Utf16(iter) => iter.nth_back(n),
         }
     }
 }
