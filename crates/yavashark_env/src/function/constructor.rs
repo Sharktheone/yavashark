@@ -158,12 +158,14 @@ impl NativeConstructor {
         name: String,
         f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         realm: &Realm,
+        length: usize,
     ) -> ObjectHandle {
         Self::special_with_proto(
             name,
             f,
             realm.intrinsics.func.clone(),
             realm.intrinsics.func.clone(),
+            length,
         )
     }
 
@@ -173,10 +175,18 @@ impl NativeConstructor {
         f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         proto: ObjectHandle,
         self_proto: ObjectHandle,
+        length: usize,
     ) -> ObjectHandle {
+        let mut obj = MutObject::with_proto(self_proto);
+
+        let _ = obj.define_property_internal(
+            "length".into(),
+            Value::Number(length as f64),
+        );
+
         let this = Self {
             inner: RefCell::new(MutableNativeConstructor {
-                object: MutObject::with_proto(self_proto),
+                object: obj,
                 constructor: Value::Undefined.into(),
             }),
             name,
