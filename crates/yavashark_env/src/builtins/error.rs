@@ -55,6 +55,7 @@ macro_rules! error {
                 },
                 error_proto.clone(),
                 error_proto,
+                1,
             );
 
             constr.define_property_attributes(
