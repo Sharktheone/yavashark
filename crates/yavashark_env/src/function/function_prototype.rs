@@ -85,7 +85,7 @@ pub struct FunctionConstructor;
 
 impl Initializer<ObjectHandle> for FunctionConstructor {
     fn initialize(realm: &mut Realm) -> Res<ObjectHandle> {
-        let ctor = NativeConstructor::special("Function".to_string(), constructor, realm);
+        let ctor = NativeConstructor::special("Function".to_string(), constructor, realm, 1);
 
         ctor.define_property_attributes(
             "prototype".into(),
