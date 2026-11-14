@@ -789,22 +789,11 @@ impl MutObject {
         Ok(DefinePropertyResult::Handled)
     }
 
-}
 
-impl MutObj for MutObject {
-    fn define_property(
-        &mut self,
-        name: InternalPropertyKey,
-        value: Value,
-        _realm: &mut Realm
-    ) -> Res<DefinePropertyResult> {
-        self.define_property_internal(name, value)
-    }
-    fn define_property_attributes(
+    pub fn define_property_attributes_internal(
         &mut self,
         name: InternalPropertyKey,
         value: Variable,
-        _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
             if let Some(desc) = self.get_array_descriptor(n) {
@@ -856,6 +845,26 @@ impl MutObj for MutObject {
         }
 
         Ok(DefinePropertyResult::Handled)
+    }
+}
+
+impl MutObj for MutObject {
+    fn define_property(
+        &mut self,
+        name: InternalPropertyKey,
+        value: Value,
+        _realm: &mut Realm
+    ) -> Res<DefinePropertyResult> {
+        self.define_property_internal(name, value)
+    }
+
+    fn define_property_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        value: Variable,
+        _realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        self.define_property_attributes_internal(name, value)
     }
 
     fn resolve_property(
