@@ -179,9 +179,9 @@ impl NativeConstructor {
     ) -> ObjectHandle {
         let mut obj = MutObject::with_proto(self_proto);
 
-        let _ = obj.define_property_internal(
+        let _ = obj.define_property_attributes_internal(
             "length".into(),
-            Value::Number(length as f64),
+            Variable::config(Value::Number(length as f64)),
         );
 
         let this = Self {
