@@ -119,7 +119,7 @@ impl BooleanObj {
     #[prop("toString")]
     fn to_js_string(#[this] this: Value) -> Res<YSString> {
         let boolean = if let Value::Object(obj) = this {
-            if let Some(boolean_obj) = obj.downcast::<BooleanObj>() {
+            if let Some(boolean_obj) = obj.downcast::<Self>() {
                 boolean_obj.boolean.get()
             } else {
                 return Err(Error::ty("Boolean.prototype.toString called on incompatible receiver"));
