@@ -114,8 +114,8 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str_ys(&inner.string, index)
-                .map_or(Value::Undefined, Into::into);
+            let chr =
+                Self::get_single_str_ys(&inner.string, index).map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -133,8 +133,8 @@ impl crate::value::ObjectImpl for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str_ys(&inner.string, index)
-                .map_or(Value::Undefined, Into::into);
+            let chr =
+                Self::get_single_str_ys(&inner.string, index).map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -445,9 +445,7 @@ impl StringObj {
             index as usize
         };
 
-        str
-            .code_unit_at(start)
-            .map(YSString::from_code_unit)
+        str.code_unit_at(start).map(YSString::from_code_unit)
     }
 
     fn string_index(index: f64) -> usize {
