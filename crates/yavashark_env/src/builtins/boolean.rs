@@ -1,6 +1,6 @@
 use crate::utils::ProtoDefault;
 use crate::value::{Constructor, CustomName, Func, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
@@ -117,11 +117,23 @@ impl BooleanObj {
     }
 
     #[prop("toString")]
-    fn to_js_string(&self) -> YSString {
-        if self.boolean.get() {
+    fn to_js_string(#[this] this: Value) -> Res<YSString> {
+        let boolean = if let Value::Object(obj) = this {
+            if let Some(boolean_obj) = obj.downcast::<BooleanObj>() {
+                boolean_obj.boolean.get()
+            } else {
+                return Err(Error::ty("Boolean.prototype.toString called on incompatible receiver"));
+            }
+        } else if let Value::Boolean(b) = this {
+            b
+        } else {
+            return Err(Error::ty("Boolean.prototype.toString called on incompatible receiver"));
+        };
+
+        Ok(if boolean {
             YSString::new_inline("true").unwrap_or("true".into())
         } else {
             YSString::new_inline("false").unwrap_or("false".into())
-        }
+        })
     }
 }
