@@ -29,6 +29,7 @@ pub struct ValueInner {
     val: u64,
 }
 
+#[allow(clippy::identity_op)]
 mod bits {
     use std::num::NonZeroUsize;
     use std::ptr::NonNull;
