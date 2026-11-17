@@ -18,7 +18,7 @@ trait GCable: Trace {
 
 
 trait Trace {
-    fn trace(&self, gc: &mut Tracer);
+    fn trace(&self, gc: &mut dyn Tracer);
 }
 
 
@@ -45,7 +45,7 @@ impl GCable for Object {
 }
 
 impl Trace for Object {
-    fn trace(&self, gc: &mut Tracer) {
+    fn trace(&self, gc: &mut dyn Tracer) {
         // Implement tracing logic for Object
     }
 }
@@ -90,8 +90,8 @@ impl<T: GCable> Gc<T> {
 
     }
 
-    fn get_data(gc: Self) -> &T::Type {
-        unsafe { self }
+    fn get_data<'a>(gc: Self) -> &'a T::Type {
+        unsafe { gc.ptr.as_ref().data.as_ref() }
     }
 
 }
