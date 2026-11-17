@@ -75,9 +75,7 @@ impl Constructor for BooleanConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let boolean = args.first().is_some_and(|v| v.is_object() || v.is_truthy());
 
-        let obj = BooleanObj::new(realm, boolean)?;
-
-        Ok(obj)
+        BooleanObj::new(realm, boolean)
     }
 }
 impl Func for BooleanConstructor {
