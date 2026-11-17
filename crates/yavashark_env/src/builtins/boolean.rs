@@ -77,7 +77,7 @@ impl Constructor for BooleanConstructor {
 
         let obj = BooleanObj::new(realm, boolean)?;
 
-        Ok(obj.into())
+        Ok(obj)
     }
 }
 impl Func for BooleanConstructor {
