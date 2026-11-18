@@ -70,10 +70,6 @@ pub fn lookup_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     let _this = this.as_object()?;
 
     Ok(Value::Undefined)
-
-    // Ok(this
-    //     .resolve_property_no_get_set(name, realm)?
-    //     .map_or(Value::Undefined, |p| ))
 }
 
 pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
