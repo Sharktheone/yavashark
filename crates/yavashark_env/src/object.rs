@@ -467,14 +467,14 @@ impl MutObject {
     ) -> DefinePropertyResult {
         let (i, found) = self.array_position(index);
 
-        if found {
-            if let Some(vi) = self.array.get(i) {
-                let Some(v) = self.values.get_mut(vi.1) else {
-                    return DefinePropertyResult::Handled;
-                };
-                *v = value.into();
+        if found && let Some(vi) = self.array.get(i) {
+            let Some(v) = self.values.get_mut(vi.1) else {
                 return DefinePropertyResult::Handled;
-            }
+            };
+
+            *v = value.into();
+
+            return DefinePropertyResult::Handled;
         }
 
         let len = self.values.len();
