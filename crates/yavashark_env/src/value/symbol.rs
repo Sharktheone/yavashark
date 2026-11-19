@@ -134,6 +134,7 @@ impl Symbol {
         AsRef::as_ref(self)
     }
 
+    #[must_use]
     pub const fn is_registered(&self) -> bool {
         self.is_registered
     }

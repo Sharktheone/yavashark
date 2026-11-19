@@ -107,6 +107,7 @@ pub enum ObjectOrNull {
 }
 
 impl ObjectOrNull {
+    #[must_use]
     pub const fn is_null(&self) -> bool {
         matches!(self, Self::Null)
     }
