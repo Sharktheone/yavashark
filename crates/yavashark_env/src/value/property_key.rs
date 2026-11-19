@@ -412,13 +412,13 @@ impl From<&'static str> for InternalPropertyKey {
 
 impl From<String> for InternalPropertyKey {
     fn from(s: String) -> Self {
-        InternalPropertyKey::from_ys_string(s.into())
+        Self::from_ys_string(s.into())
     }
 }
 
 impl From<YSString> for InternalPropertyKey {
     fn from(s: YSString) -> Self {
-        InternalPropertyKey::from_ys_string(s)
+        Self::from_ys_string(s)
     }
 }
 
