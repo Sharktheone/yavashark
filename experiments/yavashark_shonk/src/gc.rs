@@ -16,18 +16,14 @@ trait GCable: Trace {
     }
 }
 
-
 trait Trace {
     fn trace(&self, gc: &mut dyn Tracer);
 }
-
-
 
 type Value = u64;
 struct Butterfly {
     phantom: std::marker::PhantomData<[Value]>,
 }
-
 
 struct Shape {
     extensible: bool,
@@ -38,7 +34,6 @@ struct Shape {
 struct Object {
     phantom: std::marker::PhantomData<(*mut Butterfly, [Value])>,
 }
-
 
 impl GCable for Object {
     type Type = Shape;
@@ -86,12 +81,9 @@ impl<T: GCable> Gc<T> {
         let boxed = Box::new(data);
         let ptr = NonNull::from(Box::leak(boxed));
         Gc { ptr }
-
-
     }
 
     fn get_data<'a>(gc: Self) -> &'a T::Type {
         unsafe { gc.ptr.as_ref().data.as_ref() }
     }
-
 }

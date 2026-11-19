@@ -717,7 +717,6 @@ impl MutObject {
         Ok(DefinePropertyResult::Handled)
     }
 
-
     pub fn define_property_internal(
         &mut self,
         name: InternalPropertyKey,
@@ -789,7 +788,6 @@ impl MutObject {
         Ok(DefinePropertyResult::Handled)
     }
 
-
     pub fn define_property_attributes_internal(
         &mut self,
         name: InternalPropertyKey,
@@ -853,7 +851,7 @@ impl MutObj for MutObject {
         &mut self,
         name: InternalPropertyKey,
         value: Value,
-        _realm: &mut Realm
+        _realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
         self.define_property_internal(name, value)
     }

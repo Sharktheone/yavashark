@@ -120,12 +120,16 @@ impl BooleanObj {
             if let Some(boolean_obj) = obj.downcast::<Self>() {
                 boolean_obj.boolean.get()
             } else {
-                return Err(Error::ty("Boolean.prototype.toString called on incompatible receiver"));
+                return Err(Error::ty(
+                    "Boolean.prototype.toString called on incompatible receiver",
+                ));
             }
         } else if let Value::Boolean(b) = this {
             b
         } else {
-            return Err(Error::ty("Boolean.prototype.toString called on incompatible receiver"));
+            return Err(Error::ty(
+                "Boolean.prototype.toString called on incompatible receiver",
+            ));
         };
 
         Ok(if boolean {

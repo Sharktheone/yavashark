@@ -14,8 +14,8 @@ mod lib;
 //
 // Idea for the allocator: have a small bump area and we will evacuate any surving data to the eden space
 
-mod object;
 mod gc;
+mod object;
 
 use std::collections::HashMap;
 use std::ptr::NonNull;
