@@ -282,10 +282,7 @@ impl From<ObjectHandle> for ObjectOrNull {
 
 impl From<Option<ObjectHandle>> for ObjectOrNull {
     fn from(o: Option<ObjectHandle>) -> Self {
-        match o {
-            Some(o) => Self::Object(o),
-            None => Self::Null,
-        }
+        o.map_or_else(|| Self::Null, Self::Object)
     }
 }
 
