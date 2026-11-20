@@ -42,7 +42,7 @@ pub struct Data<T: ?Sized> {
     _value: PhantomData<[Value]>,
     _butterfly: PhantomData<*mut ButterFly>,
     _inner: PhantomData<NativeWrapper<T>>,
-    inner: [u8], // layout is the same as the two markers.
+    inner: [u64], // layout is the same as the two markers.
 }
 
 #[repr(align(8))]
