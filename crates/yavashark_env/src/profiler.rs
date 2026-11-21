@@ -6,6 +6,7 @@ use std::time::Instant;
 pub use yavashark_profiler::{FileProfileWriter, FrameId, Profile};
 
 #[cfg(feature = "profiler")]
+#[inline(always)]
 pub fn profile_call<T>(
     realm: &mut Realm,
     fn_name: impl FnOnce() -> String,
@@ -24,6 +25,7 @@ pub fn profile_call<T>(
 }
 
 #[cfg(not(feature = "profiler"))]
+#[inline(always)]
 pub fn profile_call<T>(
     realm: &mut Realm,
     _fn_name: impl FnOnce() -> String,
