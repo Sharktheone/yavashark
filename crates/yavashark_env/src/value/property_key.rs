@@ -351,7 +351,7 @@ impl InternalPropertyKey {
     }
 
     pub fn from_str(s: &str) -> Self {
-        if s.starts_with("+") || s.starts_with("-") {
+        if s.starts_with('+') || s.starts_with('-') {
             return Self::String(YSString::from_ref(s));
         }
         let Ok(i) = s.parse::<usize>() else {
