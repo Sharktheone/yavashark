@@ -2430,6 +2430,17 @@ version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ea2d84b969582b4b1864a92dc5d27cd2b77b622a8d79306834f1be5ba20d84b"
 dependencies = [
+ "cfg-if",
+ "crunchy",
+ "num-traits",
+ "zerocopy",
+]
+
+[[package]]
+name = "half"
+version = "2.7.1"
+source = "git+https://github.com/Sharktheone/half-rs?branch=conversion-rounding#f71ea503e72182a528273882d3e63eb143317957"
+dependencies = [
  "bytemuck",
  "cfg-if",
  "crunchy",
@@ -3508,7 +3519,7 @@ dependencies = [
  "cfg-if",
  "cfg_aliases",
  "codespan-reporting 0.13.1",
- "half",
+ "half 2.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hashbrown 0.16.1",
  "hexf-parse",
  "indexmap",
@@ -6000,7 +6011,7 @@ checksum = "b63feaf3343d35b6ca4d50483f94843803b0f51634937cc2ec519fc32232bc52"
 dependencies = [
  "fax",
  "flate2",
- "half",
+ "half 2.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "quick-error",
  "weezl",
  "zune-jpeg",
@@ -7556,7 +7567,7 @@ dependencies = [
  "egui_extras 0.34.3",
  "futures-util",
  "getrandom 0.4.3",
- "half",
+ "half 2.7.1 (git+https://github.com/Sharktheone/half-rs?branch=conversion-rounding)",
  "hex",
  "iana-time-zone",
  "icu",
@@ -7727,7 +7738,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "equivalent",
- "half",
+ "half 2.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-bigint 0.4.8",
  "num-traits",
  "rand 0.10.2",
