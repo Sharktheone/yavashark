@@ -20,7 +20,7 @@ swc_ecma_ast = "29.0.0"
 indexmap = "2.7.1"
 chrono = "0.4.40"
 base64 = "0.21.7"
-half = { version = "2.7.1", features = ["bytemuck", "num-traits"]}
+half = { git = "https://github.com/Sharktheone/half-rs", branch = "conversion-rounding", features = ["bytemuck", "num-traits"]}
 bytemuck = { version = "1.21.0", features = ["extern_crate_alloc"] }
 hex = "0.4.3"
 log = "0.4.25"
