@@ -39,10 +39,6 @@ impl Completer for ScopeCompleter {
             return Ok((pos, pairs));
         }
 
-        // let Ok(names) = self.scope.get_variable_names(realm) else {
-        //     return Ok((0, vec![]));
-        // };
-
         let names = HashSet::<String>::default();
 
         let mut completions = vec![];
