@@ -29,7 +29,7 @@ impl Constructor for ObjectConstructor {
             || self.name(),
             |realm| {
                 let Some(value) = args.first_mut() else {
-                    return Ok(Object::new(realm).into());
+                    return Ok(Object::new(realm));
                 };
 
                 let value = mem::replace(value, Value::Undefined);
