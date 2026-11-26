@@ -3,6 +3,7 @@ use crate::{PrimitiveValue, Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use std::hash::{Hash, Hasher};
+use std::str::FromStr;
 use yavashark_string::YSString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -350,6 +351,8 @@ impl InternalPropertyKey {
         //TODO: this is a hack, we should not parse strings to usize
     }
 
+    #[allow(clippy::should_implement_trait)] //TODO: we should actrually implement that but we might want to wait until the never type is fully here (it is in 1.100) and we can unwrap it safely
+    #[must_use]
     pub fn from_str(s: &str) -> Self {
         if s.starts_with('+') || s.starts_with('-') {
             return Self::String(YSString::from_ref(s));
