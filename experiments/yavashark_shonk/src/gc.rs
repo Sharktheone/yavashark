@@ -72,18 +72,18 @@ impl<T: GCable> Deref for Gc<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { self.ptr.as_ref() }
+        unsafe { &(*self.ptr.as_ptr()).value}
     }
 }
 
 impl<T: GCable> Gc<T> {
-    fn new(data: T::Type) -> Self {
-        let boxed = Box::new(data);
-        let ptr = NonNull::from(Box::leak(boxed));
-        Gc { ptr }
-    }
+    // fn new(data: T::Type) -> Self {
+    //     let boxed = Box::new(data);
+    //     let ptr = NonNull::from(Box::leak(boxed));
+    //     Gc { ptr }
+    // }
 
     fn get_data<'a>(gc: Self) -> &'a T::Type {
-        unsafe { gc.ptr.as_ref().data.as_ref() }
+        unsafe { &((*(*gc.ptr.as_ptr()).data.as_ptr()).data) }
     }
 }
